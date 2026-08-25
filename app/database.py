@@ -113,7 +113,6 @@ def ingest_csv():
     rows = cursor.fetchall()
     
     for row in rows:
-        source_id = row[0]
         relations_str = row[1]
         # format e.g. tuncok2025_prf:operationalization->lee2026_attention_control; ...
         parts = [p.strip() for p in relations_str.split(";") if p.strip()]
@@ -122,11 +121,10 @@ def ingest_csv():
                 try:
                     left, target = part.split("->")
                     src, rel_type = left.split(":")
-                    # src could be source_id or target
                     cursor.execute("""
                         INSERT OR IGNORE INTO reference_relations (source_id, target_id, relation_type)
                         VALUES (?, ?, ?)
-                    """, (source_id, target.strip(), rel_type.strip()))
+                    """, (src.strip(), target.strip(), rel_type.strip()))
                 except Exception as e:
                     print(f"Error parsing relation {part}: {e}")
 
