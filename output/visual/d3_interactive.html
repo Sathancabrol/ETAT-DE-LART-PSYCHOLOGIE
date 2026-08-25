@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphe D3 Interactif - État de l'Art Psychologie Cognitive</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { margin: 0; background: #0b0e14; color: #e8eaf2; font-family: Inter, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  header { background: #151a26; padding: 12px 20px; border-bottom: 1px solid #232a40; display: flex; justify-content: space-between; align-items: center; }
+  #main { display: flex; flex: 1; overflow: hidden; position: relative; }
+  #sidebar { width: 340px; background: #151a26; border-right: 1px solid #232a40; padding: 16px; overflow-y: auto; }
+  #graph { flex: 1; background: #0b0e14; position: relative; }
+  svg { width: 100%; height: 100%; display: block; }
+  .node circle { stroke: #fff; stroke-width: 2px; cursor: pointer; }
+  .node text { fill: #fff; font-size: 11px; font-weight: 500; text-shadow: 0 1px 2px #000; pointer-events: none; }
+  .link { stroke: #475569; stroke-width: 1.5px; fill: none; }
+  .card { background: #1c2335; border: 1px solid #2a344f; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.85rem; }
+  .back-btn { background: #1e263b; border: 1px solid #2a344f; color: #fff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1 style="margin:0; font-size:1.1rem;">🧠 Graphe Méthodologique D3</h1>
+  </div>
+  <div>
+    <a href="/" class="back-btn">← Retour App</a>
+  </div>
+</header>
+<div id="main">
+  <div id="sidebar">
+    <h3 style="font-size:0.9rem; text-transform:uppercase; color:#94a3b8; margin-top:0;">Légende & Infos</h3>
+    <p style="font-size:0.8rem; color:#cbd5e1;">Cliquez sur un nœud pour afficher les détails complets de la référence.</p>
+    <div id="details"></div>
+  </div>
+  <div id="graph">
+    <svg id="svg"></svg>
+  </div>
+</div>
+
+<script>
+async function run() {
+  const container = document.getElementById('graph');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  const res = await fetch('/api/graph');
+  const data = await res.json();
+
+  const svg = d3.select('#svg').attr('viewBox', [0, 0, width, height]);
+  const g = svg.append('g');
+
+  svg.call(d3.zoom().on('zoom', (e) => g.attr('transform', e.transform)));
+
+  const nodes = data.nodes;
+  const links = data.links.map(l => ({
+    source: l.source,
+    target: l.target,
+    type: l.relation_type
+  }));
+
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+    .force('charge', d3.forceManyBody().strength(-200))
+    .force('center', d3.forceCenter(width / 2, height / 2));
+
+  const link = g.append('g')
+    .selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('class', 'link');
+
+  const node = g.append('g')
+    .selectAll('g')
+    .data(nodes)
+    .join('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+  node.append('circle')
+    .attr('r', 8)
+    .attr('fill', '#7c6cff');
+
+  node.append('text')
+    .text(d => d.reference_courte || d.id)
+    .attr('x', 12)
+    .attr('y', 4);
+
+  node.on('click', async (e, d) => {
+    const r = await fetch(`/api/nodes/${d.id}`);
+    const det = await r.json();
+    document.getElementById('details').innerHTML = `
+      <div class="card">
+        <h4 style="margin:0 0 6px; color:#00d9ff;">${det.reference_courte}</h4>
+        <p><strong>Thème :</strong> ${det.theme}</p>
+        <p><strong>Question :</strong> ${det.question_scientifique}</p>
+        <p><strong>Trust Factor :</strong> ${det.trust_factor}/100</p>
+      </div>
+    `;
+  });
+
+  simulation.on('tick', () => {
+    link
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+
+    node
+      .attr('transform', d => `translate(${d.x}, ${d.y})`);
+  });
+}
+
+run();
+</script>
+</body>
+</html>

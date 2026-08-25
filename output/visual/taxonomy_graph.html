@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taxonomie Interactive de la Psychologie - Graphe Hiérarchique</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root{--bg:#0b0e14;--panel:#151a26;--card:#1c2335;--accent:#7c6cff;--accent2:#00d9ff;--text:#e8eaf2;--muted:#8a90a8;--node-bg:#232a40;--link:#3a455f;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden}
+  header{position:absolute;top:0;left:0;right:0;z-index:20;background:linear-gradient(180deg,rgba(11,14,20,0.95),rgba(11,14,20,0));padding:18px 22px;pointer-events:none}
+  header h1{margin:0;font-size:1.35rem;letter-spacing:-0.02em} header p{margin:4px 0 0;color:var(--muted);font-size:0.85rem;max-width:900px}
+  #container{display:flex;height:100vh;padding-top:72px}
+  #sidebar{width:380px;background:var(--panel);border-right:1px solid #232a40;display:flex;flex-direction:column;overflow:hidden}
+  .controls{padding:14px;border-bottom:1px solid #232a40}
+  .controls h3{margin:0 0 10px;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)}
+  .search-box{width:100%;padding:8px 12px;background:#1e263b;border:1px solid #2a344f;border-radius:8px;color:var(--text);font-size:0.85rem;margin-bottom:10px}
+  .btn-group{display:flex;gap:6px;margin-bottom:10px}
+  .tool-btn{padding:6px 12px;background:#1e263b;border:1px solid #2a344f;color:var(--text);border-radius:8px;font-size:0.8rem;cursor:pointer;flex:1;text-align:center}
+  .tool-btn:hover{background:#2a344f}
+  #details{flex:1;overflow:auto;padding:14px}
+  #details .card{background:var(--card);border:1px solid #2a344f;border-radius:12px;padding:14px;margin-bottom:12px}
+  #details h4{margin:0 0 6px;font-size:0.95rem;color:var(--accent2)} #details p{margin:4px 0;font-size:0.84rem;color:var(--muted);line-height:1.5}
+  #details .meta{font-size:0.75rem;color:#6b728e;border-top:1px solid #2a344f;margin-top:8px;padding-top:8px}
+  #graph{flex:1;position:relative;background:radial-gradient(1200px 600px at 50% 50%,#161c30 0%,#0b0e14 70%)}
+  svg{width:100%;height:100%}
+  .node circle{cursor:pointer;stroke:var(--accent);stroke-width:2px;transition:.2s}
+  .node text{font: 11px sans-serif;fill: var(--text);text-shadow: 0 1px 3px #000;pointer-events:none}
+  .node.highlight circle{stroke:var(--accent2);stroke-width:3px;filter:drop-shadow(0 0 8px rgba(0,217,255,0.5))}
+  .node.highlight text{font-weight:bold;fill:var(--accent2)}
+  .link{fill:none;stroke:var(--link);stroke-width:1.5px;stroke-opacity:0.6}
+  #tooltip{position:absolute;pointer-events:none;background:#0f1422;border:1px solid #2a344f;border-radius:10px;padding:10px 12px;font-size:0.82rem;max-width:300px;box-shadow:0 10px 30px rgba(0,0,0,0.5);opacity:0;transition:.15s;z-index:30}
+  #toolbar{position:absolute;top:12px;right:12px;z-index:15;display:flex;gap:8px}
+  .action-btn{background:#1c2335;border:1px solid #2a344f;color:var(--text);padding:7px 12px;border-radius:8px;font-size:0.8rem;cursor:pointer}
+  .action-btn:hover{background:#232e4a}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌳 Taxonomie Hiérarchique de la Psychologie & Cognition</h1>
+  <p>Arborescence complète (5 Piliers • Psychologie Cognitive détaillée • Domaines Appliqués) • Cliquez sur les nœuds pour replier/déplier • Recherche interactive</p>
+</header>
+
+<div id="container">
+  <div id="sidebar">
+    <div class="controls">
+      <h3>Exploration</h3>
+      <input type="text" id="searchBox" class="search-box" placeholder="Rechercher un concept (ex: Métacognition)...">
+      <div class="btn-group">
+        <button class="tool-btn" id="expandAll">Tout déplier</button>
+        <button class="tool-btn" id="collapseAll">Tout replier</button>
+        <button class="tool-btn" id="resetZoom">Centrer</button>
+      </div>
+    </div>
+    <div id="details">
+      <div class="card">
+        <h4>📖 Mode d'emploi de l'arborescence</h4>
+        <p>Ce graphe représente la taxonomie scientifique de la psychologie structurée en 5 piliers majeurs, avec un focus exhaustif sur la <strong>psychologie cognitive</strong> (ses 9 processus fondamentaux, ses méthodes et ses applications).</p>
+        <p>• <strong>Cercle bleu / violet :</strong> Nœud cliquable (repliable s'il contient des enfants).</p>
+        <p>• <strong>Clic simple :</strong> Affiche les détails du sous-domaine et son intérêt pour le projet Cognitorium.</p>
+        <p>• <strong>Recherche :</strong> Saisissez un mot-clé pour localiser instantanément le concept dans l'arbre.</p>
+      </div>
+      <div id="selectedInfo"></div>
+    </div>
+  </div>
+  <div id="graph">
+    <div id="toolbar">
+      <button class="action-btn" id="exportSvg">Export SVG</button>
+    </div>
+    <svg id="svg"></svg>
+    <div id="tooltip"></div>
+  </div>
+</div>
+
+<script>
+// --- TAXONOMY DATA HIERARCHY ---
+const taxonomyData = {
+  name: "Psychologie Scientifique & Clinique",
+  desc: "Racine globale unifiant les neurosciences, la psychologie cognitive, du développement, sociale et clinique.",
+  cognitorium: "Socle ontologique global pour structurer les entités et graphes du Cognitorium.",
+  children: [
+    {
+      name: "1. Pilier Biologique & Neurosciences",
+      desc: "Étude des bases neurobiologiques et physiologiques du comportement et de la cognition.",
+      cognitorium: "Fournit les substrats neuro-anatomiques (réseau préfronto-pariétal, précunéus).",
+      children: [
+        { name: "Neurosciences cognitives", desc: "Imagerie cérébrale, connectomique, corrélats neuronaux.", cognitorium: "Validation des modèles de monitoring." },
+        { name: "Neuropsychologie", desc: "Lésions cérébrales et dissociations fonctionnelles.", cognitorium: "Analyse des déficits exécutifs." },
+        { name: "Psychophysiologie", desc: "Mesures autonomes, EEG, rythmes alpha/bêta.", cognitorium: "Traces physiologiques de charge cognitive." },
+        { name: "Psycho-endocrinologie", desc: "Hormones, stress et régulation.", cognitorium: "Modélisation du stress au travail." },
+        { name: "Conscience & Sommeil", desc: "États de conscience, consolidation mnésique nocturne.", cognitorium: "Rôle du sommeil dans l'apprentissage." }
+      ]
+    },
+    {
+      name: "2. Pilier Psychologie Cognitive",
+      desc: "Science des fonctions mentales : acquisition, traitement, stockage et utilisation de l'information.",
+      cognitorium: "Cœur fonctionnel et algorithmique du Cognitorium.",
+      children: [
+        {
+          name: "A. Perception",
+          desc: "Organisation et interprétation des signaux sensoriels.",
+          children: [
+            { name: "Perception visuelle", desc: "Formes, profondeur, mouvement, illusions.", cognitorium: "Design UI/UX visuel." },
+            { name: "Perception auditive", desc: "Localisation, parole, musique.", cognitorium: "Feedback audio et crossmodal." },
+            { name: "Perception multisensorielle", desc: "Intégration vue-ouïe-toucher, effet McGurk.", cognitorium: "Interfaces multimodales." },
+            { name: "Perception & Action", desc: "Couplage sensorimoteur, cognition incarnée.", cognitorium: "Interaction directe avec les graphes." }
+          ]
+        },
+        {
+          name: "B. Attention",
+          desc: "Mécanismes de sélection, de concentration et de contrôle.",
+          children: [
+            { name: "Attention sélective", desc: "Filtrage, effet Stroop, recherche visuelle.", cognitorium: "Réduction des distracteurs UI." },
+            { name: "Attention soutenue", desc: "Vigilance sur longue période.", cognitorium: "Gestion de la fatigue cognitive." },
+            { name: "Attention divisée / Multitâche", desc: "Partage des ressources limitées.", cognitorium: "Éviter la surcharge en formation." },
+            { name: "Attention exécutive", desc: "Inhibition, flexibilité, contrôle.", cognitorium: "Pilotage des flux d'orientation." },
+            { name: "Attention Spatiale & Temporelle", desc: "Covert attention, pRF, hazard rates, rythmes.", cognitorium: "Pré-cues visuels et temporalité des parcours." }
+          ]
+        },
+        {
+          name: "C. Mémoire & Apprentissage",
+          desc: "Encodage, stockage, récupération et modification durable.",
+          children: [
+            { name: "Mémoire sensorielle", desc: "Iconique et échoïque.", cognitorium: "Micro-interactions." },
+            { name: "Mémoire de travail (WMC)", desc: "Boucle phonologique, calepin, contrôle attentionnel (Lee & Engle).", cognitorium: "Dimensionnement des tâches cognitives." },
+            { name: "Mémoire à long terme", desc: "Épisodique, sémantique, procédurale.", cognitorium: "Base de connaissances des métiers et compétences." },
+            { name: "Apprentissage & Consolidation", desc: "Répétition espacée, sommeil, interférence.", cognitorium: "Algorithmes de révision adaptative." },
+            { name: "Métamémoire", desc: "Jugements de confiance, prédictions de performance.", cognitorium: "Widgets d'auto-évaluation." }
+          ]
+        },
+        {
+          name: "D. Langage (Psycholinguistique)",
+          desc: "Compréhension, production et acquisition du langage.",
+          children: [
+            { name: "Phonologie & Syntaxe", desc: "Traitement des sons et structures grammaticales.", cognitorium: "Traitement automatique des fiches métiers." },
+            { name: "Sémantique & Pragmatique", desc: "Sens des mots, inférences, théorie de l'esprit.", cognitorium: "Sémantique des graphes de compétences." },
+            { name: "Acquisition, Lecture & Troubles", desc: "Bilinguisme, dyslexie, compréhension de texte.", cognitorium: "Accessibilité et adaptation textuelle." }
+          ]
+        },
+        {
+          name: "E. Pensée, Raisonnement & Résolution",
+          desc: "Formation de concepts, inférences et résolution de problèmes.",
+          children: [
+            { name: "Catégorisation & Concepts", desc: "Prototypes, exemplaires, théories essentialistes.", cognitorium: "Taxonomie des compétences ROME." },
+            { name: "Raisonnement inductif / déductif", desc: "Règles logiques, tests d'hypothèses.", cognitorium: "Moteur de recommandation logique." },
+            { name: "Résolution de problèmes & Créativité", desc: "Heuristiques, insight, incubation.", cognitorium: "Scénarios de résolution de projets." }
+          ]
+        },
+        {
+          name: "F. Prise de décision & Jugement",
+          desc: "Évaluation des options et choix sous incertitude.",
+          children: [
+            { name: "Heuristiques & Biais", desc: "Disponibilité, représentativité, confirmation.", cognitorium: "Garde-fous contre les biais d'orientation." },
+            { name: "Modèles de décision", desc: "Prospect Theory, utilité attendue.", cognitorium: "Algorithmes d'aide à la décision." }
+          ]
+        },
+        {
+          name: "G. Métacognition & Fonctions Exécutives",
+          desc: "Surveillance et régulation de second ordre, auto-régulation (SRL).",
+          cognitorium: "Pilier central du module d'auto-régulation du Cognitorium.",
+          children: [
+            { name: "Métacognition (Connaissances & Régulation)", desc: "Planification, monitoring, contrôle, évaluation (Flavell, Zimmerman).", cognitorium: "Boucle métacognitive 4 étapes." },
+            { name: "Fonctions Exécutives", desc: "Inhibition, flexibilité, updating.", cognitorium: "Maîtrise des tâches complexes." },
+            { name: "Apprentissage Auto-Régulé (SRL)", desc: "Modèle en 3 phases (Forethought, Performance, Reflection).", cognitorium: "Parcours d'orientation autonome." }
+          ]
+        },
+        {
+          name: "H. Cognition Sociale & Émotionnelle",
+          desc: "Perception des émotions, empathie et théorie de l'esprit.",
+          cognitorium: "Accompagnement humain et empathique des utilisateurs.",
+          children: [
+            { name: "Perception des émotions & Empathie", desc: "Expressions faciales, vocales, résonance affective.", cognitorium: "Détection du découragement." },
+            { name: "Théorie de l'Esprit & Régulation", desc: "Inférences sur autrui, réévaluation cognitive.", cognitorium: "Aide à la prise de recul." }
+          ]
+        },
+        {
+          name: "I. Cognition Numérique & Spatiale",
+          desc: "Traitement des nombres, quantités et repères spatiaux.",
+          cognitorium: "Cartographie interactive des graphes de compétences.",
+          children: [
+            { name: "Cognition numérique", desc: "Ligne mentale des nombres, calcul, dyscalculie.", cognitorium: "Indicateurs chiffrés de progression." },
+            { name: "Cognition spatiale", desc: "Navigation, cartes cognitives, rotation mentale.", cognitorium: "Exploration visuelle des métiers." }
+          ]
+        }
+      ]
+    },
+    {
+      name: "3. Pilier Psychologie du Développement",
+      desc: "Évolution des processus psychologiques de la naissance à la fin de vie.",
+      cognitorium: "Adaptation des parcours selon l'âge et le stade de maturité professionnelle.",
+      children: [
+        { name: "Développement Enfant & Adolescent", desc: "Cognition sociale, fonctions exécutives en croissance.", cognitorium: "Orientation scolaire et collèges/lycées." },
+        { name: "Adulte & Vieillissement cognitif", desc: "Réserve cognitive, maintien des acquis (Benge & Scullin).", cognitorium: "Reconversion professionnelle et séniors." }
+      ]
+    },
+    {
+      name: "4. Pilier Sociale & Personnalité",
+      desc: "Influence du contexte social, des groupes et des traits stables.",
+      cognitorium: "Personnalisation des profils d'orientation et tests d'affinité.",
+      children: [
+        { name: "Psychologie Sociale", desc: "Attitudes, influence, normes, désinformation.", cognitorium: "Résilience face aux biais d'information." },
+        { name: "Personnalité (Big Five / HEXACO)", desc: "Traits stables, honnêteté-humilité, ouverture.", cognitorium: "Matching personnalité-métier." },
+        { name: "Motivation & Émotions", desc: "Théorie de l'Autodétermination (Deci & Ryan), buts.", cognitorium: "Stimulation de la motivation intrinsèque." }
+      ]
+    },
+    {
+      name: "5. Pilier Santé Mentale & Clinique",
+      desc: "Psychopathologie, prévention et interventions thérapeutiques.",
+      cognitorium: "Prévention du décrochage et gestion de l'anxiété d'orientation.",
+      children: [
+        { name: "Psychopathologie & Clinique", desc: "Troubles anxieux, dépressifs, neurodiversité.", cognitorium: "Soutien inclusif et neurodiversité." },
+        { name: "Psychologie de la Santé", desc: "Addictions, douleur chronique, obésité, numérique.", cognitorium: "Bien-être global de l'apprenant." },
+        { name: "Psychothérapies (TCC)", desc: "Restructuration cognitive, efficacité validée (Cuijpers).", cognitorium: "Outils de recadrage constructif." }
+      ]
+    },
+    {
+      name: "6. Domaines Appliqués Transverses",
+      desc: "Champs d'application opérationnelle de la psychologie scientifique.",
+      cognitorium: "Cœur opérationnel de déploiement du projet.",
+      children: [
+        { name: "Éducation & Sciences de l'apprentissage", desc: "Intégration GenAI, prompts métacognitifs, LMS.", cognitorium: "Module d'apprentissage du Cognitorium." },
+        { name: "Travail & Organisations (I/O)", desc: "Ergonomie, stress, leadership, télétravail.", cognitorium: "Module d'orientation professionnelle." },
+        { name: "Ergonomie Cognitive & IHM", desc: "Charge cognitive, design centré utilisateur.", cognitorium: "Architecture UI/UX du graphe D3." }
+      ]
+    }
+  ]
+};
+
+// --- D3 COLLAPSIBLE TREE SETUP ---
+const svgEl = document.getElementById('svg');
+const width = () => svgEl.clientWidth;
+const height = () => svgEl.clientHeight;
+
+const svg = d3.select('#svg')
+  .attr('viewBox', [0, 0, width(), height()])
+  .call(d3.zoom().on('zoom', (e) => g.attr('transform', e.transform)));
+
+const g = svg.append('g');
+
+let root;
+let treeLayout;
+let i = 0;
+const duration = 400;
+const dx = 28;
+const dy = 220;
+
+function initTree() {
+  root = d3.hierarchy(taxonomyData, d => d.children);
+  root.x0 = height() / 2;
+  root.y0 = 0;
+
+  // Collapse all children of nodes beyond depth 1 to keep clean initial view
+  root.children.forEach(collapse);
+
+  update(root);
+  centerNode(root);
+}
+
+function collapse(d) {
+  if (d.children) {
+    d._children = d.children;
+    d._children.forEach(collapse);
+    d.children = null;
+  }
+}
+
+function expand(d) {
+  if (d._children) {
+    d.children = d._children;
+    d._children = null;
+  }
+  if (d.children) {
+    d.children.forEach(expand);
+  }
+}
+
+function update(source) {
+  const tree = d3.tree().nodeSize([dx, dy]);
+  const transform = tree(root);
+
+  let left = root;
+  let right = root;
+  root.eachBefore(node => {
+    if (node.x < left.x) left = node;
+    if (node.x > right.x) right = node;
+  });
+
+  const nodes = root.descendants().reverse();
+  const links = root.links();
+
+  // Compute the new tree layout.
+  tree(root);
+
+  const transition = svg.transition().duration(duration);
+
+  // --- NODES ---
+  const node = g.selectAll('g.node')
+    .data(nodes, d => d.id || (d.id = ++i));
+
+  // Enter any new nodes at the parent's previous position.
+  const nodeEnter = node.enter().append('g')
+    .attr('class', 'node')
+    .attr('transform', d => `translate(${source.y0},${source.x0})`)
+    .on('click', (event, d) => {
+      if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else {
+        d.children = d._children;
+        d._children = null;
+      }
+      update(d);
+      selectNodeDetail(d);
+    })
+    .on('mouseenter', (event, d) => {
+      showTooltip(event, d);
+    })
+    .on('mouseleave', () => {
+      hideTooltip();
+    });
+
+  nodeEnter.append('circle')
+    .attr('r', 1e-6)
+    .attr('fill', d => d._children ? '#7c6cff' : (d.children ? '#00d9ff' : '#1e263b'))
+    .attr('stroke', d => d._children ? '#00d9ff' : '#7c6cff');
+
+  nodeEnter.append('text')
+    .attr('dy', '0.31em')
+    .attr('x', d => d._children || d.children ? -10 : 10)
+    .attr('text-anchor', d => d._children || d.children ? 'end' : 'start')
+    .text(d => d.data.name)
+    .clone(true).lower()
+    .attr('stroke', 'var(--bg)')
+    .attr('stroke-width', 3);
+
+  // Transition nodes to their new position.
+  const nodeUpdate = node.merge(nodeEnter).transition(transition)
+    .attr('transform', d => `translate(${d.y},${d.x})`);
+
+  nodeUpdate.select('circle')
+    .attr('r', 6)
+    .attr('fill', d => d._children ? '#232a40' : (d.children ? '#7c6cff' : '#00d9ff'))
+    .attr('stroke', d => d._children ? '#7c6cff' : '#00d9ff');
+
+  nodeUpdate.select('text')
+    .attr('x', d => d._children || d.children ? -10 : 10)
+    .attr('text-anchor', d => d._children || d.children ? 'end' : 'start')
+    .attr('fill-opacity', 1);
+
+  // Transition exiting nodes to the parent's new position.
+  const nodeExit = node.exit().transition(transition).remove()
+    .attr('transform', d => `translate(${source.y},${source.x})`);
+
+  nodeExit.select('circle')
+    .attr('r', 1e-6);
+
+  nodeExit.select('text')
+    .attr('fill-opacity', 1e-6);
+
+  // --- LINKS ---
+  const link = g.selectAll('path.link')
+    .data(links, d => d.target.id);
+
+  // Enter any new links at the parent's previous position.
+  const linkEnter = link.enter().insert('path', 'g')
+    .attr('class', 'link')
+    .attr('d', d => {
+      const o = {x: source.x0, y: source.y0};
+      return diagonal({source: o, target: o});
+    });
+
+  // Transition links to their new position.
+  link.merge(linkEnter).transition(transition)
+    .attr('d', diagonal);
+
+  // Transition exiting links to the parent's new position.
+  link.exit().transition(transition).remove()
+    .attr('d', d => {
+      const o = {x: source.x, y: source.y};
+      return diagonal({source: o, target: o});
+    });
+
+  // Stash the old positions for transition.
+  root.eachBefore(d => {
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+}
+
+function diagonal(d) {
+  return `M ${d.target.y} ${d.target.x}
+          C ${(d.source.y + d.target.y) / 2} ${d.target.x},
+            ${(d.source.y + d.target.y) / 2} ${d.source.x},
+            ${d.source.y} ${d.source.x}`;
+}
+
+function selectNodeDetail(d) {
+  const details = document.getElementById('selectedInfo');
+  details.innerHTML = `
+    <div class="card">
+      <h4>📌 ${d.data.name}</h4>
+      <p><strong>Description scientifique :</strong> ${d.data.desc || 'Branche taxonomique de la psychologie.'}</p>
+      ${d.data.cognitorium ? `<p><strong>Implication Cognitorium :</strong> <span style="color:var(--accent2)">${d.data.cognitorium}</span></p>` : ''}
+      <div class="meta">
+        <strong>Enfants directs :</strong> ${d.children ? d.children.length : (d._children ? d._children.length : 0)} sous-domaines.<br>
+        <em>Astuce : Cliquez pour replier/déplier.</em>
+      </div>
+    </div>
+  `;
+}
+
+// Tooltip
+const tooltip = document.getElementById('tooltip');
+function showTooltip(event, d) {
+  tooltip.style.opacity = 1;
+  tooltip.style.left = (event.pageX + 12) + 'px';
+  tooltip.style.top = (event.pageY - 28) + 'px';
+  tooltip.innerHTML = `
+    <strong>${d.data.name}</strong><br>
+    <span style="color:var(--muted);font-size:0.78rem">${d.data.desc || ''}</span>
+  `;
+}
+function hideTooltip() {
+  tooltip.style.opacity = 0;
+}
+
+function centerNode(source) {
+  const t = d3.zoomTransform(svg.node());
+  const x = -source.y0 + width() / 4;
+  const y = -source.x0 + height() / 2;
+  svg.transition().duration(500).call(
+    d3.zoom().transform,
+    d3.zoomIdentity.translate(x, y).scale(0.85)
+  );
+}
+
+// Controls
+document.getElementById('expandAll').addEventListener('click', () => {
+  expand(root);
+  update(root);
+});
+
+document.getElementById('collapseAll').addEventListener('click', () => {
+  root.children.forEach(collapse);
+  update(root);
+});
+
+document.getElementById('resetZoom').addEventListener('click', () => {
+  centerNode(root);
+});
+
+// Search functionality
+document.getElementById('searchBox').addEventListener('input', (e) => {
+  const val = e.target.value.toLowerCase().trim();
+  g.selectAll('g.node').classed('highlight', d => {
+    if (!val) return false;
+    return d.data.name.toLowerCase().includes(val) || (d.data.desc && d.data.desc.toLowerCase().includes(val));
+  });
+
+  if (val) {
+    // Expand matching nodes parents
+    root.each(d => {
+      if (d.data.name.toLowerCase().includes(val)) {
+        let p = d.parent;
+        while (p) {
+          if (p._children) {
+            p.children = p._children;
+            p._children = null;
+          }
+          p = p.parent;
+        }
+      }
+    });
+    update(root);
+  }
+});
+
+document.getElementById('exportSvg').addEventListener('click', () => {
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob([svgData], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='taxonomie_psychologie_cognitorium.svg'; a.click();
+});
+
+// Init
+initTree();
+window.addEventListener('resize', () => {
+  svg.attr('viewBox', [0, 0, width(), height()]);
+});
+</script>
+</body>
+</html>

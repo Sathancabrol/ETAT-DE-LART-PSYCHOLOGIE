@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>État de l'Art Psychologie Cognitive - Visualisation Méthodologique</title>
+<style>
+  :root { --bg:#0f1115; --card:#1a1e27; --accent:#7c6cff; --accent2:#00d9ff; --text:#e6e8ef; --muted:#9aa0b5; }
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  header{padding:40px 24px;text-align:center;background:linear-gradient(135deg,#1a1e27,#2a2540);border-bottom:1px solid #2a2f45}
+  header h1{margin:0;font-size:2.2rem;letter-spacing:-0.02em} header p{color:var(--muted);max-width:800px;margin:12px auto 0}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:20px;background:var(--card);position:sticky;top:0;z-index:10;border-bottom:1px solid #2a2f45}
+  .btn{padding:8px 14px;border-radius:20px;border:1px solid #3a3f5a;background:#242a3d;color:var(--text);cursor:pointer;font-size:0.9rem;transition:.2s}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:white}
+  .btn:hover{transform:translateY(-1px)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;padding:24px;max-width:1400px;margin:0 auto}
+  .card{background:var(--card);border:1px solid #2a2f45;border-radius:16px;padding:18px;transition:.3s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 30px rgba(124,108,255,.15)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;margin-right:6px;margin-bottom:6px}
+  .b-theorique{background:#3a2a5a;color:#d0a6ff} .b-experimental{background:#1a3a4a;color:#6ce1ff}
+  .b-neuro{background:#2a4a2a;color:#8eff9e} .b-revue{background:#4a3a1a;color:#ffdd7c} .b-meta{background:#4a1a2a;color:#ff8eb0}
+  .b-preprint{background:#3a3a3a;color:#ccc}
+  .domain{font-size:0.8rem;color:var(--accent2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+  .card h3{margin:6px 0 8px;font-size:1.1rem;line-height:1.3}
+  .card p{font-size:0.9rem;color:var(--muted);margin:6px 0}
+  .card .meta{font-size:0.8rem;color:#7a8199;margin-top:10px;border-top:1px solid #2a2f45;padding-top:10px}
+  .pyramid{display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px 20px;max-width:900px;margin:0 auto}
+  .level{width:100%;text-align:center;padding:12px;border-radius:10px;font-weight:600;transition:.2s}
+  .level:hover{transform:scale(1.02)}
+  .l1{width:20%;background:#4a1a4a} .l2{width:35%;background:#4a2a1a} .l3{width:50%;background:#2a3a5a}
+  .l4{width:65%;background:#1a4a4a} .l5{width:80%;background:#2a4a2a} .l6{width:95%;background:#3a4a1a} .l7{width:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));color:white}
+  .method-cycle{max-width:1100px;margin:30px auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .step{background:var(--card);border:1px solid #2a2f45;border-radius:12px;padding:14px;text-align:center}
+  .step .num{width:28px;height:28px;border-radius:50%;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px}
+  .mermaid-container{background:#151821;border:1px solid #2a2f45;border-radius:16px;padding:20px;margin:20px auto;max-width:1200px;overflow:auto}
+  footer{padding:30px;text-align:center;color:var(--muted);font-size:0.85rem;border-top:1px solid #2a2f45;margin-top:40px}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 État de l'Art Psychologie Cognitive</h1>
+  <p>Visualisation interactive classée par <strong>méthode scientifique</strong> • 6 domaines • 12 références 2025-2026 • Enactive / 4E, Attention spatiale & temporelle, Fluence, Mémoire & Contrôle attentionnel</p>
+  <p style="font-size:0.85rem;margin-top:8px">Pyramide des preuves • Validité • Cycle hypothético-déductif • Implications Cognitorium</p>
+</header>
+
+<div class="controls">
+  <button class="btn active" data-filter="all">Tous (12)</button>
+  <button class="btn" data-filter="theorique">Théorique (3)</button>
+  <button class="btn" data-filter="experimental">Expérimental (4)</button>
+  <button class="btn" data-filter="neuro">Neuroimagerie (3)</button>
+  <button class="btn" data-filter="revue">Revue systématique (5)</button>
+  <button class="btn" data-filter="meta">Méta-analyse (2)</button>
+  <button class="btn" data-filter="4E">4E / Enaction (3)</button>
+  <button class="btn" data-filter="attention">Attention (5)</button>
+  <button class="btn" data-filter="fluence">Fluence (2)</button>
+</div>
+
+<section style="max-width:1200px;margin:0 auto;padding:10px 20px">
+  <h2>📊 Pyramide des Preuves (adaptée psycho cognitive)</h2>
+  <div class="pyramid">
+    <div class="level l7">Niveau 7 - Open Science / Pré-enregistrement / Réplication (standard émergent)</div>
+    <div class="level l6">Niveau 6 - Méta-analyse: Frontiers Edu 2026 SMD=0.448, Lee & Engle latente</div>
+    <div class="level l5">Niveau 5 - Revue systématique: Lee & Engle 2026, Denison 2024, Ben Hamed 2025, Alter 2009</div>
+    <div class="level l4">Niveau 4 - Neuroimagerie: Tünçok 2025 fMRI 7T pRF, Ben Hamed décodage préfrontal</div>
+    <div class="level l3">Niveau 3 - Expérimental contrôlé: Tünçok psychophysique, Knight crossmodal, Tian temporel</div>
+    <div class="level l2">Niveau 2 - Corrélationnel: WMC-gF, différences individuelles</div>
+    <div class="level l1">Niveau 1 - Théorique: Fuchs 2026, Exceptionality 2026</div>
+  </div>
+</section>
+
+<section style="max-width:1100px;margin:0 auto;padding:10px 20px">
+  <h2>🔬 Cycle Hypothético-Déductif - Placement des études</h2>
+  <div class="method-cycle">
+    <div class="step"><div class="num">1</div><strong>Théorie</strong><br><small>Fuchs 2026<br>Exceptionality 2026<br>Pascucci 2026 routines</small></div>
+    <div class="step"><div class="num">2</div><strong>Hypothèse falsifiable</strong><br><small>Lee & Engle: AC médie WMC-gF<br>Si AC alors baseline shift</small></div>
+    <div class="step"><div class="num">3</div><strong>Opérationnalisation</strong><br><small>Tâches AC pures: antisaccade, Stroop, flanker vs span</small></div>
+    <div class="step"><div class="num">4</div><strong>Design</strong><br><small>Tünçok: cueing covert + pre-target baseline<br>Tian: compétition vs non</small></div>
+    <div class="step"><div class="num">5</div><strong>Collecte</strong><br><small>Ben Hamed: préfrontal temps réel<br>fMRI 7T, EEG alpha</small></div>
+    <div class="step"><div class="num">6</div><strong>Analyse</strong><br><small>pRF, MVPA, variables latentes, modélisation normalisation</small></div>
+    <div class="step"><div class="num">7</div><strong>Falsification</strong><br><small>Huang falsifie n-back<br>Chen & Yan: pas consensus transfert lointain</small></div>
+    <div class="step"><div class="num">8</div><strong>Révision</strong><br><small>Renommer WMC→AC<br>4E inclusive<br>Alignement fonctionnel</small></div>
+  </div>
+</section>
+
+<div class="grid" id="grid">
+  <!-- Cards generated -->
+  <div class="card" data-tags="revue meta memoire">
+    <div class="domain">Mémoire & Contrôle Attentionnel</div>
+    <h3>Lee & Engle 2026 - Beyond WMC: Attention Control</h3>
+    <span class="badge b-revue">Revue systématique</span><span class="badge b-meta">Variables latentes</span>
+    <p><strong>Thèse:</strong> AC explique 75.6% variance multitâche, r WMC-gF 0.63→0.40 quand AC contrôlé. Mécanismes: maintien but, suppression interférence, désengagement.</p>
+    <p><strong>Méthode:</strong> Synthèse 6 domaines + modélisation latente (Engle et al. 1999 framework)</p>
+    <div class="meta">Validité construit forte • Preuve Élevée • Paradigme Executive Attention • <em>Journal of Intelligence</em></div>
+  </div>
+
+  <div class="card" data-tags="neuro revue attention">
+    <div class="domain">Attention Spatiale - Neuroscience</div>
+    <h3>Ben Hamed 2025 - Decoding Covert Visual Attention</h3>
+    <span class="badge b-neuro">Neurophysio</span><span class="badge b-revue">Annual Review Vision Sci</span>
+    <p><strong>Thèse:</strong> Attention covert décodable temps réel depuis préfrontal haute résolution. Rythmique, suppression proactive/réactive, saccades attentionnelles.</p>
+    <p><strong>Méthode:</strong> Décodage temps réel signaux préfrontaux, réseaux récurrents</p>
+    <div class="meta">Validité interne élevée • Preuve Élevée • <em>Ann Rev Vision Sci 11:495-520</em></div>
+  </div>
+
+  <div class="card" data-tags="experimental neuro attention">
+    <div class="domain">Attention Spatiale</div>
+    <h3>Tünçok, Carrasco & Winawer 2025 - Covert & Cortex Visuel</h3>
+    <span class="badge b-experimental">Expérimental contrôlé</span><span class="badge b-neuro">fMRI 7T pRF</span>
+    <p><strong>Thèse:</strong> Attention covert modifie cortex visuel avant cible: baseline shift indépendant stimulus + déplacement centres pRF vers localisation attendue, accentuation hiérarchique V1→LO.</p>
+    <p><strong>Méthode:</strong> Psychophysique + fMRI 7T + modélisation pRF</p>
+    <div class="meta">Validité interne Élevée • Preuve Élevée • <em>Nature Communications</em> • Baseline shift + pRF shift</div>
+  </div>
+
+  <div class="card" data-tags="theorique revue 4E">
+    <div class="domain">Cognition 4E - Enactive</div>
+    <h3>Fuchs 2026 - Experiential Basis of Concepts</h3>
+    <span class="badge b-theorique">Théorique</span><span class="badge b-revue">Frontiers Psychol</span>
+    <p><strong>Thèse:</strong> Concepts = engagement corps-monde, abstraits par extension métaphorique + sens participatif. Pas coupure basse/haute cognition. Incarnation partielle, graduée, dépendante tâche.</p>
+    <p><strong>Méthode:</strong> Phénoménologie + synthèse énactive langage interaction sociale</p>
+    <div class="meta">Validité écologique Élevée • Preuve Théorique • Scaling up problème</div>
+  </div>
+
+  <div class="card" data-tags="revue meta 4E">
+    <div class="domain">Cognition 4E - STEM</div>
+    <h3>Frontiers Edu 2026 - Embodied Cognition in STEM</h3>
+    <span class="badge b-revue">Revue intégrative</span><span class="badge b-meta">Méta SMD=0.448</span>
+    <p><strong>Thèse:</strong> 4 traditions 4E, 4 mécanismes: geste, structuration perceptivo-spatiale, offloading, interaction sociale. Effet modéré hétérogène. Modérateurs: âge, domaine, alignement fonctionnel.</p>
+    <p><strong>Méthode:</strong> Revue de revues + méta-analyses</p>
+    <div class="meta">Preuve Élevée • Validité externe modérée • Alignement fonctionnel clé: supplanter pas additionner charge</div>
+  </div>
+
+  <div class="card" data-tags="theorique 4E">
+    <div class="domain">Cognition 4E - Épistémologie</div>
+    <h3>Exceptionality of Enactivism 2026</h3>
+    <span class="badge b-theorique">Philosophique</span>
+    <p><strong>Thèse:</strong> Seul énactivisme autopoïétique rompt vraiment avec cognitivisme classique (représentationnalisme, computationnalisme). Autres E compatibles cognitivisme amendé.</p>
+    <p><strong>Méthode:</strong> Analyse épistémologique, critique ontologique</p>
+    <div class="meta">Validité conceptuelle • Pour refonte radicale Cognitorium</div>
+  </div>
+
+  <div class="card" data-tags="revue attention">
+    <div class="domain">Attention Spatio-temporelle</div>
+    <h3>Pascucci & Kristjánsson 2026 - Spatiotemporal Routines</h3>
+    <span class="badge b-revue">Perspective</span>
+    <p><strong>Thèse:</strong> Perception façonnée par contexte spatio-temporel riche. Concept routines spatio-temporelles: mécanismes intégrant structure spatiale+temporelle pour guider perception/comportement.</p>
+    <p><strong>Méthode:</strong> Intégration vision/attention/mémoire/décision</p>
+    <div class="meta">Validité écologique Élevée • <em>Nat Rev Psychol 5:420-432</em> • Paradigm shift vers contextes riches</div>
+  </div>
+
+  <div class="card" data-tags="experimental attention preprint">
+    <div class="domain">Attention Temporelle</div>
+    <h3>Tian, Motzer & Denison 2026 - Attention Temporelle Volontaire</h3>
+    <span class="badge b-experimental">Expérimental</span><span class="badge b-preprint">Préprint bioRxiv</span>
+    <p><strong>Thèse:</strong> Attention temporelle volontaire améliore perception même sans compétition temporelle → facilitation pré-compétitive pas résolution conflit.</p>
+    <p><strong>Méthode:</strong> Psychophysique compétition vs non-compétition</p>
+    <div class="meta">Preuve Faible-Modérée (préprint) • Validité interne modérée • À confirmer</div>
+  </div>
+
+  <div class="card" data-tags="revue attention">
+    <div class="domain">Attention Temporelle - Fondatrice</div>
+    <h3>Nobre & van Ede + Denison 2024 - Temporal Structure</h3>
+    <span class="badge b-revue">Revue fondatrice</span>
+    <p><strong>Thèse:</strong> 4 structures temporelles: cues, hazard rates, rythmes, séquences. Attentes temporelles amplifient spatiales. Modèle normalisation dynamique.</p>
+    <p><strong>Méthode:</strong> Revue + modèles computationnels, EEG alpha/bêta</p>
+    <div class="meta">Preuve Élevée • <em>Nat Rev Neurosci</em> + Denison 2024 NRP • Synergie spatio-temporelle</div>
+  </div>
+
+  <div class="card" data-tags="revue fluence">
+    <div class="domain">Fluence de Traitement</div>
+    <h3>Alter & Oppenheimer 2009 - Tribes of Fluency</h3>
+    <span class="badge b-revue">Revue fondatrice</span>
+    <p><strong>Thèse:</strong> Fluence = expérience subjective facilité traitement, indice métacognitif ubiquitaire influençant vérité, confiance, liking. Catégories: perceptive, conceptuelle, linguistique, mnésique, incarnée.</p>
+    <p><strong>Méthode:</strong> Revue systématique multi-manipulations</p>
+    <div class="meta">Preuve Élevée • Multi-paradigmes • <em>Pers Soc Psychol Rev</em> • Fondation fluence</div>
+  </div>
+
+  <div class="card" data-tags="experimental fluence">
+    <div class="domain">Fluence - Crossmodal</div>
+    <h3>Knight, Flavell & Mattys 2025 - Fluence & Affect</h3>
+    <span class="badge b-experimental">Expérimental crossmodal</span>
+    <p><strong>Thèse:</strong> Objets visuels + audio fluide mieux évalués, transfert persiste avec décalage → intégration crossmodale pas simple regroupement. Fluence déclenche affect positif attribué à tort aux objets.</p>
+    <p><strong>Méthode:</strong> Audio-visuel crossmodal + décalage temporel</p>
+    <div class="meta">Validité interne Élevée • Preuve Modéré-Élevé • <em>Atten Percept Psychophys</em></div>
+  </div>
+
+  <div class="card" data-tags="revue memoire">
+    <div class="domain">Mémoire & Validité Construit</div>
+    <h3>Huang et al. 2025 - Tâche n-back</h3>
+    <span class="badge b-revue">Critique paradigme</span>
+    <p><strong>Thèse:</strong> n-back = mise à jour + maintien + AC parallèle. Validité construit faible: progrès via stratégies chunking/familiarité pas vrai gain WMC. Transfert inconstant.</p>
+    <p><strong>Méthode:</strong> Analyse critique mécanismes</p>
+    <div class="meta">Validité construit Faible • Preuve Modérée • <em>Front Hum Neurosci</em> • Éviter métrique unique</div>
+  </div>
+</div>
+
+<section style="max-width:1200px;margin:40px auto;padding:20px">
+  <h2>🧭 Implications Design - Matrice Méthode → Cognitorium</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
+    <div class="card"><h3>🧠 Si méthode = Théorique 4E</h3><p>Compétences = patterns engagement corps-outils-environnement. Design: situations, artefacts, interactions sociales. Pas états internes.</p><small>Réf: Fuchs 2026, Exceptionality 2026</small></div>
+    <div class="card"><h3>👁️ Si méthode = Expé spatiale</h3><p>Exploiter pré-cues spatiaux, baseline shift: montrer repères avant contenu. Mise en page prédictive. Compromis sélectif: amélioration attendue, dégradation ailleurs.</p><small>Réf: Tünçok 2025</small></div>
+    <div class="card"><h3>⏱️ Si méthode = Attention temporelle</h3><p>Structurer timing: hazard rates, rythmes, séquences prédictibles. Signaux temporels améliorent perception même sans compétition.</p><small>Réf: Tian 2026, Nobre 2017, Denison 2024</small></div>
+    <div class="card"><h3>✨ Si méthode = Fluence</h3><p>Parcours fluide, prévisible, crossmodal cohérent = jugements positifs. Mais fluence biaise évaluation. Introduire disfluence volontaire pour pensée analytique.</p><small>Réf: Alter 2009, Knight 2025</small></div>
+    <div class="card"><h3>🎯 Si méthode = Revue systématique AC</h3><p>Mesurer contrôle attentionnel (antisaccade, Stroop) pas stockage. Tâches avec distracteurs. AC explique 75.6% variance multitâche.</p><small>Réf: Lee & Engle 2026</small></div>
+    <div class="card"><h3>🔄 Si méthode = Routines spatio-temporelles</h3><p>Passer de stimuli isolés à contextes riches. Paradigme shift: placer contexte spatio-temporel au coeur du design expérimental et interface.</p><small>Réf: Pascucci & Kristjánsson 2026</small></div>
+  </div>
+</section>
+
+<div class="mermaid-container">
+  <h3>Graphique Méthode → Domaine → Implication (Mermaid)</h3>
+  <pre style="white-space:pre-wrap;font-size:0.85rem;color:#9aa0b5">
+flowchart LR
+  Théorique --> 4E[4E / Enaction] --> Design1[Compétences = patterns engagement]
+  Expérimental --> AttentionSpatiale[Attention Spatiale] --> Design2[Pré-cues + baseline shift]
+  Neuroimagerie --> AttentionDecodage[Décodage temps réel] --> Design3[Interface neuro-adaptative]
+  RevueSystématique --> MemoireAC[Mémoire & AC] --> Design4[Mesurer AC pas stockage]
+  MétaAnalyse --> STEM[4E STEM SMD=0.448] --> Design5[Alignement fonctionnel geste-contenu]
+  Expérimental --> Fluence[Fluence crossmodal] --> Design6[Parcours fluide + disfluence utile]
+  Perspective --> Routines[Routines spatio-temporelles] --> Design7[Contextes riches]
+  </pre>
+</div>
+
+<footer>
+  <p>État de l'art généré 2026-05-13 • Sources: Lee & Engle 2026 J Intelligence, Ben Hamed 2025 Ann Rev Vision Sci, Tünçok et al. 2025 Nat Comms, Fuchs 2026 Front Psychol, Frontiers Edu 2026, Pascucci & Kristjánsson 2026 Nat Rev Psychol, Tian et al. 2026 bioRxiv, Alter & Oppenheimer 2009 PSPR, Knight et al. 2025 • Classification méthode scientifique: pyramide preuves + validités Cook & Campbell + cycle Popper</p>
+  <p>Fichiers associés: output/etat_art_psychologie_cognitive.csv • output/tableau_etat_art.md • output/mermaid_mindmap.md • output/classification_methodologique.md</p>
+</footer>
+
+<script>
+  const btns = document.querySelectorAll('.btn');
+  const cards = document.querySelectorAll('.card[data-tags]');
+  btns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      btns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      cards.forEach(c=>{
+        if(f==='all' || c.dataset.tags.includes(f)) c.classList.remove('hidden');
+        else c.classList.add('hidden');
+      });
+    });
+  });
+</script>
+</body>
+</html>
