@@ -14,12 +14,10 @@ app = FastAPI(
     version="2.0"
 )
 
-# Initialize database on startup
 @app.on_event("startup")
 def startup_event():
     init_db()
 
-# Templates & Static
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
@@ -82,7 +80,6 @@ def get_node_detail(node_id: str):
     
     node_data = dict(row)
 
-    # Get relations
     cursor.execute("""
         SELECT target_id, relation_type FROM reference_relations WHERE source_id = ?
         UNION
