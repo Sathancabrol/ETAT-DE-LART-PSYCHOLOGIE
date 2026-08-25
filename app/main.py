@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import sqlite3
+import os
 from typing import Optional, List
 
 from app.database import init_db, get_db_connection, DB_PATH
@@ -36,6 +37,27 @@ class MetacognitiveTraceCreate(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 def read_index(request: Request):
     return templates.TemplateResponse(request, "index.html", {"request": request})
+
+@app.get("/graph", response_class=HTMLResponse)
+def get_graph_page():
+    path = "output/visual/d3_interactive.html"
+    if os.path.exists(path):
+        return FileResponse(path)
+    return HTMLResponse("Graph page not found", status_code=404)
+
+@app.get("/taxonomy", response_class=HTMLResponse)
+def get_taxonomy_page():
+    path = "output/visual/taxonomy_graph.html"
+    if os.path.exists(path):
+        return FileResponse(path)
+    return HTMLResponse("Taxonomy page not found", status_code=404)
+
+@app.get("/cards", response_class=HTMLResponse)
+def get_cards_page():
+    path = "output/visual/index.html"
+    if os.path.exists(path):
+        return FileResponse(path)
+    return HTMLResponse("Cards page not found", status_code=404)
 
 @app.get("/api/nodes")
 def get_nodes(
@@ -129,7 +151,12 @@ def get_graph_data():
     refs = [dict(r) for r in cursor.fetchall()]
 
     cursor.execute("SELECT source_id, target_id, relation_type FROM reference_relations")
-    rels = [dict(r) for r in cursor.fetchall()]
+    rels = []
+    for r in cursor.fetchall():
+        d = dict(r)
+        d["source"] = d["source_id"]
+        d["target"] = d["target_id"]
+        rels.append(d)
     
     conn.close()
     return {
