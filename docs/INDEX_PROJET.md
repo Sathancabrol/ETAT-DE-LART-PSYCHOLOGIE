@@ -12,6 +12,7 @@ ETAT-DE-LART-PSYCHOLOGIE/
 │   ├── INDEX_PROJET.md                                 # Ce fichier
 │   ├── ETAT_ART_CRITIQUE_PSYCHOLOGIE_2020_2026_CORRIGE.md # DOCUMENT PRINCIPAL - Version 2.0 corrigée PRISMA 2020 (5 parties, 12 domaines)
 │   ├── METACOGNITION_EDUCATION_2025_2026.md            # Synthèse détaillée Métacognition & Éducation (modèles, méta-analyses 2025-2026, boucles IA, bibliographie)
+│   ├── TAXONOMIE_PSYCHOLOGIE_COGNITIVE.md              # Arborescence ontologique complète de la psychologie et de la psychologie cognitive (5 piliers, 9 processus, approches, applications)
 │   ├── ANALYSE_CONCEPTS_COGNITORIUM_4E.md              # Analyse 10 concepts 4E avec sources, gaps, opérationnalisation, modèle 6 couches, MVP
 │   ├── SOURCE_PASTE_ANALYSE_4E_ORIGINAL.md             # Source originale paste.txt fournie
 │   ├── PRISMA_FLOW.md                                  # Diagramme flux PRISMA 2020 + checklist
