@@ -1258,3 +1258,157 @@ def get_taxonomy():
             }
         ]
     }
+
+# ──────────────── V8+ : CONCEPTS / BIAIS / OUTILS ────────────────
+from app.concepts_data import get_all_concepts, get_concept_detail, get_article, get_timeline as get_concept_tl, TOOL_SUBCATS, SCIENTIFIC_ARTICLES
+
+@app.get("/api/concept-subcats")
+def api_tool_subcats():
+    return TOOL_SUBCATS
+
+@app.get("/api/concepts")
+def api_concepts():
+    items = []
+    for c in get_all_concepts():
+        d = c["detail"]
+        items.append({"id": c["id"], "cat": c["cat"], "name": c["name"], "tagline": c["tagline"],
+                      "author": c.get("author", ""), "year": c.get("year", ""),
+                      "definition": c.get("definition", ""), "impact": c.get("impact", ""),
+                      "examples": c.get("examples", []), "subcat": d.get("subcat", ""),
+                      "url": d.get("url", ""), "simulation": d.get("simulation")})
+    return items
+
+@app.get("/api/concepts/{cid}")
+def api_concept_detail(cid: str):
+    c = get_concept_detail(cid)
+    if not c:
+        raise HTTPException(status_code=404, detail="Not found")
+    det = c["detail"]
+    return {"id": c["id"], "cat": c["cat"], "name": c["name"], "tagline": c["tagline"],
+            "author": c.get("author", ""), "year": c.get("year", ""), "definition": c.get("definition", ""),
+            "impact": c.get("impact", ""), "examples": c.get("examples", []),
+            "histoire": det.get("histoire", ""), "mecanismes": det.get("mecanismes", []),
+            "experiences": det.get("experiences", []), "applications": det.get("applications", []),
+            "debias": det.get("debias", []), "related": det.get("related", []),
+            "timeline": det.get("timeline", []), "svg": det.get("svg_html", ""),
+            "schema": det.get("schema_html", ""), "simulation": det.get("simulation"),
+            "article": det.get("article"), "results": det.get("results", {}),
+            "doi": det.get("doi"), "seminal": det.get("seminal"), "url": det.get("url"),
+            "subcat": det.get("subcat")}
+
+@app.get("/api/articles")
+def api_articles_list():
+    return [{"id": k, "title": v["title"], "authors": v["authors"], "year": v["year"],
+             "journal": v["journal"], "citations": v["citations"]} for k, v in SCIENTIFIC_ARTICLES.items()]
+
+@app.get("/api/articles/{aid}")
+def api_article_detail(aid: str):
+    a = get_article(aid)
+    if not a:
+        raise HTTPException(status_code=404, detail="Not found")
+    d = dict(a)
+    d["id"] = aid
+    d["svg_html"] = __import__("app.concepts_data", fromlist=["art_svg"]).art_svg(a.get("svg", "line"))
+    return d
+
+@app.get("/api/concept-timeline/{cid}")
+def api_concept_timeline(cid: str):
+    return get_concept_tl(cid)
+
+# ──────────────── V8+ : LABORATOIRE ────────────────
+from app.lab_data import get_templates, get_suggestions
+
+@app.get("/api/experiment-templates")
+def api_lab_templates():
+    return get_templates()
+
+@app.get("/api/lab-suggestions")
+def api_lab_suggestions():
+    return get_suggestions()
+
+class ExperimentCreate(BaseModel):
+    title: str
+    category: Optional[str] = ""
+    hypothesis: Optional[str] = ""
+    iv: Optional[str] = ""
+    iv_levels: Optional[str] = ""
+    dv: Optional[str] = ""
+    dv_measure: Optional[str] = ""
+    design: Optional[str] = ""
+    population: Optional[str] = ""
+    n_sample: Optional[str] = ""
+    material: Optional[str] = ""
+    procedure: Optional[str] = ""
+    controls: Optional[str] = ""
+    ethics: Optional[str] = ""
+    expected: Optional[str] = ""
+    analysis_plan: Optional[str] = ""
+    concepts: Optional[str] = ""
+    sim_type: Optional[str] = ""
+    status: Optional[str] = "draft"
+
+@app.get("/api/experiments")
+def api_experiments():
+    conn = get_db_connection()
+    rows = [dict(r) for r in conn.execute("SELECT * FROM experiments ORDER BY created_at DESC").fetchall()]
+    conn.close()
+    return rows
+
+@app.post("/api/experiments")
+def api_create_experiment(exp: ExperimentCreate):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("""INSERT INTO experiments (title,category,hypothesis,iv,iv_levels,dv,dv_measure,design,
+        population,n_sample,material,procedure,controls,ethics,expected,analysis_plan,concepts,sim_type,status)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (exp.title, exp.category, exp.hypothesis, exp.iv, exp.iv_levels, exp.dv, exp.dv_measure, exp.design,
+         exp.population, exp.n_sample, exp.material, exp.procedure, exp.controls, exp.ethics, exp.expected,
+         exp.analysis_plan, exp.concepts, exp.sim_type, exp.status))
+    conn.commit()
+    eid = c.lastrowid
+    conn.close()
+    return {"status": "success", "id": eid}
+
+@app.put("/api/experiments/{exp_id}")
+def api_update_experiment(exp_id: int, exp: ExperimentCreate):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("""UPDATE experiments SET title=?,category=?,hypothesis=?,iv=?,iv_levels=?,dv=?,dv_measure=?,
+        design=?,population=?,n_sample=?,material=?,procedure=?,controls=?,ethics=?,expected=?,
+        analysis_plan=?,concepts=?,sim_type=?,status=? WHERE id=?""",
+        (exp.title, exp.category, exp.hypothesis, exp.iv, exp.iv_levels, exp.dv, exp.dv_measure,
+         exp.design, exp.population, exp.n_sample, exp.material, exp.procedure, exp.controls,
+         exp.ethics, exp.expected, exp.analysis_plan, exp.concepts, exp.sim_type, exp.status, exp_id))
+    conn.commit()
+    ok = c.rowcount > 0
+    conn.close()
+    if not ok:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"status": "success"}
+
+@app.delete("/api/experiments/{exp_id}")
+def api_delete_experiment(exp_id: int):
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM experiments WHERE id=?", (exp_id,))
+    conn.commit()
+    ok = c.rowcount > 0
+    conn.close()
+    if not ok:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"status": "success"}
+
+# ──────────────── V8+ : STATISTIQUES & TRAITEMENT DE DONNÉES ────────────────
+from app.stats_data import get_stat_tree, get_stat_tests, get_data_tools
+
+@app.get("/api/stats-tree")
+def api_stats_tree():
+    return get_stat_tree()
+
+@app.get("/api/stat-tests")
+def api_stat_tests():
+    return get_stat_tests()
+
+@app.get("/api/data-tools")
+def api_data_tools():
+    return get_data_tools()

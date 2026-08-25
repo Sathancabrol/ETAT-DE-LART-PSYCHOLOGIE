@@ -1,0 +1,50 @@
+/* Cognitorium v8 — styles custom (Tailwind CDN gère le reste) */
+[x-cloak]{display:none!important}
+:root{--bg:#070a14;--bg2:#0c1120;--bg3:#111830;--border:#1e2745}
+body{background:var(--bg);color:#e2e8f0;font-family:Inter,system-ui,-apple-system,sans-serif}
+.glass{background:rgba(13,18,35,.82);backdrop-filter:blur(14px)}
+.glass-card{background:linear-gradient(145deg,rgba(20,27,52,.75),rgba(13,18,35,.65));border:1px solid rgba(255,255,255,.06)}
+.fade-in{animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+.scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#1e2745;border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+.badge-meta{background:#6366f120;color:#a5b4fc;border:1px solid #6366f145}
+.badge-revue{background:#3b82f620;color:#93c5fd;border:1px solid #3b82f645}
+.badge-exp{background:#10b98120;color:#6ee7b7;border:1px solid #10b98145}
+.badge-theo{background:#f59e0b20;color:#fcd34d;border:1px solid #f59e0b45}
+.badge-preprint{background:#ec489920;color:#f9a8d4;border:1px solid #ec489945}
+.badge-neuro{background:#06b6d420;color:#67e8f9;border:1px solid #06b6d445}
+.stat-card{transition:transform .2s,border-color .2s}
+.stat-card:hover{transform:translateY(-2px);border-color:#6366f155}
+.tab-btn{transition:all .18s}
+.stim-box{min-height:220px;display:flex;align-items:center;justify-content:center;border-radius:14px;border:1px solid var(--border);background:var(--bg2);font-weight:800}
+.key-btn{width:58px;height:58px;border-radius:14px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;transition:all .15s;cursor:pointer;user-select:none}
+.key-btn.lit{transform:scale(1.12);box-shadow:0 0 24px 4px currentColor;border-color:currentColor}
+.rt-bar{display:inline-block;width:10px;margin-right:2px;border-radius:3px 3px 0 0}
+.drag-card{transition:opacity .2s,transform .2s}
+.drag-card.dragging{opacity:.45;transform:scale(.96) rotate(1deg)}
+.drop-zone{border:2px dashed var(--border);border-radius:14px;transition:all .2s}
+.drop-zone.over{border-color:#6366f1;background:rgba(99,102,241,.08)}
+.sug-pop{position:absolute;z-index:60;left:0;right:0;top:100%;margin-top:4px;max-height:210px;overflow-y:auto;background:var(--bg3);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.sug-item{padding:7px 12px;font-size:11px;color:#cbd5e1;cursor:pointer}
+.sug-item:hover{background:rgba(99,102,241,.15);color:#fff}
+.fiche-svg svg{width:100%;height:auto;border-radius:12px}
+.tl-dot{width:11px;height:11px;border-radius:50%;border:2px solid currentColor;background:var(--bg)}
+.tl-line{position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--border)}
+input,select,textarea{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:7px 11px;font-size:12px;color:#e2e8f0;outline:none;width:100%}
+input:focus,select,textarea:focus{border-color:#6366f1}
+select{cursor:pointer}
+label.fl{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;font-weight:700;margin-bottom:4px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:600;border:1px solid;cursor:pointer;transition:all .15s}
+.nav-drop{position:relative}
+.nav-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:190px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,.55);z-index:70}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:11.5px;color:#cbd5e1;cursor:pointer;white-space:nowrap}
+.nav-item:hover{background:rgba(99,102,241,.15);color:#fff}
+#graph3d canvas{border-radius:14px}
+.test-node circle{cursor:pointer}
+.tree-node{cursor:pointer}
+.tree-node text{font-size:10.5px;fill:#cbd5e1}
+.tree-node:hover circle{stroke:#818cf8;stroke-width:2.5}

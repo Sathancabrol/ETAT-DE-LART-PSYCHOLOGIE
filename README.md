@@ -2,16 +2,33 @@
 
 > **Version 2.0 corrigée** - Répond à l'analyse critique : passage de "état de l'art exhaustif" à **cartographie critique préliminaire** conforme PRISMA 2020, avec protocole transparent, évaluation biais, et programme recherche testable.
 
-## 🆕 Cognitorium v8 (app web)
+## 🆕 Cognitorium v8 (app web complète)
 
-L'application `app/` (FastAPI) passe en **v8** :
+L'application `app/` (FastAPI + SQLite) passe en **v8** — plateforme complète en 13 vues, navigation par menus déroulants :
 
-- **Onglet « 12 Domaines »** (`/api/domains`) : cartographie critique interactive — couverture (Fort/Partiel/Insuffisant/Absent), gaps identifiés, références clés v2.0, nombre d'études liées dans la base, pour chacun des 12 domaines.
-- **Onglet « PRISMA 2020 »** (`/api/prisma`) : diagramme de flux complet (identification → screening → éligibilité → inclus), motifs d'exclusion chiffrés, checklist 27 items, outils RoB 2 / ROBINS-I / AMSTAR 2 / GRADE.
-- **Onglet « Recherche »** (`/api/research-program`) : programme de recherche testable — 12 gaps → questions testables → designs recommandés → résultats attendus, filtrables par domaine.
-- **Export coffre Obsidian** (`/api/export/obsidian-vault`) : télécharge un `.zip` contenant un vrai coffre Obsidian — ~100 notes Markdown avec frontmatter YAML (id, type, group, trust, year, tags, compatible Dataview), wikilinks typés (converging, falsification, operationalization…), sommaire, et un fichier **Canvas** (`01 Canvas - Graphe Cognitorium.canvas`) reproduisant le graphe v7 en colonnes par type de nœud.
+**Cartographie**
+- **Dashboard** : stats live + graphiques Chart.js (trust, types, sous-domaines)
+- **12 Domaines** (`/api/domains`) : couverture, gaps, refs clés v2.0 par domaine
+- **Graphe 3D** (`/api/obsidian-graph`) : 99 nœuds / 137 liens rendus en 3D (Three.js / 3d-force-graph) — rotation, zoom, pan, fly-to-camera, filtres par type (études/concepts/méthodes/théoriciens/sources OER), filtre par groupe, recherche, sidebar de connexions
+- **Taxonomie** : arbre D3 collapsible 225 nœuds, recherche avec expansion de branche
+- **PRISMA 2020** (`/api/prisma`) : flux chiffré, motifs d'exclusion, checklist 27 items, RoB2/ROBINS-I/AMSTAR2/GRADE
 
-Historique : v4 = app de base (base 42 champs, timeline, pyramide, concepts 4E, module SRL) → v5/v6 = graphe D3 méthodologique → v7 = graphe style Obsidian (99 nœuds, 137 liens, 38 sources OER, taxonomie 225 nœuds) → **v8 = cartographie critique complète + export Obsidian**.
+**Données**
+- **Base de références** : 14 refs × 42 champs, filtres, fiches, comparateur (jusqu'à 3)
+- **Timeline** chronologique cliquable
+- **Programme de recherche** (`/api/research-program`) : 12 gaps → questions testables, avec envoi vers le labo
+- **Export coffre Obsidian** (`/api/export/obsidian-vault`) : ZIP ~102 fichiers (notes YAML + wikilinks + Canvas)
+
+**Concepts & Outils**
+- **Concepts** (`/api/concepts`) : **40 fiches** — 15 biais cognitifs, 13 grands concepts, 12 outils. Chaque fiche : tagline, histoire + auteur, mécanismes + schéma SVG, expériences → **fiches d'articles scientifiques** (résumé, intro, méthode, résultats chiffrés + graphique, discussion, conclusion), illustration SVG, applications réelles, débiaisage, **frise historique**, ressources DOI, résultats clés. Boutons **▶ Simuler** → laboratoire
+- **Statistiques** (`/api/stats-tree`) : arbre de décision D3 interactif → 15 tests (t-test, ANOVA, Mann-Whitney, Wilcoxon, Kruskal-Wallis, Friedman, Pearson, Spearman, χ², Fisher, régressions…) avec hypothèses, formules, tailles d'effet, logiciels, format de report APA
+- **Traitement de données** (`/api/data-tools`) : 10 outils (JASP, jamovi, R, Python, G*Power, CSV, EEGLAB, MNE, FieldTrip, IA) avec fiches
+
+**Pratique**
+- **Laboratoire** : **21 expériences jouables** (`/api/experiment-templates`) couvrant 12 domaines (Stroop, Flanker, Posner, N-back, Oddball/P300, Stroop émotionnel, Asch, Framing, Ancrage, Coûts irrécupérables, Spectateur, Big Five, Conservation, Sally-Anne, Dunning-Kruger, Calibration JOL, DRM, Testing, Génération, Spaced, Exposition). Formulaire de création avec **autocomplétion** (151 suggestions, `/api/lab-suggestions`), CRUD complet (`/api/experiments`), **Mes projets** avec drag & drop, **analyse statistique automatique** (TR, précision, d', t de Welch, p, d de Cohen — calculés en JS), **replay timeline des réponses** (boutons qui s'illuminent), **clics par touche**, exports **CSV/JSON** et génération de code **R/Python**
+- **Module SRL** : boucle métacognitive en 5 phases, traces en base
+
+Historique : v4 = app de base → v5/v6 = graphe D3 → v7 = graphe style Obsidian (99 nœuds, 38 sources OER, taxonomie 225 nœuds) → **v8 = plateforme complète (3D, fiches, labo, stats, traitement de données)**.
 
 ## 📁 Structure du dépôt (corrigée)
 

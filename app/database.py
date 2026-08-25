@@ -87,11 +87,35 @@ def init_db():
     )
     """)
 
+    # 4. Lab experiments (Cognitorium v8 — Laboratoire)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS experiments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        category TEXT,
+        hypothesis TEXT,
+        iv TEXT,
+        iv_levels TEXT,
+        dv TEXT,
+        dv_measure TEXT,
+        design TEXT,
+        population TEXT,
+        n_sample TEXT,
+        material TEXT,
+        procedure TEXT,
+        controls TEXT,
+        ethics TEXT,
+        expected TEXT,
+        analysis_plan TEXT,
+        concepts TEXT,
+        sim_type TEXT,
+        status TEXT DEFAULT 'draft',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     conn.commit()
     conn.close()
-
-    # Ingest CSV if table is empty
-    ingest_csv()
 
 def ingest_csv():
     if not os.path.exists(CSV_PATH):
