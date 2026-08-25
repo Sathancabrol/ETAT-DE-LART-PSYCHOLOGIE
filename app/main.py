@@ -35,7 +35,7 @@ class MetacognitiveTraceCreate(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 def read_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html", {"request": request})
 
 @app.get("/api/nodes")
 def get_nodes(
