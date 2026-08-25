@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitorium & État de l'Art en Psychologie (2020-2026)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- D3.js -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="h-full text-slate-100 font-sans antialiased flex flex-col" x-data="appData()" x-init="init()">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0 shadow-lg z-20">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center shadow-md shadow-indigo-500/20">
+        <i data-lucide="brain" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Cognitorium & État de l'Art Psychologie</h1>
+        <p class="text-xs text-slate-400">Cartographie critique 2020–2026 • Métacognition, Cognition 4E & Sciences de l'Apprentissage</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="hidden md:flex items-center space-x-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+      <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'" class="px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>Dashboard</span>
+      </button>
+      <button @click="activeTab = 'database'; loadNodes()" :class="activeTab === 'database' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'" class="px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+        <i data-lucide="database" class="w-4 h-4"></i>
+        <span>Base de Données (42 champs)</span>
+      </button>
+      <button @click="activeTab = 'graph'; setTimeout(initD3Graph, 50)" :class="activeTab === 'graph' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'" class="px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+        <i data-lucide="share-2" class="w-4 h-4"></i>
+        <span>Graphe Méthodologique</span>
+      </button>
+      <button @click="activeTab = 'taxonomy'; setTimeout(initTaxonomyTree, 50)" :class="activeTab === 'taxonomy' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'" class="px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+        <i data-lucide="git-commit" class="w-4 h-4"></i>
+        <span>Arbre Taxonomique</span>
+      </button>
+      <button @click="activeTab = 'cognitorium'" :class="activeTab === 'cognitorium' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'" class="px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-2">
+        <i data-lucide="compass" class="w-4 h-4"></i>
+        <span>Module Cognitorium (SRL)</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-hidden relative flex flex-col">
+
+    <!-- TAB 1: DASHBOARD -->
+    <div x-show="activeTab === 'dashboard'" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
+      <!-- Welcome Hero -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-2xl p-8 relative overflow-hidden shadow-xl">
+        <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="max-w-3xl relative z-10">
+          <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-semibold uppercase tracking-wider">Version 2.0 Corrigée • PRISMA 2020</span>
+          <h2 class="text-3xl font-extrabold text-white mt-4 tracking-tight">Cartographie Critique & Application Cognitorium</h2>
+          <p class="text-slate-300 mt-3 text-sm leading-relaxed">
+            Ce dépôt centralise l'état de l'art en psychologie cognitive, neurosciences et sciences de l'apprentissage (2020–2026). Il combine rigueur méthodologique (base de 42 champs normalisés, Trust Factor, évaluation PRISMA) et traduction opérationnelle pour le projet <strong>Cognitorium</strong> (interfaces 4E, boucles métacognitives et IA générative encadrée).
+          </p>
+          <div class="mt-6 flex flex-wrap gap-4">
+            <button @click="activeTab = 'database'; loadNodes()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+              <i data-lucide="database" class="w-4 h-4"></i>
+              <span>Explorer la Base (42 champs)</span>
+            </button>
+            <button @click="activeTab = 'cognitorium'" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+              <i data-lucide="compass" class="w-4 h-4"></i>
+              <span>Tester le Module Métacognitif</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <i data-lucide="file-text" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Références Indexées</p>
+            <h3 class="text-2xl font-bold text-white mt-1" x-text="stats.total_references || 14">14</h3>
+            <p class="text-xs text-emerald-400 mt-1 flex items-center"><i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Validation PASSED</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <i data-lucide="shield-check" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Trust Factor Moyen</p>
+            <h3 class="text-2xl font-bold text-white mt-1" x-text="stats.average_trust_factor + '/100'">73.2/100</h3>
+            <p class="text-xs text-slate-400 mt-1">Méthodo + Réplication + Open Science</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <i data-lucide="layers" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Domaines Majeurs</p>
+            <h3 class="text-2xl font-bold text-white mt-1">12 Domaines</h3>
+            <p class="text-xs text-slate-400 mt-1">Cognitif, Clinique, Éducation, etc.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <i data-lucide="cpu" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Concepts 4E Analysés</p>
+            <h3 class="text-2xl font-bold text-white mt-1">10 Concepts</h3>
+            <p class="text-xs text-slate-400 mt-1">Embodied, Enactive, Affordance</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links / Recent highlights -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-base text-white flex items-center"><i data-lucide="sparkles" class="w-5 h-5 text-indigo-400 mr-2"></i> Axes Majeurs 2025–2026</h3>
+              <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full">Actualité scientifique</span>
+            </div>
+            <div class="space-y-4 text-sm text-slate-300">
+              <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                <h4 class="font-semibold text-white flex items-center"><span class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span> 1. Métacognition & Éducation</h4>
+                <p class="text-xs text-slate-400 mt-1">Modèle prédictif hiérarchique, réseaux préfronto-pariétaux, et boucles d'auto-régulation (SRL) indispensables face aux IA génératives.</p>
+              </div>
+              <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                <h4 class="font-semibold text-white flex items-center"><span class="w-2 h-2 rounded-full bg-cyan-500 mr-2"></span> 2. Cognition 4E & Alignement Fonctionnel</h4>
+                <p class="text-xs text-slate-400 mt-1">Dépassement de l'incarnation décorative au profit de l'offloading perceptivo-spatial et des routines spatio-temporelles (SMD = 0.448).</p>
+              </div>
+              <div class="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                <h4 class="font-semibold text-white flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> 3. IA et Recommandation par l'Incertitude</h4>
+                <p class="text-xs text-slate-400 mt-1">Intégration des scores de calibration et d'incertitude dans les algorithmes d'orientation et d'apprentissage.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-md flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-base text-white mb-4 flex items-center"><i data-lucide="bookmark" class="w-5 h-5 text-indigo-400 mr-2"></i> Documents Clés</h3>
+            <ul class="space-y-3 text-xs">
+              <li>
+                <a href="#" @click.prevent="activeTab = 'database'" class="p-3 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-xl block transition">
+                  <span class="font-semibold text-indigo-400 block">Base de Données 42 Champs</span>
+                  <span class="text-slate-400 text-[11px] mt-0.5 block">Explorer les métadonnées et sources validées.</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" @click.prevent="activeTab = 'graph'; setTimeout(initD3Graph, 50)" class="p-3 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-xl block transition">
+                  <span class="font-semibold text-cyan-400 block">Graphe Méthodologique D3</span>
+                  <span class="text-slate-400 text-[11px] mt-0.5 block">Visualiser les liens épistémologiques et de falsification.</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" @click.prevent="activeTab = 'taxonomy'; setTimeout(initTaxonomyTree, 50)" class="p-3 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-xl block transition">
+                  <span class="font-semibold text-emerald-400 block">Arbre Taxonomique Complet</span>
+                  <span class="text-slate-400 text-[11px] mt-0.5 block">Explorer les 5 piliers de la psychologie scientifique.</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: DATABASE 42 FIELDS -->
+    <div x-show="activeTab === 'database'" class="flex-1 flex flex-col overflow-hidden p-6 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
+        <div>
+          <h2 class="text-2xl font-bold text-white tracking-tight">Base de Données Bibliographique (42 Champs)</h2>
+          <p class="text-xs text-slate-400 mt-1">Exploration filtrable des entrées validées avec calcul automatique du Trust Factor.</p>
+        </div>
+        <!-- Search & Filters -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <input type="text" x-model="searchQuery" @input="filterNodes()" placeholder="Rechercher (titre, thème, tags)..." class="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-64">
+          </div>
+          <select x-model="selectedDomain" @change="filterNodes()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <option value="all">Tous les domaines</option>
+            <option value="Psychologie cognitive">Psychologie cognitive</option>
+            <option value="Psychologie">Psychologie</option>
+          </select>
+          <select x-model="selectedNiveau" @change="filterNodes()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <option value="all">Tous niveaux de preuve</option>
+            <option value="tres_eleve">Très élevé</option>
+            <option value="eleve">Élevé</option>
+            <option value="modere_eleve">Modéré-Élevé</option>
+            <option value="modere">Modéré</option>
+            <option value="theorique">Théorique</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Nodes Grid / Table -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pr-2">
+        <template x-for="node in filteredNodes" :key="node.id">
+          <div class="bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 shadow-md transition flex flex-col justify-between group cursor-pointer" @click="openModal(node)">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" x-text="node.sous_domaine"></span>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center"><i data-lucide="shield" class="w-3 h-3 mr-1"></i> Trust <span x-text="node.trust_factor"></span></span>
+              </div>
+              <h3 class="font-bold text-base text-white group-hover:text-indigo-400 transition" x-text="node.reference_courte"></h3>
+              <p class="text-xs text-slate-300 mt-2 line-clamp-2" x-text="node.theme"></p>
+              <p class="text-[11px] text-slate-400 mt-2 italic line-clamp-2" x-text="node.consensus_actuel"></p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+              <span class="font-mono" x-text="'DOI: ' + node.doi"></span>
+              <span class="text-indigo-400 font-semibold group-hover:underline flex items-center">Détails 42 champs <i data-lucide="chevron-right" class="w-3 h-3 ml-0.5"></i></span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- TAB 3: D3 METHODOLOGICAL GRAPH -->
+    <div x-show="activeTab === 'graph'" class="flex-1 flex flex-col relative bg-slate-950 overflow-hidden">
+      <div class="absolute top-4 left-6 z-10 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-xl p-4 shadow-xl max-w-sm">
+        <h3 class="font-bold text-sm text-white flex items-center"><i data-lucide="share-2" class="w-4 h-4 text-indigo-400 mr-2"></i> Graphe de Connaissances & Méthodes</h3>
+        <p class="text-xs text-slate-400 mt-1">Liens typés : <span class="text-cyan-400">opérationnalisation</span>, <span class="text-emerald-400">convergence</span>, <span class="text-amber-400">synthèse</span>, <span class="text-rose-400">falsification</span>, <span class="text-purple-400">révision</span>.</p>
+        <div class="mt-3 flex items-center space-x-2 text-[11px]">
+          <span class="inline-block w-3 h-3 rounded-full bg-indigo-500"></i> Domaine</span>
+          <span class="inline-block w-3 h-3 rounded-full bg-emerald-400"></i> Neuro</span>
+          <span class="inline-block w-3 h-3 rounded-full bg-cyan-400"></i> Expé</span>
+        </div>
+      </div>
+      <div id="d3-container" class="flex-1 w-full h-full cursor-grab active:cursor-grabbing"></div>
+    </div>
+
+    <!-- TAB 4: TAXONOMY TREE -->
+    <div x-show="activeTab === 'taxonomy'" class="flex-1 flex flex-col relative bg-slate-950 overflow-hidden">
+      <div class="absolute top-4 left-6 z-10 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-xl p-4 shadow-xl max-w-sm">
+        <h3 class="font-bold text-sm text-white flex items-center"><i data-lucide="git-commit" class="w-4 h-4 text-emerald-400 mr-2"></i> Arbre Taxonomique Complet</h3>
+        <p class="text-xs text-slate-400 mt-1">Cliquez sur un nœud pour le replier/déplier et afficher son implication dans le Cognitorium.</p>
+      </div>
+      <div id="taxonomy-container" class="flex-1 w-full h-full cursor-grab active:cursor-grabbing"></div>
+    </div>
+
+    <!-- TAB 5: COGNITORIUM MODULE (SRL & METACGNITIVE LOOP) -->
+    <div x-show="activeTab === 'cognitorium'" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 custom-scrollbar">
+      <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-950/60 to-slate-900 border border-indigo-500/20 rounded-2xl p-6 shadow-xl">
+          <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-xs font-semibold uppercase tracking-wider">Module Interactif Cognitorium</span>
+          <h2 class="text-2xl font-bold text-white mt-3">Boucle Métacognitive & Garde-fous GenAI</h2>
+          <p class="text-slate-300 text-sm mt-2">
+            Conforme à l'état de l'art 2025–2026 : l'usage de l'IA générative sans encadrement affaiblit l'auto-régulation (SRL). Ce module structure explicitement une boucle en 4 étapes (Planification, Monitoring, Contrôle, Évaluation) pour maximiser l'autonomie et calibrer la confiance.
+          </p>
+        </div>
+
+        <!-- Wizard Box -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl">
+          <!-- Stepper Indicator -->
+          <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
+            <template x-for="(sName, idx) in ['1. Planification', '2. Monitoring & GenAI', '3. Contrôle / Ajustement', '4. Évaluation & Bilan']">
+              <div class="flex items-center space-x-2">
+                <div :class="suloStep === idx + 1 ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : (suloStep > idx + 1 ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400')" class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition" x-text="idx + 1"></div>
+                <span class="hidden sm:inline text-xs font-semibold" :class="suloStep === idx + 1 ? 'text-white' : 'text-slate-400'" x-text="sName"></span>
+              </div>
+            </template>
+          </div>
+
+          <!-- STEP 1: PLANIFICATION -->
+          <div x-show="suloStep === 1" class="space-y-6">
+            <h3 class="font-bold text-lg text-white flex items-center"><i data-lucide="target" class="w-5 h-5 text-indigo-400 mr-2"></i> Étape 1 : Planification & Fixation d'Objectif (Forethought)</h3>
+            <p class="text-xs text-slate-400">Avant d'explorer ou de solliciter l'IA, définissez clairement votre intention pédagogique ou professionnelle.</p>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Quel est votre objectif précis aujourd'hui ?</label>
+                <input type="text" x-model="traceData.objective" placeholder="Ex: Explorer les métiers de la data science et identifier 3 formations adaptées" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Quels sont vos critères de succès ?</label>
+                <input type="text" x-model="traceData.criteria" placeholder="Ex: Comprendre les prérequis mathématiques et les débouchés locaux" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Quelles sont vos contraintes ? (Temps, prérequis, localisation)</label>
+                <input type="text" x-model="traceData.constraints" placeholder="Ex: Formation en distanciel, 6 mois maximum" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+              <button @click="suloStep = 2" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+                <span>Étape suivante : Monitoring IA</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: MONITORING & GENAI -->
+          <div x-show="suloStep === 2" class="space-y-6">
+            <h3 class="font-bold text-lg text-white flex items-center"><i data-lucide="bot" class="w-5 h-5 text-cyan-400 mr-2"></i> Étape 2 : Requête GenAI Encadrée (Monitoring)</h3>
+            <p class="text-xs text-slate-400">Posez votre question à l'assistant IA en lien direct avec votre objectif planifié.</p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Votre requête / prompt IA :</label>
+                <textarea rows="3" x-model="traceData.ai_query" placeholder="Ex: Quels sont les 3 principaux métiers de la data science en 2026 et leurs compétences clés ?" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+              </div>
+
+              <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-xl">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-cyan-400 flex items-center"><i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> Réponse simulée de l'IA (Gardée sous contrôle)</span>
+                  <button @click="simulateAIResponse()" class="text-xs text-indigo-400 hover:underline">Générer la réponse</button>
+                </div>
+                <textarea rows="4" x-model="traceData.ai_response" placeholder="La réponse de l'IA apparaîtra ici..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 focus:outline-none"></textarea>
+              </div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+              <button @click="suloStep = 1" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition">Retour</button>
+              <button @click="suloStep = 3" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+                <span>Étape suivante : Contrôle & Évaluation</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: CONTRÔLE / AJUSTEMENT -->
+          <div x-show="suloStep === 3" class="space-y-6">
+            <h3 class="font-bold text-lg text-white flex items-center"><i data-lucide="sliders" class="w-5 h-5 text-emerald-400 mr-2"></i> Étape 3 : Contrôle et Ajustement Métacognitif</h3>
+            <p class="text-xs text-slate-400">Analysez la réponse de l'IA par rapport à vos critères initiaux. Qu'est-ce qui est utile ? Qu'est-ce qui manque ?</p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Votre évaluation critique (Qu'est-ce qui manque ou est ambigu ?)</label>
+                <textarea rows="3" x-model="traceData.evaluation" placeholder="Ex: La réponse donne de bons métiers mais ne précise pas les contraintes de reconversion." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Niveau de confiance métacognitive (0 à 100%) : <span class="font-bold text-indigo-400" x-text="traceData.confidence + '%'"></span></label>
+                <input type="range" min="0" max="100" x-model="traceData.confidence" class="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2 cursor-pointer">
+              </div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+              <button @click="suloStep = 2" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition">Retour</button>
+              <button @click="suloStep = 4" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
+                <span>Étape finale : Bilan & Plan d'action</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: ÉVALUATION A POSTERIORI & PLAN D'ACTION -->
+          <div x-show="suloStep === 4" class="space-y-6">
+            <h3 class="font-bold text-lg text-white flex items-center"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 mr-2"></i> Étape 4 : Plan d'Action Concret & Enregistrement des Traces</h3>
+            <p class="text-xs text-slate-400">Traduisez cette session en action concrète et enregistrez vos traces dans la base de données SQLite.</p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Quelle est votre prochaine étape concrète ?</label>
+                <input type="text" x-model="traceData.action_plan" placeholder="Ex: Contacter un conseiller en formation et comparer les certifications RNCP" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+
+              <!-- Summary Card -->
+              <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs text-slate-300">
+                <p><strong>Objectif :</strong> <span class="text-white" x-text="traceData.objective"></span></p>
+                <p><strong>Confiance évaluée :</strong> <span class="text-indigo-400 font-bold" x-text="traceData.confidence + '%'"></span></p>
+                <p><strong>Plan d'action :</strong> <span class="text-emerald-400 font-semibold" x-text="traceData.action_plan"></span></p>
+              </div>
+            </div>
+
+            <div class="flex justify-between pt-4">
+              <button @click="suloStep = 3" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition">Retour</button>
+              <button @click="submitTrace()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Enregistrer la Trace Métacognitive</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL FOR NODE DETAIL (42 FIELDS) -->
+  <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" x-text="selectedNode.sous_domaine"></span>
+          <h3 class="font-bold text-base text-white mt-1" x-text="selectedNode.reference_courte"></h3>
+        </div>
+        <button @click="modalOpen = false" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Modal Body (42 fields list) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs">
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl">
+          <h4 class="font-bold text-indigo-400 mb-1">Référence Complète :</h4>
+          <p class="text-slate-200" x-text="selectedNode.reference_complete"></p>
+          <div class="mt-3 flex items-center space-x-3">
+            <a :href="selectedNode.url" target="_blank" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold flex items-center"><i data-lucide="external-link" class="w-3.5 h-3.5 mr-1.5"></i> Accéder au DOI / URL</a>
+            <span class="text-slate-400 font-mono" x-text="'DOI: ' + selectedNode.doi"></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="text-slate-400 block font-semibold">Type de Publication</span>
+            <span class="text-white font-medium mt-0.5 block" x-text="selectedNode.type_publication"></span>
+          </div>
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="text-slate-400 block font-semibold">Niveau de Preuve</span>
+            <span class="text-emerald-400 font-medium mt-0.5 block" x-text="selectedNode.niveau_preuve"></span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+          <h4 class="font-bold text-cyan-400">Question Scientifique :</h4>
+          <p class="text-slate-200" x-text="selectedNode.question_scientifique"></p>
+        </div>
+
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+          <h4 class="font-bold text-emerald-400">Consensus Actuel :</h4>
+          <p class="text-slate-200" x-text="selectedNode.consensus_actuel"></p>
+        </div>
+
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+          <h4 class="font-bold text-amber-400">Gaps Actuels & Limites :</h4>
+          <p class="text-slate-200" x-text="selectedNode.gap_actuel"></p>
+        </div>
+
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+          <h4 class="font-bold text-purple-400">Trust Factor & Justification (<span x-text="selectedNode.trust_factor + '/100'"></span>) :</h4>
+          <p class="text-slate-200" x-text="selectedNode.trust_justification"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    function appData() {
+      return {
+        activeTab: 'dashboard',
+        stats: {},
+        nodes: [],
+        filteredNodes: [],
+        searchQuery: '',
+        selectedDomain: 'all',
+        selectedNiveau: 'all',
+        modalOpen: false,
+        selectedNode: {},
+        suloStep: 1,
+        traceData: {
+          session_id: 'session-' + Math.random().toString(36.substring(2, 9)),
+          phase: 'planification',
+          objective: '',
+          criteria: '',
+          constraints: '',
+          ai_query: '',
+          ai_response: '',
+          evaluation: '',
+          confidence: 75,
+          action_plan: ''
+        },
+
+        async init() {
+          // Load stats
+          try {
+            const res = await fetch('/api/stats');
+            this.stats = await res.json();
+          } catch(e) { console.error(e); }
+
+          await this.loadNodes();
+          lucide.createIcons();
+        },
+
+        async loadNodes() {
+          try {
+            const res = await fetch('/api/nodes');
+            this.nodes = await res.json();
+            this.filteredNodes = this.nodes;
+          } catch(e) { console.error(e); }
+        },
+
+        filterNodes() {
+          this.filteredNodes = this.nodes.filter(n => {
+            const matchSearch = this.searchQuery === '' || 
+              n.reference_courte.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              n.theme.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              n.tags.toLowerCase().includes(this.searchQuery.toLowerCase());
+            const matchDomain = this.selectedDomain === 'all' || n.domaine === this.selectedDomain;
+            const matchNiveau = this.selectedNiveau === 'all' || n.niveau_preuve === this.selectedNiveau;
+            return matchSearch && matchDomain && matchNiveau;
+          });
+        },
+
+        openModal(node) {
+          this.selectedNode = node;
+          this.modalOpen = true;
+          setTimeout(() => lucide.createIcons(), 50);
+        },
+
+        simulateAIResponse() {
+          this.traceData.ai_response = "En 2026, la data science s'articule autour de 3 piliers majeurs : l'ingénierie des LLMs/agents autonomes, l'éthique de l'IA (alignement et explicabilité XAI), et la valorisation des données multimodales (vision, texte, séries temporelles). Les compétences clés incluent Python, PyTorch, MLOps et l'évaluation critique des hallucinations.";
+        },
+
+        async submitTrace() {
+          try {
+            const res = await fetch('/api/metacognitive-traces', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.traceData)
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+              alert('Trace métacognitive enregistrée avec succès dans la base SQLite !');
+              this.suloStep = 1;
+              this.traceData.objective = '';
+              this.traceData.criteria = '';
+              this.traceData.constraints = '';
+              this.traceData.ai_query = '';
+              this.traceData.ai_response = '';
+              this.traceData.evaluation = '';
+              this.traceData.action_plan = '';
+            }
+          } catch(e) {
+            alert('Erreur lors de l\'enregistrement.');
+            console.error(e);
+          }
+        }
+      }
+    }
+
+    // D3 Knowledge Graph Initialization
+    async function initD3Graph() {
+      const container = document.getElementById('d3-container');
+      container.innerHTML = '';
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      try {
+        const res = await fetch('/api/graph');
+        const data = await res.json();
+
+        const svg = d3.select('#d3-container').append('svg')
+          .attr('viewBox', [0, 0, width, height])
+          .call(d3.zoom().on('zoom', (e) => g.attr('transform', e.transform)));
+
+        const g = svg.append('g');
+
+        const simulation = d3.forceSimulation(data.nodes)
+          .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+          .force('charge', d3.forceManyBody().strength(-250))
+          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('collision', d3.forceCollide().radius(30));
+
+        const link = g.append('g')
+          .selectAll('line')
+          .data(data.links)
+          .join('line')
+          .attr('stroke', '#334155')
+          .attr('stroke-width', 1.5);
+
+        const node = g.append('g')
+          .selectAll('g')
+          .data(data.nodes)
+          .join('g')
+          .call(d3.drag()
+            .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+            .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+            .on('end', (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+        node.append('circle')
+          .attr('r', 8)
+          .attr('fill', '#7c6cff')
+          .attr('stroke', '#ffffff')
+          .attr('stroke-width', 1.5);
+
+        node.append('text')
+          .text(d => d.reference_courte)
+          .attr('x', 12)
+          .attr('y', 4)
+          .attr('fill', '#cbd5e1')
+          .attr('font-size', '10px');
+
+        simulation.on('tick', () => {
+          link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+          node
+            .attr('transform', d => `translate(${d.x}, ${d.y})`);
+        });
+      } catch(e) { console.error('Error loading D3 graph:', e); }
+    }
+
+    // Taxonomy Tree D3 Initialization
+    function initTaxonomyTree() {
+      const container = document.getElementById('taxonomy-container');
+      container.innerHTML = '';
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      const treeData = {
+        name: "Psychologie & Cognition",
+        children: [
+          {
+            name: "1. Pilier Biologique & Neurosciences",
+            children: [
+              { name: "Neurosciences cognitives" },
+              { name: "Neuropsychologie" },
+              { name: "Psychophysiologie" }
+            ]
+          },
+          {
+            name: "2. Pilier Psychologie Cognitive",
+            children: [
+              { name: "Perception & Action (4E)" },
+              { name: "Attention Spatiale & Temporelle" },
+              { name: "Mémoire & Contrôle Attentionnel" },
+              { name: "Métacognition & SRL" }
+            ]
+          },
+          {
+            name: "3. Pilier Psychologie du Développement",
+            children: [
+              { name: "Enfant & Adolescent" },
+              { name: "Vieillissement & Réserve cognitive" }
+            ]
+          },
+          {
+            name: "4. Pilier Sociale & Personnalité",
+            children: [
+              { name: "Psychologie Sociale" },
+              { name: "Personnalité (Big Five / HEXACO)" }
+            ]
+          },
+          {
+            name: "5. Pilier Santé Mentale & Clinique",
+            children: [
+              { name: "Psychopathologie" },
+              { name: "Psychothérapie (TCC)" }
+            ]
+          },
+          {
+            name: "6. Domaines Appliqués",
+            children: [
+              { name: "Éducation & Sciences de l'Apprentissage" },
+              { name: "Ergonomie & IHM" }
+            ]
+          }
+        ]
+      };
+
+      const svg = d3.select('#taxonomy-container').append('svg')
+        .attr('viewBox', [0, 0, width, height])
+        .call(d3.zoom().on('zoom', (e) => gTree.attr('transform', e.transform)));
+
+      const gTree = svg.append('g').attr('transform', 'translate(80, 50)');
+
+      const root = d3.hierarchy(treeData);
+      const treeLayout = d3.tree().size([height - 100, width - 300]);
+      treeLayout(root);
+
+      gTree.append('g')
+        .selectAll('path')
+        .data(root.links())
+        .join('path')
+        .attr('fill', 'none')
+        .attr('stroke', '#334155')
+        .attr('stroke-width', 1.5)
+        .attr('d', d3.linkHorizontal()
+          .x(d => d.y)
+          .y(d => d.x));
+
+      const node = gTree.append('g')
+        .selectAll('g')
+        .data(root.descendants())
+        .join('g')
+        .attr('transform', d => `translate(${d.y}, ${d.x})`);
+
+      node.append('circle')
+        .attr('r', 6)
+        .attr('fill', '#00d9ff')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', 1.5);
+
+      node.append('text')
+        .attr('dy', '0.31em')
+        .attr('x', d => d.children ? -10 : 10)
+        .attr('text-anchor', d => d.children ? 'end' : 'start')
+        .text(d => d.data.name)
+        .attr('fill', '#e2e8f0')
+        .attr('font-size', '11px');
+    }
+  </script>
+</body>
+</html>
