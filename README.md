@@ -95,11 +95,12 @@ scripts/
 ## 📊 Visualisations
 
 - `output/visual/index.html` - Cartes filtrables par méthode (théorique, expérimental, neuro, revue, méta)
-- `output/visual/d3_interactive.html` - Graphe D3 force-directed
-  - Nœuds: domaines (blanc) + méthodes hubs (couleur) + références (couleur méthode)
-  - Liens typés: operationalization (théorie→test), converging (expé→neuro), synthesis (études→revue), falsification (résultat falsifie paradigme), revision (falsification→nouvelle théorie)
-  - Modes: force, pyramide (par niveau preuve), timeline (2009-2026)
-  - Drag, zoom, click focus voisins, filtres, export SVG
+- `output/visual/d3_interactive.html` - Graphe D3 force-directed des liens méthodologiques
+- `output/visual/taxonomy_graph.html` - Arbre hiérarchique interactif (taxonomie complète des 5 piliers et de la psychologie cognitive)
+  - Nœuds dépliables/repliables au clic
+  - Recherche en temps réel
+  - Panneau latéral détaillant les implications pour le Cognitorium
+  - Export SVG
 
 ## 🧭 Base 42 champs + Trust Factor
 
