@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D3 Graphe Interactif - État de l'Art Psychologie Cognitive - Liens Méthodes</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root{--bg:#0b0e14;--panel:#151a26;--card:#1c2335;--accent:#7c6cff;--accent2:#00d9ff;--text:#e8eaf2;--muted:#8a90a8;--theorique:#b07cff;--experimental:#4da6ff;--neuro:#4ade80;--revue:#facc15;--meta:#fb7185;--preprint:#9ca3af;--domain:#e2e8f0}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden}
+  header{position:absolute;top:0;left:0;right:0;z-index:20;background:linear-gradient(180deg,rgba(11,14,20,0.95),rgba(11,14,20,0));padding:18px 22px;pointer-events:none}
+  header h1{margin:0;font-size:1.35rem;letter-spacing:-0.02em} header p{margin:4px 0 0;color:var(--muted);font-size:0.85rem;max-width:900px}
+  #container{display:flex;height:100vh;padding-top:72px}
+  #sidebar{width:360px;background:var(--panel);border-right:1px solid #232a40;display:flex;flex-direction:column;overflow:hidden}
+  .controls{padding:14px;border-bottom:1px solid #232a40}
+  .controls h3{margin:0 0 10px;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)}
+  .filter-group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .filter-btn{padding:5px 10px;border-radius:14px;border:1px solid #2a344f;background:#1e263b;color:var(--text);font-size:0.78rem;cursor:pointer;transition:.2s}
+  .filter-btn.active{color:white;border-color:transparent}
+  .filter-btn[data-f="theorique"].active{background:var(--theorique)} .filter-btn[data-f="experimental"].active{background:var(--experimental)}
+  .filter-btn[data-f="neuro"].active{background:var(--neuro);color:#052e16} .filter-btn[data-f="revue"].active{background:var(--revue);color:#422006}
+  .filter-btn[data-f="meta"].active{background:var(--meta)} .filter-btn[data-f="preprint"].active{background:var(--preprint);color:#111}
+  .filter-btn[data-f="domain"].active{background:var(--domain);color:#111}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.78rem}
+  .legend-item{display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  #details{flex:1;overflow:auto;padding:14px}
+  #details .card{background:var(--card);border:1px solid #2a344f;border-radius:12px;padding:14px;margin-bottom:12px}
+  #details h4{margin:0 0 6px;font-size:0.95rem} #details p{margin:4px 0;font-size:0.84rem;color:var(--muted);line-height:1.5}
+  #details .meta{font-size:0.75rem;color:#6b728e;border-top:1px solid #2a344f;margin-top:8px;padding-top:8px}
+  #graph{flex:1;position:relative;background:radial-gradient(1200px 600px at 50% -10%,#1a2040 0%,#0b0e14 60%)}
+  svg{width:100%;height:100%}
+  .link{stroke:#2a344f;stroke-opacity:0.6}
+  .link.operationalization{stroke:var(--experimental);stroke-dasharray:6 4;stroke-width:1.5px}
+  .link.converging{stroke:var(--neuro);stroke-width:1.2px}
+  .link.synthesis{stroke:var(--revue);stroke-width:1.5px}
+  .link.falsification{stroke:var(--meta);stroke-dasharray:2 4;stroke-width:1.5px}
+  .link.revision{stroke:var(--theorique);stroke-width:1.5px}
+  .link.belongs{stroke:#3a455f;stroke-opacity:0.3;stroke-width:1px}
+  .node{cursor:pointer;transition:.2s}
+  .node circle{stroke:#0b0e14;stroke-width:1.5px}
+  .node.domain circle{stroke-width:2.5px;filter:drop-shadow(0 0 8px rgba(255,255,255,0.15))}
+  .node.reference circle{filter:drop-shadow(0 0 6px currentColor)}
+  .node:hover{filter:brightness(1.2)}
+  .node.selected circle{stroke:white;stroke-width:3px}
+  .node.dimmed{opacity:0.12}
+  .link.dimmed{opacity:0.05}
+  .label{font-size:10px;pointer-events:none;fill:var(--text);text-shadow:0 1px 3px #000;font-weight:500}
+  .label.domain{font-size:11px;font-weight:700;fill:white}
+  #tooltip{position:absolute;pointer-events:none;background:#0f1422;border:1px solid #2a344f;border-radius:10px;padding:10px 12px;font-size:0.82rem;max-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.5);opacity:0;transition:.15s;z-index:30}
+  #toolbar{position:absolute;top:12px;right:12px;z-index:15;display:flex;gap:8px}
+  .tool-btn{background:#1c2335;border:1px solid #2a344f;color:var(--text);padding:7px 10px;border-radius:8px;font-size:0.8rem;cursor:pointer}
+  .tool-btn:hover{background:#232e4a}
+  .mode-switch{display:flex;background:#1c2335;border:1px solid #2a344f;border-radius:8px;overflow:hidden}
+  .mode-switch button{border:none;background:transparent;color:var(--muted);padding:6px 12px;font-size:0.8rem;cursor:pointer}
+  .mode-switch button.active{background:var(--accent);color:white}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 D3 Graphe Interactif — Liens entre Méthodes Scientifiques</h1>
+  <p>Force-directed graph • 6 domaines • 12 références 2025-2026 • Liens: opérationnalisation, convergence, synthèse, falsification, révision théorique • Drag & zoom, click pour focus, filtres par méthode</p>
+</header>
+
+<div id="container">
+  <div id="sidebar">
+    <div class="controls">
+      <h3>Filtres Méthode</h3>
+      <div class="filter-group" id="methodFilters">
+        <button class="filter-btn active" data-f="all">Tous</button>
+        <button class="filter-btn active" data-f="theorique">Théorique</button>
+        <button class="filter-btn active" data-f="experimental">Expérimental</button>
+        <button class="filter-btn active" data-f="neuro">Neuroimagerie</button>
+        <button class="filter-btn active" data-f="revue">Revue systématique</button>
+        <button class="filter-btn active" data-f="meta">Méta-analyse</button>
+        <button class="filter-btn active" data-f="domain">Domaines</button>
+      </div>
+      <h3>Filtres Liens</h3>
+      <div class="filter-group" id="linkFilters">
+        <button class="filter-btn active" data-l="all">Tous liens</button>
+        <button class="filter-btn active" data-l="operationalization">Opérationnalisation</button>
+        <button class="filter-btn active" data-l="converging">Convergence</button>
+        <button class="filter-btn active" data-l="synthesis">Synthèse</button>
+        <button class="filter-btn active" data-l="falsification">Falsification</button>
+        <button class="filter-btn active" data-l="revision">Révision</button>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--theorique)"></div> Théorique / Enactive</div>
+        <div class="legend-item"><div class="dot" style="background:var(--experimental)"></div> Expérimental</div>
+        <div class="legend-item"><div class="dot" style="background:var(--neuro)"></div> Neuroimagerie</div>
+        <div class="legend-item"><div class="dot" style="background:var(--revue)"></div> Revue systématique</div>
+        <div class="legend-item"><div class="dot" style="background:var(--meta)"></div> Méta / Falsification</div>
+        <div class="legend-item"><div class="dot" style="background:var(--domain)"></div> Domaine</div>
+      </div>
+    </div>
+    <div id="details">
+      <div class="card">
+        <h4>📖 Comment lire ce graphe</h4>
+        <p><strong>Nœuds:</strong> Domaines (grand, blanc) • Méthodes (moyen, couleur) • Références (petit, couleur méthode)</p>
+        <p><strong>Liens:</strong><br>
+          <span style="color:var(--experimental)">— — Opérationnalisation</span>: Théorie → test empirique<br>
+          <span style="color:var(--neuro)">— Convergence</span>: Expé → neuro, preuves convergentes<br>
+          <span style="color:var(--revue)">— Synthèse</span>: Études → revue/méta<br>
+          <span style="color:var(--meta)">- - Falsification</span>: Résultat qui falsifie paradigme<br>
+          <span style="color:var(--theorique)">— Révision</span>: Falsification → nouvelle théorie
+        </p>
+        <p><strong>Interactions:</strong> Drag nœuds, scroll zoom, click nœud = focus voisins, double-click = reset.</p>
+      </div>
+      <div id="selectedInfo"></div>
+    </div>
+  </div>
+  <div id="graph">
+    <div id="toolbar">
+      <div class="mode-switch">
+        <button class="active" data-mode="force">Force</button>
+        <button data-mode="pyramid">Pyramide</button>
+        <button data-mode="timeline">Timeline</button>
+      </div>
+      <button class="tool-btn" id="resetBtn">Reset</button>
+      <button class="tool-btn" id="exportBtn">Export PNG</button>
+    </div>
+    <svg id="svg"></svg>
+    <div id="tooltip"></div>
+  </div>
+</div>
+
+<script>
+// --- DATA ---
+const nodes = [
+  // Domains
+  {id:"d_memoire", label:"Mémoire & Contrôle Attentionnel", type:"domain", group:"domain", size:28, desc:"WMC, contrôle attentionnel, executive attention"},
+  {id:"d_4E", label:"Cognition 4E", type:"domain", group:"domain", size:26, desc:"Embodied, Embedded, Enactive, Extended"},
+  {id:"d_attSpat", label:"Attention Spatiale", type:"domain", group:"domain", size:24, desc:"Covert, pRF, décodage préfrontal"},
+  {id:"d_attTemp", label:"Attention Temporelle", type:"domain", group:"domain", size:22, desc:"Volontaire, hazard rates, rythmes"},
+  {id:"d_fluence", label:"Fluence", type:"domain", group:"domain", size:20, desc:"Traitement fluide, métacognition, affect"},
+  {id:"d_entrain", label:"Entraînement & Plasticité", type:"domain", group:"domain", size:18, desc:"Transfert, plasticité, schémas abstraits"},
+
+  // Methods (hubs)
+  {id:"m_theorique", label:"Théorique", type:"method", method:"theorique", size:20, color:"#b07cff", desc:"Argument conceptuel, phénoménologie, critique épistémologique - Niveau 1 pyramide"},
+  {id:"m_experimental", label:"Expérimental contrôlé", type:"method", method:"experimental", size:22, color:"#4da6ff", desc:"Randomisation, contrôle, psychophysique - Niveau 3"},
+  {id:"m_neuro", label:"Neuroimagerie", type:"method", method:"neuro", size:20, color:"#4ade80", desc:"fMRI 7T, EEG, décodage temps réel - Niveau 4"},
+  {id:"m_revue", label:"Revue systématique", type:"method", method:"revue", size:22, color:"#facc15", desc:"Synthèse qualitative, 6 domaines, variables latentes - Niveau 5-6"},
+  {id:"m_meta", label:"Méta-analyse", type:"method", method:"meta", size:18, color:"#fb7185", desc:"Quantification effet, SMD, hétérogénéité - Niveau 6"},
+  {id:"m_preprint", label:"Préprint / Émergent", type:"method", method:"preprint", size:14, color:"#9ca3af", desc:"Non relu, à confirmer - Niveau faible-modéré"},
+
+  // References - Mémoire & AC
+  {id:"lee2026", label:"Lee & Engle 2026", type:"reference", method:"revue", domain:"d_memoire", size:14, year:2026, preuve:"Élevée", color:"#facc15",
+   thesis:"AC explique 75.6% variance multitâche, r WMC-gF 0.63→0.40", mechanisms:"maintien but, suppression interférence, désengagement", validite:"Construit forte", citation:"J Intelligence"},
+  {id:"rosen2025", label:"Rosen & Freedman 2025", type:"reference", method:"revue", domain:"d_memoire", size:11, year:2025, preuve:"Modéré-Élevé", color:"#facc15",
+   thesis:"Cognition distribuée réseaux ordre supérieur, pas aires primaires", mechanisms:"réseaux fronto-pariétal, recrutement moteur", validite:"Externe élevée", citation:"Nat Rev Neurosci Perspective"},
+  {id:"huang2025", label:"Huang et al. 2025", type:"reference", method:"revue", domain:"d_memoire", size:10, year:2025, preuve:"Modéré", color:"#fb7185",
+   thesis:"n-back = mise à jour + maintien + AC, validité construit faible", mechanisms:"chunking, familiarité, stratégies", validite:"Construit faible - FALSIFIE n-back", citation:"Front Hum Neurosci"},
+
+  // Entraînement
+  {id:"chen2025", label:"Chen & Yan 2025", type:"reference", method:"revue", domain:"d_entrain", size:11, year:2025, preuve:"Modéré", color:"#fb7185",
+   thesis:"Pas consensus transfert lointain humain, schémas abstraits médiateurs", mechanisms:"schémas neuronaux abstraits, effet plafond", validite:"Externe faible - FALSIFIE transfert naïf", citation:"Behav Brain Funct"},
+
+  // 4E
+  {id:"fuchs2026", label:"Fuchs 2026", type:"reference", method:"theorique", domain:"d_4E", size:13, year:2026, preuve:"Théorique", color:"#b07cff",
+   thesis:"Concepts = engagement corps-monde, extension métaphorique", mechanisms:"couplage sensorimoteur, sens participatif", validite:"Écologique élevée", citation:"Front Psychol"},
+  {id:"frontiers2026", label:"Frontiers Edu 2026", type:"reference", method:"meta", domain:"d_4E", size:15, year:2026, preuve:"Élevé", color:"#fb7185",
+   thesis:"4E: SMD 0.448 cognitif, 4 mécanismes, modérateurs âge/domaine/alignement", mechanisms:"geste, structuration spatiale, offloading, interaction sociale", validite:"Externe modérée, hétérogène", citation:"Front Edu - Méta"},
+  {id:"exception2026", label:"Exceptionality 2026", type:"reference", method:"theorique", domain:"d_4E", size:10, year:2026, preuve:"Théorique", color:"#b07cff",
+   thesis:"Seul énactivisme autopoïétique rompt vraiment avec cognitivisme", mechanisms:"autopoïèse, constructivisme radical", validite:"Conceptuelle", citation:"Phenom Cogn Sci"},
+
+  // Attention spatiale
+  {id:"tuncok2025", label:"Tünçok et al. 2025", type:"reference", method:"experimental", domain:"d_attSpat", size:16, year:2025, preuve:"Élevé", color:"#4da6ff",
+   thesis:"Covert modifie cortex visuel avant cible: baseline shift + pRF shift hiérarchique", mechanisms:"baseline shift, déplacement centres pRF V1→LO", validite:"Interne élevée", citation:"Nat Comms fMRI 7T"},
+  {id:"benhamed2025", label:"Ben Hamed 2025", type:"reference", method:"neuro", domain:"d_attSpat", size:14, year:2025, preuve:"Élevé", color:"#4ade80",
+   thesis:"Attention covert décodable temps réel préfrontal, rythmique, suppression proactive/réactive", mechanisms:"réseaux récurrents préfrontaux, saccades attentionnelles", validite:"Interne élevée", citation:"Ann Rev Vision Sci 11:495"},
+  {id:"pascucci2026", label:"Pascucci & Kristjánsson 2026", type:"reference", method:"revue", domain:"d_attSpat", size:13, year:2026, preuve:"Modéré-Élevé", color:"#facc15",
+   thesis:"Routines spatio-temporelles: contexte au coeur, paradigm shift", mechanisms:"intégration contexte spatial-temporel", validite:"Écologique élevée", citation:"Nat Rev Psychol 5:420"},
+
+  // Attention temporelle
+  {id:"tian2026", label:"Tian et al. 2026", type:"reference", method:"preprint", domain:"d_attTemp", size:9, year:2026, preuve:"Faible-Modéré", color:"#9ca3af",
+   thesis:"Attention temporelle volontaire améliore perception même sans compétition", mechanisms:"facilitation pré-compétitive", validite:"À confirmer (préprint)", citation:"bioRxiv"},
+  {id:"nobre2017", label:"Nobre & Denison 2024", type:"reference", method:"revue", domain:"d_attTemp", size:12, year:2024, preuve:"Élevé", color:"#facc15",
+   thesis:"4 structures: cues, hazard rates, rythmes, séquences; attentes temporelles amplifient spatiales", mechanisms:"alpha/bêta, normalisation dynamique", validite:"Interne + externe élevée", citation:"Nat Rev Neurosci + Denison NRP"},
+
+  // Fluence
+  {id:"alter2009", label:"Alter & Oppenheimer 2009", type:"reference", method:"revue", domain:"d_fluence", size:13, year:2009, preuve:"Élevé", color:"#facc15",
+   thesis:"Fluence = indice métacognitif ubiquitaire, vérité, confiance, liking", mechanisms:"perceptive, conceptuelle, linguistique, incarnée", validite:"Interne + externe élevée", citation:"Pers Soc Psychol Rev - Fondatrice"},
+  {id:"knight2025", label:"Knight et al. 2025", type:"reference", method:"experimental", domain:"d_fluence", size:11, year:2025, preuve:"Modéré-Élevé", color:"#4da6ff",
+   thesis:"Fluence audio → évaluation visuelle positive, transfert crossmodal persiste décalage", mechanisms:"transfert affectif crossmodal, intégration multisensorielle", validite:"Interne élevée", citation:"Atten Percept Psychophys"},
+];
+
+const links = [
+  // Domain belongs
+  {source:"d_memoire", target:"d_attSpat", type:"belongs", strength:0.2, label:"attention comme mécanisme"},
+  {source:"d_memoire", target:"d_attTemp", type:"belongs", strength:0.15},
+  {source:"d_attSpat", target:"d_attTemp", type:"belongs", strength:0.5, label:"routines spatio-temporelles"},
+  {source:"d_4E", target:"d_attSpat", type:"belongs", strength:0.3, label:"embodied attention"},
+  {source:"d_4E", target:"d_fluence", type:"belongs", strength:0.25, label:"fluency embodied"},
+  {source:"d_fluence", target:"d_attSpat", type:"belongs", strength:0.3},
+  {source:"d_entrain", target:"d_memoire", type:"belongs", strength:0.4},
+
+  // References to domains
+  {source:"d_memoire", target:"lee2026", type:"belongs"},
+  {source:"d_memoire", target:"rosen2025", type:"belongs"},
+  {source:"d_memoire", target:"huang2025", type:"belongs"},
+  {source:"d_entrain", target:"chen2025", type:"belongs"},
+  {source:"d_4E", target:"fuchs2026", type:"belongs"},
+  {source:"d_4E", target:"frontiers2026", type:"belongs"},
+  {source:"d_4E", target:"exception2026", type:"belongs"},
+  {source:"d_attSpat", target:"tuncok2025", type:"belongs"},
+  {source:"d_attSpat", target:"benhamed2025", type:"belongs"},
+  {source:"d_attSpat", target:"pascucci2026", type:"belongs"},
+  {source:"d_attTemp", target:"tian2026", type:"belongs"},
+  {source:"d_attTemp", target:"nobre2017", type:"belongs"},
+  {source:"d_fluence", target:"alter2009", type:"belongs"},
+  {source:"d_fluence", target:"knight2025", type:"belongs"},
+
+  // References to methods
+  {source:"m_theorique", target:"fuchs2026", type:"belongs"},
+  {source:"m_theorique", target:"exception2026", type:"belongs"},
+  {source:"m_experimental", target:"tuncok2025", type:"belongs"},
+  {source:"m_experimental", target:"knight2025", type:"belongs"},
+  {source:"m_experimental", target:"tian2026", type:"belongs"},
+  {source:"m_neuro", target:"tuncok2025", type:"belongs"},
+  {source:"m_neuro", target:"benhamed2025", type:"belongs"},
+  {source:"m_revue", target:"lee2026", type:"belongs"},
+  {source:"m_revue", target:"rosen2025", type:"belongs"},
+  {source:"m_revue", target:"nobre2017", type:"belongs"},
+  {source:"m_revue", target:"alter2009", type:"belongs"},
+  {source:"m_revue", target:"pascucci2026", type:"belongs"},
+  {source:"m_revue", target:"chen2025", type:"belongs"},
+  {source:"m_revue", target:"huang2025", type:"belongs"},
+  {source:"m_meta", target:"frontiers2026", type:"belongs"},
+  {source:"m_meta", target:"lee2026", type:"belongs"},
+  {source:"m_preprint", target:"tian2026", type:"belongs"},
+
+  // Methodological links - Scientific method cycle
+  // Operationalization: theory -> experimental
+  {source:"fuchs2026", target:"frontiers2026", type:"operationalization", label:"opérationnalise 4E en STEM", strength:0.8},
+  {source:"exception2026", target:"fuchs2026", type:"revision", label:"précise rupture", strength:0.6},
+  {source:"m_theorique", target:"m_experimental", type:"operationalization", label:"Théorie → Hypothèse testable", strength:1},
+  {source:"fuchs2026", target:"tuncok2025", type:"operationalization", label:"embodied → attention spatiale test", strength:0.3},
+  {source:"lee2026", target:"tuncok2025", type:"operationalization", label:"AC → baseline shift opérationnalisation", strength:0.9},
+  {source:"alter2009", target:"knight2025", type:"operationalization", label:"théorie fluence → test crossmodal", strength:0.9},
+  {source:"nobre2017", target:"tian2026", type:"operationalization", label:"structures temporelles → test volontaire", strength:0.7},
+
+  // Converging evidence: experimental -> neuro
+  {source:"tuncok2025", target:"benhamed2025", type:"converging", label:"convergence fMRI + décodage", strength:0.9},
+  {source:"tuncok2025", target:"pascucci2026", type:"converging", label:"contexte spatial → routines", strength:0.6},
+  {source:"benhamed2025", target:"nobre2017", type:"converging", label:"décodage préfrontal + attentes temporelles", strength:0.5},
+  {source:"knight2025", target:"alter2009", type:"converging", label:"empirique confirme revue", strength:0.7},
+
+  // Synthesis: studies -> revue/meta
+  {source:"tuncok2025", target:"lee2026", type:"synthesis", label:"intègre dans revue AC", strength:0.6},
+  {source:"benhamed2025", target:"pascucci2026", type:"synthesis", label:"synthèse routines", strength:0.7},
+  {source:"frontiers2026", target:"pascucci2026", type:"synthesis", label:"4E + routines = contexte riche", strength:0.5},
+  {source:"knight2025", target:"frontiers2026", type:"synthesis", label:"fluence crossmodal = offloading ?", strength:0.3},
+  {source:"tian2026", target:"nobre2017", type:"synthesis", label:"préprint vers revue fondatrice", strength:0.6},
+
+  // Falsification
+  {source:"huang2025", target:"lee2026", type:"falsification", label:"falsifie validité n-back → renforce AC", strength:0.8},
+  {source:"chen2025", target:"frontiers2026", type:"falsification", label:"pas consensus transfert lointain", strength:0.7},
+  {source:"chen2025", target:"lee2026", type:"falsification", label:"falsifie entraînement stockage", strength:0.6},
+  {source:"tuncok2025", target:"rosen2025", type:"converging", label:"attention spatiale = preuve distribution ?", strength:0.5},
+
+  // Revision
+  {source:"huang2025", target:"fuchs2026", type:"revision", label:"critique construit → vers 4E ?", strength:0.4},
+  {source:"chen2025", target:"fuchs2026", type:"revision", label:"échec transfert → besoin incarnation", strength:0.4},
+  {source:"pascucci2026", target:"m_theorique", type:"revision", label:"paradigm shift contexte riche", strength:0.8},
+  {source:"lee2026", target:"m_theorique", type:"revision", label:"renommer WMC→AC", strength:0.9},
+
+  // Cross-domain conceptual links
+  {source:"d_4E", target:"m_theorique", type:"belongs", strength:0.9},
+  {source:"d_attSpat", target:"m_experimental", type:"belongs", strength:0.8},
+  {source:"d_fluence", target:"m_experimental", type:"belongs", strength:0.6},
+];
+
+// --- D3 SETUP ---
+const svgEl = document.getElementById('svg');
+const width = () => svgEl.clientWidth;
+const height = () => svgEl.clientHeight;
+
+const svg = d3.select('#svg')
+  .attr('viewBox', [0,0,width(),height()])
+  .call(d3.zoom().on('zoom', (e)=> g.attr('transform', e.transform)))
+  .on('click', ()=> clearSelection());
+
+const g = svg.append('g');
+
+const tooltip = d3.select('#tooltip');
+
+let simulation;
+let linkSel, nodeSel, labelSel;
+
+function init() {
+  // Scales
+  const colorScale = d => {
+    if(d.type==='domain') return '#e2e8f0';
+    return d.color || '#999';
+  };
+
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d=>d.id).distance(l=>{
+      if(l.type==='belongs' && l.source.type==='domain') return 80;
+      if(l.type==='belongs') return 50;
+      if(l.type==='operationalization') return 120;
+      if(l.type==='converging') return 100;
+      if(l.type==='synthesis') return 130;
+      if(l.type==='falsification') return 140;
+      return 90;
+    }).strength(l=> l.strength || 0.3))
+    .force('charge', d3.forceManyBody().strength(d=> d.type==='domain'? -600 : -300))
+    .force('center', d3.forceCenter(width()/2, height()/2))
+    .force('collide', d3.forceCollide().radius(d=> (d.size||10)+12))
+    .force('x', d3.forceX(width()/2).strength(0.05))
+    .force('y', d3.forceY(height()/2).strength(0.05));
+
+  linkSel = g.append('g').selectAll('line').data(links).join('line')
+    .attr('class', d=> `link ${d.type}`)
+    .attr('stroke-width', d=> d.type==='belongs'?1:2);
+
+  // Arrow markers for methodological links
+  svg.append('defs').selectAll('marker').data(['operationalization','converging','synthesis','falsification','revision'])
+    .join('marker').attr('id', d=>`arrow-${d}`).attr('viewBox','0 -5 10 10').attr('refX',18).attr('refY',0)
+    .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+    .append('path').attr('d','M0,-5L10,0L0,5').attr('fill', d=>{
+      if(d==='operationalization') return '#4da6ff';
+      if(d==='converging') return '#4ade80';
+      if(d==='synthesis') return '#facc15';
+      if(d==='falsification') return '#fb7185';
+      return '#b07cff';
+    });
+
+  linkSel.filter(d=>d.type!=='belongs').attr('marker-end', d=>`url(#arrow-${d.type})`);
+
+  nodeSel = g.append('g').selectAll('g').data(nodes).join('g')
+    .attr('class', d=>`node ${d.type} ${d.method||''}`)
+    .call(d3.drag().on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
+
+  nodeSel.append('circle')
+    .attr('r', d=> d.size||10)
+    .attr('fill', d=> colorScale(d))
+    .attr('stroke', d=> d.type==='domain'?'#fff':'#0b0e14');
+
+  nodeSel.append('title').text(d=> d.label);
+
+  labelSel = g.append('g').selectAll('text').data(nodes).join('text')
+    .attr('class', d=>`label ${d.type}`)
+    .text(d=> d.label.length>22? d.label.slice(0,20)+'…' : d.label)
+    .attr('dx', d=> (d.size||10)+4)
+    .attr('dy', 4);
+
+  nodeSel.on('mouseenter', (e,d)=>{
+    tooltip.style('opacity',1)
+      .html(`
+        <strong style="color:${d.color||'#fff'}">${d.label}</strong><br>
+        <small>${d.type} ${d.method? '• '+d.method : ''} ${d.year? '• '+d.year : ''}</small><br>
+        ${d.thesis? `<div style="margin:6px 0;color:#cbd5e1">${d.thesis}</div>`: ''}
+        ${d.mechanisms? `<div style="font-size:0.78rem;color:#94a3b8"><em>Mécanismes:</em> ${d.mechanisms}</div>`: ''}
+        ${d.validite? `<div style="font-size:0.75rem;margin-top:4px">Validité: ${d.validite} • Preuve: ${d.preuve||''}</div>`: ''}
+        ${d.desc? `<div style="font-size:0.75rem;margin-top:4px;color:#94a3b8">${d.desc}</div>`: ''}
+      `);
+  }).on('mousemove', (e)=>{
+    tooltip.style('left', (e.pageX+14)+'px').style('top', (e.pageY-20)+'px');
+  }).on('mouseleave', ()=>{
+    tooltip.style('opacity',0);
+  }).on('click', (e,d)=>{
+    e.stopPropagation();
+    selectNode(d);
+  });
+
+  simulation.on('tick', ()=>{
+    linkSel.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y).attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+    nodeSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+    labelSel.attr('x', d=>d.x).attr('y', d=>d.y);
+  });
+
+  // Filters
+  setupFilters();
+}
+
+function dragStarted(e,d){
+  if(!e.active) simulation.alphaTarget(0.3).restart();
+  d.fx=d.x; d.fy=d.y;
+}
+function dragged(e,d){ d.fx=e.x; d.fy=e.y; }
+function dragEnded(e,d){ if(!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }
+
+let selected = null;
+function selectNode(d){
+  selected = d;
+  // highlight neighbors
+  const neighborIds = new Set([d.id]);
+  links.forEach(l=>{
+    if(l.source.id===d.id) neighborIds.add(l.target.id);
+    if(l.target.id===d.id) neighborIds.add(l.source.id);
+  });
+  nodeSel.classed('dimmed', n=> !neighborIds.has(n.id));
+  linkSel.classed('dimmed', l=> l.source.id!==d.id && l.target.id!==d.id);
+  nodeSel.classed('selected', n=> n.id===d.id);
+
+  // details panel
+  const info = document.getElementById('selectedInfo');
+  info.innerHTML = `
+    <div class="card" style="border-color:${d.color||'#2a344f'}">
+      <h4 style="color:${d.color||'#fff'}">${d.label} ${d.year? '('+d.year+')':''}</h4>
+      <p><strong>Type:</strong> ${d.type} ${d.method? '• '+d.method : ''}</p>
+      ${d.thesis? `<p><strong>Thèse:</strong> ${d.thesis}</p>`: ''}
+      ${d.mechanisms? `<p><strong>Mécanismes:</strong> ${d.mechanisms}</p>`: ''}
+      ${d.validite? `<p><strong>Validité:</strong> ${d.validite}</p>`: ''}
+      ${d.preuve? `<p><strong>Niveau preuve:</strong> ${d.preuve}</p>`: ''}
+      ${d.citation? `<p><strong>Source:</strong> ${d.citation}</p>`: ''}
+      <div class="meta">
+        <strong>Voisins (${neighborIds.size-1}):</strong><br>
+        ${[...neighborIds].filter(id=>id!==d.id).map(id=>{
+          const n = nodes.find(x=>x.id===id);
+          return n? `• ${n.label} <small style="color:${n.color||'#888'}">(${n.type})</small>` : '';
+        }).join('<br>')}
+      </div>
+      ${d.type==='reference'? `<div style="margin-top:10px"><small>Liens méthodologiques:<br>
+        ${links.filter(l=>l.source.id===d.id || l.target.id===d.id).filter(l=>l.type!=='belongs').map(l=>`• <span style="color:var(--${l.type==='operationalization'?'experimental': l.type==='converging'?'neuro': l.type==='synthesis'?'revue': l.type==='falsification'?'meta':'theorique'})">${l.type}</span>: ${l.label||''} (${l.source.id===d.id? '→ '+l.target.label : '← '+l.source.label})`).join('<br>')}
+      </small></div>`: ''}
+    </div>
+  `;
+}
+
+function clearSelection(){
+  selected=null;
+  nodeSel.classed('dimmed',false).classed('selected',false);
+  linkSel.classed('dimmed',false);
+  document.getElementById('selectedInfo').innerHTML='';
+}
+
+function setupFilters(){
+  const methodBtns = document.querySelectorAll('#methodFilters .filter-btn');
+  const linkBtns = document.querySelectorAll('#linkFilters .filter-btn');
+
+  methodBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.f==='all'){
+        const allActive = btn.classList.contains('active');
+        methodBtns.forEach(b=> b.classList.toggle('active', !allActive));
+        btn.classList.toggle('active', !allActive);
+      } else {
+        btn.classList.toggle('active');
+        const any = [...methodBtns].some(b=> b.dataset.f!=='all' && b.classList.contains('active'));
+        document.querySelector('[data-f="all"]').classList.toggle('active', any && [...methodBtns].filter(b=>b.dataset.f!=='all').every(b=>b.classList.contains('active')));
+      }
+      applyFilters();
+    });
+  });
+
+  linkBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.l==='all'){
+        const allActive = btn.classList.contains('active');
+        linkBtns.forEach(b=> b.classList.toggle('active', !allActive));
+      } else {
+        btn.classList.toggle('active');
+      }
+      applyFilters();
+    });
+  });
+}
+
+function applyFilters(){
+  const activeMethods = new Set([...document.querySelectorAll('#methodFilters .filter-btn.active')].map(b=>b.dataset.f));
+  const activeLinks = new Set([...document.querySelectorAll('#linkFilters .filter-btn.active')].map(b=>b.dataset.l));
+  const showAllMethods = activeMethods.has('all') || activeMethods.size===0;
+  const showAllLinks = activeLinks.has('all');
+
+  nodeSel.style('display', d=>{
+    if(d.type==='domain') return activeMethods.has('domain') || showAllMethods || activeMethods.has('all') ? null : 'none';
+    if(d.type==='method') return activeMethods.has(d.method) || showAllMethods ? null : 'none';
+    if(d.type==='reference') return activeMethods.has(d.method) || showAllMethods ? null : 'none';
+    return null;
+  });
+  labelSel.style('display', function(){
+    const d = d3.select(this).datum();
+    if(d.type==='domain') return activeMethods.has('domain') || showAllMethods ? null : 'none';
+    if(d.type==='method') return activeMethods.has(d.method) || showAllMethods ? null : 'none';
+    if(d.type==='reference') return activeMethods.has(d.method) || showAllMethods ? null : 'none';
+    return null;
+  });
+
+  linkSel.style('display', d=>{
+    if(d.type==='belongs') return null; // always show belongs but opacity handled by node visibility
+    if(showAllLinks || activeLinks.has('all')) return null;
+    return activeLinks.has(d.type) ? null : 'none';
+  });
+}
+
+// Modes
+document.querySelectorAll('.mode-switch button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-switch button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    if(mode==='force'){
+      simulation.force('x', d3.forceX(width()/2).strength(0.05))
+                .force('y', d3.forceY(height()/2).strength(0.05))
+                .force('center', d3.forceCenter(width()/2,height()/2))
+                .alpha(0.5).restart();
+    } else if(mode==='pyramid'){
+      // Arrange by pyramid level
+      const order = {theorique:0, experimental:1, neuro:2, revue:3, meta:4, preprint:1, domain:5};
+      nodes.forEach(n=>{
+        if(n.type==='method') n.fy = 100 + (order[n.method]||0)*90;
+        else if(n.type==='reference') n.fy = 150 + (order[n.method]||0)*90 + Math.random()*40;
+        else if(n.type==='domain') n.fy = height()-80;
+        else n.fy = null;
+      });
+      simulation.alpha(0.8).restart();
+      setTimeout(()=> nodes.forEach(n=> n.fy=null), 2500);
+    } else if(mode==='timeline'){
+      nodes.forEach(n=>{
+        if(n.year){
+          n.fx = 100 + ((n.year-2009)/(2026-2009))* (width()-200);
+          n.fy = height()/2 + (Math.random()-0.5)*300;
+        }
+      });
+      simulation.alpha(0.8).restart();
+      setTimeout(()=> nodes.forEach(n=>{n.fx=null; n.fy=null}), 3000);
+    }
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  clearSelection();
+  simulation.alpha(1).restart();
+  svg.transition().duration(750).call(d3.zoom().transform, d3.zoomIdentity);
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob([svgData], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='etat_art_d3_graph.svg'; a.click();
+});
+
+// Init
+init();
+window.addEventListener('resize', ()=>{
+  svg.attr('viewBox', [0,0,width(),height()]);
+  simulation.force('center', d3.forceCenter(width()/2,height()/2)).alpha(0.3).restart();
+});
+</script>
+</body>
+</html>
