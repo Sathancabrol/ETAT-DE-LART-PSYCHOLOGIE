@@ -76,7 +76,8 @@
       </template>
     </nav>
     <div class="hidden xl:flex items-center space-x-2">
-      <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">v4.0</span>
+      <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">v8.0</span>
+      <button @click="window.open('/api/export/obsidian-vault','_blank')" class="flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20 transition"><i data-lucide="download" class="w-3 h-3"></i><span>Export Obsidian</span></button>
     </div>
   </div>
 </header>
@@ -122,6 +123,7 @@
         </div>
         <div class="flex items-center space-x-2">
           <input type="text" x-model="graphSearch" @input="searchGraph()" placeholder="Rechercher un nœud..." class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-1 text-[11px] text-slate-300 w-44 focus:border-indigo-500 focus:outline-none">
+          <button @click="window.open('/api/export/obsidian-vault','_blank')" class="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] font-medium bg-purple-500/10 text-purple-300 border border-purple-500/25 hover:bg-purple-500/20 transition" title="Télécharger le graphe en coffre Obsidian (.zip : notes + Canvas)"><i data-lucide="file-down" class="w-3.5 h-3.5"></i><span>Exporter coffre .obsidian</span></button>
           <template x-for="ft in nodeFilters" :key="ft.type">
             <button @click="ft.active=!ft.active; applyGraphFilters()" :class="ft.active ? 'border-opacity-60 bg-opacity-10' : 'border-opacity-20 bg-transparent opacity-40'" class="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] border transition" :style="`border-color:${ft.color};color:${ft.color};background:${ft.color}15`">
               <div class="w-2 h-2 rounded-full" :style="`background:${ft.color}`"></div>
@@ -357,6 +359,214 @@
     </div>
   </section>
 
+  <!-- ══════════ V8 : CARTOGRAPHIE 12 DOMAINES ══════════ -->
+  <section x-show="activeTab==='domains'" class="space-y-4 fade-in">
+    <div class="glass-card rounded-xl p-4">
+      <h2 class="text-lg font-bold flex items-center"><i data-lucide="map" class="w-5 h-5 text-indigo-400 mr-2"></i>Cartographie critique — 12 domaines</h2>
+      <p class="text-[10px] text-slate-600 mt-1">Couverture initiale, gaps identifiés et références ajoutées (version 2.0) • Score = intensité de couverture estimée</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      <template x-for="d in domains" :key="d.id">
+        <div class="glass-card rounded-xl p-4 hover:border-indigo-500/30 transition space-y-2.5">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="text-[13px] font-bold" x-text="d.name"></h3>
+              <p class="text-[9px] text-slate-600" x-text="d.detail"></p>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold border shrink-0" :class="coverageColor(d.coverage)" x-text="d.coverage"></span>
+          </div>
+          <div>
+            <div class="flex justify-between text-[9px] text-slate-600 mb-1"><span>Couverture</span><span x-text="d.coverage_score+'%'"></span></div>
+            <div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400" :style="`width:${d.coverage_score}%`"></div></div>
+          </div>
+          <div>
+            <p class="text-[8px] text-amber-400/80 uppercase font-semibold mb-1">Gaps identifiés</p>
+            <div class="flex flex-wrap gap-1">
+              <template x-for="g in d.gaps" :key="g"><span class="px-1.5 py-0.5 rounded-md text-[9px] bg-amber-500/5 text-amber-300/80 border border-amber-500/15" x-text="g"></span></template>
+            </div>
+          </div>
+          <div>
+            <p class="text-[8px] text-emerald-400/80 uppercase font-semibold mb-1">Références clés v2.0</p>
+            <ul class="space-y-0.5">
+              <template x-for="r in d.key_refs" :key="r"><li class="text-[9px] text-slate-500 leading-snug" x-text="'• '+r"></li></template>
+            </ul>
+          </div>
+          <div class="flex items-center justify-between pt-1 border-t border-white/5">
+            <span class="text-[9px] text-slate-600">Études liées dans la base</span>
+            <span class="text-[11px] font-bold text-indigo-400" x-text="d.db_studies"></span>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ══════════ V8 : FLUX PRISMA 2020 ══════════ -->
+  <section x-show="activeTab==='prisma'" class="space-y-4 fade-in">
+    <div class="glass-card rounded-xl p-4">
+      <h2 class="text-lg font-bold flex items-center"><i data-lucide="filter" class="w-5 h-5 text-indigo-400 mr-2"></i>Diagramme de flux PRISMA 2020</h2>
+      <p class="text-[10px] text-slate-600 mt-1">Chiffres préliminaires illustratifs — à remplacer après la recherche systématique finale (26-30 août 2026) • Protocole pré-enregistré OSF</p>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Identification -->
+      <div class="glass-card rounded-xl p-4 space-y-2">
+        <p class="text-[9px] uppercase font-bold tracking-wider text-indigo-400">1 · Identification</p>
+        <template x-for="db in prisma.identification?.databases||[]" :key="db.name">
+          <div class="flex items-center justify-between text-[10px] py-1 border-b border-white/5">
+            <span class="text-slate-400" x-text="db.name"></span>
+            <div class="flex items-center gap-1.5">
+              <span x-show="!db.primary" class="text-[8px] text-amber-400/70">complémentaire</span>
+              <span class="font-bold text-slate-200" x-text="'n = '+db.n"></span>
+            </div>
+          </div>
+        </template>
+        <div class="pt-2 text-center">
+          <p class="text-lg font-bold text-indigo-300" x-text="'n = '+prisma.identification?.total"></p>
+          <p class="text-[9px] text-slate-600">enregistrements identifiés</p>
+        </div>
+        <div class="rounded-lg bg-rose-500/5 border border-rose-500/15 p-2 space-y-1">
+          <p class="text-[9px] text-rose-300/90 font-semibold">Exclus avant screening</p>
+          <p class="text-[9px] text-slate-500" x-text="'Doublons supprimés (Zotero + script) : n = '+prisma.identification?.removed_duplicates"></p>
+          <p class="text-[9px] text-slate-500" x-text="'Inéligibles par automatisation (langue, date) : n = '+prisma.identification?.removed_automation"></p>
+          <p class="text-[9px] text-slate-500" x-text="'Autres motifs (sans DOI, rétractés) : n = '+prisma.identification?.removed_other"></p>
+        </div>
+        <div class="text-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 p-2">
+          <p class="text-sm font-bold text-cyan-300" x-text="'n = '+prisma.identification?.screened"></p>
+          <p class="text-[9px] text-slate-500">enregistrements uniques à screener</p>
+        </div>
+      </div>
+      <!-- Screening -->
+      <div class="glass-card rounded-xl p-4 space-y-2">
+        <p class="text-[9px] uppercase font-bold tracking-wider text-indigo-400">2 · Screening (titres/résumés)</p>
+        <div class="text-center rounded-lg bg-white/5 border border-white/10 p-2">
+          <p class="text-sm font-bold text-slate-200" x-text="'n = '+prisma.screening?.screened"></p>
+          <p class="text-[9px] text-slate-600">2 chercheurs indépendants (Kappa)</p>
+        </div>
+        <div class="rounded-lg bg-rose-500/5 border border-rose-500/15 p-2 space-y-1">
+          <p class="text-[9px] text-rose-300/90 font-semibold" x-text="'Exclus : n = '+prisma.screening?.excluded"></p>
+          <template x-for="r in prisma.screening?.exclusion_reasons||[]" :key="r.reason">
+            <p class="text-[9px] text-slate-500" x-text="r.reason+' : n = '+r.n"></p>
+          </template>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="text-center rounded-lg bg-white/5 border border-white/10 p-2">
+            <p class="text-sm font-bold text-slate-200" x-text="'n = '+prisma.screening?.retrieval_sought"></p>
+            <p class="text-[8px] text-slate-600">textes recherchés</p>
+          </div>
+          <div class="text-center rounded-lg bg-rose-500/5 border border-rose-500/15 p-2">
+            <p class="text-sm font-bold text-rose-300" x-text="'n = '+prisma.screening?.not_retrieved"></p>
+            <p class="text-[8px] text-slate-600">non récupérés</p>
+          </div>
+        </div>
+        <div class="text-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 p-2">
+          <p class="text-sm font-bold text-cyan-300" x-text="'n = '+prisma.screening?.fulltext_assessed"></p>
+          <p class="text-[9px] text-slate-500">évalués en texte intégral</p>
+        </div>
+      </div>
+      <!-- Éligibilité & inclus -->
+      <div class="glass-card rounded-xl p-4 space-y-2">
+        <p class="text-[9px] uppercase font-bold tracking-wider text-indigo-400">3 · Éligibilité</p>
+        <div class="rounded-lg bg-rose-500/5 border border-rose-500/15 p-2 space-y-1">
+          <p class="text-[9px] text-rose-300/90 font-semibold" x-text="'Exclus en texte intégral : n = '+prisma.eligibility?.excluded"></p>
+          <template x-for="r in prisma.eligibility?.exclusion_reasons||[]" :key="r.reason">
+            <p class="text-[9px] text-slate-500" x-text="r.reason+' : n = '+r.n"></p>
+          </template>
+        </div>
+        <p class="text-[9px] uppercase font-bold tracking-wider text-emerald-400 pt-1">4 · Inclus dans la cartographie</p>
+        <div class="text-center rounded-lg bg-emerald-500/10 border border-emerald-500/25 p-2">
+          <p class="text-lg font-bold text-emerald-300" x-text="'n = '+prisma.included?.current"></p>
+          <p class="text-[9px] text-slate-500" x-text="'préliminaire — cible '+prisma.included?.target_min+'-'+prisma.included?.target_max+' études'"></p>
+        </div>
+        <div class="flex flex-wrap gap-1">
+          <template x-for="dom in prisma.included?.by_domain||[]" :key="dom.name">
+            <span class="px-1.5 py-0.5 rounded-md text-[9px] bg-emerald-500/5 text-emerald-300/80 border border-emerald-500/15" x-text="dom.name+' '+dom.n"></span>
+          </template>
+        </div>
+        <p class="text-[9px] text-slate-500" x-text="'⏳ Protocoles en cours (OSF/ClinicalTrials) : n = '+prisma.included?.ongoing"></p>
+      </div>
+    </div>
+    <!-- Checklist + outils RoB -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="glass-card rounded-xl p-4">
+        <p class="text-[9px] uppercase font-bold tracking-wider text-indigo-400 mb-2">Checklist PRISMA 2020 (27 items)</p>
+        <div class="space-y-1">
+          <template x-for="it in prisma.checklist||[]" :key="it.item">
+            <div class="flex items-center justify-between text-[10px] py-1 border-b border-white/5">
+              <div class="flex items-center gap-2">
+                <span x-text="it.status==='ok'?'✅':'⏳'"></span>
+                <span class="text-slate-300" x-text="it.item"></span>
+              </div>
+              <span class="text-[9px] text-slate-600 text-right ml-3" x-text="it.note"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="glass-card rounded-xl p-4">
+        <p class="text-[9px] uppercase font-bold tracking-wider text-indigo-400 mb-2">Évaluation du risque de biais</p>
+        <div class="space-y-2">
+          <template x-for="t in prisma.rob_tools||[]" :key="t.tool">
+            <div class="flex items-center justify-between rounded-lg bg-white/5 border border-white/10 px-3 py-2">
+              <span class="text-[10px] text-slate-400" x-text="t.type"></span>
+              <span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20" x-text="t.tool"></span>
+            </div>
+          </template>
+        </div>
+        <p class="text-[9px] text-slate-600 mt-3">Chaque étude incluse est évaluée avec l'outil correspondant à son design, puis la certitude des preuves est gradée (GRADE).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ V8 : PROGRAMME DE RECHERCHE TESTABLE ══════════ -->
+  <section x-show="activeTab==='research'" class="space-y-4 fade-in">
+    <div class="glass-card rounded-xl p-4 flex items-start justify-between flex-wrap gap-3">
+      <div>
+        <h2 class="text-lg font-bold flex items-center"><i data-lucide="flask-conical" class="w-5 h-5 text-indigo-400 mr-2"></i>Programme de recherche testable</h2>
+        <p class="text-[10px] text-slate-600 mt-1">Chaque gap → question testable → design recommandé → résultat attendu (partie 6 du document principal)</p>
+      </div>
+      <select x-model="researchFilter" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-[11px] text-slate-300 focus:border-indigo-500 focus:outline-none">
+        <option value="all">Tous les domaines</option>
+        <option value="Cognitive">Cognitive</option>
+        <option value="Éducation">Éducation</option>
+        <option value="Sociale">Sociale</option>
+        <option value="Travail">Travail</option>
+        <option value="Santé">Santé</option>
+        <option value="Vieillissement">Vieillissement</option>
+        <option value="Développement">Développement</option>
+        <option value="Méta-science">Méta-science</option>
+        <option value="Différentielle">Différentielle</option>
+        <option value="4E">4E</option>
+        <option value="Transversal">Transversal</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      <template x-for="(r,i) in researchFiltered" :key="r.id">
+        <div class="glass-card rounded-xl p-4 hover:border-indigo-500/30 transition space-y-2">
+          <div class="flex items-start justify-between">
+            <span class="text-[9px] font-bold text-slate-600" x-text="'GAP-'+String(r.id).padStart(2,'0')"></span>
+            <div class="flex flex-wrap gap-1 justify-end">
+              <template x-for="dom in r.domains" :key="dom"><span class="px-1.5 py-0.5 rounded-md text-[8px] bg-indigo-500/5 text-indigo-300/80 border border-indigo-500/15" x-text="dom"></span></template>
+            </div>
+          </div>
+          <div>
+            <p class="text-[8px] text-amber-400/80 uppercase font-semibold">Gap</p>
+            <p class="text-[10px] text-slate-300" x-text="r.gap"></p>
+          </div>
+          <div class="p-2 rounded-lg bg-indigo-500/5 border border-indigo-500/15">
+            <p class="text-[8px] text-indigo-400 uppercase font-semibold">Question testable</p>
+            <p class="text-[10px] text-slate-200 font-medium mt-0.5" x-text="r.question"></p>
+          </div>
+          <div>
+            <p class="text-[8px] text-cyan-400/80 uppercase font-semibold">Design recommandé</p>
+            <p class="text-[10px] text-slate-400" x-text="r.design"></p>
+          </div>
+          <div class="pt-1 border-t border-white/5">
+            <p class="text-[8px] text-emerald-400/80 uppercase font-semibold">Résultat attendu</p>
+            <p class="text-[10px] text-slate-500" x-text="r.expected"></p>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+
 </main>
 
 <!-- Node Detail Modal -->
@@ -388,11 +598,16 @@
 function app() {
   return {
     activeTab:'dashboard',
-    tabs:[{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts 4E',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
+    tabs:[{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'domains',label:'12 Domaines',icon:'map'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts 4E',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'prisma',label:'PRISMA 2020',icon:'filter'},{id:'research',label:'Recherche',icon:'flask-conical'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
 
     stats:{}, nodes:[], filteredNodes:[], concepts4e:[],
     searchQuery:'', filterDomain:'all', uniqueDomains:[], compareList:[], showCompare:false,
     showNodeModal:false, selectedNode:{},
+
+    // V8 : domaines / PRISMA / programme de recherche
+    domains:[], prisma:{}, research:[], researchFilter:'all',
+    get researchFiltered(){ return this.researchFilter==='all' ? this.research : this.research.filter(r=>r.domains.some(d=>d.toLowerCase().includes(this.researchFilter.toLowerCase()))); },
+    coverageColor(c){ return {Fort:'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',Partiel:'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',Insuffisant:'text-amber-400 bg-amber-500/10 border-amber-500/20',Absent:'text-rose-400 bg-rose-500/10 border-rose-500/20',Indirect:'text-slate-400 bg-slate-500/10 border-slate-500/20'}[c]||'text-slate-400 bg-white/5 border-white/10'; },
 
     // Graph
     graphData:{nodes:[],links:[]}, graphSearch:'', selectedObsNode:null, connectedNodes:[], graphZoom:1, visibleNodes:0,
@@ -413,13 +628,16 @@ function app() {
     srlData:{session_id:'s-'+Math.random().toString(36).slice(2,8),objective:'',criteria:'',constraints:'',ai_query:'',ai_response:'',evaluation:'',confidence:75,action_plan:''},
 
     async init(){
-      await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts()]);
+      await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDomains(),this.loadPrisma(),this.loadResearch()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();});
     },
 
     async loadStats(){try{const r=await fetch('/api/stats');this.stats=await r.json();}catch(e){}},
     async loadNodes(){try{const r=await fetch('/api/nodes');this.nodes=await r.json();this.filteredNodes=[...this.nodes];this.uniqueDomains=[...new Set(this.nodes.map(n=>n.sous_domaine).filter(Boolean))];}catch(e){}},
     async loadConcepts(){try{const r=await fetch('/api/concepts-4e');this.concepts4e=await r.json();}catch(e){}},
+    async loadDomains(){try{const r=await fetch('/api/domains');this.domains=await r.json();}catch(e){}},
+    async loadPrisma(){try{const r=await fetch('/api/prisma');this.prisma=await r.json();}catch(e){}},
+    async loadResearch(){try{const r=await fetch('/api/research-program');this.research=await r.json();}catch(e){}},
 
     switchTab(tab){
       this.activeTab=tab;

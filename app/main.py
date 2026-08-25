@@ -1,15 +1,17 @@
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import sqlite3
 import os
+import io
+import zipfile
 from typing import Optional, List, Dict, Any
 
 from app.database import init_db, get_db_connection, DB_PATH
 
-app = FastAPI(title="Cognitorium v4", version="4.0")
+app = FastAPI(title="Cognitorium v8", version="8.0")
 
 @app.on_event("startup")
 def startup_event():
@@ -517,6 +519,359 @@ def get_obsidian_graph():
     links = [l for l in links if l["source"] in node_ids and l["target"] in node_ids]
 
     return {"nodes": nodes, "links": links}
+
+# ──────────────── V8 : CARTOGRAPHIE 12 DOMAINES ────────────────
+
+@app.get("/api/domains")
+def get_domains():
+    """Cartographie critique des 12 domaines (couverture, gaps, références v2.0)."""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT sous_domaine, COUNT(*) FROM references_table GROUP BY sous_domaine")
+    db_counts = dict(c.fetchall())
+    conn.close()
+
+    def db_match(*keywords):
+        n = 0
+        for k, v in db_counts.items():
+            if k and any(kw.lower() in k.lower() for kw in keywords):
+                n += v
+        return n
+
+    domains = [
+        {"id":"cognitive","name":"Cognitive","coverage":"Fort","coverage_score":85,
+         "detail":"EF, exercice, attention",
+         "gaps":["Langage","Raisonnement","Mémoire prospective","4E empirique"],
+         "key_refs":["Singh 2025 umbrella N=258k SMD 0.42 (DOI:10.1136/bjsports-2024-108589)","Lee & Engle 2026","Tünçok 2025","Alter 2009"],
+         "db_keywords":["Mémoire","Attention","Métacognition","Perception","Entraînement"]},
+        {"id":"developpement","name":"Développement","coverage":"Partiel","coverage_score":55,
+         "detail":"Attachement, TND",
+         "gaps":["Adolescence","Longitudinal","Social/culturel"],
+         "key_refs":["Sadozai 2024 (DOI:10.1038/s41562-024-02000-9)","Nivison 2026 (DOI:10.1111/jcpp.70087)"],
+         "db_keywords":[]},
+        {"id":"sociale","name":"Sociale","coverage":"Partiel","coverage_score":50,
+         "detail":"Contact intergroupe",
+         "gaps":["Influence","Normes","Identité","Désinformation"],
+         "key_refs":["Paolini 2024 N=152k (DOI:10.1037/bul0000439)","Emmer 2024 g=-0.30 (DOI:10.1037/bul0000419)"],
+         "db_keywords":[]},
+        {"id":"clinique","name":"Clinique","coverage":"Partiel","coverage_score":55,
+         "detail":"Psychothérapies",
+         "gaps":["Personnalité","Prévention","Comorbidités","Résultats fonctionnels"],
+         "key_refs":["Cuijpers 2024 N=33 881 NNT 2.4-5.0 (DOI:10.1002/wps.21203)"],
+         "db_keywords":[]},
+        {"id":"sante","name":"Santé","coverage":"Partiel","coverage_score":50,
+         "detail":"Exercice-cognition",
+         "gaps":["Douleur chronique","Addictions","Obésité","Santé numérique"],
+         "key_refs":["Singh 2025","Benge & Scullin 2025"],
+         "db_keywords":[]},
+        {"id":"education","name":"Éducation","coverage":"Insuffisant","coverage_score":30,
+         "detail":"Très insuffisante",
+         "gaps":["Apprentissage autorégulé","Motivation","Orientation","IA éducative"],
+         "key_refs":["Wang et al. 2024 SDT meta N=11 792 g=0.58-1.14 (DOI:10.1016/j.lmot.2024.102015)"],
+         "db_keywords":[]},
+        {"id":"travail","name":"Travail","coverage":"Absent","coverage_score":10,
+         "detail":"Absente de la cartographie initiale",
+         "gaps":["Stress","Ergonomie cognitive","Leadership","Sélection","Télétravail"],
+         "key_refs":["Leader-targeted SMI 2025 g=-0.38/-0.32 N=2 466","Interventions Psychologie Positive 2025"],
+         "db_keywords":[]},
+        {"id":"differentielle","name":"Différentielle","coverage":"Absent","coverage_score":10,
+         "detail":"Absente de la cartographie initiale",
+         "gaps":["Personnalité","Intelligence","Génétique du comportement","Intra-individuel"],
+         "key_refs":["Anglim et al. 2022-2025 N=162 636 k=272 r=.06-.24"],
+         "db_keywords":[]},
+        {"id":"vieillissement","name":"Vieillissement","coverage":"Indirect","coverage_score":25,
+         "detail":"Couverture indirecte via santé/cognition",
+         "gaps":["Démences","Réserve cognitive","Vie social","Bien-être"],
+         "key_refs":["Benge & Scullin 2025 OR=0.42 HR=0.74 N=411 430 (DOI:10.1038/s41562-025-02159-9)"],
+         "db_keywords":[]},
+        {"id":"neuropsychologie","name":"Neuropsychologie","coverage":"Partiel","coverage_score":45,
+         "detail":"EF, trauma",
+         "gaps":["Plasticité","Réhabilitation","Validité écologique","Évaluation numérique"],
+         "key_refs":["Semkovska 2025 (DOI:10.1016/j.bpsc.2025.09.006)"],
+         "db_keywords":[]},
+        {"id":"neurosciences","name":"Neurosciences cognitives","coverage":"Partiel","coverage_score":40,
+         "detail":"Quelques liens attachement",
+         "gaps":["EEG","IRMf","Connectomique","Causalité","Reproductibilité"],
+         "key_refs":["Ben Hamed 2025 (DOI:10.1146/annurev-vision-101322-011902)","Zhang & Chen 2025 EEG connectomes"],
+         "db_keywords":["Neuro"]},
+        {"id":"metascience","name":"Méta-science","coverage":"Insuffisant","coverage_score":20,
+         "detail":"Presque absente",
+         "gaps":["Réplication","Open science","Biais","Statistiques","IA et intégrité"],
+         "key_refs":["Sandoval-Lentisco 2025 (DOI:10.1177/25152459241300113) — 27% préenregistrées"],
+         "db_keywords":[]},
+    ]
+    for d in domains:
+        keywords = d.pop("db_keywords", [])
+        d["db_studies"] = db_match(*keywords)
+    return domains
+
+# ──────────────── V8 : FLUX PRISMA 2020 ────────────────
+
+@app.get("/api/prisma")
+def get_prisma():
+    """Diagramme de flux PRISMA 2020 (chiffres préliminaires illustratifs) + checklist."""
+    return {
+        "identification": {
+            "databases": [
+                {"name":"PsycINFO","n":642,"primary":True},
+                {"name":"PubMed/MEDLINE","n":487,"primary":True},
+                {"name":"Scopus","n":412,"primary":True},
+                {"name":"Web of Science","n":201,"primary":True},
+                {"name":"ERIC","n":100,"primary":True},
+                {"name":"OSF/ClinicalTrials/PROSPERO","n":45,"primary":True},
+                {"name":"Crossref/OpenAlex (vérif. DOI)","n":120,"primary":True},
+                {"name":"Google Scholar (complémentaire)","n":85,"primary":False},
+            ],
+            "total": 2092,
+            "removed_duplicates": 387,
+            "removed_automation": 120,
+            "removed_other": 30,
+            "screened": 1555
+        },
+        "screening": {
+            "screened": 1555,
+            "excluded": 1120,
+            "exclusion_reasons": [
+                {"reason":"Hors période","n":180},
+                {"reason":"Hors 12 domaines","n":340},
+                {"reason":"Sans DOI","n":45},
+                {"reason":"Type exclu (thèse/chapitre)","n":555}
+            ],
+            "retrieval_sought": 435,
+            "not_retrieved": 100,
+            "fulltext_assessed": 335
+        },
+        "eligibility": {
+            "assessed": 335,
+            "excluded": 215,
+            "exclusion_reasons": [
+                {"reason":"Données insuffisantes pour extraction","n":78},
+                {"reason":"Redondance avec méta-analyse incluse","n":67},
+                {"reason":"Faible qualité / failles critiques","n":40},
+                {"reason":"Langue autre que EN/FR","n":30}
+            ]
+        },
+        "included": {
+            "target_min": 120, "target_max": 250,
+            "current": 36,
+            "ongoing": 15,
+            "by_domain": [
+                {"name":"Cognitive","n":15},{"name":"Development","n":12},{"name":"Social","n":12},
+                {"name":"Clinical","n":15},{"name":"Health","n":10},{"name":"Education","n":8},
+                {"name":"Work","n":8},{"name":"Differential","n":8},{"name":"Aging","n":10},
+                {"name":"Neuropsychology","n":8},{"name":"Cognitive Neuroscience","n":10},{"name":"Meta-science","n":8}
+            ]
+        },
+        "checklist": [
+            {"item":"1 Titre","status":"ok","note":"« Cartographie critique préliminaire », pas exhaustif"},
+            {"item":"2 Abstract","status":"todo","note":"À rédiger après recherche finale"},
+            {"item":"3 Rationale","status":"ok","note":"Gaps identifiés, 8 domaines insuffisamment couverts"},
+            {"item":"4 Objectifs","status":"ok","note":"Question principale + 7 sous-questions/domaine"},
+            {"item":"5 Critères éligibilité","status":"ok","note":"Inclusion/exclusion détaillées"},
+            {"item":"6 Sources d'information","status":"ok","note":"7 bases + Google Scholar complémentaire"},
+            {"item":"7 Stratégie recherche","status":"ok","note":"Exemples + template (SEARCH_STRATEGIES.md)"},
+            {"item":"8 Processus sélection","status":"ok","note":"2 chercheurs indépendants, Kappa"},
+            {"item":"9 Collecte données","status":"ok","note":"Template 42 champs + script validation"},
+            {"item":"10 Data items","status":"ok","note":"42 champs définis"},
+            {"item":"11 Risque de biais","status":"ok","note":"RoB2, ROBINS-I, AMSTAR2, GRADE"},
+            {"item":"12 Mesures d'effet","status":"ok","note":"g, d, r, OR, HR, SMD avec IC"},
+            {"item":"13 Méthodes synthèse","status":"ok","note":"Narrative + tables + programme recherche"},
+            {"item":"14 Biais de reporting","status":"ok","note":"Funnel plot, Egger, littérature grise"},
+            {"item":"15 Certitude (GRADE)","status":"ok","note":"Adaptation GRADE"},
+            {"item":"16-22 Résultats","status":"todo","note":"Préliminaire n=36, cible 120-250"},
+            {"item":"23-27 Discussion","status":"ok","note":"Limites, implications, prochaines étapes"}
+        ],
+        "rob_tools": [
+            {"type":"Essai randomisé (RCT)","tool":"RoB 2"},
+            {"type":"Étude non randomisée","tool":"ROBINS-I"},
+            {"type":"Revue systématique / méta-analyse","tool":"AMSTAR 2"},
+            {"type":"Certitude des preuves","tool":"GRADE"}
+        ]
+    }
+
+# ──────────────── V8 : PROGRAMME DE RECHERCHE TESTABLE ────────────────
+
+@app.get("/api/research-program")
+def get_research_program():
+    """Gaps → questions testables → designs recommandés (partie 5/6 du document principal)."""
+    return [
+        {"id":1,"gap":"Peu d'études écologiques sur les EF","question":"Les EF mesurées en labo prédisent-elles la régulation réelle des apprentissages ?","design":"Longitudinal + mesures écologiques EMA + tâches quotidiennes","expected":"Validité écologique et prédictive des EF, R²","domains":["Cognitive","Éducation"]},
+        {"id":2,"gap":"Faible diversité culturelle","question":"Les effets des interventions varient-ils selon le contexte culturel et le SES ?","design":"Méta-analyse multilevel (modérateurs culturels) ou étude multicentrique 5 pays","expected":"Modérateurs culturels, Q_between","domains":["Transversal","Sociale"]},
+        {"id":3,"gap":"Peu de recherche sur l'orientation","question":"Les profils cognitifs/motivationnels améliorent-ils la qualité des décisions d'orientation ?","design":"Essai contrôlé randomisé ou comparaison orientation avec vs sans profils","expected":"Effets sur décisions, satisfaction, trajectoires, OR","domains":["Éducation","Travail"]},
+        {"id":4,"gap":"Usage croissant de l'IA","question":"Une interface explicable améliore-t-elle la métacognition sans renforcer les biais ?","design":"Essai randomisé : IA explicable vs opaque vs contrôle","expected":"Calibration de confiance, biais, performance, d","domains":["Méta-science","Éducation","Cognitive"]},
+        {"id":5,"gap":"Lien faible recherche-application","question":"Les construits psychologiques sont-ils mesurables de façon fiable dans un outil numérique ?","design":"Étude psychométrique : fidélité test-retest, validité convergente, invariance","expected":"Alpha, ICC, CFI, RMSEA, invariance","domains":["Méta-science","Différentielle"]},
+        {"id":6,"gap":"Vieillissement et numérique","question":"L'usage guidé des technologies numériques retarde-t-il le déclin cognitif des seniors ?","design":"RCT 12 mois : technologie guidée vs contrôle, N=200 seniors","expected":"Effets cognition, autonomie, bien-être, g","domains":["Vieillissement","Santé"]},
+        {"id":7,"gap":"Travail hybride et cognition","question":"Le travail hybride modifie-t-il la charge cognitive, le stress, la performance ?","design":"Longitudinal + mesures objectives (NASA-TLX, physiologie) + performance","expected":"Modèles charge/récupération, beta","domains":["Travail","Cognitive"]},
+        {"id":8,"gap":"Méta-science et IA","question":"L'usage d'outils IA modifie-t-il la qualité, la transparence et les biais des publications ?","design":"Analyse bibliométrique + étude expérimentale IA vs humain","expected":"Impact intégrité, biais, transparence, OR","domains":["Méta-science"]},
+        {"id":9,"gap":"Langage, raisonnement, 4E","question":"La cognition incarnée améliore-t-elle le raisonnement abstrait ?","design":"Expé contrôlé : incarnation vs contrôle, tâches de raisonnement","expected":"Effet incarnation sur raisonnement, d","domains":["Cognitive","4E"]},
+        {"id":10,"gap":"Trajectoires à l'adolescence","question":"Les trajectoires des EF à l'adolescence prédisent-elles la réussite adulte ?","design":"Cohorte longitudinale 10 ans, N=500","expected":"Trajectoires, prédiction","domains":["Développement"]},
+        {"id":11,"gap":"Désinformation et normes","question":"Des interventions par normes sociales réduisent-elles la désinformation ?","design":"RCT en ligne, N=1000, normes vs contrôle","expected":"Réduction de la croyance en la désinfo, d","domains":["Sociale"]},
+        {"id":12,"gap":"Douleur et addictions","question":"Les interventions intégrées bio-psycho-sociales sont-elles efficaces sur la douleur chronique ?","design":"Méta-analyse + RCT","expected":"Effet douleur, qualité de vie","domains":["Santé"]}
+    ]
+
+# ──────────────── V8 : EXPORT COFFRE OBSIDIAN ────────────────
+
+OBSIDIAN_FOLDER_BY_TYPE = {
+    "study": "01 Études",
+    "concept": "02 Concepts",
+    "method": "03 Méthodes",
+    "theorist": "04 Théoriciens",
+    "source": "05 Sources OER",
+}
+
+OBSIDIAN_CANVAS_COLOR = {"study":"1","concept":"2","method":"4","theorist":"5","source":"6"}
+
+def _obsidian_note(node: Dict[str, Any], links_from, links_to) -> str:
+    """Génère le contenu Markdown d'une note Obsidian pour un nœud du graphe."""
+    ntype = node.get("type", "study")
+    folder = OBSIDIAN_FOLDER_BY_TYPE.get(ntype, "00 Divers")
+    type_label = {"study":"Étude","concept":"Concept","method":"Méthode","theorist":"Théoricien","source":"Source OER"}.get(ntype, ntype)
+    tags = []
+    if ntype == "study":
+        for t in (node.get("tags") or "").split(";"):
+            t = t.strip().lstrip("-").strip()
+            if t:
+                tags.append(t.replace(" ", "-").lower())
+    tags += ["cognitorium", f"type/{ntype}", node.get("group", "divers").replace(" ", "-").lower()]
+
+    fm = [
+        "---",
+        f"id: {node['id']}",
+        f"title: \"{node.get('label', node['id'])}\"",
+        f"type: {ntype}",
+        f"group: {node.get('group', '')}",
+        f"trust: {node.get('trust', '')}",
+        f"year: {node.get('year', '')}",
+    ]
+    if ntype == "study":
+        fm.append(f"question: \"{(node.get('question') or '')[:200]}\"")
+    fm += ["tags: [" + ", ".join(dict.fromkeys(tags)) + "]", "---", ""]
+
+    body = [f"# {node.get('label', node['id'])}", ""]
+    body.append(f"> [!info] {type_label} • {node.get('group','')} • Trust {node.get('trust','?')}/100 • {node.get('year','')}")
+    body.append(">")
+    desc = (node.get("desc") or "").strip()
+    body.append(f"> {desc}" if desc else "> (pas de description)")
+    body.append("")
+
+    if ntype == "study":
+        if node.get("question"):
+            body += ["## Question scientifique", node["question"], ""]
+        if node.get("gap"):
+            body += ["## Gap identifié", node["gap"], ""]
+        body += ["## Évaluation", f"- **Trust factor** : {node.get('trust','?')}/100",
+                 f"- **Type de publication** : {node.get('pubtype','—')}",
+                 f"- **Citations (Google Scholar)** : {node.get('citations', '—')}", ""]
+        body += ["## Outils d'évaluation du biais", "- Type RCT → **RoB 2** • Non randomisé → **ROBINS-I** • Revue/méta → **AMSTAR 2** • Certitude → **GRADE**", ""]
+
+    out_links = links_from.get(node["id"], [])
+    in_links = links_to.get(node["id"], [])
+    body += ["## Liens", ""]
+    if out_links:
+        body.append("**Sortants :**")
+        for t, rel in out_links:
+            body.append(f"- [[{t}]] — *{rel}*")
+        body.append("")
+    if in_links:
+        body.append("**Entrants :**")
+        for s, rel in in_links:
+            body.append(f"- [[{s}]] — *{rel}* (entrant)")
+        body.append("")
+    if not out_links and not in_links:
+        body.append("*Aucune connexion dans le graphe.*")
+        body.append("")
+    body.append("---")
+    body.append("*Généré par Cognitorium v8 — cartographie critique PRISMA 2020 (2020-2026).*")
+    body.append("")
+    return "\n".join(fm + body), folder
+
+def _build_obsidian_vault_zip(graph: Dict[str, Any]) -> bytes:
+    """Construit un coffre Obsidian complet (notes Markdown + Canvas) en mémoire."""
+    nodes = graph["nodes"]
+    links = graph["links"]
+    labels = {n["id"]: n.get("label", n["id"]) for n in nodes}
+
+    links_from: Dict[str, list] = {}
+    links_to: Dict[str, list] = {}
+    for l in links:
+        links_from.setdefault(l["source"], []).append((l["target"], l["type"]))
+        links_to.setdefault(l["target"], []).append((l["source"], l["type"]))
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Sommaire
+        by_type: Dict[str, list] = {}
+        for n in nodes:
+            by_type.setdefault(n.get("type", "study"), []).append(n)
+        summary = ["# Cognitorium v8 — Coffre Obsidian", "",
+                   "> Cartographie critique PRISMA 2020 de la recherche en psychologie (2020-2026).", "",
+                   f"**{len(nodes)} notes** • **{len(links)} liens**", ""]
+        type_names = {"study":("Études","01 Études"),"concept":("Concepts","02 Concepts"),
+                      "method":("Méthodes","03 Méthodes"),"theorist":("Théoriciens","04 Théoriciens"),
+                      "source":("Sources OER","05 Sources OER")}
+        for t, (label, folder) in type_names.items():
+            items = by_type.get(t, [])
+            if not items:
+                continue
+            summary.append(f"## {label} ({len(items)})")
+            for n in sorted(items, key=lambda x: x.get("label", "")):
+                summary.append(f"- [[{folder}/{n['id']}|{n.get('label', n['id'])}]]")
+            summary.append("")
+        summary += ["## Navigation", "- [[01 Canvas - Graphe Cognitorium]] (ouvrir en mode Canvas)", "",
+                    "---", "*Pré-enregistré OSF https://osf.io/qhrau/ — licence CC-BY.*"]
+        zf.writestr("Cognitorium Vault/00 SOMMAIRE.md", "\n".join(summary))
+
+        # Notes par nœud
+        for n in nodes:
+            content, folder = _obsidian_note(n, links_from, links_to)
+            zf.writestr(f"Cognitorium Vault/{folder}/{n['id']}.md", content)
+
+        # Canvas Obsidian (JSON)
+        canvas_nodes = []
+        cols = {"study":0, "concept":1, "method":2, "theorist":3, "source":4}
+        col_heights = {}
+        for n in nodes:
+            col = cols.get(n.get("type"), 5)
+            row = col_heights.get(col, 0)
+            col_heights[col] = row + 1
+            canvas_nodes.append({
+                "id": n["id"][:16],
+                "type": "text",
+                "text": f"**{n.get('label', n['id'])}**\n{n.get('group','')} • trust {n.get('trust','?')}\n\n{(n.get('desc') or '')[:220]}",
+                "x": col * 460, "y": row * 240,
+                "width": 420, "height": 200,
+                "color": OBSIDIAN_CANVAS_COLOR.get(n.get("type"), "0")
+            })
+        id_map = {n["id"]: n["id"][:16] for n in nodes}
+        canvas_edges = []
+        for i, l in enumerate(links):
+            canvas_edges.append({
+                "id": f"e{i}",
+                "fromNode": id_map.get(l["source"]),
+                "fromSide": "right",
+                "toNode": id_map.get(l["target"]),
+                "toSide": "left",
+                "label": l.get("type", "")
+            })
+        canvas = {"nodes": canvas_nodes, "edges": canvas_edges}
+        zf.writestr("Cognitorium Vault/01 Canvas - Graphe Cognitorium.canvas", __import__("json").dumps(canvas, ensure_ascii=False))
+
+        # README du coffre
+        zf.writestr("Cognitorium Vault/README.md",
+            "# Coffre Cognitorium v8\n\nOuvrir ce dossier dans Obsidian :\n1. Obsidian → *Open folder as vault*\n2. Sélectionner `Cognitorium Vault`\n3. Ouvrir `01 Canvas - Graphe Cognitorium.canvas` pour le graphe visuel\n\n"
+            "Notes avec frontmatter YAML compatible Dataview (id, type, group, trust, year, tags).\n")
+    return buf.getvalue()
+
+@app.get("/api/export/obsidian-vault")
+def export_obsidian_vault():
+    """Exporte le graphe complet en coffre Obsidian (.zip : notes Markdown + Canvas)."""
+    graph = get_obsidian_graph()
+    data = _build_obsidian_vault_zip(graph)
+    return Response(
+        content=data,
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=cognitorium-v8-obsidian-vault.zip"}
+    )
 
 # ──────────────── TAXONOMY API ────────────────
 

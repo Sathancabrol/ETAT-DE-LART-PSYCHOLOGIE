@@ -2,6 +2,17 @@
 
 > **Version 2.0 corrigée** - Répond à l'analyse critique : passage de "état de l'art exhaustif" à **cartographie critique préliminaire** conforme PRISMA 2020, avec protocole transparent, évaluation biais, et programme recherche testable.
 
+## 🆕 Cognitorium v8 (app web)
+
+L'application `app/` (FastAPI) passe en **v8** :
+
+- **Onglet « 12 Domaines »** (`/api/domains`) : cartographie critique interactive — couverture (Fort/Partiel/Insuffisant/Absent), gaps identifiés, références clés v2.0, nombre d'études liées dans la base, pour chacun des 12 domaines.
+- **Onglet « PRISMA 2020 »** (`/api/prisma`) : diagramme de flux complet (identification → screening → éligibilité → inclus), motifs d'exclusion chiffrés, checklist 27 items, outils RoB 2 / ROBINS-I / AMSTAR 2 / GRADE.
+- **Onglet « Recherche »** (`/api/research-program`) : programme de recherche testable — 12 gaps → questions testables → designs recommandés → résultats attendus, filtrables par domaine.
+- **Export coffre Obsidian** (`/api/export/obsidian-vault`) : télécharge un `.zip` contenant un vrai coffre Obsidian — ~100 notes Markdown avec frontmatter YAML (id, type, group, trust, year, tags, compatible Dataview), wikilinks typés (converging, falsification, operationalization…), sommaire, et un fichier **Canvas** (`01 Canvas - Graphe Cognitorium.canvas`) reproduisant le graphe v7 en colonnes par type de nœud.
+
+Historique : v4 = app de base (base 42 champs, timeline, pyramide, concepts 4E, module SRL) → v5/v6 = graphe D3 méthodologique → v7 = graphe style Obsidian (99 nœuds, 137 liens, 38 sources OER, taxonomie 225 nœuds) → **v8 = cartographie critique complète + export Obsidian**.
+
 ## 📁 Structure du dépôt (corrigée)
 
 ```
