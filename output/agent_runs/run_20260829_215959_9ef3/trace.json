@@ -1,0 +1,56 @@
+{
+  "run_id": "run_20260829_215959_9ef3",
+  "date": "2026-08-29T21:59:59.868761+00:00",
+  "tache": "synthétiser les références par domaine",
+  "cerveau": "regles",
+  "rationale": "1 compétence(s) sélectionnée(s) sur 11 par motifs déclencheurs",
+  "llm": {
+    "available": false,
+    "provider": "aucun",
+    "model": null,
+    "hint": "Définissez OPENAI_API_KEY ou ANTHROPIC_API_KEY pour activer le cerveau LLM (le planificateur à règles reste utilisé par défaut et en secours)."
+  },
+  "statut": "succès",
+  "duree_s": 0.0,
+  "mode_degrade": false,
+  "plan": {
+    "brain": "regles",
+    "rationale": "1 compétence(s) sélectionnée(s) sur 11 par motifs déclencheurs",
+    "steps": [
+      {
+        "skill": "synthesize",
+        "params": {
+          "source": "auto"
+        },
+        "reason": "déclencheur : synthesize"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "n": 1,
+      "skill": "synthesize",
+      "description": "Synthétise les références par domaine : effectifs, trust moyen, niveaux de preuve, gaps agrégés → rapport markdown avec questions de recherche émergentes.",
+      "reason": "déclencheur : synthesize",
+      "params": {
+        "source": "auto"
+      },
+      "ok": true,
+      "summary": "Synthèse générée : 14 références réparties en 1 domaines",
+      "degraded": false,
+      "details": [
+        "1 domaines ; gaps transversaux : 14"
+      ],
+      "artifacts": [
+        "output/agent_runs/run_20260829_215959_9ef3/synthese.md",
+        "output/agent_runs/run_20260829_215959_9ef3/synthese.json"
+      ],
+      "data": {
+        "domaines": {
+          "Psychologie cognitive": 14
+        }
+      },
+      "duration_s": 0.0
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "meta": {"count": 3, "demo_fixture": true},
+  "results": [
+    {
+      "id": "W5500111",
+      "doi": "https://doi.org/10.1037/xge0000123",
+      "title": "Working memory training and transfer: a registered replication report",
+      "publication_year": 2026,
+      "type": "article",
+      "cited_by_count": 9,
+      "authorships": [{"author": {"display_name": "Aude Dupont"}},
+                      {"author": {"display_name": "Marc Vidal"}}],
+      "primary_location": {"source": {"display_name": "Journal of Experimental Psychology: General"}},
+      "open_access": {"is_oa": true, "oa_status": "green"}
+    },
+    {
+      "id": "W5500222",
+      "doi": "https://doi.org/10.1111/jcpp.70087",
+      "title": "Longitudinal trajectories of adolescent executive function",
+      "publication_year": 2026,
+      "type": "article",
+      "cited_by_count": 6,
+      "authorships": [{"author": {"display_name": "Alexandra Nivison"}}],
+      "primary_location": {"source": {"display_name": "JCPP Advances"}},
+      "open_access": {"is_oa": true, "oa_status": "gold"}
+    },
+    {
+      "id": "W5500333",
+      "doi": "https://doi.org/10.1016/j.lmot.2024.102015",
+      "title": "Self-determination theory classroom interventions: meta-analysis update",
+      "publication_year": 2026,
+      "type": "article",
+      "cited_by_count": 4,
+      "authorships": [{"author": {"display_name": "Hai Wang"}}],
+      "primary_location": {"source": {"display_name": "Learning and Motivation"}},
+      "open_access": {"is_oa": false, "oa_status": "closed"}
+    }
+  ]
+}

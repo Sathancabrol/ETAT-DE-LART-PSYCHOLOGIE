@@ -1,0 +1,338 @@
+[
+  {
+    "id": "lee2026_attention_control",
+    "reference": "Lee & Engle 2026",
+    "trust_declare": 88,
+    "trust_heuristique": 74,
+    "ecart": -14,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "rosen2025_distributed_cognition",
+    "reference": "Rosen & Freedman 2025",
+    "trust_declare": 72,
+    "trust_heuristique": 59,
+    "ecart": -13,
+    "detail": {
+      "M": 15,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "huang2025_nback",
+    "reference": "Huang et al. 2025",
+    "trust_declare": 68,
+    "trust_heuristique": 81,
+    "ecart": 13,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 13,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "O+7 : données ouvertes",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "chen2025_transfer",
+    "reference": "Chen & Yan 2025",
+    "trust_declare": 65,
+    "trust_heuristique": 74,
+    "ecart": 9,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "fuchs2026_embodied_concepts",
+    "reference": "Fuchs 2026",
+    "trust_declare": 55,
+    "trust_heuristique": 59,
+    "ecart": 4,
+    "detail": {
+      "M": 15,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "frontiers2026_embodied_stem",
+    "reference": "Frontiers Edu 2026",
+    "trust_declare": 90,
+    "trust_heuristique": 84,
+    "ecart": -6,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 16,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+20 : méta-analyse",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "O+7 : données ouvertes",
+      "O+3 : code ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "exception2026_enactivism",
+    "reference": "Exceptionality 2026",
+    "trust_declare": 48,
+    "trust_heuristique": 53,
+    "ecart": 5,
+    "detail": {
+      "M": 15,
+      "R": 8,
+      "O": 0,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : triangulation ≥3 sources",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "tuncok2025_prf",
+    "reference": "Tünçok et al. 2025",
+    "trust_declare": 85,
+    "trust_heuristique": 74,
+    "ecart": -11,
+    "detail": {
+      "M": 20,
+      "R": 8,
+      "O": 16,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : article empirique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "O+7 : données ouvertes",
+      "O+3 : code ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "benhamed2025_decoding",
+    "reference": "Ben Hamed 2025",
+    "trust_declare": 82,
+    "trust_heuristique": 74,
+    "ecart": -8,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "pascucci2026_spatiotemporal",
+    "reference": "Pascucci & Kristjánsson 2026",
+    "trust_declare": 74,
+    "trust_heuristique": 59,
+    "ecart": -15,
+    "detail": {
+      "M": 15,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "tian2026_temporal",
+    "reference": "Tian et al. 2026",
+    "trust_declare": 42,
+    "trust_heuristique": 29,
+    "ecart": -13,
+    "detail": {
+      "M": 15,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 10,
+      "P": 25
+    },
+    "justification": [
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+2 : justification trust fournie",
+      "P+15 : non peer review",
+      "P+10 : preprint"
+    ]
+  },
+  {
+    "id": "nobre2017_temporal",
+    "reference": "Nobre & van Ede 2017 + Denison 2024",
+    "trust_declare": 88,
+    "trust_heuristique": 74,
+    "ecart": -14,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 6,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "alter2009_tribes_fluency",
+    "reference": "Alter & Oppenheimer 2009",
+    "trust_declare": 90,
+    "trust_heuristique": 68,
+    "ecart": -22,
+    "detail": {
+      "M": 30,
+      "R": 8,
+      "O": 0,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+15 : revue systématique",
+      "M+5 : triangulation ≥3 sources",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  },
+  {
+    "id": "knight2025_crossmodal_fluency",
+    "reference": "Knight et al. 2025",
+    "trust_declare": 78,
+    "trust_heuristique": 71,
+    "ecart": -7,
+    "detail": {
+      "M": 20,
+      "R": 8,
+      "O": 13,
+      "C": 15,
+      "T": 15,
+      "P": 0
+    },
+    "justification": [
+      "M+5 : article empirique",
+      "M+5 : triangulation ≥3 sources",
+      "O+6 : accès ouvert",
+      "O+7 : données ouvertes",
+      "C+2 : question scientifique explicite",
+      "C+3 : tags ≥3",
+      "T+5 : peer review",
+      "T+2 : justification trust fournie"
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "historique": [
+    {
+      "date": "2026-08-29",
+      "run": "run_20260829_215953_5959",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-08-29",
+      "run": "run_20260829_215959_6d58",
+      "identifies": 5,
+      "apres_deduplication": 5
+    }
+  ],
+  "dernier": {
+    "date": "2026-08-29",
+    "run": "run_20260829_215959_6d58",
+    "identifies": 5,
+    "apres_deduplication": 5
+  }
+}

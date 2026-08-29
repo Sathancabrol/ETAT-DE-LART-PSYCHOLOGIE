@@ -1,0 +1,20 @@
+{
+  "groupes": {
+    "Psychologie cognitive": [
+      "lee2026_attention_control",
+      "rosen2025_distributed_cognition",
+      "huang2025_nback",
+      "chen2025_transfer",
+      "fuchs2026_embodied_concepts",
+      "frontiers2026_embodied_stem",
+      "exception2026_enactivism",
+      "tuncok2025_prf",
+      "benhamed2025_decoding",
+      "pascucci2026_spatiotemporal",
+      "tian2026_temporal",
+      "nobre2017_temporal",
+      "alter2009_tribes_fluency",
+      "knight2025_crossmodal_fluency"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -903,3 +903,98 @@ def get_taxonomy():
             }
         ]
     }
+
+# ──────────────── AGENT CHERCHEUR API ────────────────
+
+class AgentRunRequest(BaseModel):
+    task: str
+    max_results: int = 10
+    use_llm: Optional[bool] = None
+
+@app.get("/agent", response_class=HTMLResponse)
+def agent_page(request: Request):
+    return templates.TemplateResponse(request, "agent.html", {"request": request})
+
+@app.get("/api/agent/skills")
+def agent_skills():
+    from agent.core.registry import catalog
+    return catalog()
+
+@app.get("/api/agent/status")
+def agent_status():
+    from agent.core import llm as llm_mod
+    return llm_mod.llm_status()
+
+@app.post("/api/agent/run")
+def agent_run(req: AgentRunRequest):
+    """Exécute une tâche via l'agent chercheur (synchrone, borné)."""
+    from agent import Agent
+    if not req.task or not req.task.strip():
+        raise HTTPException(status_code=400, detail="Tâche vide")
+    agent = Agent(max_results=min(req.max_results, 50), use_llm=req.use_llm)
+    try:
+        trace = agent.run(req.task.strip()[:500])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur agent : {e}")
+    return _trace_public(trace)
+
+@app.get("/api/agent/runs")
+def agent_runs_list():
+    """Historique des runs (métadonnées)."""
+    from agent.core.context import RUNS_DIR
+    runs = []
+    if RUNS_DIR.exists():
+        for d in sorted(RUNS_DIR.iterdir(), reverse=True)[:30]:
+            tj = d / "trace.json"
+            if tj.exists():
+                try:
+                    import json
+                    t = json.loads(tj.read_text(encoding="utf-8"))
+                    runs.append({"run_id": t["run_id"], "tache": t["tache"], "statut": t["statut"],
+                                 "cerveau": t["cerveau"], "duree_s": t["duree_s"],
+                                 "etapes": len(t.get("steps", [])), "date": t["date"],
+                                 "mode_degrade": t.get("mode_degrade", False)})
+                except Exception:
+                    continue
+    return runs
+
+@app.get("/api/agent/runs/{run_id}")
+def agent_run_detail(run_id: str):
+    from agent.core.context import RUNS_DIR
+    tj = RUNS_DIR / run_id / "trace.json"
+    if not tj.exists():
+        raise HTTPException(status_code=404, detail="Run introuvable")
+    import json
+    return _trace_public(json.loads(tj.read_text(encoding="utf-8")))
+
+@app.get("/api/agent/artifact")
+def agent_artifact(path: str):
+    """Sert un artefact markdown/html/json/csv d'un run (chemins contrôlés).
+
+    Accepte les chemins relatifs à output/agent_runs/ ou à la racine du dépôt.
+    """
+    from agent.core.context import ROOT
+    clean = path.replace("\\", "/").lstrip("/")
+    prefix = "output/"
+    if clean.startswith(prefix):
+        clean = clean[len(prefix):]
+    base = (ROOT / "output").resolve()
+    target = (base / clean).resolve()
+    if not str(target).startswith(str(base)) or not target.exists():
+        raise HTTPException(status_code=404, detail="Artefact introuvable")
+    if target.suffix not in {".md", ".html", ".json", ".csv"}:
+        raise HTTPException(status_code=400, detail="Type non autorisé")
+    return PlainTextResponse(target.read_text(encoding="utf-8"))
+
+def _trace_public(trace: Dict[str, Any]) -> Dict[str, Any]:
+    """Allège la trace pour l'affichage web."""
+    light = {k: v for k, v in trace.items() if k not in {"llm"}}
+    for s in light.get("steps", []):
+        data = s.get("data") or {}
+        s["data"] = {k: v for k, v in data.items() if k in {"query", "total", "par_base", "distribution",
+                                                            "resultats", "domaines", "identifies",
+                                                            "apres_deduplication", "drafts"}}
+        if isinstance(s["data"].get("resultats"), list):
+            s["data"]["resultats"] = s["data"]["resultats"][:8]
+    light["llm_status"] = trace.get("llm", {})
+    return light

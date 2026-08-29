@@ -1,0 +1,9 @@
+{
+  "esearchresult": {
+    "count": "3",
+    "retmax": "3",
+    "retstart": "0",
+    "idlist": ["39000001", "39000002", "39000003"],
+    "demo_fixture": true
+  }
+}
