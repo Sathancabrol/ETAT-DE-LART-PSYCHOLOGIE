@@ -1,8 +1,9 @@
 """
-Cognitorium — Agent Scientifique Chercheur
-==========================================
-Agent hybride (règles par défaut, LLM optionnel) qui planifie et exécute
-des tâches de recherche scientifique via des compétences (skills) :
+Cognitorium — Uranus ♅, l'agent scientifique chercheur
+======================================================
+Uranus (Ouranos, divinité primordiale du ciel) est un agent hybride
+(règles par défaut, LLM optionnel) qui planifie et exécute des tâches de
+recherche scientifique via des compétences (skills) :
 
   recherche documentaire → enrichment DOI → métriques de citations →
   déduplication → validation 42 champs → trust factor → évaluation

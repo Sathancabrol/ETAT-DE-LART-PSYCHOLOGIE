@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent Chercheur — Cognitorium</title>
+  <title>{{ agent_symbol }} {{ agent_name }} — Agent Chercheur · Cognitorium</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
@@ -31,10 +31,10 @@
   <!-- ═══ HEADER ═══ -->
   <header class="glass sticky top-0 z-40 border-b border-white/5">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/30 to-cyan-500/20 border border-indigo-500/30 flex items-center justify-center text-lg">🤖</div>
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/30 via-purple-500/20 to-cyan-400/20 border border-indigo-400/40 flex items-center justify-center text-xl text-indigo-200 select-none" title="Uranus — symbole astronomique">{{ agent_symbol }}</div>
       <div class="flex-1">
-        <h1 class="text-sm font-semibold tracking-wide">Agent Chercheur <span class="text-slate-500 font-normal">· Cognitorium</span></h1>
-        <p class="text-[11px] text-slate-500">Agent scientifique hybride — planification par compétences, exécution traçable</p>
+        <h1 class="text-sm font-semibold tracking-wide">{{ agent_name }} <span class="text-slate-500 font-normal">· agent chercheur <span class="text-slate-600">· Cognitorium</span></span></h1>
+        <p class="text-[11px] text-slate-500">{{ agent_tagline }}</p>
       </div>
       <div class="hidden sm:flex items-center gap-2">
         <template x-if="status.available">
@@ -216,7 +216,7 @@
   </div>
 
   <footer class="text-center text-[10px] text-slate-700 py-4">
-    Agent Chercheur Cognitorium — cerveau hybride règles/LLM · traçabilité complète dans <span class="mono">output/agent_runs/</span>
+    {{ agent_symbol }} {{ agent_name }} — agent chercheur du Cognitorium · cerveau hybride règles/LLM · traçabilité complète dans <span class="mono">output/agent_runs/</span>
   </footer>
 </div>
 

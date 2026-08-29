@@ -913,7 +913,12 @@ class AgentRunRequest(BaseModel):
 
 @app.get("/agent", response_class=HTMLResponse)
 def agent_page(request: Request):
-    return templates.TemplateResponse(request, "agent.html", {"request": request})
+    from agent.core.context import AGENT_NAME, AGENT_SYMBOL, AGENT_TAGLINE
+    return templates.TemplateResponse(request, "agent.html",
+                                      {"request": request,
+                                       "agent_name": AGENT_NAME,
+                                       "agent_symbol": AGENT_SYMBOL,
+                                       "agent_tagline": AGENT_TAGLINE})
 
 @app.get("/api/agent/skills")
 def agent_skills():
@@ -923,7 +928,10 @@ def agent_skills():
 @app.get("/api/agent/status")
 def agent_status():
     from agent.core import llm as llm_mod
-    return llm_mod.llm_status()
+    from agent.core.context import AGENT_NAME, AGENT_SYMBOL
+    st = llm_mod.llm_status()
+    st.update({"name": AGENT_NAME, "symbol": AGENT_SYMBOL})
+    return st
 
 @app.post("/api/agent/run")
 def agent_run(req: AgentRunRequest):

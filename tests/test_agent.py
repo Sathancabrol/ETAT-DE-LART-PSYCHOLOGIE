@@ -24,6 +24,35 @@ from agent.core.planner import build_plan
 from agent.core.registry import get_skill
 
 
+# ── Identité / branding Uranus ──────────────────────────────────────────────
+
+def test_identite_uranus():
+    from agent.core.context import AGENT_NAME, AGENT_SYMBOL, AGENT_TAGLINE
+    assert AGENT_NAME == "Uranus"
+    assert AGENT_SYMBOL == "♅"
+    assert "connaissance" in AGENT_TAGLINE.lower()
+
+
+def test_page_web_et_api_portent_le_nom():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    page = c.get("/agent")
+    assert page.status_code == 200
+    assert "Uranus" in page.text and "♅" in page.text
+    accueil = c.get("/")
+    assert "Uranus" in accueil.text
+    st = c.get("/api/agent/status").json()
+    assert st["name"] == "Uranus"
+
+
+def test_rapport_run_mentionne_uranus(tmp_path):
+    trace = Agent(use_llm=False).run("valider la base")
+    run_dir = ROOT / "output" / "agent_runs" / trace["run_id"]
+    report = (run_dir / "report.md").read_text(encoding="utf-8")
+    assert "Uranus" in report
+
+
 # ── Registre ────────────────────────────────────────────────────────────────
 
 def test_11_competences_enregistrees():

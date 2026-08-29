@@ -28,6 +28,14 @@ FIXTURES_DIR = ROOT / "agent" / "fixtures"
 RUNS_DIR = ROOT / "output" / "agent_runs"
 DATA_CSV = ROOT / "data" / "nodes_etat_art_psychologie.csv"
 
+# ── Identité de l'agent (source de vérité unique) ─────────────────────────
+# Uranus (Ouranos) : divinité primordiale du ciel chez les Grecs — « celui qui
+# couvre le ciel » —, père des Titans. La planète ♅ porte son nom : l'agent
+# cartographie le ciel de la connaissance.
+AGENT_NAME = "Uranus"
+AGENT_SYMBOL = "♅"          # symbole astronomique/astrologique d'Uranus
+AGENT_TAGLINE = "Agent chercheur scientifique — cartographe du ciel de la connaissance"
+
 MAILTO = os.environ.get("AGENT_CROSSREF_MAILTO", "cognitorium-agent@example.org")
 
 # AGENT_OFFLINE=1 force le mode dégradé (fixtures) sans tenter le réseau

@@ -1,5 +1,5 @@
 """
-CLI de l'agent chercheur.
+CLI de l'agent chercheur Uranus (♅).
 
 Usage :
     python -m agent run "rechercher les méta-analyses attention 2024-2026"
@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 from agent.core.agent import Agent
-from agent.core.context import RUNS_DIR
+from agent.core.context import RUNS_DIR, AGENT_NAME, AGENT_SYMBOL
 from agent.core import llm as llm_mod
 from agent.core.registry import list_skills
 
@@ -35,7 +35,7 @@ def cmd_run(args):
             print(f"  {i}. {s.skill}  {json.dumps(s.params, ensure_ascii=False)}")
             print(f"     └ {s.reason}")
         return 0
-    print(f"▶ Exécution de la tâche : « {args.task} »\n")
+    print(f"{AGENT_SYMBOL} {AGENT_NAME} — exécution de la tâche : « {args.task} »\n")
     trace = agent.run(args.task)
     print(f"\n{'='*70}")
     for s in trace["steps"]:
@@ -90,7 +90,7 @@ def cmd_status(_args):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="agent", description="Agent scientifique chercheur — Cognitorium")
+    p = argparse.ArgumentParser(prog="agent", description=f"{AGENT_NAME} ({AGENT_SYMBOL}) — agent scientifique chercheur du Cognitorium")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pr = sub.add_parser("run", help="exécuter une tâche")

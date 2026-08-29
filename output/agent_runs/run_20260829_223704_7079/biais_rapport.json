@@ -1,0 +1,392 @@
+[
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "lee2026_attention_control",
+    "reference": "Lee & Engle 2026",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "n/a",
+    "items": [
+      {
+        "item": "type non évaluable",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "incertain",
+    "id": "rosen2025_distributed_cognition",
+    "reference": "Rosen & Freedman 2025",
+    "type": "perspective"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "huang2025_nback",
+    "reference": "Huang et al. 2025",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "chen2025_transfer",
+    "reference": "Chen & Yan 2025",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "n/a",
+    "items": [
+      {
+        "item": "type non évaluable",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "incertain",
+    "id": "fuchs2026_embodied_concepts",
+    "reference": "Fuchs 2026",
+    "type": "theorique"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "frontiers2026_embodied_stem",
+    "reference": "Frontiers Edu 2026",
+    "type": "meta_analyse"
+  },
+  {
+    "grille": "n/a",
+    "items": [
+      {
+        "item": "type non évaluable",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "incertain",
+    "id": "exception2026_enactivism",
+    "reference": "Exceptionality 2026",
+    "type": "theorique"
+  },
+  {
+    "grille": "RoB2-lite",
+    "items": [
+      {
+        "item": "Biais de sélection (randomisation)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais de détection (aveugle)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Données manquantes (attrition)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Puissance statistique",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement",
+        "risque": "élevé"
+      },
+      {
+        "item": "Vérifiabilité (données+code)",
+        "risque": "faible"
+      }
+    ],
+    "risque_global": "élevé",
+    "id": "tuncok2025_prf",
+    "reference": "Tünçok et al. 2025",
+    "type": "article_empirique"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "benhamed2025_decoding",
+    "reference": "Ben Hamed 2025",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "n/a",
+    "items": [
+      {
+        "item": "type non évaluable",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "incertain",
+    "id": "pascucci2026_spatiotemporal",
+    "reference": "Pascucci & Kristjánsson 2026",
+    "type": "perspective"
+  },
+  {
+    "grille": "n/a",
+    "items": [
+      {
+        "item": "type non évaluable",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "incertain",
+    "id": "tian2026_temporal",
+    "reference": "Tian et al. 2026",
+    "type": "preprint"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "nobre2017_temporal",
+    "reference": "Nobre & van Ede 2017 + Denison 2024",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "AMSTAR2-lite",
+    "items": [
+      {
+        "item": "Recherche ≥2 bases (triangulation)",
+        "risque": "faible"
+      },
+      {
+        "item": "Sélection 2 évaluateurs",
+        "risque": "incertain"
+      },
+      {
+        "item": "Extraction données dupliquée",
+        "risque": "incertain"
+      },
+      {
+        "item": "Liste études exclues",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais publication testé",
+        "risque": "faible"
+      },
+      {
+        "item": "Financements déclarés",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement protocole",
+        "risque": "élevé"
+      }
+    ],
+    "risque_global": "modéré",
+    "id": "alter2009_tribes_fluency",
+    "reference": "Alter & Oppenheimer 2009",
+    "type": "revue_systematique"
+  },
+  {
+    "grille": "RoB2-lite",
+    "items": [
+      {
+        "item": "Biais de sélection (randomisation)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Biais de détection (aveugle)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Données manquantes (attrition)",
+        "risque": "incertain"
+      },
+      {
+        "item": "Puissance statistique",
+        "risque": "incertain"
+      },
+      {
+        "item": "Préenregistrement",
+        "risque": "élevé"
+      },
+      {
+        "item": "Vérifiabilité (données+code)",
+        "risque": "incertain"
+      }
+    ],
+    "risque_global": "élevé",
+    "id": "knight2025_crossmodal_fluency",
+    "reference": "Knight et al. 2025",
+    "type": "article_empirique"
+  }
+]

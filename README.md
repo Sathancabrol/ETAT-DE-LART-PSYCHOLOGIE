@@ -44,15 +44,15 @@ agent/                                                   # 🤖 AGENT CHERCHEUR 
 tests/test_agent.py                                      # 23 tests, 100 % hors-ligne
 ```
 
-## 🤖 Agent Chercheur (nouveau)
+## 🤖 Uranus ♅ — Agent Chercheur (nouveau)
 
-Agent scientifique hybride qui exécute des tâches de recherche en **11 compétences** :
+**Uranus** (nommé d'après la divinité du ciel), agent scientifique hybride qui exécute des tâches de recherche en **11 compétences** :
 **recherche multi-bases** (Crossref/OpenAlex/PubMed) → **enrichissement DOI** → **métriques citations** → **déduplication** → **validation 42 champs** → **Trust Factor** → **dépistage biais** → **PRISMA** → **synthèse par domaine** → **visualisation** → **veille scientifique**.
 
 - **Cerveau hybride** : planificateur à règles déterministes par défaut ; LLM optionnel si `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (repli automatique sur les règles)
 - **Traçabilité intégrale** : chaque run produit `trace.json` + `report.md` dans `output/agent_runs/<run_id>/`
 - **Mode dégradé explicite** : sans réseau, fixtures de démonstration clairement signalées
-- **Double interface** : CLI (`python -m agent`) et page web `/agent` intégrée au Cognitorium
+- **Double interface** : CLI (`python -m agent`) et page web `/agent` (« ♅ Uranus » dans l'en-tête du Cognitorium)
 
 ```bash
 source .venv/bin/activate

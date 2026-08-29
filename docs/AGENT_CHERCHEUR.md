@@ -1,6 +1,8 @@
-# Agent Chercheur — Cognitorium
+# Uranus ♅ — Agent Chercheur du Cognitorium
 
-> Agent scientifique hybride qui planifie et exécute des tâches de recherche via **11 compétences** : recherche documentaire multi-bases, enrichment DOI, métriques de citations, déduplication, validation 42 champs, Trust Factor, dépistage de biais, flux PRISMA, synthèse par domaine, visualisation, veille scientifique.
+> **Uranus** (Ouranos, Οὐρανός) : divinité primordiale du ciel chez les Grecs, « celui qui couvre le ciel » — la planète ♅ porte son nom. L'agent Uranus cartographie le ciel de la connaissance : agent scientifique hybride qui planifie et exécute des tâches de recherche via **11 compétences** — recherche documentaire multi-bases, enrichment DOI, métriques de citations, déduplication, validation 42 champs, Trust Factor, dépistage de biais, flux PRISMA, synthèse par domaine, visualisation, veille scientifique.
+
+*Identité centralisée dans `agent/core/context.py` (`AGENT_NAME`, `AGENT_SYMBOL`, `AGENT_TAGLINE`) : un seul endroit à changer pour renommer l'agent partout — page web, CLI, rapports, API.*
 
 ## 🧠 Architecture
 
@@ -85,7 +87,7 @@ print(trace["statut"], [s["skill"] for s in trace["steps"]])
 uvicorn app.main:app --reload    # puis ouvrir http://localhost:8000/agent
 ```
 
-La page **/agent** (lien « 🤖 Agent » dans l'en-tête du Cognitorium) permet de : saisir une tâche (exemples cliquables), suivre le plan exécuté étape par étape (statut, durée, détails), ouvrir les artefacts (rapports, visualisations), parcourir l'historique des runs et le catalogue des compétences.
+La page **/agent** (lien « ♅ Uranus » dans l'en-tête du Cognitorium) permet de : saisir une tâche (exemples cliquables), suivre le plan exécuté étape par étape (statut, durée, détails), ouvrir les artefacts (rapports, visualisations), parcourir l'historique des runs et le catalogue des compétences.
 
 ### API
 

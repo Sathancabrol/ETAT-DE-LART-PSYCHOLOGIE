@@ -40,7 +40,7 @@ ETAT-DE-LART-PSYCHOLOGIE/
     ├── validate_entry.py                               # Validation 28 mandatory, DOI regex, triangulation >=3, tags >=3, trust 0-100, dates ISO, duplicates
     └── add_entry.py                                    # DOI -> auto row via Crossref API
 
-agent/                                                   # 🤖 AGENT CHERCHEUR - agent scientifique hybride (règles + LLM optionnel)
+agent/                                                   # 🤖 URANUS (♅) - agent chercheur scientifique hybride (règles + LLM optionnel)
 ├── core/                                               # registry @skill, contexte, planner règles, llm optionnel, orchestrateur
 ├── skills/                                             # 11 compétences: recherche multi-bases, enrich DOI, citations, dédup,
 │                                                       # validation 42 champs, trust M+R+O+C+T-P, biais RoB2/AMSTAR2-lite,

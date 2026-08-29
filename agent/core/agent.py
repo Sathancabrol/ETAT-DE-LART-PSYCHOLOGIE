@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from agent.core import llm as llm_mod
-from agent.core.context import AgentContext, ROOT
+from agent.core.context import AgentContext, ROOT, AGENT_NAME, AGENT_SYMBOL
 from agent.core.planner import Plan, build_plan
 from agent.core.registry import catalog, get_skill, list_skills
 
@@ -105,7 +105,7 @@ class Agent:
 def _build_report(task: str, trace: Dict[str, Any]) -> str:
     icon = {"succès": "✅", "partiel": "⚠️", "échec": "❌", "planifié": "📋"}
     lines = [
-        "# Rapport d'exécution — Agent Chercheur Cognitorium", "",
+        f"# Rapport d'exécution — {AGENT_SYMBOL} {AGENT_NAME}", "",
         f"- **Tâche** : {task}",
         f"- **Statut** : {icon.get(trace['statut'], '')} {trace['statut']}",
         f"- **Cerveau** : {trace['cerveau']}" + (f" ({trace['llm']['provider']}/{trace['llm']['model']})" if trace['cerveau'] == 'llm' else " — déterministe"),
@@ -129,5 +129,5 @@ def _build_report(task: str, trace: Dict[str, Any]) -> str:
             lines += ["", "**Artefacts :**"]
             lines += [f"- `{a}`" for a in s["artifacts"]]
         lines.append("")
-    lines += ["---", "*Généré automatiquement par l'agent chercheur — traçabilité complète dans `trace.json`.*"]
+    lines += ["---", f"*Généré automatiquement par {AGENT_NAME} ({AGENT_SYMBOL}), agent chercheur du Cognitorium — traçabilité complète dans `trace.json`.*"]
     return "\n".join(lines)
