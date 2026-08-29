@@ -1,17 +1,17 @@
-# Rapport d'exécution — Agent Chercheur Cognitorium
+# Rapport d'exécution — ♅ Uranus
 
-- **Tâche** : recherche systématique des méta-analyses sur l'attention 2024-2026
+- **Tâche** : recherche systématique des méta-analyses attention 2024-2026
 - **Statut** : ✅ succès
 - **Cerveau** : regles — déterministe
-- **Durée** : 0.01 s
-- **Run** : `run_20260829_215953_5959`
+- **Durée** : 0.0 s
+- **Run** : `run_20260829_223829_1330`
 - **⚠️ Mode dégradé** : une ou plusieurs compétences ont utilisé des fixtures de démonstration (réseau indisponible). Les données correspondantes ne sont PAS réelles.
 
 ## Plan exécuté
 
 1. ✅ **search_literature** — 5 références uniques trouvées (OpenAlex:3 + Crossref:3) [MODE DÉGRADÉ hors-ligne : fixtures démo] (0.0 s)
 2. ✅ **deduplicate** — 0 doublon(s) supprimé(s) sur 5 résultats → 5 conservés (0.0 s)
-3. ✅ **prisma_flow** — PRISMA : 5 identifiés → 5 après déduplication (1 mises à jour cumulées) (0.0 s)
+3. ✅ **prisma_flow** — PRISMA : 5 identifiés → 5 après déduplication (3 mises à jour cumulées) (0.0 s)
 4. ✅ **synthesize** — Synthèse générée : 5 références groupées (source : recherche du run) (0.0 s)
 
 ## Détail par compétence
@@ -30,7 +30,7 @@
 - • Effectiveness of physical activity interventions for improving cognitive function in child (2025) [OpenAlex]
 
 **Artefacts :**
-- `output/agent_runs/run_20260829_215953_5959/recherche_resultats.csv`
+- `output/agent_runs/run_20260829_223829_1330/recherche_resultats.csv`
 
 ### 2. deduplicate
 
@@ -43,19 +43,19 @@
 - Conservés : 5
 
 **Artefacts :**
-- `output/agent_runs/run_20260829_215953_5959/deduplication_rapport.json`
+- `output/agent_runs/run_20260829_223829_1330/deduplication_rapport.json`
 
 ### 3. prisma_flow
 
 *Met à jour et restitue le flux PRISMA 2020 (identifiés, dédupliqués, screenés, inclus) avec diagramme Mermaid régénéré.*
 
-→ PRISMA : 5 identifiés → 5 après déduplication (1 mises à jour cumulées)
+→ PRISMA : 5 identifiés → 5 après déduplication (3 mises à jour cumulées)
 
 - Identifiés : 5
 - Après déduplication : 5
 
 **Artefacts :**
-- `output/agent_runs/run_20260829_215953_5959/prisma_flux.md`
+- `output/agent_runs/run_20260829_223829_1330/prisma_flux.md`
 - `output/prisma_state.json`
 
 ### 4. synthesize
@@ -67,8 +67,8 @@
 - 5 références, 538 citations cumulées
 
 **Artefacts :**
-- `output/agent_runs/run_20260829_215953_5959/synthese.md`
-- `output/agent_runs/run_20260829_215953_5959/synthese.json`
+- `output/agent_runs/run_20260829_223829_1330/synthese.md`
+- `output/agent_runs/run_20260829_223829_1330/synthese.json`
 
 ---
-*Généré automatiquement par l'agent chercheur — traçabilité complète dans `trace.json`.*
+*Généré automatiquement par Uranus (♅), agent chercheur du Cognitorium — traçabilité complète dans `trace.json`.*

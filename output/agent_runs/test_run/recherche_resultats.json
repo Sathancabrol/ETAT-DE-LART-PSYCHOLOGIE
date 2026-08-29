@@ -1,6 +1,6 @@
 {
-  "query": "exercise cognition",
-  "from": 2024,
+  "query": "attention",
+  "from": 2020,
   "to": 2026,
   "par_base": {
     "OpenAlex": 3,

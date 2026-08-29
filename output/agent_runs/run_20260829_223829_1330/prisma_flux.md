@@ -3,7 +3,7 @@
 - Identifiés : **5**
 - Après déduplication : **5**
 - Screenés (estimation) : **5**
-- Historique : 1 mise(s) à jour
+- Historique : 3 mise(s) à jour
 
 ## Diagramme
 

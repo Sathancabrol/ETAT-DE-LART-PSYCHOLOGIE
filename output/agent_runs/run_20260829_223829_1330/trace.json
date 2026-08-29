@@ -1,7 +1,7 @@
 {
-  "run_id": "run_20260829_215959_6d58",
-  "date": "2026-08-29T22:00:02.425284+00:00",
-  "tache": "recherche systématique exercice cognition 2024-2026",
+  "run_id": "run_20260829_223829_1330",
+  "date": "2026-08-29T22:38:29.149749+00:00",
+  "tache": "recherche systématique des méta-analyses attention 2024-2026",
   "cerveau": "regles",
   "rationale": "4 compétence(s) sélectionnée(s) sur 11 par motifs déclencheurs + composition pipeline systématique",
   "llm": {
@@ -11,7 +11,7 @@
     "hint": "Définissez OPENAI_API_KEY ou ANTHROPIC_API_KEY pour activer le cerveau LLM (le planificateur à règles reste utilisé par défaut et en secours)."
   },
   "statut": "succès",
-  "duree_s": 2.55,
+  "duree_s": 0.0,
   "mode_degrade": true,
   "plan": {
     "brain": "regles",
@@ -27,7 +27,7 @@
           "max_results": 10,
           "from_year": 2024,
           "to_year": 2026,
-          "query": "exercise cognition"
+          "query": "attention meta-analysis psychology"
         },
         "reason": "recherche documentaire multi-bases"
       },
@@ -73,13 +73,13 @@
         "max_results": 10,
         "from_year": 2024,
         "to_year": 2026,
-        "query": "exercise cognition"
+        "query": "attention meta-analysis psychology"
       },
       "ok": true,
       "summary": "5 références uniques trouvées (OpenAlex:3 + Crossref:3) [MODE DÉGRADÉ hors-ligne : fixtures démo]",
       "degraded": true,
       "details": [
-        "Requête : « exercise cognition » | Période 2024–2026 | Limites : 10/base",
+        "Requête : « attention meta-analysis psychology » | Période 2024–2026 | Limites : 10/base",
         "OpenAlex : 3 résultats",
         "Crossref : 3 résultats",
         "• Relative effects of psychotherapies for mental disorders: systematic review and meta-analy (2024) [OpenAlex]",
@@ -87,10 +87,10 @@
         "• Effectiveness of physical activity interventions for improving cognitive function in child (2025) [OpenAlex]"
       ],
       "artifacts": [
-        "output/agent_runs/run_20260829_215959_6d58/recherche_resultats.csv"
+        "output/agent_runs/run_20260829_223829_1330/recherche_resultats.csv"
       ],
       "data": {
-        "query": "exercise cognition",
+        "query": "attention meta-analysis psychology",
         "total": 5,
         "par_base": {
           "OpenAlex": 3,
@@ -154,7 +154,7 @@
           }
         ]
       },
-      "duration_s": 2.54
+      "duration_s": 0.0
     },
     {
       "n": 2,
@@ -175,7 +175,7 @@
         "Conservés : 5"
       ],
       "artifacts": [
-        "output/agent_runs/run_20260829_215959_6d58/deduplication_rapport.json"
+        "output/agent_runs/run_20260829_223829_1330/deduplication_rapport.json"
       ],
       "data": {
         "source": "search"
@@ -192,14 +192,14 @@
         "to_year": 2026
       },
       "ok": true,
-      "summary": "PRISMA : 5 identifiés → 5 après déduplication (2 mises à jour cumulées)",
+      "summary": "PRISMA : 5 identifiés → 5 après déduplication (3 mises à jour cumulées)",
       "degraded": false,
       "details": [
         "Identifiés : 5",
         "Après déduplication : 5"
       ],
       "artifacts": [
-        "output/agent_runs/run_20260829_215959_6d58/prisma_flux.md",
+        "output/agent_runs/run_20260829_223829_1330/prisma_flux.md",
         "output/prisma_state.json"
       ],
       "data": {
@@ -225,8 +225,8 @@
         "5 références, 538 citations cumulées"
       ],
       "artifacts": [
-        "output/agent_runs/run_20260829_215959_6d58/synthese.md",
-        "output/agent_runs/run_20260829_215959_6d58/synthese.json"
+        "output/agent_runs/run_20260829_223829_1330/synthese.md",
+        "output/agent_runs/run_20260829_223829_1330/synthese.json"
       ],
       "data": {
         "groupes": {
