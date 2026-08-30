@@ -114,7 +114,15 @@ def charge_step(skill: str, ok: bool, duration_s: float, degraded: bool) -> None
 
 
 def complete_mission(run_id: str, statut: str, steps: int, tokens_in: int = 0,
-                     tokens_out: int = 0, model: str = "regles") -> None:
+                     tokens_out: int = 0, model: str = "regles",
+                     trace: Dict[str, Any] | None = None) -> None:
     ledger.record(agent="uranus", action=f"mission:{run_id}", model=model,
                   tokens_in=tokens_in, tokens_out=tokens_out,
                   meta={"statut": statut, "etapes": steps})
+    # Mémoire évolutive : archiver les productions (artefacts + références)
+    if trace:
+        try:
+            from cosmos import memory
+            memory.record_mission(trace)
+        except Exception:
+            pass

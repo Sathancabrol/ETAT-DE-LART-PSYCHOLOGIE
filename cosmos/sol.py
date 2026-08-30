@@ -165,6 +165,12 @@ def detect_intent(message: str) -> str:
 
 def chat(message: str) -> Dict[str, Any]:
     """Réponse déterministe de SOL, ancrée sur les données réelles."""
+    # Mémoire évolutive : chaque question enrichit la base du système
+    try:
+        from cosmos import memory
+        memory.record_question(message)
+    except Exception:
+        pass
     intent = detect_intent(message)
     data: Dict[str, Any] = {}
 

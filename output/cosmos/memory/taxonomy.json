@@ -1,0 +1,115 @@
+{
+  "name": "Cognitorium",
+  "children": [
+    {
+      "name": "Psychologie scientifique",
+      "children": [
+        {
+          "name": "Cognition & attention",
+          "children": [
+            {
+              "name": "Fonctions exécutives",
+              "children": []
+            },
+            {
+              "name": "Métacognition",
+              "children": []
+            },
+            {
+              "name": "Cognition incarnée (4E)",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Clinique & santé",
+          "children": [
+            {
+              "name": "Psychothérapies",
+              "children": []
+            },
+            {
+              "name": "Santé mentale",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Éducation & apprentissage",
+          "children": []
+        },
+        {
+          "name": "Méthodologie & open science",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Construction",
+      "children": [
+        {
+          "name": "BTP / TP",
+          "children": [
+            {
+              "name": "Sécurité",
+              "children": [
+                {
+                  "name": "Équipement",
+                  "children": [
+                    {
+                      "name": "EPI",
+                      "children": []
+                    },
+                    {
+                      "name": "Visière",
+                      "children": [
+                        {
+                          "name": "Modèle de vision connecté IA",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Administratif augmenté",
+              "children": [
+                {
+                  "name": "Automatisation documentaire",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Chantiers augmentés",
+              "children": [
+                {
+                  "name": "Visière HUD terrain",
+                  "children": []
+                },
+                {
+                  "name": "Robotique de chantier",
+                  "children": []
+                },
+                {
+                  "name": "Drones & suivi",
+                  "children": []
+                },
+                {
+                  "name": "Jumeaux numériques",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Émergents (auto-enrichis)",
+      "children": []
+    }
+  ]
+}

@@ -180,3 +180,58 @@ dans la visionneuse d'artefacts).
 `write_paper` (papier de synthèse + documentation) et `build_dossier`
 (dossier stratégique + graphe), intégrées au planificateur (déclencheurs
 « méta-analyse/papier » et « dossier/stratégie/améliorer/intégrer »).
+
+## 🆕 Constellations zodiacales, mémoire évolutive, dashboard & widget
+
+### Choisir sa constellation (graphe Obsidian)
+
+Bouton « ✦ Choisir sa constellation » au-dessus de la barre de recherche du
+graphe : 17 vues, dont les constellations du zodiaque (maîtrises classiques/modernes) :
+
+| Corps | Constellation | Contenu |
+|---|---|---|
+| ☉ SOL | ♌ Lion | graphe de gouvernance |
+| ♀ Vénus | ♉ Taureau | constellation financière (caps, dépenses, tarifs) |
+| ♅ Uranus | ♒ Verseau | connaissances (références + concepts + domaines) |
+| Satellites | ♒ …du Verseau | constellation de chaque satellite (Zêta : neurosciences/IHM/HUD…) |
+| Cour de Vénus | ♉ …du Taureau | périmètre de chaque analyste |
+| — | ✦ Zodiaque du système | toutes constellations fusionnées |
+| — | 🧠 Mémoire du système | questions, documents, tags émergents |
+
+API : `GET /api/cosmos/constellations` (catalogue) et `/api/cosmos/constellations/{id}`
+(format Obsidian). Le rendu réutilise le moteur D3 existant (filtres étendus).
+
+### Mémoire évolutive (`cosmos/memory.py`)
+
+Le système apprend de chaque interaction :
+- **Questions** : chaque message au chat SOL est archivé ;
+- **Missions** : références trouvées et artefacts (papiers, dossiers, plans,
+  graphes, veilles) versés à la mémoire ;
+- **Ingesta manuels** : `POST /api/cosmos/memory {type, titre, contenu, tags}`
+  — types supportés : article, thèse, draft, poster, texte, audio, vidéo,
+  mémoire, question, référence, dossier, papier, plan, graph, rapport… ;
+- **Taxonomie enrichie** (`output/cosmos/memory/taxonomy.json`) : seed avec la
+  branche demandée Construction → BTP/TP → Sécurité → Équipement → EPI /
+  Visière → Modèle de vision connecté IA ; s'enrichit automatiquement
+  (branchage par mots-clés, sinon branche « Émergents ») via les dossiers,
+  questions et ingesta ;
+- **Concepts partagés** (`GET /api/concepts`) : 4E + base 42 champs +
+  satellites + cour + taxonomie + mémoire — l'onglet « Concepts » (ex-4E)
+  affiche tout, avec badge de provenance.
+
+### Dashboard métrique
+
+`GET /api/dashboard/metrics` : 14 métriques (trust, intégrité, références,
+relations, citations, burn rate, tokens, PRISMA, mémoire, concepts,
+taxonomie, interactions, compétences, corps). Chaque carte est cliquable →
+**fenêtre détaillée avec la formule et sa légende** — ou la mention
+« ⚠️ Pas de formule — compteur simple » quand il n'y en a pas (ex. : Trust
+= M+R+O+C+T−P détaillé composante par composante ; intégrité ; burn rate ;
+PRISMA). Le dashboard affiche aussi une **représentation du système solaire**
+(orbites animées) — cliquer ouvre la page `/sol`.
+
+### ☉ Widget soleil flottant (`app/static/sol_widget.js`)
+
+Sur toutes les pages : petit soleil **en rotation avec plasma pulsant et
+éruptions solaires animées** (CSS pur). Un clic ouvre un mini-chat SOL
+(vues rapides état/budget/interactions/constellation, artefacts cliquables).

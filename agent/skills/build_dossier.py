@@ -93,6 +93,13 @@ def build_dossier(ctx, **_) -> SkillResult:
     terms = _key_terms(subject)
     phases = _detect_phases(subject)
 
+    # Enrichissement de la taxonomie partagée (mémoire du système)
+    try:
+        from cosmos import memory
+        memory.enrich_taxonomy(terms)
+    except Exception:
+        pass
+
     # Recherche documentaire si aucune n'a été faite dans ce run
     results: List[Dict[str, Any]] = ctx.state.get("search_results") or []
     did_search = False

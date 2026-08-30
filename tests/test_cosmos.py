@@ -280,3 +280,105 @@ def test_api_knowledge():
     assert r.status_code == 200 and len(r.json()["nodes"]) >= 30
     assert c.get("/api/cosmos/knowledge/zeta").status_code == 200
     assert c.get("/api/cosmos/knowledge/pluton").status_code == 404
+
+
+# ── Constellations zodiacales ───────────────────────────────────────────────
+
+def test_catalogue_constellations():
+    from cosmos.constellations import views
+    vs = {v["id"]: v for v in views()}
+    assert "zodiaque" in vs and "base" in vs and "memoire" in vs
+    assert vs["venus"]["label"].startswith("Taureau")      # demandé explicitement
+    assert vs["sol"]["label"].startswith("Lion")
+    assert vs["uranus"]["label"].startswith("Verseau")
+    assert vs["zeta"]["parent"] == "uranus" and "Verseau" in vs["zeta"]["label"]
+
+
+def test_graphes_constellations_format_obsidian():
+    from cosmos.constellations import graph_for
+    for vid in ("zodiaque", "sol", "venus", "uranus", "zeta", "thalie", "memoire"):
+        g = graph_for(vid)
+        assert g and g["nodes"], f"{vid} vide"
+        assert all("relation_type" in l for l in g["links"])
+    assert graph_for("pluton") is None
+
+
+# ── Mémoire évolutive ───────────────────────────────────────────────────────
+
+def test_taxonomie_seeed_construction():
+    from cosmos import memory
+    tree = memory.load_taxonomy()
+    blob = json.dumps(tree, ensure_ascii=False)
+    for attendu in ("Construction", "BTP / TP", "Sécurité", "Équipement", "EPI",
+                    "Visière", "Modèle de vision connecté IA"):
+        assert attendu in blob, f"{attendu} absent de la taxonomie seed"
+
+
+def test_enrichissement_taxonomie():
+    from cosmos import memory
+    leaves0 = len(memory.taxonomy_leaves())
+    added = memory.enrich_taxonomy(["drone de chantier", "réalité mixte industrielle"])
+    assert len(added) == 2
+    assert len(memory.taxonomy_leaves()) >= leaves0 + 2
+    # réinjecter le seed propre pour les autres tests
+    memory.save_taxonomy(memory.SEED_TAXONOMY)
+
+
+def test_memoire_record_et_graph():
+    from cosmos import memory
+    it = memory.record_item("video", "Visite chantier pilote", contenu="capture casque",
+                            tags=["chantier", "btp"])
+    assert it["type"] == "video"
+    g = memory.memory_graph()
+    assert g["nodes"] and g["nodes"][0]["id"] == "memoire"
+    assert any("Visite chantier" in n["label"] for n in g["nodes"])
+
+
+def test_question_enregistree_par_chat():
+    from cosmos.system import get_system
+    get_system()
+    from cosmos import memory
+    n0 = len(memory.items(type_="question"))
+    sol.chat("question test pour la mémoire 12345")
+    assert len(memory.items(type_="question")) == n0 + 1
+
+
+def test_concepts_partages_agreges():
+    from cosmos import memory
+    cs = memory.concepts()
+    names = " ".join(c["name"].lower() for c in cs)
+    assert len(cs) > 30
+    assert "epi" in names and "neurosciences" in names and "hud" in names
+
+
+# ── Dashboard métriques ─────────────────────────────────────────────────────
+
+def test_dashboard_metrics_avec_formules():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    d = c.get("/api/dashboard/metrics").json()
+    metrics = {m["id"]: m for m in d["metrics"]}
+    assert "trust" in metrics and "M + R + O + C + T" in metrics["trust"]["formula"][0]
+    assert metrics["integrite"]["formula"]
+    assert metrics["references"]["formula"] is None          # compteur simple
+    assert "Pas de formule" in metrics["references"]["legend"][0]
+    assert "burn" in metrics and "prisma" in metrics and "memoire" in metrics
+
+
+def test_api_constellations_et_concepts():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    assert c.get("/api/cosmos/constellations").status_code == 200
+    assert c.get("/api/cosmos/constellations/venus").status_code == 200
+    assert c.get("/api/cosmos/constellations/pluton").status_code == 404
+    conc = c.get("/api/concepts").json()
+    assert len(conc) > 40
+    assert any("4E" in (x.get("sources") or []) for x in conc)
+    mem = c.post("/api/cosmos/memory", json={"type": "audio", "titre": "réunion chantier",
+                                             "contenu": "point sécurité", "tags": ["btp"]})
+    assert mem.status_code == 200 and mem.json()["type"] == "audio"
+
+
+import json  # noqa: E402  (utilisé par test_taxonomie_seeed)

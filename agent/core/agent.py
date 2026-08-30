@@ -114,7 +114,7 @@ class Agent:
             used = llm_mod.USAGE[usage_t0:]
             gov.complete_mission(ctx.run_id, status, len(steps_report),
                                  sum(u["in"] for u in used), sum(u["out"] for u in used),
-                                 used[-1]["model"] if used else "regles")
+                                 used[-1]["model"] if used else "regles", trace=trace)
 
         # Rapport markdown lisible
         if not dry_run:

@@ -1072,3 +1072,152 @@ def cosmos_knowledge(body_id: str):
     if g is None:
         raise HTTPException(status_code=404, detail=f"Corps inconnu : {body_id}")
     return g
+
+# ──────────────── CONSTELLATIONS / MÉMOIRE / DASHBOARD ────────────────
+
+class MemoryItemRequest(BaseModel):
+    type: str
+    titre: str
+    contenu: str = ""
+    tags: List[str] = []
+    source: str = "user"
+    corps: str = "systeme"
+
+@app.get("/api/cosmos/constellations")
+def cosmos_constellations():
+    """Catalogue des constellations (zodiac) proposées dans le sélecteur du graphe."""
+    from cosmos.constellations import views
+    return views()
+
+@app.get("/api/cosmos/constellations/{view_id}")
+def cosmos_constellation_graph(view_id: str):
+    from cosmos.constellations import graph_for
+    g = graph_for(view_id)
+    if g is None:
+        raise HTTPException(status_code=404, detail=f"Constellation inconnue : {view_id}")
+    return g
+
+@app.get("/api/cosmos/memory")
+def cosmos_memory(type: Optional[str] = None, limit: int = 200):
+    from cosmos import memory
+    return {"items": memory.items(limit=min(max(limit, 1), 500), type_=type),
+            "stats": memory.stats()}
+
+@app.post("/api/cosmos/memory")
+def cosmos_memory_add(req: MemoryItemRequest):
+    """Ingère un élément dans la mémoire : article, thèse, draft, poster, texte, audio, vidéo…"""
+    from cosmos import memory
+    if not req.titre.strip():
+        raise HTTPException(status_code=400, detail="Titre requis")
+    return memory.record_item(req.type, req.titre.strip(), req.contenu,
+                              tags=req.tags, source=req.source, corps=req.corps)
+
+@app.get("/api/cosmos/taxonomy")
+def cosmos_taxonomy():
+    from cosmos import memory
+    return memory.load_taxonomy()
+
+@app.get("/api/concepts")
+def all_concepts():
+    """Concepts partagés : 4E (Cognitorium) + base 42 champs + satellites + cour + taxonomie + mémoire."""
+    from cosmos import memory
+    merged = {c["id"]: {**c, "sources": ["4E"]} for c in get_concepts_4e()}
+    for c in memory.concepts():
+        if c["id"] in merged:
+            src = set(merged[c["id"]].get("sources", ["4E"])) | set(c["sources"])
+            merged[c["id"]]["sources"] = sorted(src)
+        else:
+            merged[c["id"]] = {**c, "solidite": None,
+                               "mecanismes": [f"relié à {r}" for r in c.get("refs", [])[:4]],
+                               "applications": [], "gaps": []}
+    return list(merged.values())
+
+@app.get("/api/dashboard/metrics")
+def dashboard_metrics():
+    """Toutes les métriques du système, avec formules/légendes quand elles existent."""
+    import json as _json
+    from agent.core.registry import list_skills
+    from cosmos import memory, sol as sol_mod, venus as venus_mod, ledger
+    from cosmos.bodies import BODIES
+    from cosmos.system import get_system
+    from pathlib import Path as _P
+    get_system()
+    init_db()
+
+    stats = get_stats()
+    integ = sol_mod.integrity()
+    ven = venus_mod.status()
+    mem = memory.stats()
+
+    prisma = {"identifies": None, "dedup": None}
+    ppath = _P("output/prisma_state.json")
+    if ppath.exists():
+        try:
+            p = _json.loads(ppath.read_text(encoding="utf-8"))
+            last = p.get("dernier") or (p.get("historique") or [{}])[-1]
+            prisma = {"identifies": last.get("identifies"), "dedup": last.get("apres_deduplication")}
+        except Exception:
+            pass
+
+    n_inter = len(sol_mod._bus.history(limit=500)) if sol_mod._bus else 0
+    burn = round(ven["spend_today_usd"] / ven["budget"]["daily_cap_usd"], 3) if ven["budget"]["daily_cap_usd"] else 0
+
+    metrics = [
+        {"id": "trust", "label": "Trust factor moyen", "value": stats.get("average_trust_factor"),
+         "unit": "/100", "icon": "🛡️",
+         "formula": ["Trust = M + R + O + C + T − P",
+                     "M · Méthodologie : 0–30 (méta-analyse 30, revue 25, empirique 15…)",
+                     "R · Réplication : 0–20 (grand N, répliques)",
+                     "O · Open science : 0–20 (OA 6 + données 7 + code 3 + préenreg. 4)",
+                     "C · Cohérence : 0–15 (question explicite 2, tags ≥3 : 3)",
+                     "T · Transparence : 0–15 (peer review 5, justification 2)",
+                     "P · Pénalités : 0–50 (non peer review +15, preprint +10)"],
+         "legend": ["Moyenne calculée sur les trust_factor déclarés de la base 42 champs.",
+                    "Le recalcul heuristique est disponible via la compétence trust_scoring."]},
+        {"id": "integrite", "label": "Intégrité du système", "value": integ["score"], "unit": "/100",
+         "icon": "🟢", "status": integ["statut"],
+         "formula": ["Score = 100 − min(40, taux_erreur × 100) − 15·[burn ≥ 0,8] − 10·[dégradé ≥ 50 %]",
+                     "taux_erreur = interactions failed ÷ total (les refus de politique ne comptent pas)"],
+         "legend": integ["alertes"] or ["Aucune alerte préventive."]},
+        {"id": "references", "label": "Références (base 42 champs)", "value": stats.get("total_references"),
+         "unit": "", "icon": "📚", "formula": None,
+         "legend": ["Pas de formule — indicateur compteur (lignes validées du CSV)."]},
+        {"id": "relations", "label": "Relations", "value": stats.get("total_relations"), "unit": "",
+         "icon": "🔗", "formula": None, "legend": ["Pas de formule — compteur de liens inter-références."]},
+        {"id": "citations", "label": "Citations moyennes", "value": stats.get("average_citations"),
+         "unit": "", "icon": "📈",
+         "formula": ["moyenne = Σ citations ÷ nombre de références"], "legend": []},
+        {"id": "burn", "label": "Burn rate budgétaire", "value": burn, "unit": "",
+         "icon": "♀", "formula": ["burn = dépense du jour ÷ cap journalier",
+                                  "alerte SOL si burn ≥ 0,8"],
+         "legend": [f"Dépense : {ven['spend_today_usd']:.4f} $ · cap : {ven['budget']['daily_cap_usd']} $",
+                    f"Projection mois : {ven['forecast']['monthly_projection_usd']:.2f} $"]},
+        {"id": "tokens", "label": "Tokens aujourd'hui", "value": ven["tokens_today"], "unit": "tok",
+         "icon": "🪙", "formula": ["Σ tokens entrée et sortie des appels LLM du jour (grand livre)"],
+         "legend": ["Moteur à règles = 0 token (coût nul)."]},
+        {"id": "prisma", "label": "PRISMA (dernier run)", "value": prisma["dedup"], "unit": "réf.",
+         "icon": "🔀",
+         "formula": ["après_déduplication = identifiés − doublons (DOI exact + titres ≥ 0,93)"],
+         "legend": [f"Identifiés : {prisma['identifies'] if prisma['identifies'] is not None else 'n/a'}"]},
+        {"id": "memoire", "label": "Éléments en mémoire", "value": mem["total"], "unit": "",
+         "icon": "🧠", "formula": None,
+         "legend": [f"Par type : {mem['par_type']}", "Questions, références, dossiers, papiers, ingesta…"]},
+        {"id": "concepts", "label": "Concepts partagés", "value": mem["concepts"], "unit": "",
+         "icon": "💠", "formula": None,
+         "legend": ["Agrégation : base 42 champs + satellites + cour + taxonomie + mémoire."]},
+        {"id": "taxonomy", "label": "Feuilles de taxonomie", "value": mem["taxonomy_feuilles"], "unit": "",
+         "icon": "🌳", "formula": None,
+         "legend": ["S'enrichit automatiquement avec les missions (dossiers, questions, veilles)."]},
+        {"id": "interactions", "label": "Interactions approuvées", "value": n_inter, "unit": "",
+         "icon": "☰", "formula": None,
+         "legend": ["Toutes passent par SOL (bus journalisé dans output/cosmos/interactions.jsonl)."]},
+        {"id": "skills", "label": "Compétences Uranus", "value": len(list_skills()), "unit": "",
+         "icon": "⚙️", "formula": None, "legend": ["Registre extensible via le décorateur @skill."]},
+        {"id": "corps", "label": "Corps du système", "value": 3 + len(BODIES["uranus"]["satellites"])
+         + len(BODIES["venus"]["court"]), "unit": "",
+         "icon": "🪐", "formula": None,
+         "legend": ["SOL + 2 planètes + 7 satellites + 4 analystes."]},
+    ]
+    return {"metrics": metrics,
+            "system": {"integrite": integ, "spend_today_usd": ven["spend_today_usd"],
+                       "daily_cap_usd": ven["budget"]["daily_cap_usd"]}}
