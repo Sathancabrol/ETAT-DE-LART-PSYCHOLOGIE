@@ -910,6 +910,8 @@ class AgentRunRequest(BaseModel):
     task: str
     max_results: int = 10
     use_llm: Optional[bool] = None
+    skills: List[str] = []      # compétences choisies via le bouton (+)
+    subjects: List[str] = []     # sujets ajoutés via le bouton (+)
 
 @app.get("/agent", response_class=HTMLResponse)
 def agent_page(request: Request):
@@ -941,7 +943,9 @@ def agent_run(req: AgentRunRequest):
         raise HTTPException(status_code=400, detail="Tâche vide")
     agent = Agent(max_results=min(req.max_results, 50), use_llm=req.use_llm)
     try:
-        trace = agent.run(req.task.strip()[:500])
+        trace = agent.run(req.task.strip()[:500],
+                          force_skills=[s for s in req.skills if s][:8],
+                          subjects=[s for s in req.subjects if s.strip()][:6])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur agent : {e}")
     return _trace_public(trace)
@@ -1371,3 +1375,230 @@ def dashboard_metrics():
     return {"metrics": metrics,
             "system": {"integrite": integ, "spend_today_usd": ven["spend_today_usd"],
                        "daily_cap_usd": ven["budget"]["daily_cap_usd"]}}
+
+
+# ──────────────── CONSOLE URANUS : DASHBOARD, TIMELINE 4D, LAPLACE ────────────────
+
+@app.get("/api/agent/subjects")
+def agent_subjects():
+    """Sujets connus proposés par le (+) : branches de taxonomie + domaines + satellites."""
+    from cosmos import memory
+    from cosmos.bodies import BODIES
+    tree = memory.load_taxonomy()
+    branches = [c["name"] for c in tree.get("children", [])]
+    leaves = memory.taxonomy_leaves()
+    sats = [s["name"].split(" ")[0] for s in BODIES["uranus"]["satellites"]]
+    from cosmos.knowledge import SATELLITE_CONCEPTS
+    domaines = sorted({c.split(" ")[0].capitalize() for cs in SATELLITE_CONCEPTS.values() for c in cs})
+    return {"branches": branches, "feuilles": leaves[:60], "satellites": sats,
+            "domaines": domaines[:12]}
+
+
+@app.get("/api/agent/metrics")
+def agent_metrics():
+    """Dashboard d'Uranus : tâches, tokens, ressources consultées/fournies/créées + détails."""
+    import json as _json
+    from collections import Counter as _Counter
+    from pathlib import Path as _P
+    from cosmos import memory, ledger as _ledger
+    runs_dir = _P("output/agent_runs")
+    runs = []
+    if runs_dir.exists():
+        for d in sorted(runs_dir.iterdir(), reverse=True):
+            tj = d / "trace.json"
+            if tj.exists():
+                try:
+                    runs.append(_json.loads(tj.read_text(encoding="utf-8")))
+                except Exception:
+                    continue
+    skill_usage = _Counter(s["skill"] for t in runs for s in t.get("steps", []))
+    status_count = _Counter(t.get("statut") for t in runs)
+    total_dur = sum(t.get("duree_s", 0) for t in runs)
+    degraded = sum(1 for t in runs if t.get("mode_degrade"))
+
+    entries = _ledger.read_ledger()
+    tokens_in = sum(e["tokens_in"] for e in entries)
+    tokens_out = sum(e["tokens_out"] for e in entries)
+    cost_total = round(sum(e["cost_usd"] for e in entries), 6)
+    by_model = _Counter(e["model"] for e in entries)
+
+    mem = memory.stats()
+    consulted = mem["par_type"].get("reference", 0)          # ressources consultées
+    provided = sum(v for k, v in mem["par_type"].items()
+                   if k in {"papier", "dossier", "plan", "graph", "rapport", "document"})  # fournies
+    created = mem["concepts"]                                 # connaissances créées (concepts)
+    by_day = _Counter(t["date"][:10] for t in runs)
+
+    cards = [
+        {"id": "taches", "label": "Tâches accomplies", "value": len(runs), "unit": "missions",
+         "icon": "✅", "explain": [f"{len(runs)} missions exécutées par Uranus "
+                                   f"({status_count.get('succès', 0)} succès, "
+                                   f"{status_count.get('partiel', 0)} partielles).",
+                                   "Chaque mission est approuvée par SOL et journalisée."],
+         "detail": [{"main": t.get("tache", "")[:80], "secondary": t["date"][:16],
+                     "badge": t.get("statut", ""), "badge_color": "#34d399"}
+                    for t in runs[:15]]},
+        {"id": "tokens", "label": "Tokens consommés", "value": tokens_in + tokens_out, "unit": "tok",
+         "icon": "🪙", "explain": [f"{tokens_in} tokens en entrée / {tokens_out} en sortie "
+                                   f"— coût cumulé {cost_total} $.",
+                                   "Moteur à règles = 0 token. Chaque appel LLM est compté "
+                                   "au grand livre de Vénus."],
+         "detail": [{"main": m, "secondary": f"{n} actions", "badge": "", "badge_color": ""}
+                    for m, n in by_model.most_common()]},
+        {"id": "consultees", "label": "Ressources consultées", "value": consulted, "unit": "réf.",
+         "icon": "🔎", "explain": ["Références scientifiques trouvées par les recherches "
+                                   "multi-bases (Crossref, OpenAlex, PubMed) et versées en mémoire."],
+         "detail": [{"main": i["titre"][:80], "secondary": i["ts"][:16],
+                     "badge": "réf.", "badge_color": "#38bdf8"}
+                    for i in memory.items(type_="reference", limit=15)]},
+        {"id": "fournies", "label": "Ressources fournies", "value": provided, "unit": "doc.",
+         "icon": "📤", "explain": ["Documents produits et remis : papiers scientifiques, dossiers "
+                                   "stratégiques, plans, graphes, rapports."],
+         "detail": [{"main": i["titre"][:80], "secondary": i["ts"][:16],
+                     "badge": i["type"], "badge_color": "#fbbf24"}
+                    for i in memory.items(limit=40) if i["type"] in
+                    {"papier", "dossier", "plan", "graph", "rapport", "document"}][:15]},
+        {"id": "creees", "label": "Connaissances créées", "value": created, "unit": "concepts",
+         "icon": "💠", "explain": ["Concepts du registre partagé (base + satellites + cour + "
+                                   "taxonomie + mémoire) — croît à chaque mission et question."],
+         "detail": [{"main": c["name"][:80], "secondary": ", ".join(c["sources"][:2]),
+                     "badge": "", "badge_color": ""}
+                    for c in memory.concepts()[:15]]},
+        {"id": "competences", "label": "Compétences utilisées", "value": len(skill_usage), "unit": "skills",
+         "icon": "⚙️", "explain": ["Répartition d'usage des compétences sur toutes les missions."],
+         "detail": [{"main": s, "secondary": f"{n}×", "badge": "", "badge_color": ""}
+                    for s, n in skill_usage.most_common()]},
+    ]
+    return {"cards": cards,
+            "summary": {"missions": len(runs), "succes": status_count.get("succès", 0),
+                        "partiels": status_count.get("partiel", 0),
+                        "duree_totale_s": round(total_dur, 1), "degradees": degraded,
+                        "tokens_in": tokens_in, "tokens_out": tokens_out, "cout_usd": cost_total,
+                        "par_jour": dict(sorted(by_day.items())[-14:])}}
+
+
+@app.get("/api/agent/timeline")
+def agent_timeline():
+    """Timeline 4D des actions d'Uranus : nœuds et liens horodatés (temps + espace)."""
+    import json as _json
+    from datetime import datetime as _dt, timedelta as _td
+    from pathlib import Path as _P
+    nodes, links = [], []
+    runs_dir = _P("output/agent_runs")
+    if not runs_dir.exists():
+        return {"nodes": [], "links": []}
+    for d in sorted(runs_dir.iterdir()):
+        tj = d / "trace.json"
+        if not tj.exists():
+            continue
+        try:
+            t = _json.loads(tj.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        base = _dt.fromisoformat(t["date"])
+        rid = "run:" + t["run_id"]
+        nodes.append({"id": rid, "label": (t.get("tache", "")[:38] or t["run_id"]),
+                      "type": "run", "ts": t["date"], "statut": t.get("statut")})
+        offset = 0.0
+        for s in t.get("steps", []):
+            sid = f"{t['run_id']}:{s['skill']}:{s['n']}"
+            ts = (base + _td(seconds=offset)).isoformat(timespec="seconds")
+            offset += s.get("duration_s", 0) or 0.1
+            nodes.append({"id": sid, "label": s["skill"], "type": "skill",
+                          "ts": ts, "ok": s.get("ok")})
+            links.append({"source": rid, "target": sid, "type": "execute"})
+            for a in s.get("artifacts", []) or []:
+                aid = "art:" + a.split("/")[-1] + ":" + sid.split(":")[-1]
+                nodes.append({"id": aid, "label": a.split("/")[-1][:30], "type": "artifact", "ts": ts,
+                              "path": a})
+                links.append({"source": sid, "target": aid, "type": "produit"})
+            for r in (s.get("data", {}) or {}).get("resultats", []) or []:
+                if isinstance(r, dict) and r.get("titre"):
+                    xid = "ref:" + (r.get("doi") or r["titre"])[:40] + ":" + sid.split(":")[-1]
+                    nodes.append({"id": xid, "label": r["titre"][:34], "type": "reference",
+                                  "ts": ts, "doi": r.get("doi")})
+                    links.append({"source": sid, "target": xid, "type": "trouve"})
+    return {"nodes": nodes, "links": links}
+
+
+# ──────────────── LAPLACE ✳ / SEBAS ◉ ────────────────
+
+class LaplaceAgentRequest(BaseModel):
+    name: str
+    role: str = ""
+    parent: str = "uranus"
+    kind: str = "satellite"
+    system: str = "cognitorium"
+
+class LaplaceImproveRequest(BaseModel):
+    role: Optional[str] = None
+    name: Optional[str] = None
+
+class LaplaceSystemRequest(BaseModel):
+    name: str
+    star_name: str = "SOL-jumeau"
+
+class SebasObserveRequest(BaseModel):
+    sensor: str
+    contenu: str
+    tags: List[str] = []
+
+@app.get("/api/laplace")
+def laplace_registry():
+    from cosmos import nebula
+    return {"agents": nebula.list_agents(), "systems": nebula.list_systems()}
+
+@app.post("/api/laplace/agents")
+def laplace_create_agent(req: LaplaceAgentRequest):
+    from cosmos import nebula
+    try:
+        return nebula.create_agent(req.name, req.role, req.parent, req.kind, req.system)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/laplace/agents/{agent_id}/improve")
+def laplace_improve(agent_id: str, req: LaplaceImproveRequest):
+    from cosmos import nebula
+    try:
+        return nebula.improve_agent(agent_id, req.role, req.name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.post("/api/laplace/agents/{agent_id}/test")
+def laplace_test(agent_id: str):
+    from cosmos import nebula
+    return nebula.test_agent(agent_id)
+
+@app.post("/api/laplace/systems")
+def laplace_create_system(req: LaplaceSystemRequest):
+    from cosmos import nebula
+    try:
+        return nebula.create_system(req.name, req.star_name)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/sebas/sensors")
+def sebas_sensors():
+    from cosmos import nebula
+    return nebula.sensors_status()
+
+@app.post("/api/sebas/observe")
+def sebas_observe(req: SebasObserveRequest):
+    from cosmos import nebula
+    try:
+        return nebula.record_observation(req.sensor, req.contenu, req.tags)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# ──────────────── SYNCHRO BASE DE DONNÉES ↔ MÉMOIRE ────────────────
+
+@app.post("/api/database/sync")
+def database_sync():
+    from app.database import sync_memory_items
+    return {"synchronises": sync_memory_items()}
+
+@app.get("/api/memory-items")
+def memory_items(type: Optional[str] = None, limit: int = 300):
+    from app.database import get_memory_items, sync_memory_items
+    sync_memory_items()
+    return {"items": get_memory_items(type_filter=type, limit=min(max(limit, 1), 1000))}

@@ -278,3 +278,64 @@ Cinq branches racines :
 
 Migration automatique : les enrichissements existants sont conservés, les
 branches seed manquantes sont ajoutées au chargement.
+
+---
+
+## Niveau Laplace ✳ & Sebas ◉ (au-dessus de SOL)
+
+Le système gagne un étage supérieur : **Laplace ✳**, « créateur de nébuleuse du
+savoir », spécialisé dans la création d'agents à tous les niveaux et de
+systèmes solaires complets supplémentaires (qu'il peut modifier, améliorer,
+tester), accompagné de **Sebas ◉**, son exécutant de terrain connecté aux
+capteurs (webcam, wifi, téléphone).
+
+- `cosmos/nebula.py` — registre persistant (`output/cosmos/nebula.json`) :
+  `create_agent` (parent ∈ {sol, uranus, vénus, laplace, sebas} ∪ agents
+  existants), `improve_agent` (version++, compteur d'améliorations),
+  `test_agent` (ping sur le bus, approbation SOL incluse), `create_system`,
+  `sensors_status`, `record_observation`.
+- `cosmos/bodies.py` — Laplace (kind `nebuleuse`, #c084fc) et Sebas
+  (kind `executeur`, #34d399, capteurs) ; `known_body_ids()` inclut les corps
+  créés par Laplace → **SOL peut approuver leurs interactions**.
+- Vue 3D `/sol` : nébuleuse de 420 particules au-dessus du soleil, cœur ✳
+  cliquable, étincelles ✦ = agents créés, Sebas en orbite autour de la nébuleuse.
+  Modales : registre + création d'agent/système, amélioration, test, capteurs,
+  consignation d'observation.
+- Honnêteté matérielle : la sandbox n'a pas de périphériques → statut
+  « interface prête — périphérique non détecté », **jamais de fausses données**.
+
+API : `GET /api/laplace` · `POST /api/laplace/agents` ·
+`POST /api/laplace/agents/{id}/improve` · `POST /api/laplace/agents/{id}/test` ·
+`POST /api/laplace/systems` · `GET /api/sebas/sensors` · `POST /api/sebas/observe`
+
+## Console Uranus v2 (`/agent`)
+
+Trois vues : **Console** (missions), **Dashboard**, **Timeline 4D**.
+
+- **Dashboard agent** (`GET /api/agent/metrics`) : 6 cartes — tâches accomplies,
+  tokens consommés, ressources consultées / fournies, connaissances créées,
+  compétences utilisées. Clic sur une carte → **page complète** (explications,
+  détail, activité par jour).
+- **Chat avec « + »** (à la Claude/GPT) : « ⚙ Choisir compétence » (cases à
+  cocher, ajout multiple) et « 🏷 Ajouter un sujet » (branches de taxonomie,
+  domaines des satellites, sujets fins). `/api/agent/run` accepte
+  `skills` + `subjects` : le plan est imposé, les sujets enrichissent la tâche.
+- **Illustration de la production** : à la fin d'une run, le meilleur artefact
+  est prévisualisé en ligne (HTML en iframe, graphe D3, markdown rendu).
+- **Timeline 4D** (`GET /api/agent/timeline`) : nœuds (runs, compétences,
+  artefacts, références) horodatés + liens (execute / produit / trouve),
+  représentés de 3 façons : **⏱ Temps** (axe chronologique + couloirs par
+  type), **🌌 Espace** (graphe type Obsidian), **🌀 Mixte** (positions
+  spatiales + apparition chronologique — curseur temporel & rejeu).
+
+## Synchro base de données ↔ mémoire (l'oubli corrigé)
+
+Chaque écriture en mémoire (`memory.record_item`) déclenche la synchronisation
+vers SQLite (`app.database.sync_memory_items`) :
+
+- table `memory_items` (id, ts, type, titre, contenu, tags, source, corps, meta)
+  — idempotente, index sur `type` ;
+- les références versées en mémoire par les recherches alimentent aussi la
+  table scientifique `references_table` (préfixe `mem_`, DOI/année extraits).
+
+API : `POST /api/database/sync` · `GET /api/memory-items?type=&limit=`

@@ -247,7 +247,17 @@ def record_item(type_: str, titre: str, contenu: str = "", tags: Optional[List[s
         f.write(json.dumps(item, ensure_ascii=False) + "\n")
     if tags:
         enrich_taxonomy(tags)
+    _sync_to_database(item)
     return item
+
+
+def _sync_to_database(item: Dict[str, Any]) -> None:
+    """Synchronise l'élément dans la base de données (si l'app est présente)."""
+    try:
+        from app.database import sync_memory_items
+        sync_memory_items()
+    except Exception:
+        pass  # hors app (CLI) : la synchro se fera au prochain démarrage
 
 
 def record_question(message: str) -> None:

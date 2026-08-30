@@ -26,8 +26,10 @@ from cosmos.bus import Bus, Message
 # ────────────────────────── Politique d'approbation ──────────────────────────
 
 def approve(msg: Message) -> Tuple[bool, str]:
-    """Politique SOL : corps connus + débit + budget."""
-    if msg.source not in BODIES or msg.target not in BODIES:
+    """Politique SOL : corps connus (y compris créés par Laplace) + débit + budget."""
+    from cosmos.bodies import known_body_ids
+    known = known_body_ids()
+    if msg.source not in known or msg.target not in known:
         return False, f"corps inconnu dans l'échange {msg.source}→{msg.target}"
     if msg.source == msg.target:
         return False, "auto-interaction interdite"

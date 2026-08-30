@@ -49,6 +49,8 @@
         <span class="text-[11px] px-2.5 py-1 rounded-full border" :class="integClass()" x-text="integ.label"></span>
         <span class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 mono" x-text="budget.spend_today_usd != null ? budget.spend_today_usd.toFixed(4) + ' $ / ' + (budget.budget?.daily_cap_usd ?? '—') + ' $' : '…'"></span>
         <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition">☉ Chat SOL</button>
+        <button @click="refreshNebula(); openModal('laplace')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 transition">✳ Laplace</button>
+        <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition">◉ Sebas</button>
         <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition">♅ Uranus</a>
         <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition">Base</a>
       </div>
@@ -60,7 +62,7 @@
     <div id="sky3d" class="absolute inset-0"></div>
     <div class="absolute top-3 left-4 z-10 pointer-events-none">
       <h2 class="text-[11px] uppercase tracking-[.14em] text-slate-500">Système — vue 3D</h2>
-      <p class="text-[10px] text-slate-600 mt-0.5">SOL ☉ au centre · ♀ Vénus (cour des Charites) · ♅ Uranus (anneaux + 7 satellites, Zêta ζ en premier)</p>
+      <p class="text-[10px] text-slate-600 mt-0.5">✳ Laplace (nébuleuse, créateur) · ◉ Sebas (terrain) · SOL ☉ au centre · ♀ Vénus (cour des Charites) · ♅ Uranus (anneaux + 7 satellites)</p>
     </div>
     <div class="absolute bottom-3 right-4 z-10 text-[10px] text-slate-600 text-right leading-relaxed pointer-events-none">
       <div>glisser = tourner · molette = zoom</div>
@@ -71,6 +73,104 @@
       <div class="text-[9.5px] text-slate-500 max-w-[240px]" x-text="hover.role"></div>
     </div>
   </main>
+
+  <!-- ══════════════ MODALE LAPLACE ✳ (créateur de nébuleuse) ══════════════ -->
+  <div x-show="modals.laplace" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('laplace')">
+    <div class="glass rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-5 fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">✳ Laplace — créateur de nébuleuse du savoir</h2>
+          <p class="text-[10.5px] text-slate-500">Crée des agents à tous les niveaux, des systèmes solaires complets · les modifie, les améliore, les teste</p>
+        </div>
+        <button @click="closeModal('laplace')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Agents créés <span x-text="'(' + laplace.agents.length + ')'"></span></h3>
+      <div class="space-y-1.5">
+        <template x-for="a in laplace.agents" :key="a.id">
+          <div class="glass-card rounded-lg p-3 flex items-center gap-3">
+            <span class="text-lg text-purple-300">✦</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-slate-200 mono truncate" x-text="a.id + (a.name ? ' · ' + a.name : '')"></p>
+              <p class="text-[10px] text-slate-500 truncate" x-text="a.role || '(rôle à définir)'"></p>
+              <p class="text-[9px] text-slate-600 mono" x-text="'parent ' + a.parent + ' · ' + a.kind + ' · ' + a.tests + ' test(s) · ' + a.statut"></p>
+            </div>
+            <button @click="improveAgent(a.id)" class="text-[9.5px] px-2 py-1 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20">améliorer</button>
+            <button @click="testAgent(a.id)" class="text-[9.5px] px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20">tester</button>
+          </div>
+        </template>
+        <p x-show="!laplace.agents.length" class="text-[11px] text-slate-600 italic">Aucun agent créé pour l'instant — Laplace attend vos instructions.</p>
+      </div>
+
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Créer un agent</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <input x-model="nlAgent.name" placeholder="nom (ex : Hélios)" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-purple-500 focus:outline-none">
+        <input x-model="nlAgent.role" placeholder="rôle (ex : veille solaire énergétique)" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-purple-500 focus:outline-none">
+        <select x-model="nlAgent.parent" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-300 focus:border-purple-500">
+          <template x-for="b in [{id:'uranus',l:'♅ Uranus — recherche'},{id:'venus',l:'♀ Vénus — finances'},{id:'sol',l:'☉ SOL — orchestration'},{id:'laplace',l:'✳ Laplace — création'},{id:'sebas',l:'◉ Sebas — terrain'}]" :key="b.id">
+            <option :value="b.id" x-text="b.l"></option>
+          </template>
+        </select>
+        <select x-model="nlAgent.kind" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-300 focus:border-purple-500">
+          <option value="satellite">satellite</option><option value="analyste">analyste</option>
+          <option value="planet">planète</option><option value="agent">agent</option><option value="star">étoile</option>
+        </select>
+      </div>
+      <button @click="createAgent()" class="mt-2 w-full py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 disabled:opacity-40" :disabled="!nlAgent.name.trim()">✦ Créer l'agent</button>
+      <p class="text-[10px] text-slate-600 mt-1.5">Chaque création passe par l'approbation de ☉ SOL et se synchronise au registre de la nébuleuse.</p>
+
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Systèmes solaires créés <span x-text="'(' + laplace.systems.length + ')'"></span></h3>
+      <div class="space-y-1.5">
+        <template x-for="s in laplace.systems" :key="s.id">
+          <div class="glass-card rounded-lg p-3 flex items-center gap-3">
+            <span class="text-lg text-amber-300">☉</span>
+            <div class="flex-1"><p class="text-xs text-slate-200 mono" x-text="s.id + ' · ' + s.star_name"></p>
+            <p class="text-[9.5px] text-slate-600" x-text="'créé ' + s.created + ' · ' + s.agents.length + ' agent(s)'"></p></div>
+          </div>
+        </template>
+      </div>
+      <div class="flex gap-2 mt-2">
+        <input x-model="nlSystem.name" placeholder="nom du système (ex : Nébuleuse-BTP)" class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-purple-500">
+        <button @click="createSystem()" :disabled="!nlSystem.name.trim()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-orange-500 disabled:opacity-40">☉ Créer système</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE SEBAS ◉ (exécutant terrain) ══════════════ -->
+  <div x-show="modals.sebas" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('sebas')">
+    <div class="glass rounded-2xl w-full max-w-xl max-h-[88vh] overflow-y-auto p-5 fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">◉ Sebas — exécutant de Laplace</h2>
+          <p class="text-[10.5px] text-slate-500">L'homme de terrain — capteurs webcam, wifi, téléphone · Laplace gère le savoir, Sebas agit</p>
+        </div>
+        <button @click="closeModal('sebas')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Capteurs</h3>
+      <div class="space-y-2">
+        <template x-for="s in sebas" :key="s.id">
+          <div class="glass-card rounded-lg p-3 flex items-center gap-3">
+            <span class="text-lg" x-text="s.icon"></span>
+            <div class="flex-1">
+              <p class="text-xs text-slate-200" x-text="s.nom"></p>
+              <p class="text-[10px] text-slate-500" x-text="s.description"></p>
+            </div>
+            <span class="text-[9.5px] mono px-2 py-1 rounded" :class="s.connecte ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30' : 'bg-slate-500/10 text-slate-500 border border-slate-600/40'" x-text="s.statut"></span>
+          </div>
+        </template>
+      </div>
+      <p class="text-[10px] text-amber-300/80 mt-2">⚠️ Environnement sandbox sans périphérique : interfaces prêtes, aucune donnée fabriquée.</p>
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Enregistrer une observation terrain</h3>
+      <div class="flex gap-2">
+        <select x-model="obs.sensor" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-300">
+          <option value="webcam">📷 webcam</option><option value="wifi">📶 wifi</option><option value="telephone">📱 téléphone</option>
+        </select>
+        <input x-model="obs.contenu" placeholder="ce que Sebas observe…" class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-emerald-500">
+        <button @click="recordObs()" :disabled="!obs.contenu.trim()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40">◉ consigner</button>
+      </div>
+      <p x-show="obsMsg" class="text-[10.5px] text-emerald-300 mt-2" x-text="obsMsg"></p>
+    </div>
+  </div>
 
   <!-- ══════════════ MODALE SOL (chat + vues) ══════════════ -->
   <div x-show="modals.sol" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('sol')">
@@ -224,7 +324,10 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false},
+    laplace: {agents: [], systems: []}, sebas: [],
+    nlAgent: {name: '', role: '', parent: 'uranus', kind: 'satellite'},
+    nlSystem: {name: ''}, obs: {sensor: 'webcam', contenu: ''}, obsMsg: '',
     selectedSat: 'uranus', selectedAnalyst: 'venus',
     graphs: {}, graphInfo: '', hover: {info: false, x: 0, y: 0, name: '', role: ''},
     artifact: {path: '', kind: 'raw', raw: '', html: ''},
@@ -235,6 +338,7 @@ function solApp() {
         const st = await (await fetch('/api/cosmos/state')).json();
         this.bodies = st.corps;
         this.satellites = (st.corps.find(b => b.id === 'uranus') || {}).satellites || [];
+        this.refreshNebula();
         this.court = (st.corps.find(b => b.id === 'venus') || {}).court || [];
         this.setInteg(st.integrite);
         this.buildSky();
@@ -263,6 +367,49 @@ function solApp() {
     },
 
     // ── Modales ─────────────────────────────────────────────
+    async refreshNebula() {
+      try {
+        const r = await (await fetch('/api/laplace')).json();
+        this.laplace = r;
+        this.sebas = await (await fetch('/api/sebas/sensors')).json();
+        if (this._nebulaSync) this._nebulaSync(r.agents);
+      } catch (e) {}
+    },
+    async createAgent() {
+      const r = await fetch('/api/laplace/agents', {method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(this.nlAgent)});
+      if (!r.ok) { alert((await r.json()).detail); return; }
+      this.nlAgent = {name: '', role: '', parent: 'uranus', kind: 'satellite'};
+      await this.refreshNebula();
+    },
+    async improveAgent(id) {
+      const role = prompt('Nouveau rôle / mission pour ' + id + ' :', '');
+      if (role === null) return;
+      const r = await fetch('/api/laplace/agents/' + id + '/improve', {method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({role: role || undefined})});
+      if (!r.ok) { alert((await r.json()).detail); return; }
+      await this.refreshNebula();
+    },
+    async testAgent(id) {
+      const r = await (await fetch('/api/laplace/agents/' + id + '/test', {method: 'POST'})).json();
+      alert(id + ' → ' + r.statut + (r.detail ? '\n' + r.detail : ''));
+      await this.refreshNebula();
+    },
+    async createSystem() {
+      const r = await fetch('/api/laplace/systems', {method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(this.nlSystem)});
+      if (!r.ok) { alert((await r.json()).detail); return; }
+      this.nlSystem = {name: ''};
+      await this.refreshNebula();
+    },
+    async recordObs() {
+      const r = await fetch('/api/sebas/observe', {method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(this.obs)});
+      if (!r.ok) { alert((await r.json()).detail); return; }
+      this.obsMsg = '◉ Observation ' + (await r.json()).id + ' consignée en mémoire (corps Sebas).';
+      this.obs.contenu = '';
+      setTimeout(() => this.obsMsg = '', 4000);
+    },
     openModal(id) {
       this.modals[id] = true;
       if (id === 'sol') this.$nextTick(() => this.scrollMsgs());
@@ -517,6 +664,58 @@ function solApp() {
       clickables.push(solCore, solGlow);
       scene.add(sol);
 
+      // ✳ LAPLACE — nébuleuse au-dessus du soleil
+      const nebulaGrp = new THREE.Group();
+      nebulaGrp.position.set(0, 185, 0);
+      const nebPts = [];
+      for (let i = 0; i < 420; i++) {
+        const r = 30 + Math.pow(Math.random(), 1.6) * 95, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+        nebPts.push(r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph) * 0.55, r * Math.sin(ph) * Math.sin(th));
+      }
+      const nebGeo = new THREE.BufferGeometry();
+      nebGeo.setAttribute('position', new THREE.Float32BufferAttribute(nebPts, 3));
+      const nebulaCloud = new THREE.Points(nebGeo, new THREE.PointsMaterial({color: 0xc084fc, size: 2.1, transparent: true, opacity: .5}));
+      nebulaGrp.add(nebulaCloud);
+      const lapCore = body(9, 0xa855f7, true);
+      const lapLbl = label('✳ Laplace', '#d8b4fe'); lapLbl.position.y = 22;
+      lapCore.userData = {bodyId: 'laplace', name: '✳ Laplace', role: 'Créateur de nébuleuse du savoir — crée agents & systèmes, les améliore et les teste'};
+      nebulaGrp.add(lapCore, lapLbl);
+      const lapGlow = new THREE.Mesh(new THREE.SphereGeometry(17, 20, 20),
+        new THREE.MeshBasicMaterial({color: 0xc084fc, transparent: true, opacity: .12}));
+      lapGlow.userData = lapCore.userData;
+      nebulaGrp.add(lapGlow);
+      clickables.push(lapCore, lapGlow);
+      scene.add(nebulaGrp);
+      // ✦ étincelles = agents créés par Laplace
+      const sparks = [];
+      this._nebulaSync = agents => {
+        sparks.forEach(s => nebulaGrp.remove(s.mesh));
+        sparks.length = 0;
+        (agents || []).slice(0, 24).forEach((a, i) => {
+          const sp = new THREE.Mesh(new THREE.SphereGeometry(2.2, 8, 8),
+            new THREE.MeshBasicMaterial({color: 0xe9d5ff}));
+          sp.userData = {bodyId: 'laplace', name: '✦ ' + a.id, role: a.role || 'agent créé par Laplace'};
+          const ang = i * 1.7, rr = 52 + (i % 5) * 13;
+          sparks.push({mesh: sp, ang, rr, y: ((i % 7) - 3) * 9, sp: .0026 + (i % 5) * .0007});
+          nebulaGrp.add(sp);
+        });
+      };
+      // ◉ SEBAS — exécutant, orbite autour de la nébuleuse
+      const sebasPivot = new THREE.Group();
+      const sebasGrp = new THREE.Group();
+      sebasGrp.position.x = 118;
+      const sebasMesh = body(5.5, 0x34d399, true);
+      sebasMesh.userData = {bodyId: 'sebas', name: '◉ Sebas', role: 'Exécutant de Laplace — capteurs webcam, wifi, téléphone · l\'homme de terrain'};
+      const sebasLbl = label('◉ Sebas', '#6ee7b7'); sebasLbl.position.y = 14;
+      sebasGrp.add(sebasMesh, sebasLbl);
+      const sebasOrbit = new THREE.Mesh(new THREE.RingGeometry(117.6, 118.4, 90),
+        new THREE.MeshBasicMaterial({color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: .18}));
+      sebasOrbit.rotation.x = Math.PI / 2;
+      nebulaGrp.add(sebasOrbit);
+      sebasPivot.add(sebasGrp);
+      nebulaGrp.add(sebasPivot);
+      clickables.push(sebasMesh);
+
       // orbites + planètes
       const ORBIT = {venus: 150, uranus: 265};
       const planets = {};
@@ -606,6 +805,8 @@ function solApp() {
         const u = hit.object.userData;
         if (!u || !u.bodyId) return;
         if (u.bodyId === 'sol') this.openModal('sol');
+        else if (u.bodyId === 'laplace') { this.refreshNebula(); this.openModal('laplace'); }
+        else if (u.bodyId === 'sebas') { this.refreshNebula(); this.openModal('sebas'); }
         else if (u.bodyId === 'uranus') { this.selectedSat = 'uranus'; this.openModal('uranus'); }
         else if (u.bodyId === 'venus') { this.selectedAnalyst = 'venus'; this.openModal('venus'); }
         else if (this.satellites.some(s => s.id === u.bodyId)) { this.selectedSat = u.bodyId; this.openModal('uranus'); }
@@ -622,6 +823,9 @@ function solApp() {
         const t = clock.getElapsedTime();
         planets.venus.pivot.rotation.y += 0.0011;
         planets.uranus.pivot.rotation.y += 0.0005;
+        nebulaGrp.rotation.y += 0.0007;
+        sebasPivot.rotation.y += 0.004;
+        sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
         planets.uranus.mesh.rotation.y += 0.004;
         planets.venus.mesh.rotation.y += 0.01;
         moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0012; });

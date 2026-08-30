@@ -3,106 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ agent_symbol }} {{ agent_name }} — Agent Chercheur · Cognitorium</title>
+  <title>{{ agent_symbol }} {{ agent_name }} — Console · Cognitorium</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     [x-cloak] { display: none !important; }
-    :root {
-      --bg0:#030508; --bg1:#070b14; --bg2:#0d1320; --bg3:#151d2e; --bg4:#1c2640;
-      --border:#1e293b; --border2:#334155;
-      --text1:#f1f5f9; --text2:#94a3b8; --text3:#64748b;
-      --indigo:#818cf8; --cyan:#22d3ee; --emerald:#34d399; --amber:#fbbf24; --rose:#fb7185; --purple:#c084fc;
-    }
-    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg0); color:var(--text1); }
+    :root { --bg0:#030508; --bg1:#070b14; --bg2:#0d1320; --bg3:#151d2e; --border:#1e293b; --border2:#334155;
+      --indigo:#818cf8; --cyan:#22d3ee; --emerald:#34d399; --amber:#fbbf24; --rose:#fb7185; --purple:#c084fc; }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg0); color:#f1f5f9; }
     ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-    .glass{background:rgba(13,19,32,0.8);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05)}
-    .glass-card{background:rgba(21,29,46,0.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    .fade-in{animation:fadeInUp .4s ease-out}
-    @keyframes pulseDot{0%,100%{opacity:.3}50%{opacity:1}}
-    .thinking{animation:pulseDot 1.2s infinite}
+    .glass{background:rgba(13,19,32,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05)}
+    .glass-card{background:rgba(21,29,46,0.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
+    .fade-in{animation:fadeInUp .35s ease-out} @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .thinking{animation:pulseDot 1.2s infinite} @keyframes pulseDot{0%,100%{opacity:.3}50%{opacity:1}}
     .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+    .chip{font-size:10.5px;font-family:'JetBrains Mono',monospace;padding:3px 9px;border-radius:7px;background:var(--bg2);border:1px solid var(--border);color:#94a3b8;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .vbtn{font-size:11px;padding:6px 12px;border-radius:9px;background:var(--bg2);border:1px solid var(--border);color:#94a3b8;transition:all .15s}
+    .vbtn:hover{border-color:rgba(129,140,248,.5);color:#a5b4fc}
+    .vbtn.on{border-color:rgba(129,140,248,.6);color:#a5b4fc;background:rgba(129,140,248,.1)}
+    .md h1{font-size:16px;font-weight:700;margin:12px 0 6px} .md h2{font-size:13.5px;font-weight:600;margin:12px 0 5px}
+    .md h3{font-size:12px;font-weight:600;color:#c7d2fe;margin:9px 0 4px} .md p{margin:5px 0;font-size:12px;color:#cbd5e1}
+    .md li{margin:2px 0 2px 15px;list-style:disc;font-size:11.5px;color:#cbd5e1}
+    .md table{border-collapse:collapse;margin:7px 0;font-size:10.5px} .md td,.md th{border:1px solid #334155;padding:3px 7px;color:#cbd5e1}
+    .md blockquote{border-left:2px solid #f59e0b;padding-left:9px;color:#94a3b8;margin:7px 0;font-size:11.5px}
+    .md hr{border-color:#1e293b;margin:10px 0} .md code{color:#7dd3fc;font-size:11px} .md strong{color:#f1f5f9}
   </style>
 </head>
 <body class="h-full">
-<div x-data="agentApp()" x-init="init()" class="min-h-full flex flex-col">
+<div x-data="uranusApp()" x-init="init()" class="min-h-full flex flex-col">
 
   <!-- ═══ HEADER ═══ -->
   <header class="glass sticky top-0 z-40 border-b border-white/5">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/30 via-purple-500/20 to-cyan-400/20 border border-indigo-400/40 flex items-center justify-center text-xl text-indigo-200 select-none" title="Uranus — symbole astronomique">{{ agent_symbol }}</div>
-      <div class="flex-1">
-        <h1 class="text-sm font-semibold tracking-wide">{{ agent_name }} <span class="text-slate-500 font-normal">· agent chercheur <span class="text-slate-600">· Cognitorium</span></span></h1>
-        <p class="text-[11px] text-slate-500">{{ agent_tagline }}</p>
+    <div class="max-w-[1500px] mx-auto px-4 py-2.5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/30 via-purple-500/20 to-cyan-400/20 border border-indigo-400/40 flex items-center justify-center text-xl text-indigo-200 select-none">♅</div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-semibold tracking-wide">{{ agent_name }} <span class="text-slate-500 font-normal">· console missions <span class="text-slate-600">· Cognitorium</span></span></h1>
+        <p class="text-[10.5px] text-slate-500">{{ agent_tagline }}</p>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button @click="view='console'" :class="view==='console' && 'on'" class="vbtn">⌨ Console</button>
+        <button @click="view='dashboard'; loadMetrics()" :class="view==='dashboard' && 'on'" class="vbtn">📊 Dashboard</button>
+        <button @click="view='timeline'; loadTimeline()" :class="view==='timeline' && 'on'" class="vbtn">🕒 Timeline 4D</button>
       </div>
       <div class="hidden sm:flex items-center gap-2">
-        <template x-if="status.available">
-          <span class="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">🧠 LLM : <span x-text="status.provider"></span></span>
-        </template>
-        <template x-if="!status.available">
-          <span class="text-[11px] px-2.5 py-1 rounded-full bg-slate-500/10 text-slate-400 border border-slate-600/40">⚙️ Cerveau : règles déterministes</span>
-        </template>
-        <a href="/sol" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 text-amber-300 transition">☉ Système</a>
+        <a href="/sol" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition">☉ Système</a>
         <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition">← Base</a>
       </div>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+  <main class="flex-1 max-w-[1500px] w-full mx-auto px-4 py-5">
 
-    <!-- ═══ COLONNE PRINCIPALE ═══ -->
-    <section class="flex flex-col gap-5 min-w-0">
+  <!-- ══════════════════ VUE CONSOLE ══════════════════ -->
+  <section x-show="view==='console'" class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+    <div class="flex flex-col gap-5 min-w-0">
 
-      <!-- Formulaire de tâche -->
+      <!-- Zone de chat -->
       <div class="glass rounded-2xl p-5 fade-in">
-        <label class="text-[11px] uppercase tracking-[.12em] text-slate-500">Tâche en langage naturel</label>
-        <textarea x-model="task" rows="2" placeholder="ex : recherche systématique des méta-analyses sur l'attention 2024-2026, puis déduplique et génère le flux PRISMA"
-          class="mt-2 w-full bg-[var(--bg2)] border border-[var(--border)] rounded-xl px-3.5 py-3 text-sm text-slate-200 placeholder-slate-600 focus:border-indigo-500 focus:outline-none resize-none"></textarea>
-
-        <div class="flex flex-wrap gap-1.5 mt-3" x-show="examples.length">
+        <label class="text-[11px] uppercase tracking-[.12em] text-slate-500">Tâche / question</label>
+        <!-- chips sélectionnées -->
+        <div class="flex flex-wrap gap-1.5 mt-2 mb-2" x-show="selSkills.length || selSubjects.length">
+          <template x-for="s in selSkills" :key="'k'+s">
+            <span class="inline-flex items-center gap-1 text-[10.5px] px-2 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">⚙ <span x-text="skills.find(x=>x.name===s)?.name || s"></span><button @click="selSkills=selSkills.filter(x=>x!==s)" class="hover:text-white">✕</button></span>
+          </template>
+          <template x-for="s in selSubjects" :key="'s'+s">
+            <span class="inline-flex items-center gap-1 text-[10.5px] px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">🏷 <span x-text="s"></span><button @click="selSubjects=selSubjects.filter(x=>x!==s)" class="hover:text-white">✕</button></span>
+          </template>
+        </div>
+        <div class="flex gap-2 items-end">
+          <!-- bouton + -->
+          <div class="relative">
+            <button @click="plusOpen=!plusOpen" class="w-9 h-9 rounded-xl border border-indigo-500/40 hover:border-indigo-400 bg-indigo-500/10 text-indigo-300 text-lg leading-none transition flex items-center justify-center" title="Ajouter — compétences, sujets">＋</button>
+            <div x-show="plusOpen" @click.outside="plusOpen=false" x-cloak class="absolute left-0 bottom-11 w-72 glass rounded-xl p-2 z-50 shadow-2xl">
+              <button @click="plusTab='skills'" :class="plusTab==='skills'?'bg-indigo-500/15 text-indigo-300':'text-slate-500'" class="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition flex items-center gap-2">⚙ Choisir compétence</button>
+              <button @click="plusTab='subjects'; loadSubjects()" :class="plusTab==='subjects'?'bg-emerald-500/15 text-emerald-300':'text-slate-500'" class="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition flex items-center gap-2">🏷 Ajouter un sujet</button>
+              <div class="border-t border-white/5 my-1.5"></div>
+              <!-- liste compétences -->
+              <div x-show="plusTab==='skills'" class="max-h-64 overflow-y-auto pr-1">
+                <template x-for="sk in skills" :key="sk.name">
+                  <label class="flex items-start gap-2 px-2 py-1.5 rounded-lg hover:bg-white/[.04] cursor-pointer">
+                    <input type="checkbox" :value="sk.name" x-model.number="nothing" @change="toggleSkill(sk.name)" :checked="selSkills.includes(sk.name)" class="accent-indigo-500 mt-0.5">
+                    <span class="min-w-0">
+                      <span class="block text-[11px] text-slate-200 mono" x-text="sk.name"></span>
+                      <span class="block text-[9px] text-slate-600 leading-snug" x-text="sk.description.slice(0,70)"></span>
+                    </span>
+                  </label>
+                </template>
+              </div>
+              <!-- liste sujets -->
+              <div x-show="plusTab==='subjects'" class="max-h-64 overflow-y-auto pr-1">
+                <p class="text-[9px] uppercase tracking-wider text-slate-600 px-2 py-1">Branches</p>
+                <template x-for="b in subjects.branches" :key="'b'+b">
+                  <button @click="toggleSubject(b)" :class="selSubjects.includes(b)?'bg-emerald-500/15 text-emerald-300':'text-slate-400'" class="w-full text-left px-2 py-1.5 rounded-lg text-[11px] hover:bg-white/[.04] transition" x-text="'📁 ' + b"></button>
+                </template>
+                <p class="text-[9px] uppercase tracking-wider text-slate-600 px-2 py-1 mt-1">Domaines des satellites</p>
+                <template x-for="d in subjects.domaines" :key="'d'+d">
+                  <button @click="toggleSubject(d)" :class="selSubjects.includes(d)?'bg-emerald-500/15 text-emerald-300':'text-slate-400'" class="w-full text-left px-2 py-1.5 rounded-lg text-[11px] hover:bg-white/[.04] transition" x-text="'♆ ' + d"></button>
+                </template>
+                <p class="text-[9px] uppercase tracking-wider text-slate-600 px-2 py-1 mt-1">Sujets fins (taxonomie)</p>
+                <template x-for="f in subjects.feuilles.slice(0,30)" :key="'f'+f">
+                  <button @click="toggleSubject(f)" :class="selSubjects.includes(f)?'bg-emerald-500/15 text-emerald-300':'text-slate-400'" class="w-full text-left px-2 py-1 rounded-lg text-[10.5px] hover:bg-white/[.04] transition" x-text="'· ' + f"></button>
+                </template>
+              </div>
+            </div>
+          </div>
+          <!-- saisie -->
+          <textarea x-model="task" rows="2" :placeholder="chatPlaceholder"
+            class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:border-indigo-500 focus:outline-none resize-none"></textarea>
+          <button @click="runTask()" :disabled="running || (!task.trim() && !selSkills.length)"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 transition shrink-0">
+            <span x-show="!running">▶</span><span x-show="running" class="thinking">●</span>
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-3" x-show="view==='console'">
           <template x-for="ex in examples" :key="ex">
             <button @click="task = ex" class="text-[11px] text-slate-400 hover:text-indigo-300 bg-[var(--bg2)] hover:bg-indigo-500/10 border border-[var(--border)] hover:border-indigo-500/40 rounded-full px-3 py-1 transition" x-text="'▸ ' + ex"></button>
           </template>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 mt-4">
-          <button @click="runTask()" :disabled="running || !task.trim()"
-            class="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 transition flex items-center gap-2">
-            <span x-show="!running">▶ Exécuter</span>
-            <span x-show="running" class="thinking">● L'agent travaille…</span>
-          </button>
-          <div class="flex items-center gap-2 text-[11px] text-slate-500">
-            <span>Résultats max / base</span>
-            <input type="number" x-model.number="maxResults" min="3" max="50" class="w-16 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2 py-1 text-slate-300">
-          </div>
-          <label class="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer" x-show="status.available">
-            <input type="checkbox" x-model="useLlm" class="accent-indigo-500"> utiliser le LLM
-          </label>
         </div>
       </div>
 
       <!-- Résultat du run -->
       <div x-show="result" x-cloak class="flex flex-col gap-4">
-
-        <!-- Entête run -->
         <div class="glass rounded-2xl p-5 fade-in" x-if="result">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div class="flex items-center gap-2">
                 <span class="text-lg" x-text="{'succès':'✅','partiel':'⚠️','échec':'❌','planifié':'📋'}[result.statut] || '❔'"></span>
-                <h2 class="text-sm font-semibold" x-text="'Run terminé — ' + result.statut"></h2>
+                <h2 class="text-sm font-semibold" x-text="'Run ' + result.statut"></h2>
               </div>
               <p class="text-[11px] text-slate-500 mt-1 mono" x-text="result.run_id + ' · cerveau ' + result.cerveau + ' · ' + result.duree_s + ' s'"></p>
             </div>
-            <div class="flex gap-2">
-              <button @click="openArtifact(result.run_id + '/report.md')" class="text-[11px] px-3 py-1.5 rounded-lg bg-[var(--bg2)] border border-[var(--border)] hover:border-indigo-500/40 text-slate-300 transition">📄 Rapport complet</button>
-            </div>
+            <button @click="openArtifact(result.run_id + '/report.md')" class="text-[11px] px-3 py-1.5 rounded-lg bg-[var(--bg2)] border border-[var(--border)] hover:border-indigo-500/40 text-slate-300 transition">📄 Rapport complet</button>
           </div>
-          <p class="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mt-3" x-show="result.mode_degrade">
-            ⚠️ Mode dégradé : réseau indisponible — certaines compétences ont utilisé des fixtures de démonstration (données non réelles).
-          </p>
+          <p class="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mt-3" x-show="result.mode_degrade">⚠️ Mode dégradé : réseau indisponible — fixtures de démonstration.</p>
           <p class="text-[11px] text-slate-500 mt-3 italic" x-text="'« ' + result.rationale + ' »'"></p>
+        </div>
+
+        <!-- 🎨 Illustration de la production -->
+        <div class="glass rounded-2xl p-5 fade-in" x-show="production.title" x-if="result">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-[11px] uppercase tracking-[.12em] text-slate-500">🎨 Production de la mission</h2>
+            <span class="text-[10px] text-slate-600 mono" x-text="production.title"></span>
+          </div>
+          <iframe x-show="production.kind==='html'" :srcdoc="production.raw" class="w-full h-72 rounded-lg bg-white/95"></iframe>
+          <svg x-show="production.kind==='graph'" id="prodgraph" class="w-full" style="height:288px"></svg>
+          <div x-show="production.kind==='md'" class="md max-h-72 overflow-y-auto pr-2" x-html="production.html"></div>
         </div>
 
         <!-- Étapes -->
@@ -110,8 +156,7 @@
           <div class="glass-card rounded-xl p-4 fade-in">
             <div class="flex items-start gap-3">
               <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold mono shrink-0"
-                :class="s.ok ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'"
-                x-text="s.n"></div>
+                :class="s.ok ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'" x-text="s.n"></div>
               <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="mono text-xs text-indigo-300" x-text="s.skill"></span>
@@ -119,27 +164,11 @@
                   <span class="text-[10px] text-slate-600" x-text="s.duration_s + 's'"></span>
                 </div>
                 <p class="text-[13px] text-slate-300 mt-1" x-text="s.summary"></p>
-                <ul class="mt-2 space-y-0.5" x-show="s.details && s.details.length">
-                  <template x-for="(d, i) in (s.details || []).slice(0, 8)" :key="i">
+                <ul class="mt-2 space-y-0.5">
+                  <template x-for="(d, i) in (s.details || []).slice(0, 6)" :key="i">
                     <li class="text-[11px] text-slate-500 flex gap-1.5"><span class="text-slate-700">—</span><span class="min-w-0" x-text="d"></span></li>
                   </template>
                 </ul>
-                <!-- Résultats de recherche inline -->
-                <div x-show="s.data && s.data.resultats && s.data.resultats.length" class="mt-3 space-y-1">
-                  <template x-for="(r, i) in (s.data && s.data.resultats ? s.data.resultats : []).slice(0,6)" :key="i">
-                    <div class="text-[11px] bg-[var(--bg2)]/60 border border-[var(--border)] rounded-lg px-3 py-2">
-                      <div class="flex items-start justify-between gap-2">
-                        <span class="text-slate-300" x-text="'· ' + (r.titre || '').slice(0, 110)"></span>
-                        <span class="text-slate-600 shrink-0 mono" x-text="(r.annee || '') + ' · ' + (r.citations || 0) + ' cit.'"></span>
-                      </div>
-                      <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] px-1.5 rounded bg-cyan-500/10 text-cyan-300/80" x-text="r.base"></span>
-                        <span class="text-slate-600 truncate" x-text="r.auteurs"></span>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-                <!-- Artefacts cliquables -->
                 <div class="flex flex-wrap gap-1.5 mt-3" x-show="s.artifacts && s.artifacts.length">
                   <template x-for="a in s.artifacts" :key="a">
                     <button @click="openArtifact(a)" class="text-[10px] mono px-2 py-1 rounded-md bg-[var(--bg2)] border border-[var(--border)] hover:border-cyan-500/40 text-slate-400 hover:text-cyan-300 transition" x-text="a.split('/').pop()"></button>
@@ -151,7 +180,7 @@
         </template>
       </div>
 
-      <!-- Catalogue des compétences -->
+      <!-- Catalogue compétences -->
       <div class="glass rounded-2xl p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-[11px] uppercase tracking-[.12em] text-slate-500">Compétences <span x-text="'(' + skills.length + ')'"></span></h2>
@@ -159,25 +188,25 @@
         </div>
         <div x-show="showSkills" x-cloak class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <template x-for="sk in skills" :key="sk.name">
-            <div class="glass-card rounded-xl p-3.5 hover:border-indigo-500/30 transition cursor-pointer" @click="task = sk.examples[0] || task">
+            <div class="glass-card rounded-xl p-3.5 hover:border-indigo-500/30 transition cursor-pointer" @click="toggleSkill(sk.name)">
               <div class="flex items-center gap-2">
                 <span class="text-sm" x-text="catIcon[sk.category] || '⚙️'"></span>
                 <span class="mono text-xs text-indigo-300" x-text="sk.name"></span>
-                <span class="text-[9px] uppercase tracking-wider text-slate-600 ml-auto" x-text="sk.category"></span>
+                <input type="checkbox" :checked="selSkills.includes(sk.name)" class="accent-indigo-500 ml-auto" onclick="event.stopPropagation()">
+                <span class="text-[9px] uppercase tracking-wider text-slate-600" x-text="sk.category"></span>
               </div>
               <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed" x-text="sk.description"></p>
-              <p class="text-[10px] text-slate-600 mt-2 italic" x-show="sk.examples.length" x-text="'ex : ' + sk.examples[0]"></p>
             </div>
           </template>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ═══ COLONNE DROITE : historique ═══ -->
+    <!-- Historique -->
     <aside class="flex flex-col gap-4">
       <div class="glass rounded-2xl p-4">
         <h2 class="text-[11px] uppercase tracking-[.12em] text-slate-500 mb-3">Historique des runs</h2>
-        <div class="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
+        <div class="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
           <template x-for="r in runs" :key="r.run_id">
             <button @click="loadRun(r.run_id)" class="w-full text-left glass-card rounded-xl p-3 hover:border-indigo-500/30 transition">
               <div class="flex items-center gap-2">
@@ -185,96 +214,393 @@
                 <span class="text-[11px] text-slate-300 truncate flex-1" x-text="r.tache"></span>
               </div>
               <div class="flex items-center gap-2 mt-1">
-                <span class="text-[10px] text-slate-600 mono" x-text="r.run_id.replace('run_','')"></span>
-                <span class="text-[9px] px-1.5 rounded bg-slate-700/50 text-slate-400" x-text="r.cerveau"></span>
+                <span class="text-[10px] text-slate-600 mono" x-text="r.run_id.slice(-8)"></span>
                 <span x-show="r.mode_degrade" class="text-[9px] px-1.5 rounded bg-amber-500/10 text-amber-300">dégradé</span>
-                <span class="text-[10px] text-slate-600 ml-auto" x-text="r.etapes + ' ét. · ' + r.duree_s + 's'"></span>
+                <span class="text-[10px] text-slate-600 ml-auto" x-text="r.etapes + ' ét.'"></span>
               </div>
             </button>
           </template>
-          <p x-show="!runs.length" class="text-[11px] text-slate-600 text-center py-4">Aucun run pour l'instant</p>
         </div>
       </div>
     </aside>
+  </section>
+
+  <!-- ══════════════════ VUE DASHBOARD AGENT ══════════════════ -->
+  <section x-show="view==='dashboard'" x-cloak class="space-y-5 fade-in">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold">Dashboard d'{{ agent_name }}</h2>
+        <p class="text-[10.5px] text-slate-500">Métriques de l'agent — cliquez sur une carte pour la page complète</p>
+      </div>
+      <div class="flex gap-1.5 text-[10px] text-slate-500" x-show="metrics.summary">
+        <span class="glass-card rounded-lg px-2.5 py-1.5 mono" x-text="metrics.summary.missions + ' missions'"></span>
+        <span class="glass-card rounded-lg px-2.5 py-1.5 mono" x-text="metrics.summary.duree_totale_s + ' s cumulées'"></span>
+        <span class="glass-card rounded-lg px-2.5 py-1.5 mono" x-text="metrics.summary.cout_usd + ' $'"></span>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <template x-for="c in metrics.cards" :key="c.id">
+        <button @click="openMetricPage(c)" class="text-left glass-card rounded-xl p-4 hover:border-indigo-500/40 transition group">
+          <div class="flex items-center justify-between"><span class="text-lg" x-text="c.icon"></span><span class="text-[9px] text-slate-700 group-hover:text-indigo-400">page complète ↗</span></div>
+          <p class="text-2xl font-bold mono mt-2" x-text="c.value ?? '—'"></p>
+          <p class="text-[10px] text-slate-500" x-text="c.label"></p>
+          <p class="text-[9px] text-slate-600" x-text="c.unit"></p>
+        </button>
+      </template>
+    </div>
+    <!-- activité par jour -->
+    <div class="glass-card rounded-xl p-4" x-show="metrics.summary">
+      <h3 class="text-xs font-semibold mb-3">Activité par jour (missions)</h3>
+      <div class="flex items-end gap-1.5 h-24">
+        <template x-for="(n, d) in (metrics.summary.par_jour || {})" :key="d">
+          <div class="flex-1 flex flex-col items-center gap-1 group">
+            <div class="w-full rounded-t bg-indigo-500/50 group-hover:bg-indigo-400/70 transition-all" :style="'height:' + Math.max(4, n * 12) + 'px'"></div>
+            <span class="text-[8px] text-slate-600 mono" x-text="d.slice(5)"></span>
+            <span class="text-[9px] text-slate-500" x-text="n"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Page complète de la métrique -->
+    <div x-show="metricPage" x-cloak class="glass rounded-2xl p-5 fade-in">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl" x-text="metricPage?.icon"></span>
+          <div>
+            <h3 class="text-base font-bold" x-text="metricPage?.label"></h3>
+            <p class="text-[11px] text-slate-500 mono" x-text="(metricPage?.value ?? '—') + ' ' + (metricPage?.unit || '')"></p>
+          </div>
+        </div>
+        <button @click="metricPage=null" class="text-slate-500 hover:text-white text-lg leading-none px-2">✕</button>
+      </div>
+      <div class="glass-card rounded-xl p-3.5 mb-3">
+        <template x-for="(e, i) in (metricPage?.explain || [])" :key="i">
+          <p class="text-[12px] text-slate-400 leading-relaxed mb-1.5" x-html="mdInline(e)"></p>
+        </template>
+      </div>
+      <div class="glass-card rounded-xl p-3.5">
+        <p class="text-[9px] uppercase tracking-[.14em] text-slate-600 mb-2">Détail</p>
+        <div class="space-y-1 max-h-72 overflow-y-auto pr-1">
+          <template x-for="(it, i) in (metricPage?.detail || [])" :key="i">
+            <div class="flex items-center gap-2 p-1.5 rounded bg-black/20">
+              <span class="text-[11px] text-slate-300 flex-1 min-w-0 truncate" x-text="it.main"></span>
+              <span class="text-[9px] text-slate-600 shrink-0" x-text="it.secondary"></span>
+              <span x-show="it.badge" class="text-[9px] mono px-1.5 py-0.5 rounded bg-black/30 border border-white/10 text-slate-400 shrink-0" x-text="it.badge"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ VUE TIMELINE 4D ══════════════════ -->
+  <section x-show="view==='timeline'" x-cloak class="fade-in flex flex-col gap-4" style="min-height:calc(100vh - 160px)">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-bold">Timeline 4D — actions d'{{ agent_name }}</h2>
+        <p class="text-[10.5px] text-slate-500">Création des nœuds et liens dans le <b class="text-indigo-300">temps</b> et l'<b class="text-cyan-300">espace</b> · <span x-text="tl.nodes.length"></span> nœuds · <span x-text="tl.links.length"></span> liens</p>
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <button @click="tlMode='temps'; renderTimeline()" :class="tlMode==='temps' && 'on'" class="vbtn">⏱ Temps</button>
+        <button @click="tlMode='espace'; renderTimeline()" :class="tlMode==='espace' && 'on'" class="vbtn">🌌 Espace</button>
+        <button @click="tlMode='mixte'; renderTimeline()" :class="tlMode==='mixte' && 'on'" class="vbtn">🌀 Mixte</button>
+        <button @click="tlPlay=!tlPlay" class="vbtn" x-text="tlPlay ? '⏸ Pause' : '▶ Rejouer'"></button>
+      </div>
+    </div>
+    <!-- curseur temporel -->
+    <div class="glass-card rounded-xl p-3.5 flex items-center gap-3">
+      <span class="text-[10px] text-slate-500 mono w-32 shrink-0" x-text="tlCursorLabel"></span>
+      <input type="range" min="0" max="1000" x-model.number="tlCursor" @input="applyTimeFilter()" class="flex-1 accent-indigo-500">
+      <span class="text-[10px] text-slate-500 mono shrink-0" x-text="tlVisible + '/' + tl.nodes.length + ' nœuds'"></span>
+    </div>
+    <div class="glass rounded-2xl flex-1 relative overflow-hidden" style="min-height:420px">
+      <svg id="tlsvg" class="w-full h-full"></svg>
+      <div class="absolute bottom-3 left-3 glass rounded-lg px-3 py-2 flex gap-3 text-[9px]">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#818cf8"></span>runs</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#34d399"></span>compétences</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#fbbf24"></span>artefacts</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:#38bdf8"></span>références</span>
+      </div>
+      <p class="absolute top-3 right-3 text-[9.5px] text-slate-600 max-w-[240px] text-right" x-text="tlModeHelp"></p>
+    </div>
+  </section>
   </main>
 
-  <!-- ═══ MODAL ARTEFACT ═══ -->
-  <div x-show="artifact.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,.75);backdrop-filter:blur(4px)" @click.self="artifact.open=false">
-    <div class="glass rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-white/5">
-        <h3 class="mono text-xs text-cyan-300" x-text="artifact.path.split('/').pop()"></h3>
-        <button @click="artifact.open=false" class="text-slate-500 hover:text-white text-lg leading-none">✕</button>
+  <!-- ═══ MODALE ARTEFACT ═══ -->
+  <div x-show="artOpen" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4" @click.self="artOpen=false" style="background:rgba(0,0,0,.75);backdrop-filter:blur(4px)">
+    <div class="glass rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col shadow-2xl fade-in">
+      <div class="flex items-center gap-2 px-5 py-3 border-b border-white/5">
+        <h3 class="mono text-xs text-cyan-300" x-text="artPath.split('/').pop()"></h3>
+        <span class="text-[9px] text-slate-600 mono truncate hidden md:inline" x-text="artPath"></span>
+        <span class="flex-1"></span>
+        <button @click="artOpen=false" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
-      <div class="overflow-auto p-5">
-        <template x-if="artifact.path.endsWith('.html')">
-          <iframe :srcdoc="artifact.content" class="w-full h-[70vh] rounded-lg bg-white/95"></iframe>
-        </template>
-        <template x-if="!artifact.path.endsWith('.html')">
-          <pre class="text-[12px] leading-relaxed text-slate-300 whitespace-pre-wrap mono" x-text="artifact.content"></pre>
-        </template>
+      <div class="flex-1 overflow-auto p-5">
+        <div x-show="artKind==='md'" class="md max-w-3xl mx-auto" x-html="artHtml"></div>
+        <div x-show="artKind==='html'"><iframe :srcdoc="artRaw" class="w-full h-[70vh] rounded-lg bg-white/95"></iframe></div>
+        <pre x-show="artKind==='raw'" class="text-[11.5px] text-slate-300 whitespace-pre-wrap mono" x-text="artRaw"></pre>
       </div>
     </div>
   </div>
 
   <footer class="text-center text-[10px] text-slate-700 py-4">
-    {{ agent_symbol }} {{ agent_name }} — agent chercheur du Cognitorium · cerveau hybride règles/LLM · traçabilité complète dans <span class="mono">output/agent_runs/</span>
+    ♅ {{ agent_name }} · gouverné par ☉ SOL &amp; ♀ Vénus · ✳ Laplace (créateur) · ◉ Sebas (terrain) — traçabilité : <span class="mono">output/agent_runs/</span>
   </footer>
 </div>
 
 <script>
-function agentApp() {
+function uranusApp() {
   return {
-    task: '',
+    view: 'console', task: '', running: false, result: null,
     examples: [
       'recherche systématique des méta-analyses sur l\'attention 2024-2026',
+      'méta-analyse exercice cognition — génère le papier scientifique',
+      'je veux améliorer le BTP avec l\'IA : administratif, visière HUD, puis robotique',
       'valider la base et auditer le trust factor',
-      'évaluer le risque de biais des références',
       'veille scientifique sur la métacognition depuis 30 jours',
-      'enrichir le DOI 10.1037/bul0000439',
-      'mettre à jour les métriques de citations de la base',
     ],
-    skills: [], status: {available: false}, runs: [],
-    running: false, result: null, showSkills: false, maxResults: 10, useLlm: true,
+    skills: [], runs: [], status: {available: false},
     catIcon: {recherche:'🔎', donnees:'🗃️', qualite:'🛡️', synthese:'📝', veille:'🔔', general:'⚙️'},
-    artifact: {open: false, path: '', content: ''},
+    // (+) menu
+    plusOpen: false, plusTab: 'skills', selSkills: [], selSubjects: [], subjects: {branches: [], feuilles: [], satellites: [], domaines: []},
+    // production
+    production: {title: '', kind: '', raw: '', html: ''},
+    // artefact modal
+    artOpen: false, artPath: '', artKind: 'raw', artRaw: '', artHtml: '',
+    // dashboard
+    metrics: {cards: [], summary: null}, metricPage: null,
+    // timeline
+    tl: {nodes: [], links: []}, tlMode: 'mixte', tlCursor: 1000, tlPlay: false, tlVisible: 0,
+    tlCursorLabel: '—', _tlSim: null, _tlScale: null,
+
+    get chatPlaceholder() {
+      const s = this.selSkills.length ? this.selSkills.length + ' compétence(s) · ' : '';
+      const j = this.selSubjects.length ? this.selSubjects.length + ' sujet(s) · ' : '';
+      return s + j + 'ex : recherche systématique méta-analyses attention 2024-2026';
+    },
+    get tlModeHelp() {
+      return {temps: 'Vue TEMPS : position = date de création (x), couloirs par type. Glissez le curseur pour voyager dans le temps.',
+              espace: 'Vue ESPACE : graphe type Obsidian — proximité = liens réels entre productions.',
+              mixte: 'Vue MIXTE (4D) : positions spatiales du graphe + apparition chronologique des nœuds et liens au fil du curseur.'}[this.tlMode];
+    },
 
     async init() {
-      await Promise.all([this.fetchSkills(), this.fetchStatus(), this.fetchRuns()]);
+      await Promise.all([this.fetchSkills(), this.fetchStatus(), this.fetchRuns(), this.loadSubjects()]);
     },
     async fetchSkills() { this.skills = await (await fetch('/api/agent/skills')).json(); },
     async fetchStatus() { this.status = await (await fetch('/api/agent/status')).json(); },
     async fetchRuns() { this.runs = await (await fetch('/api/agent/runs')).json(); },
+    async loadSubjects() {
+      if (this.subjects.branches.length) return;
+      try { this.subjects = await (await fetch('/api/agent/subjects')).json(); } catch (e) {}
+    },
+
+    toggleSkill(name) { this.selSkills = this.selSkills.includes(name) ? this.selSkills.filter(x => x !== name) : [...this.selSkills, name]; },
+    toggleSubject(s) { this.selSubjects = this.selSubjects.includes(s) ? this.selSubjects.filter(x => x !== s) : [...this.selSubjects, s]; },
 
     async runTask() {
-      if (!this.task.trim() || this.running) return;
-      this.running = true; this.result = null;
+      if (this.running) return;
+      const t = this.task.trim();
+      if (!t && !this.selSkills.length) return;
+      this.running = true; this.result = null; this.production = {title: '', kind: '', raw: '', html: ''};
       try {
         const res = await fetch('/api/agent/run', {
           method: 'POST', headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({task: this.task, max_results: this.maxResults,
-                                use_llm: this.status.available && this.useLlm ? null : false}),
+          body: JSON.stringify({task: t || 'exécuter les compétences choisies',
+                                max_results: 10, use_llm: false,
+                                skills: this.selSkills, subjects: this.selSubjects}),
         });
         if (!res.ok) throw new Error((await res.json()).detail || 'erreur');
         this.result = await res.json();
+        this.selSkills = []; this.selSubjects = []; this.plusOpen = false;
+        await this.illustrateProduction();
         await this.fetchRuns();
       } catch (e) { alert('Erreur : ' + e.message); }
       this.running = false;
     },
 
-    async loadRun(runId) {
-      const res = await fetch('/api/agent/runs/' + runId);
-      if (res.ok) this.result = await res.json();
-      window.scrollTo({top: 0, behavior: 'smooth'});
+    // 🎨 illustration de production : html > graph > md
+    async illustrateProduction() {
+      const arts = (this.result.steps || []).flatMap(s => s.artifacts || []);
+      const pick = arts.find(a => a.endsWith('.html')) ||
+                   arts.find(a => a.endsWith('_graph.json')) ||
+                   arts.find(a => /paper|dossier|synthese|veille/.test(a) && a.endsWith('.md'));
+      if (!pick) return;
+      this.production.title = pick.split('/').pop();
+      const raw = await (await fetch('/api/agent/artifact?path=' + encodeURIComponent(pick))).text();
+      if (pick.endsWith('.html')) {
+        this.production = {title: this.production.title, kind: 'html', raw, html: ''};
+      } else if (pick.endsWith('_graph.json')) {
+        this.production = {title: this.production.title, kind: 'graph', raw, html: ''};
+        this.$nextTick(() => this.renderMiniGraph('prodgraph', JSON.parse(raw)));
+      } else {
+        this.production = {title: this.production.title, kind: 'md', raw, html: this.mdToHtml(raw)};
+      }
     },
 
+    renderMiniGraph(svgId, g) {
+      const svg = document.getElementById(svgId);
+      if (!svg || !g || !g.nodes) return;
+      d3.select(svg).selectAll('*').remove();
+      const W = svg.clientWidth || 800, H = 288;
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const nodes = g.nodes.map(d => ({...d})), links = g.links.map(d => ({...d}));
+      const gg = d3.select(svg).append('g');
+      d3.select(svg).call(d3.zoom().scaleExtent([.3, 4]).on('zoom', e => gg.attr('transform', e.transform)));
+      const sim = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(46).strength(.5))
+        .force('charge', d3.forceManyBody().strength(-150))
+        .force('center', d3.forceCenter(W / 2, H / 2))
+        .force('collide', d3.forceCollide(13));
+      const link = gg.selectAll('line').data(links).join('line').attr('stroke', '#33415588');
+      const node = gg.selectAll('g').data(nodes).join('g').style('cursor', 'pointer')
+        .call(d3.drag().on('start', (e, d) => {if (!e.active) sim.alphaTarget(.3).restart(); d.fx = d.x; d.fy = d.y;})
+                         .on('drag', (e, d) => {d.fx = e.x; d.fy = e.y;})
+                         .on('end', (e, d) => {if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null;}));
+      node.append('circle').attr('r', d => d.type === 'racine' || d.type === 'phase' ? 11 : 6)
+        .attr('fill', d => d.color || '#818cf8').attr('stroke', '#0d1320').attr('stroke-width', 1.4);
+      node.append('title').text(d => d.label);
+      node.append('text').text(d => d.label.length > 22 ? d.label.slice(0, 21) + '…' : d.label)
+        .attr('x', 9).attr('y', 3.2).attr('font-size', 8.5).attr('fill', '#94a3b8');
+      sim.on('tick', () => {
+        link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+      });
+    },
+
+    async loadRun(runId) {
+      const res = await fetch('/api/agent/runs/' + runId);
+      if (res.ok) { this.result = await res.json(); this.view = 'console'; await this.illustrateProduction(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+    },
+
+    // ── Dashboard ────────────────────────────────
+    async loadMetrics() {
+      try { this.metrics = await (await fetch('/api/agent/metrics')).json(); } catch (e) {}
+    },
+    openMetricPage(c) { this.metricPage = c; window.scrollTo({top: document.body.scrollHeight * .2, behavior: 'smooth'}); },
+
+    // ── Timeline 4D ──────────────────────────────
+    async loadTimeline() {
+      try { this.tl = await (await fetch('/api/agent/timeline')).json(); } catch (e) { this.tl = {nodes: [], links: []}; }
+      this.tlCursor = 1000;
+      this.$nextTick(() => this.renderTimeline());
+    },
+    renderTimeline() {
+      const svg = document.getElementById('tlsvg');
+      if (!svg || !this.tl.nodes.length) return;
+      d3.select(svg).selectAll('*').remove();
+      this.stopPlay();
+      const W = svg.clientWidth || 1000, H = svg.clientHeight || 460;
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const nodes = this.tl.nodes.map(d => ({...d, tsDate: new Date(d.ts)}));
+      const links = this.tl.links.map(l => ({...l}));
+      const tmin = d3.min(nodes, d => d.tsDate), tmax = d3.max(nodes, d => d.tsDate);
+      const color = {run: '#818cf8', skill: '#34d399', artifact: '#fbbf24', reference: '#38bdf8'};
+
+      let xOf, yOf;
+      if (this.tlMode === 'temps') {
+        const x = d3.scaleTime().domain([tmin, d3.timeSecond.offset(tmax, 1)]).range([70, W - 30]);
+        this._tlScale = x;
+        const lanes = ['run', 'skill', 'artifact', 'reference'];
+        const laneY = t => 60 + lanes.indexOf(t) * ((H - 100) / 3);
+        xOf = d => x(d.tsDate); yOf = d => laneY(d.type);
+        // axes / lanes
+        const g = d3.select(svg);
+        lanes.forEach((l, i) => {
+          g.append('text').attr('x', 12).attr('y', 54 + i * ((H - 100) / 3)).attr('font-size', 9).attr('fill', '#475569').text(l);
+          g.append('line').attr('x1', 60).attr('x2', W - 20).attr('y1', 60 + i * ((H - 100) / 3)).attr('y2', 60 + i * ((H - 100) / 3)).attr('stroke', '#1e293b').attr('stroke-dasharray', '2 5');
+        });
+        g.append('g').attr('transform', `translate(0,${H - 24})`).call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat('%d/%m %H:%M')).tickSize(3)).selectAll('text').attr('fill', '#64748b').attr('font-size', 8.5);
+      } else {
+        // positions spatiales (force) — espace & mixte
+        const sim = d3.forceSimulation(nodes)
+          .force('link', d3.forceLink(links).id(d => d.id).distance(d => d.type === 'execute' ? 60 : 34).strength(.6))
+          .force('charge', d3.forceManyBody().strength(-120))
+          .force('center', d3.forceCenter(W / 2, H / 2))
+          .force('collide', d3.forceCollide(11))
+          .stop();
+        sim.tick(260);
+        xOf = d => d.x; yOf = d => d.y;
+      }
+
+      const g = d3.select(svg).append('g');
+      d3.select(svg).call(d3.zoom().scaleExtent([.2, 5]).on('zoom', e => g.attr('transform', e.transform)));
+      const link = g.selectAll('line').data(links).join('line')
+        .attr('stroke', l => l.type === 'trouve' ? '#38bdf844' : l.type === 'produit' ? '#fbbf2444' : '#33415566')
+        .attr('stroke-width', 1);
+      const node = g.selectAll('g').data(nodes).join('g').style('cursor', 'pointer');
+      node.append('circle')
+        .attr('r', d => d.type === 'run' ? 8 : d.type === 'skill' ? 6 : 4.5)
+        .attr('fill', d => color[d.type] || '#818cf8').attr('stroke', '#0d1320').attr('stroke-width', 1.3)
+        .attr('opacity', .95);
+      node.append('title').text(d => d.label + '\n' + d.ts.slice(0, 16) + (d.statut ? ' · ' + d.statut : ''));
+      node.append('text').text(d => d.type === 'run' || d.type === 'skill' ? d.label.slice(0, 18) : '')
+        .attr('x', 9).attr('y', 3).attr('font-size', 8).attr('fill', '#94a3b8');
+      node.attr('transform', d => `translate(${xOf(d)},${yOf(d)})`);
+      link.attr('x1', l => xOf(l.source)).attr('y1', l => yOf(l.source))
+          .attr('x2', l => xOf(l.target)).attr('y2', l => yOf(l.target));
+
+      this._tlNodes = node; this._tlLinks = link; this._tlData = nodes;
+      this.applyTimeFilter();
+      if (this.tlMode !== 'espace') { this.tlCursor = 0; this.tlPlay = true; this.play(); }
+    },
+    applyTimeFilter() {
+      if (!this._tlData) return;
+      const data = this._tlData;
+      const tmin = d3.min(data, d => d.tsDate).getTime();
+      const tmax = d3.max(data, d => d.tsDate).getTime();
+      const cutoff = tmin + (tmax - tmin) * (this.tlCursor / 1000);
+      this.tlCursorLabel = new Date(cutoff).toISOString().slice(0, 16).replace('T', ' ');
+      const visible = new Set(data.filter(d => d.tsDate.getTime() <= cutoff).map(d => d.id));
+      if (this.tlMode === 'espace') { visible.clear(); data.forEach(d => visible.add(d.id)); }  // espace : pas de filtre
+      this._tlNodes.style('display', d => visible.has(d.id) ? null : 'none');
+      this._tlLinks.style('display', l => visible.has((typeof l.source === 'object' ? l.source : {id: l.source}).id) &&
+                                           visible.has((typeof l.target === 'object' ? l.target : {id: l.target}).id) ? null : 'none');
+      this.tlVisible = visible.size;
+    },
+    play() {
+      clearInterval(this._tlTimer);
+      this._tlTimer = setInterval(() => {
+        if (!this.tlPlay) { clearInterval(this._tlTimer); return; }
+        this.tlCursor += 8;
+        if (this.tlCursor >= 1000) { this.tlCursor = 1000; this.tlPlay = false; clearInterval(this._tlTimer); }
+        this.applyTimeFilter();
+      }, 60);
+    },
+    stopPlay() { this.tlPlay = false; clearInterval(this._tlTimer); },
+
+    // ── Artefacts ────────────────────────────────
     async openArtifact(path) {
-      const res = await fetch('/api/agent/artifact?path=' + encodeURIComponent(path));
-      if (!res.ok) { alert('Artefact introuvable'); return; }
-      this.artifact = {open: true, path, content: await res.text()};
+      try {
+        const r = await fetch('/api/agent/artifact?path=' + encodeURIComponent(path));
+        if (!r.ok) { alert('Artefact introuvable'); return; }
+        const raw = await r.text();
+        this.artPath = path;
+        if (path.endsWith('.html')) { this.artKind = 'html'; this.artRaw = raw; }
+        else if (path.endsWith('.md')) { this.artKind = 'md'; this.artRaw = raw; this.artHtml = this.mdToHtml(raw); }
+        else { this.artKind = 'raw'; this.artRaw = raw; }
+        this.artOpen = true;
+      } catch (e) { alert('Erreur : ' + e.message); }
+    },
+    mdInline(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\*\*(.+?)\*\*/g, '<strong class="text-slate-200">$1</strong>'); },
+    mdToHtml(md) {
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      let h = esc(md);
+      h = h.replace(/^### (.*)$/gm, '<h3>$1</h3>').replace(/^## (.*)$/gm, '<h2>$1</h2>').replace(/^# (.*)$/gm, '<h1>$1</h1>')
+           .replace(/^&gt; (.*)$/gm, '<blockquote>$1</blockquote>')
+           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>')
+           .replace(/`([^`]+)`/g, '<code>$1</code>')
+           .replace(/^\s*[-•] (.*)$/gm, '<li>$1</li>')
+           .replace(/^\s*\|(.+)\|\s*$/gm, m => '<tr>' + m.split('|').slice(1, -1).map(c => '<td>' + c.trim() + '</td>').join('') + '</tr>')
+           .replace(/(<tr>.*?<\/tr>)+/g, m => '<table>' + m + '</table>')
+           .replace(/^---+$/gm, '<hr>');
+      h = h.split(/\n{2,}/).map(b => /^<(h\d|blockquote|table|hr|ul|li)/.test(b.trim()) ? b : '<p>' + b.replace(/\n/g, '<br>') + '</p>').join('');
+      return h;
     },
   };
 }
 </script>
-  <script src="/static/sol_widget.js" defer></script>
+<script src="/static/sol_widget.js" defer></script>
 </body>
 </html>

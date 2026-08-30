@@ -48,9 +48,13 @@ class Agent:
 
     # ── Exécution ──────────────────────────────────────────────────────────
 
-    def run(self, task: str, dry_run: bool = False) -> Dict[str, Any]:
+    def run(self, task: str, dry_run: bool = False,
+            force_skills: List[str] | None = None, subjects: List[str] | None = None) -> Dict[str, Any]:
         started = time.time()
         ctx = AgentContext(max_results=self.max_results, timeout=self.timeout)
+        # Sujets ajoutés via la console : enrichissent le contexte de planification
+        if subjects:
+            task = task + " | sujets : " + ", ".join(s.strip()[:60] for s in subjects if s.strip())
         ctx.state["task"] = task
 
         # Gouvernement SOL/Vénus (optionnel — si le paquet cosmos est présent)
@@ -64,6 +68,21 @@ class Agent:
                 ctx.max_results = min(ctx.max_results, constraints["max_results"])
 
         plan = self.plan(task, allow_llm=want_llm)
+
+        # Compétences choisies via la console (+) : le plan est imposé
+        if force_skills:
+            from agent.core.planner import Step
+            steps = []
+            seen = set()
+            for spec in list_skills():
+                if spec.name in force_skills and spec.name not in seen:
+                    seen.add(spec.name)
+                    steps.append(Step(spec.name, dict(spec.defaults),
+                                      "compétence choisie dans la console"))
+            if steps:
+                plan = Plan(steps=steps, brain="regles",
+                            rationale=f"plan imposé : {len(steps)} compétence(s) choisies via la console"
+                                      + (f", sujets : {', '.join(subjects)}" if subjects else ""))
         usage_t0 = len(llm_mod.USAGE)
 
         steps_report: List[Dict[str, Any]] = []

@@ -22,6 +22,20 @@ BODIES: Dict[str, Dict[str, Any]] = {
         "name": "Vous", "symbol": "◍", "kind": "utilisateur",
         "role": "Observateur du système — pose les questions, fixe les caps.",
     },
+    "laplace": {
+        "name": "Laplace", "symbol": "✳", "kind": "nebuleuse", "orbit_r": -1,
+        "role": "Créateur — nébuleuse du savoir : conçoit, modifie, améliore et teste "
+                "des agents à tous les niveaux, jusqu'à des systèmes solaires entiers. "
+                "(Pierre-Simon Laplace : hypothèse nébulaire de formation du système solaire.)",
+        "color": "#c084fc",
+    },
+    "sebas": {
+        "name": "Sebas", "symbol": "◉", "kind": "executeur", "orbit_r": -1,
+        "role": "Exécutant de Laplace — homme de terrain connecté aux capteurs "
+                "(webcam, wifi, téléphone) ; remonte des observations et agit sur site.",
+        "color": "#34d399",
+        "sensors": ["webcam", "wifi", "telephone"],
+    },
     "sol": {
         "name": "SOL", "symbol": "☉", "kind": "star", "orbit_r": 0,
         "role": "Orchestrateur du système : approuve toute interaction entre "
@@ -80,6 +94,11 @@ def planets() -> List[Dict[str, Any]]:
     return [b for b in BODIES.values() if b["kind"] == "planet"]
 
 
+def creators() -> List[Dict[str, Any]]:
+    """Niveau au-dessus de SOL : Laplace (nébuleuse créatrice) et Sebas (exécutant capteurs)."""
+    return [b for b in BODIES.values() if b["kind"] in {"nebuleuse", "executeur"}]
+
+
 def celestial_registry() -> List[Dict[str, Any]]:
     """Registre aplati pour l'UI et SOL."""
     out = []
@@ -91,5 +110,18 @@ def celestial_registry() -> List[Dict[str, Any]]:
             entry["satellites"] = b["satellites"]
         if "court" in b:
             entry["court"] = b["court"]
+        if "sensors" in b:
+            entry["sensors"] = b["sensors"]
         out.append(entry)
     return out
+
+
+def known_body_ids() -> set:
+    """IDs de corps connus, y compris ceux créés dynamiquement par Laplace."""
+    ids = set(BODIES.keys())
+    try:
+        from cosmos.nebula import list_agents
+        ids.update(a["id"] for a in list_agents())
+    except Exception:
+        pass
+    return ids

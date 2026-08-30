@@ -425,3 +425,145 @@ def test_api_constellations_et_concepts():
 
 
 import json  # noqa: E402  (utilisé par test_taxonomie_seeed)
+
+
+# ═══ LAPLACE ✳ / SEBAS ◉ / CONSOLE V2 ═══
+
+def test_nebula_laplace_create_improve_test(tmp_path, monkeypatch):
+    """Laplace crée un agent, l'améliore, le teste — registre persisté, corps connu de SOL."""
+    import shutil
+    from cosmos import nebula, bodies
+    monkeypatch.setattr(nebula, "NEBULA_PATH", tmp_path / "nebula.json")
+    from cosmos import memory as _mem
+    monkeypatch.setattr(_mem, "MEMORY_DIR", tmp_path / "mem", raising=False)
+    monkeypatch.setattr(_mem, "ITEMS_PATH", tmp_path / "mem" / "items.jsonl", raising=False)
+
+    a = nebula.create_agent("Hélios Prime", "veille solaire", parent="uranus")
+    assert a["createur"] == "laplace" and a["statut"] == "actif" and a["tests"] == 0
+    assert "h" in a["id"]
+
+    b = nebula.improve_agent(a["id"], role="veille solaire + batteries")
+    assert b["role"] == "veille solaire + batteries" and b["version"] >= 2
+
+    t = nebula.test_agent(a["id"])
+    assert t["statut"] in {"approved", "delivered", "rejected", "échec"}
+    b2 = nebula.get_agent(a["id"])
+    assert b2["tests"] >= 1 and "dernier_statut" in b2
+
+    agents = nebula.list_agents()
+    assert any(x["id"] == a["id"] for x in agents)
+    # corps créé par Laplace → connu de SOL (approvable)
+    assert a["id"] in bodies.known_body_ids()
+
+def test_nebula_system_and_invalid_parent(tmp_path, monkeypatch):
+    from cosmos import nebula
+    monkeypatch.setattr(nebula, "NEBULA_PATH", tmp_path / "nebula.json")
+    s = nebula.create_system("Nébuleuse-BTP", star_name="SOL-BTP")
+    assert s["star_name"] == "SOL-BTP" and s["agents"] == []
+    assert any(x["id"] == s["id"] for x in nebula.list_systems())
+    import pytest
+    with pytest.raises(ValueError):
+        nebula.create_agent("X", "rôle", parent="introuvable")
+
+def test_sebas_sensors_honest_and_observation(tmp_path, monkeypatch):
+    """Sandbox sans matériel : statut honnête, jamais de fausse donnée — mais observation consignable."""
+    from cosmos import nebula
+    monkeypatch.setattr(nebula, "NEBULA_PATH", tmp_path / "nebula.json")
+    from cosmos import memory as _mem
+    monkeypatch.setattr(_mem, "MEMORY_DIR", tmp_path / "mem", raising=False)
+    monkeypatch.setattr(_mem, "ITEMS_PATH", tmp_path / "mem" / "items.jsonl", raising=False)
+    sensors = nebula.sensors_status()
+    assert {s["id"] for s in sensors} >= {"webcam", "wifi", "telephone"}
+    for s in sensors:
+        assert s["connecte"] is False and "non détecté" in s["statut"]
+    obs = nebula.record_observation("webcam", "chantier X : grue stable", ["terrain"])
+    assert obs["corps"] == "sebas" and obs["type"] == "memoire"
+    import pytest
+    with pytest.raises(ValueError):
+        nebula.record_observation("lidar", "capteur inconnu")
+
+def test_agent_run_forced_skills_and_subjects(tmp_path, monkeypatch):
+    """run() : compétences imposées via le (+), sujets concaténés à la tâche."""
+
+def test_agent_run_forced_skills_and_subjects():
+    from agent.core.agent import Agent
+    ag = Agent(max_results=3, use_llm=False)
+    trace = ag.run("recherche attention", dry_run=True,
+                   force_skills=["validate_entries", "trust_scoring"],
+                   subjects=["Neurosciences"])
+    planned = [s["skill"] for s in trace["plan"]["steps"]]
+    assert planned == ["validate_entries", "trust_scoring"]
+    assert "sujets" in trace["rationale"] and "Neurosciences" in trace["tache"]
+    assert trace["statut"] == "planifié"          # dry_run : rien n'est exécuté
+    # plan imposé : les skills inconnus sont filtrés, pas d'échec
+    trace2 = ag.run("audit", dry_run=True, force_skills=["skill_inexistante"])
+    assert trace2["plan"]["steps"] != []          # repli sur le plan par règles
+    # exécution réelle d'un plan imposé d'une seule compétence sûre
+    trace3 = ag.run("validation", force_skills=["validate_entries"])
+    assert [s["skill"] for s in trace3["steps"]] == ["validate_entries"]
+
+def test_database_memory_sync(tmp_path, monkeypatch):
+    """La base de données est synchronisée avec la mémoire des agents (l'oubli corrigé)."""
+    import sqlite3
+    from cosmos import memory
+    from app import database
+    db = tmp_path / "sync.db"
+    monkeypatch.setattr(database, "DB_PATH", str(db))
+    # 1. la mémoire contient au moins un item réel
+    memory.record_item("memoire", "test synchro db", contenu="vérification sqlite",
+                       tags=["synchro"], source="test", corps="uranus")
+    # 2. la synchro crée la table et verse tout items.jsonl
+    n = database.sync_memory_items()
+    assert n > 0
+    # 3. idempotence : re-synchroniser n'ajoute pas de doublons
+    n2 = database.sync_memory_items()
+    assert n2 == n
+    rows = database.get_memory_items(limit=5)
+    assert rows and all(r.get("id") for r in rows)
+    cols = [c[1] for c in sqlite3.connect(str(db)).execute("PRAGMA table_info(memory_items)")]
+    assert set(cols) >= {"id", "ts", "type", "titre", "corps", "tags"}
+    # 4. un item récent se retrouve bien en base
+    ids_in_db = {r["id"] for r in database.get_memory_items(limit=1000)}
+    items_ids = {it["id"] for it in memory.items(limit=1000)}
+    assert items_ids <= ids_in_db
+    # 5. les références de la mémoire alimentent aussi la table scientifique
+    import sqlite3 as _sq
+    con = _sq.connect(str(db))
+    mem_refs = con.execute("SELECT COUNT(*) FROM references_table WHERE id LIKE 'mem_%'").fetchone()[0]
+    assert mem_refs > 0
+
+def test_agent_metrics_and_timeline_api():
+    """/api/agent/metrics (6 cartes) et /api/agent/timeline (nœuds horodatés + liens)."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    m = c.get("/api/agent/metrics").json()
+    ids = [x["id"] for x in m["cards"]]
+    assert {"taches", "tokens", "consultees", "fournies", "creees"} <= set(ids)
+    assert "summary" in m and "par_jour" in m["summary"]
+    tl = c.get("/api/agent/timeline").json()
+    assert set(tl) >= {"nodes", "links"}
+    for nd in tl["nodes"][:30]:
+        assert "ts" in nd and "type" in nd and nd["type"] in {"run", "skill", "artifact", "reference"}
+
+def test_laplace_sebas_api():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    r = c.post("/api/laplace/agents", json={"name": "Agent Test API", "role": "contrôle qualité", "parent": "uranus"})
+    assert r.status_code == 200 and r.json()["createur"] == "laplace"
+    aid = r.json()["id"]
+    assert c.post(f"/api/laplace/agents/{aid}/test").json()["statut"] in {"delivered", "échec"}
+    assert c.post(f"/api/laplace/agents/{aid}/improve", json={"role": "cq v2"}).json()["version"] >= 2
+    assert c.post("/api/laplace/agents", json={"name": "Bad", "parent": "nul"}).status_code == 400
+    assert c.get("/api/sebas/sensors").status_code == 200
+    obs = c.post("/api/sebas/observe", json={"sensor": "wifi", "contenu": "réseau chantier détecté"})
+    assert obs.status_code == 200 and obs.json()["corps"] == "sebas"
+
+def test_run_api_accepts_skills_subjects():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    r = c.post("/api/agent/run", json={"task": "vérification", "skills": ["validate_entries"], "subjects": ["Psychologie"]})
+    assert r.status_code == 200
+    assert [s["skill"] for s in r.json()["steps"]] == ["validate_entries"]
