@@ -26,7 +26,16 @@ from cosmos import ledger
 NEBULA_PATH = ledger.COSMOS_DIR / "nebula.json"
 
 VALID_KINDS = {"satellite", "analyste", "planet", "agent", "star"}
-VALID_PARENTS_BASE = {"sol", "uranus", "venus", "mars", "laplace", "sebas"}
+# Parents valides : tous les corps de premier niveau du registre (planètes,
+# créateurs, étoile) — dynamique, donc les futures planètes sont incluses.
+def _valid_parents_base() -> set:
+    try:
+        from cosmos.bodies import BODIES
+        return {k for k in BODIES if k != "user"}
+    except Exception:
+        return {"sol", "uranus", "venus", "mars", "laplace", "sebas"}
+
+VALID_PARENTS_BASE = _valid_parents_base()
 
 SENSORS: List[Dict[str, str]] = [
     {"id": "webcam", "label": "Webcam", "icon": "📷",

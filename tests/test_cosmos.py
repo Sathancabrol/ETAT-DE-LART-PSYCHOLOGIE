@@ -26,6 +26,20 @@ def wired():
     return get_system()
 
 
+import pytest
+
+@pytest.fixture(autouse=True)
+def _pas_de_limite_debit(monkeypatch):
+    """La limite de débit de SOL (60 interactions / 5 min — prévention
+    saturation) ne doit pas fausser la suite de tests, qui envoie beaucoup
+    d'interactions en quelques secondes : on la neutralise localement."""
+    try:
+        from cosmos import bus as _bus
+        monkeypatch.setattr(_bus.Bus, "recent_count", lambda self: 0)
+    except Exception:
+        pass
+
+
 # ── Registre des corps ──────────────────────────────────────────────────────
 
 def test_registre_corps_complet():
@@ -95,7 +109,7 @@ def test_venus_status_complet():
 
 def test_bus_refuse_corps_inconnu():
     bus = get_system()["bus"]
-    msg = bus.send("pluton", "uranus", "mission", {"task": "x"})
+    msg = bus.send("vulcain", "uranus", "mission", {"task": "x"})
     assert msg.status == "denied" and "corps inconnu" in msg.reason
 
 
@@ -107,9 +121,9 @@ def test_bus_refuse_auto_interaction():
 
 def test_bus_journalise_tout():
     bus = get_system()["bus"]
-    n0 = len(bus.history(limit=200))
+    n0 = len(bus.history(limit=5000))
     bus.send("user", "venus", "query", {})
-    assert len(bus.history(limit=200)) == n0 + 1
+    assert len(bus.history(limit=5000)) == n0 + 1
 
 
 def test_refus_budgetaire_via_sol():
@@ -223,7 +237,7 @@ def test_knowledge_graphs_par_corps():
 
 def test_knowledge_graph_corps_inconnu():
     from cosmos.knowledge import knowledge_graph
-    assert knowledge_graph("pluton") is None
+    assert knowledge_graph("vulcain") is None
 
 
 def test_zeta_graph_contient_ses_concepts():
@@ -279,7 +293,7 @@ def test_api_knowledge():
     r = c.get("/api/cosmos/knowledge/uranus")
     assert r.status_code == 200 and len(r.json()["nodes"]) >= 30
     assert c.get("/api/cosmos/knowledge/zeta").status_code == 200
-    assert c.get("/api/cosmos/knowledge/pluton").status_code == 404
+    assert c.get("/api/cosmos/knowledge/vulcain").status_code == 404
 
 
 # ── Constellations zodiacales ───────────────────────────────────────────────
@@ -700,13 +714,13 @@ def test_structure_entreprise_complete():
     orbr = {pid: b["orbit_r"] for pid, b in BODIES.items() if b["kind"] == "planet"}
     assert (orbr["mercure"] < orbr["venus"] < orbr["terre"] < orbr["mars"]
             < orbr["ceres"] < orbr["jupiter"] < orbr["uranus"] < orbr["neptune"])
-    assert len(planets()) == 8
+    assert len(planets()) == 9
     # find_body retrouve satellites et cours + leur parent
     io, par = find_body("io")
     assert io and par["name"] == "Jupiter"
     peitho, par2 = find_body("peitho")
     assert peitho and par2["name"] == "Mercure"
-    assert find_body("pluton") == (None, None)
+    assert find_body("vulcain") == (None, None)
     # tous connus de SOL
     assert {"io", "peitho", "lune", "triton", "thallo", "callisto"} <= known_body_ids()
 
@@ -729,7 +743,7 @@ def test_fiche_body_et_metrics_par_agent():
     assert r["body"]["parent"]["name"] == "Jupiter"
     assert "Conformité" in r["body"]["role"]
     assert r["graph"]["nodes"]
-    assert c.get("/api/cosmos/body/pluton").status_code == 404
+    assert c.get("/api/cosmos/body/vulcain").status_code == 404
     # dashboard dédié : identité + interactions + mémoire + concepts + tokens
     m = c.get("/api/agent/metrics", params={"agent": "io"}).json()
     ids = {x["id"] for x in m["cards"]}
@@ -741,3 +755,124 @@ def test_fiche_body_et_metrics_par_agent():
     # timeline dédiée : interactions + mémoire du corps
     t = c.get("/api/agent/timeline", params={"agent": "venus"}).json()
     assert t["nodes"] and t["nodes"][0]["id"] == "corps:venus"
+
+
+# ═══ MÉTATRON ✦ / HADÈS ♇ / PROFIL COGNITIF ═══
+
+def test_metatron_in_bodies_satellite_of_laplace():
+    from cosmos.bodies import BODIES, find_body, known_body_ids
+    mt, par = find_body("metatron")
+    assert mt and par["name"] == "Laplace"
+    assert "méta-prompting" in mt["role"].lower()
+    assert "metatron" in known_body_ids()
+
+def test_metatron_analyze_request():
+    from cosmos import metatron
+    a = metatron.analyze_request("je veux un outil pour calculer et visualiser la fatigue 3d sur chantier")
+    assert a["intention"] == "outil" and a["livrable"]
+    assert a["meta_prompt"].startswith("Demande d'outil")
+    # intention mission + ambiguïté détectée (pas de période, requête courte)
+    b = metatron.analyze_request("méta-analyse attention")
+    assert b["intention"] == "mission_recherche"
+    assert any("Période" in c or "période" in c for c in b["clarifications"]) or b["ambigu"]
+    # question / état / fauche / profil
+    assert metatron.analyze_request("comment va le système ?")["intention"] == "question"
+    assert metatron.analyze_request("purge le junk et les fichiers obsolètes")["intention"] == "nettoyage"
+    assert metatron.analyze_request("montre-moi mon profil cognitif")["intention"] == "profil"
+    # style
+    assert metatron.analyze_request("pourquoi le ciel est bleu ?")["style"] == "interrogatif"
+
+def test_metatron_suggest_agent_spec():
+    from cosmos import metatron
+    s = metatron.suggest_agent_spec("crée un agent pour surveiller les données du chantier")
+    assert s["parent"] == "neptune" and s["kind"] == "satellite" and s["role"]
+    s2 = metatron.suggest_agent_spec("un agent qui forge des outils de visualisation")
+    assert s2["parent"] == "mars"
+    s3 = metatron.suggest_agent_spec("agent conformité RGPD et contrats")
+    assert s3["parent"] == "jupiter"
+    # parents proposés = parents valides de nebula
+    from cosmos.nebula import VALID_PARENTS_BASE
+    for s in (s, s2, s3):
+        assert s["parent"] in VALID_PARENTS_BASE
+
+def test_hades_scan_and_reap(tmp_path, monkeypatch):
+    """Hadès détecte outdated/junk/doublons puis Charon fauche (suppression réelle)."""
+    import os
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":1}', encoding="utf-8")
+    (tmp_path / "vide.txt").write_text("", encoding="utf-8")       # junk 0 octet
+    hades.MEM_ITEMS.write_text(
+        '{"id":"a","titre":"t","contenu":"c"}\n'
+        '{"id":"b","titre":"t","contenu":"c"}\n', encoding="utf-8")  # doublon exact
+
+    sc = hades.scan_system()
+    types = sc["stats"]["par_type"]
+    assert types.get("run_outdated") == 3          # 28 runs, on garde 25
+    assert types.get("junk_vide") == 1
+    assert types.get("doublon_memoire") == 1
+
+    # dry-run : rien n'est détruit
+    dry = hades.reap(confirm=False)
+    assert dry["supprimes"] == 0 and hades.RUNS_DIR.exists()
+
+    # fauche réelle
+    r = hades.reap(confirm=True)
+    assert r["supprimes"] >= 5
+    restants = [d for d in hades.RUNS_DIR.iterdir() if d.is_dir()]
+    assert len(restants) == 25
+    assert not (tmp_path / "vide.txt").exists()
+    lignes = [l for l in hades.MEM_ITEMS.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert len(lignes) == 1 and '"a"' in lignes[0]
+
+def test_pluton_bodies_real_distances():
+    from cosmos.bodies import BODIES, planets, find_body
+    pl = BODIES["pluton"]
+    assert pl["kind"] == "planet" and pl["orbit_r"] > BODIES["neptune"]["orbit_r"]
+    dist = {s["id"]: s["distance_km"] for s in pl["satellites"]}
+    assert dist["charon"] == 19591 and dist["styx"] == 42656
+    assert "fauche" in pl["role"].lower() or "mort" in pl["role"].lower()
+    assert len(planets()) == 9                     # Pluton = 9e planète (mécène)
+    ch, par = find_body("charon")
+    assert par["name"] == "Pluton" and "passeur" in ch["role"].lower()
+
+def test_cognitive_profile():
+    from cosmos import cogniprofile
+    pr = cogniprofile.build_profile()
+    dims = {d["id"]: d for d in pr["dimensions"]}
+    assert {"curiosite", "profondeur", "creativite", "methode", "activite"} <= set(dims)
+    for d in pr["dimensions"]:
+        assert 0 <= d["valeur"] <= 100 and d["explication"]
+    assert pr["traits"] and pr["source_donnees"]["questions"] >= 0
+    assert pr["avertissement"] and "psychométrique" in pr["avertissement"][0]
+    assert all(0 <= h <= 23 for h in pr["rythme"])
+
+def test_metatron_hades_profile_api():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    a = c.post("/api/metatron/analyze", json={"message": "outil pour visualiser des réseaux"}).json()
+    assert a["intention"] == "outil" and a["meta_prompt"]
+    s = c.post("/api/metatron/suggest", json={"mission": "agent données"}).json()
+    assert s["parent"] == "neptune"
+    assert c.post("/api/metatron/analyze", json={"message": " "}).status_code == 400
+    sc = c.get("/api/hades/scan").json()
+    assert "targets" in sc and "stats" in sc
+    dry = c.post("/api/hades/reap", json={"confirm": False}).json()
+    assert dry["supprimes"] == 0
+    pr = c.get("/api/profile/cognitive").json()
+    assert len(pr["dimensions"]) == 5
+    # le chat Laplace route les nouvelles intentions
+    h = c.post("/api/cosmos/chat", json={"message": "peux-tu nettoyer les redondances ?"}).json()
+    assert h["speaker"] == "laplace" and h["intent"] == "fauche"
+    pf = c.post("/api/cosmos/chat", json={"message": "montre moi mon profil cognitif"}).json()
+    assert pf["intent"] == "profil" and "Curiosité" in pf["reply"]
+    # l'état général reste signé Laplace avec l'analyse Métatron attachée
+    et = c.post("/api/cosmos/chat", json={"message": "état du système"}).json()
+    assert et["speaker"] == "laplace" and "metatron" in et.get("data", {})

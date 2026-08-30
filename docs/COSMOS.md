@@ -436,3 +436,63 @@ sous-rôle est un astre choisi pour sa fonction, sa symbolique et sa tâche :
 - Inspecteur de nœud : clic sur un nœud (constellations `/sol`, production,
   timeline, graphe base) → panneau d'infos complet (mécanismes, applications,
   gaps, solidité, DOI, trust — données 4E fusionnées dans la sidebar base).
+
+---
+
+## Métatron ✦ — archange du méta-prompting (satellite de Laplace)
+
+Aucun agent ne couvrait le méta-prompting : Métatron ✦ a été créé, satellite
+de Laplace ✳ (l'ange qui écrit les instructions des anges). Il aide Laplace à
+mieux comprendre les requêtes et à mieux créer les agents :
+
+- `cosmos/metatron.py` — `analyze_request()` : intention fine (outil, mission
+  recherche/synthèse, création d'agent, fauche, profil, état, question),
+  domaines matchés sur la taxonomie vivante, livrable attendu, contrainte
+  temporelle, ambiguïtés → clarifications, **méta-prompt enrichi**, style
+  (impératif/interrogatif/déclaratif) ;
+- `suggest_agent_spec()` : la meilleure spécification d'agent (nom, rôle,
+  parent, kind) selon la mission — les parents proposés sont tous valides
+  (le registre de Laplace accepte désormais toute planète comme parent) ;
+- chaque requête au chat est pré-analysée par Métatron (`data.metatron`) ;
+  dans la modale Laplace (/sol) : zone d'analyse + bouton « ✦ → agent » qui
+  pré-remplit le formulaire de création.
+- API : `POST /api/metatron/analyze` · `POST /api/metatron/suggest`
+
+## Pluton ♇ / Hadès — cycle de vie & optimisation (les enfers)
+
+Le dieu des morts du système (9e planète, au-delà de Neptune) avec
+**Charon ⚰** (le passeur, 19 591 km) et **Styx ☠** (garde du seuil,
+42 656 km) :
+
+- `cosmos/hades.py` — `scan_system()` inventorie tout le système :
+  runs outdated (au-delà des 25 plus récents — régénérables), junk (fichiers
+  vides), **doublons exacts en mémoire** (hash titre+contenu), journaux qui
+  gonflent (interactions/ledger > 1 500 lignes) ;
+- `reap(confirm)` — la fauche : Charon supprime réellement (dry-run par
+  défaut), journalise au grand livre, verse un souvenir en mémoire,
+  interaction approuvée par SOL ; politique de rétention exposée (Styx) ;
+- dans /sol : bouton ♇ Hadès → modale scan + fauche ; Pluton et ses lunes
+  cliquables dans la vue 3D ; le chat Laplace comprend « nettoye les
+  redondances » / « fauche Hadès ».
+- API : `GET /api/hades/scan` · `POST /api/hades/reap`
+
+## Profil cognitif — induire vos informations des schémas d'utilisation
+
+`cosmos/cogniprofile.py` (approche type data-science comportementale —
+The Sapien Company / Palantir / marketing, appliquée à vous-même) :
+5 dimensions induites (curiosité = domaines distincts, profondeur = étapes
+par mission, créativité = visées de création, méthode = plans imposés,
+activité = volume, échelle log), rythme circadien, style cognitif dominant
+(empreinte lexicale), traits dérivés, domaines récurrents. **Avertissement
+permanent : heuristiques statistiques, pas un test psychométrique validé —
+chaque score est un compteur transparent.**
+Console `/agent` → onglet **🧠 Profil** (radar D3 + traits + rythme) ·
+chat Laplace : « montre-moi mon profil cognitif » · `GET /api/profile/cognitive`.
+
+## Ergonomie 3D corrigée
+
+- **clic simple** sur un corps = sélection + toast (fiche ↗ / suivre 🎥) —
+  plus de modale qui s'ouvre avant le double-clic ;
+- **double-clic** = suivre le corps en caméra + ouvrir sa fiche ;
+- le chat de la modale du soleil parle désormais en **✳ Laplace** (titre,
+  avatar, messages) — SOL ☉ reste mentionné comme approbateur.

@@ -48,8 +48,10 @@
       <div class="hidden md:flex items-center gap-2">
         <span class="text-[11px] px-2.5 py-1 rounded-full border" :class="integClass()" x-text="integ.label"></span>
         <span class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 mono" x-text="budget.spend_today_usd != null ? budget.spend_today_usd.toFixed(4) + ' $ / ' + (budget.budget?.daily_cap_usd ?? '—') + ' $' : '…'"></span>
-        <button @click="dispatchEvent(new Event('open-laplace-chat'))" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 transition font-semibold">✳ Laplace</button>
+        <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 transition font-semibold">💬 Laplace</button>
+        <button @click="dispatchEvent(new Event('open-laplace-chat'))" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300/80 transition" title="Chat flottant (nébuleuse, en bas à droite)">✳</button>
         <button @click="loadArmory(); openModal('mars')" class="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 transition">♂ Armurerie</button>
+        <button @click="loadHades(); openModal('hades')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/30 text-slate-300 transition">♇ Hadès</button>
         <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition">☉ SOL</button>
         <button @click="refreshNebula(); openModal('laplace')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 transition">✳ Laplace</button>
         <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition">◉ Sebas</button>
@@ -140,6 +142,15 @@
     </div>
   </div>
 
+  <!-- ══════════════ TOAST SÉLECTION CORPS (clic simple) ══════════════ -->
+  <div x-show="bodyToast" x-cloak x-transition.duration.200 class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] glass rounded-xl px-4 py-3 flex items-center gap-3 shadow-2xl" style="border-color:rgba(52,211,153,.3)">
+    <span class="text-[12px] text-slate-100 font-semibold" x-text="bodyToast?.name"></span>
+    <span class="text-[9px] text-slate-600">clic simple = sélection · double-clic = suivre + fiche</span>
+    <button @click="openBodySmart(bodyToast.id); bodyToast=null" class="text-[10px] px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/25">fiche ↗</button>
+    <button @click="followFromToast()" class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/25">suivre 🎥</button>
+    <button @click="bodyToast=null" class="text-slate-500 hover:text-white text-base leading-none">✕</button>
+  </div>
+
   <!-- ══════════════ INSPECTEUR DE NŒUD (global) ══════════════ -->
   <div x-show="inspectN" x-cloak class="fixed bottom-24 left-4 z-[60] w-72 glass rounded-xl p-3.5 fade-in" style="border-color:rgba(56,189,248,.25)">
     <div class="flex items-start justify-between gap-2">
@@ -155,6 +166,47 @@
       <p x-show="inspectN?.id"><span class="text-slate-600">id :</span> <span class="mono" x-text="inspectN?.id"></span></p>
       <p class="text-slate-500 leading-relaxed" x-show="inspectN?.type === 'concept'">Concept de la constellation — relié à son corps et aux références matchées de la base.</p>
       <p class="text-slate-500 leading-relaxed" x-show="inspectN?.type === 'reference'">Référence scientifique de la base, matchée sur les mots-clés du domaine du corps.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE PLUTON ♇ / HADÈS (cycle de vie) ══════════════ -->
+  <div x-show="modals.hades" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('hades')">
+    <div class="glass rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-5 fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">♇ Pluton / Hadès — cycle de vie & optimisation</h2>
+          <p class="text-[10.5px] text-slate-500">Le dieu des morts du système · ⚰ Charon (passeur) · ☠ Styx (politique de rétention) — fauche redondances, versions outdated et junk</p>
+        </div>
+        <button @click="closeModal('hades')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 mt-4" x-show="hadesScan.stats">
+        <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Condamnés</div><div class="mono text-lg text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
+        <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Espace libérable</div><div class="mono text-lg text-rose-300" x-text="(hadesScan.stats?.ko ?? 0) + ' Ko'"></div></div>
+        <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Politique Styx</div><div class="text-[10px] text-slate-400 mt-1" x-text="'garder les ' + (hadesScan.politique_styx?.runs_gardes ?? 25) + ' derniers runs'"></div></div>
+      </div>
+
+      <div class="flex items-center gap-2 mt-4">
+        <button @click="loadHades()" class="text-[11px] px-3 py-1.5 rounded-lg bg-[var(--bg2)] border border-[var(--border)] hover:border-slate-400/40 text-slate-300">⟳ Scanner le système</button>
+        <button @click="reapHades()" class="text-[11px] px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-200 hover:bg-rose-500/25 font-semibold">⚰ Lancer la fauche</button>
+        <span class="text-[9.5px] text-slate-600">suppression réelle, journalisée, approuvée par ☉ SOL</span>
+      </div>
+      <p x-show="hadesMsg" class="text-[11px] mt-2" :class="hadesDone ? 'text-emerald-300' : 'text-slate-400'" x-text="hadesMsg"></p>
+
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Condamnés <span x-text="'(' + (hadesScan.targets?.length || 0) + ')'"></span></h3>
+      <div class="space-y-1 max-h-64 overflow-y-auto pr-1">
+        <template x-for="(t, i) in hadesScan.targets || []" :key="i">
+          <div class="glass-card rounded-lg px-3 py-2 flex items-center gap-2">
+            <span class="text-[11px]" x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[t.type] || '⚰'"></span>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10.5px] text-slate-300 truncate mono" x-text="t.cible"></p>
+              <p class="text-[9px] text-slate-600 truncate" x-text="t.raison"></p>
+            </div>
+            <span class="text-[9px] mono text-slate-500 shrink-0" x-text="t.octets ? (t.octets/1024).toFixed(1) + ' Ko' : '—'"></span>
+          </div>
+        </template>
+        <p x-show="!(hadesScan.targets?.length)" class="text-[11px] text-emerald-300/80 italic">Le système est propre — rien à faucher. ☠ Styx approuve.</p>
+      </div>
     </div>
   </div>
 
@@ -250,6 +302,21 @@
         <p x-show="!laplace.agents.length" class="text-[11px] text-slate-600 italic">Aucun agent créé pour l'instant — Laplace attend vos instructions.</p>
       </div>
 
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">✦ Métatron — méta-prompting (comprend & enrichir vos requêtes)</h3>
+      <div class="flex gap-2">
+        <input x-model="metatronBox.query" placeholder="tapez une requête à analyser (intention, domaines, prompt enrichi)…" class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-purple-500">
+        <button @click="metatronAnalyze()" class="px-3 py-2 rounded-lg text-xs text-white bg-purple-600 hover:bg-purple-500">analyser</button>
+        <button @click="metatronSuggest()" class="px-3 py-2 rounded-lg text-xs text-indigo-200 bg-indigo-500/20 border border-indigo-500/40 hover:bg-indigo-500/30" title="Métatron spécifie l'agent idéal pour cette mission et pré-remplit le formulaire">✦ → agent</button>
+      </div>
+      <div x-show="metatronBox.result" x-cloak class="glass-card rounded-lg p-3 mt-2 text-[11px] leading-relaxed">
+        <p><b class="text-purple-300">intention :</b> <span class="mono" x-text="metatronBox.result?.intention"></span>
+           · <b class="text-purple-300">style :</b> <span x-text="metatronBox.result?.style"></span>
+           <span x-show="metatronBox.result?.livrable"> · <b class="text-purple-300">livrable :</b> <span x-text="metatronBox.result?.livrable"></span></span></p>
+        <p class="mt-1"><b class="text-purple-300">méta-prompt :</b> <span class="text-slate-400" x-text="metatronBox.result?.meta_prompt"></span></p>
+        <p class="mt-1 text-slate-500" x-show="metatronBox.result?.clarifications?.length" x-text="'clarifications : ' + (metatronBox.result?.clarifications || []).join(' · ')"></p>
+        <p class="mt-1 text-indigo-300" x-show="metatronBox.result?.suggestion" x-text="metatronBox.result?.suggestion ? '✦ agent spécifié : ' + metatronBox.result.suggestion.name + ' → ' + metatronBox.result.suggestion.parent + ' (' + metatronBox.result.suggestion.kind + ') — formulaire pré-rempli ci-dessous' : ''"></p>
+      </div>
+
       <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Créer un agent</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <input x-model="nlAgent.name" placeholder="nom (ex : Hélios)" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-purple-500 focus:outline-none">
@@ -325,7 +392,7 @@
     <div class="glass rounded-2xl w-full max-w-4xl h-[88vh] flex flex-col shadow-2xl fade-in">
       <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2.5">
         <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200">☉</span>
-        <div class="flex-1"><h2 class="text-sm font-semibold">SOL — interface du système <span class="text-[9.5px] text-purple-300/80 font-normal">· les réponses viennent de Laplace ✳</span></h2>
+        <div class="flex-1"><h2 class="text-sm font-semibold">✳ Laplace — interlocuteur principal <span class="text-[9.5px] text-amber-300/80 font-normal">· ☉ SOL approuve chaque réponse</span></h2>
         <p class="text-[10px] text-slate-600">réponses ancrées sur les données réelles · toute interaction inter-corps est approuvée & journalisée</p></div>
         <button @click="closeModal('sol')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
@@ -349,9 +416,9 @@
             <template x-if="m.role==='user'">
               <div class="flex justify-end"><div class="max-w-[80%] bg-indigo-500/15 border border-indigo-500/30 text-slate-200 text-[12px] rounded-xl rounded-br-sm px-3 py-2" x-text="m.text"></div></div>
             </template>
-            <template x-if="m.role==='sol'">
+            <template x-if="m.role!=='user'">
               <div class="flex gap-2">
-                <span class="w-6 h-6 shrink-0 rounded-full bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-[11px] text-amber-300 mt-0.5">☉</span>
+                <span class="w-6 h-6 shrink-0 rounded-full bg-purple-400/15 border border-purple-400/30 flex items-center justify-center text-[11px] text-purple-300 mt-0.5">✳</span>
                 <div class="max-w-[88%] min-w-0">
                   <div class="glass-card text-[12px] text-slate-300 leading-relaxed rounded-xl rounded-tl-sm px-3 py-2 whitespace-pre-wrap" x-text="m.text"></div>
                   <div class="flex flex-wrap gap-1.5 mt-1.5" x-show="m.artifacts && m.artifacts.length">
@@ -368,7 +435,7 @@
       </div>
       <!-- saisie -->
       <div class="px-4 pb-3 flex gap-2 items-end border-t border-white/5 pt-3">
-        <textarea x-model="input" rows="1" @keydown.enter.prevent="send()" placeholder="Parlez au système — Laplace ✳ répond…"
+        <textarea x-model="input" rows="1" @keydown.enter.prevent="send()" placeholder="Parlez à Laplace ✳ — Métatron ✦ affine vos requêtes…"
           class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-xl px-3 py-2 text-[12px] text-slate-200 placeholder-slate-600 focus:border-amber-500/60 focus:outline-none resize-none max-h-24"></textarea>
         <button @click="send()" :disabled="busy || !input.trim()"
           class="px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-100 bg-gradient-to-r from-amber-500/80 to-amber-600/80 hover:from-amber-400/90 disabled:opacity-40 transition" x-text="busy ? '…' : '➤'"></button>
@@ -465,6 +532,10 @@
 </div>
 
 <script>
+// index satellite/cour → planète propriétaire, rempli par la scène 3D
+window.__moonOwner = {};
+function moonOwnerOf(id) { return window.__moonOwner[id] || null; }
+
 function solApp() {
   return {
     // état
@@ -472,8 +543,10 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false},
-    bodyData: null, inspectN: null,
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false},
+    bodyData: null, inspectN: null, bodyToast: null,
+    hadesScan: {}, hadesMsg: '', hadesDone: false,
+    metatronBox: {query: '', result: null},
     laplace: {agents: [], systems: []}, sebas: [],
     armory: [], ossCatalogue: [],
     marsReq: {agent: 'user', besoin: ''}, marsMsg: '',
@@ -499,8 +572,8 @@ function solApp() {
     },
 
     welcome() {
-      this.messages.push({role: 'sol', intent: 'accueil', text:
-        "☉ SOL à votre écoute — Laplace ✳ est désormais l'interlocuteur principal (nébuleuse en bas à droite).\n" +
+      this.messages.push({role: 'laplace', intent: 'accueil', text:
+        "✳ Laplace à votre écoute — Métatron ✦ analyse chacune de vos requêtes avant exécution. Demandez un outil (Mars ♂), une fauche (Pluton ♇), votre profil cognitif, ou lancez une mission.\n" +
         "• Cliquez sur ♅ Uranus (vue 3D) → sa fenêtre : vue 3D de ses satellites + constellations de connaissances (cliquez Zêta…)\n" +
         "• Cliquez sur ♀ Vénus → sa fenêtre financière\n" +
         "• Demandez une méta-analyse → je fais générer le papier scientifique + sa documentation\n" +
@@ -541,6 +614,55 @@ function solApp() {
       const r = await fetch('/api/mars/forge/' + encodeURIComponent(id), {method: 'POST'});
       if (r.ok) { this.marsMsg = '⚒ Outil forgé et livré.'; await this.loadArmory(); }
     },
+    openBodySmart(id) {
+      // modales dédiées pour les corps qui en ont une, fiche générique sinon
+      if (id === 'sol') this.openModal('sol');
+      else if (id === 'laplace') { this.refreshNebula(); this.openModal('laplace'); }
+      else if (id === 'sebas') { this.refreshNebula(); this.openModal('sebas'); }
+      else if (id === 'metatron') this.openBody('metatron');
+      else if (id === 'pluton' || id === 'charon' || id === 'styx') { this.loadHades(); this.openModal('hades'); }
+      else if (id === 'mars' || id === 'phobos' || id === 'deimos') { this.loadArmory(); this.openModal('mars'); }
+      else if (id === 'uranus') { this.selectedSat = 'uranus'; this.openModal('uranus'); }
+      else if (moonOwnerOf(id) === 'uranus') { this.selectedSat = id; this.openModal('uranus'); }
+      else if (id === 'venus') { this.selectedAnalyst = 'venus'; this.openModal('venus'); }
+      else if (moonOwnerOf(id) === 'venus') { this.selectedAnalyst = id; this.openModal('venus'); }
+      else this.openBody(id);
+    },
+    async followFromToast() {
+      const t = this.bodyToast; this.bodyToast = null;
+      if (t && this._skyFollow) this._skyFollow(t.id);
+    },
+    async loadHades() {
+      try { this.hadesScan = await (await fetch('/api/hades/scan')).json(); this.hadesMsg = ''; }
+      catch (e) { this.hadesScan = {}; }
+    },
+    async reapHades() {
+      if (!confirm('⚖ Hadès va détruire les ' + (this.hadesScan.stats?.condamnes ?? '?') +
+                   ' condamnés (runs obsolètes, doublons, junk). Charon ⚰ exécute réellement. Continuer ?')) return;
+      const r = await (await fetch('/api/hades/reap', {method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify({confirm: true})})).json();
+      this.hadesDone = r.supprimes !== undefined;
+      this.hadesMsg = r.statut + (r.supprimes !== undefined
+        ? ' — ' + r.supprimes + ' condamnés, ' + (r.octets_liberes / 1024).toFixed(1) + ' Ko libérés.' : '');
+      await this.loadHades();
+    },
+    async metatronAnalyze() {
+      if (!this.metatronBox.query.trim()) return;
+      const r = await fetch('/api/metatron/analyze', {method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: this.metatronBox.query})});
+      this.metatronBox.result = await r.json();
+    },
+    async metatronSuggest() {
+      const q = this.metatronBox.query.trim();
+      if (!q) return;
+      const r = await (await fetch('/api/metatron/suggest', {method: 'POST',
+        headers: {'Content-Type': 'application/json'}, body: JSON.stringify({mission: q})})).json();
+      this.nlAgent = {name: r.name, role: r.role, parent: r.parent, kind: r.kind};
+      this.metatronBox.result = {...this.metatronBox.result,
+        suggestion: r, meta_prompt: this.metatronBox.result?.meta_prompt || r.meta_prompt};
+      await this.refreshNebula();
+    },
     async openBody(id) {
       try {
         const r = await (await fetch('/api/cosmos/body/' + encodeURIComponent(id))).json();
@@ -550,6 +672,7 @@ function solApp() {
       } catch (e) {}
     },
     inspect(d) { this.inspectN = d; },
+
     async refreshNebula() {
       try {
         const r = await (await fetch('/api/laplace')).json();
@@ -646,7 +769,7 @@ function solApp() {
           headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: text})});
         const data = await res.json();
         const arts = data.data?.artifacts || data.artifacts || [];
-        this.messages.push({role: 'sol', text: data.reply, intent: data.intent, artifacts: arts});
+        this.messages.push({role: 'laplace', text: data.reply, intent: data.intent, artifacts: arts});
         const graphPath = data.data?.graph || data.graph;
         if (graphPath) { const g = await this.tryFetchGraph(graphPath); if (g) this.graphs['#dossier'] = g; }
         try {
@@ -654,7 +777,7 @@ function solApp() {
           this.setInteg(st.integrite);
           this.budget = await (await fetch('/api/cosmos/budget')).json();
         } catch (e) {}
-      } catch (e) { this.messages.push({role: 'sol', text: '⚠️ ' + e.message}); }
+      } catch (e) { this.messages.push({role: 'laplace', text: '⚠️ ' + e.message}); }
       this.busy = false;
       this.scrollMsgs();
     },
@@ -900,9 +1023,22 @@ function solApp() {
       nebulaGrp.add(sebasPivot);
       clickables.push(sebasMesh);
 
+      // ✦ MÉTATRON — archange du méta-prompting, en orbite autour de Laplace
+      const metatronPivot = new THREE.Group();
+      const metatronGrp = new THREE.Group();
+      metatronGrp.position.set(-138, 26, 0);
+      const metatronMesh = body(4.5, 0xe9d5ff, true);
+      metatronMesh.userData = {bodyId: 'metatron', name: '✦ Métatron',
+        role: 'Archange du méta-prompting — analyse vos requêtes (intention, domaines), les reformule en prompts enrichis et guide Laplace dans la création d\'agents.'};
+      const metatronLbl = label('✦ Métatron', '#e9d5ff'); metatronLbl.position.y = 12;
+      metatronGrp.add(metatronMesh, metatronLbl);
+      metatronPivot.add(metatronGrp);
+      nebulaGrp.add(metatronPivot);
+      clickables.push(metatronMesh);
+
       // orbites + planètes — structure entreprise complète (toutes les planètes du registre)
-      const ORBIT = {mercure: 105, venus: 150, terre: 190, mars: 230, ceres: 258, jupiter: 300, uranus: 355, neptune: 405};
-      const RADIUS = {mercure: 7, venus: 11, terre: 9, mars: 9, ceres: 5.5, jupiter: 14, uranus: 16, neptune: 12};
+      const ORBIT = {mercure: 105, venus: 150, terre: 190, mars: 230, ceres: 258, jupiter: 300, uranus: 355, neptune: 405, pluton: 452};
+      const RADIUS = {mercure: 7, venus: 11, terre: 9, mars: 9, ceres: 5.5, jupiter: 14, uranus: 16, neptune: 12, pluton: 6};
       const COLOR_FIX = {venus: 0xd9a066, uranus: 0x7dd3fc};
       const planets = {};
       const makePlanet = (id, symbol, name, role, radius, color, angle0, ringed) => {
@@ -968,6 +1104,7 @@ function solApp() {
         mars: {min: 18, range: 12, color: 0xfca5a5},
         jupiter: {min: 26, range: 32, color: 0xfdba74},
         neptune: {min: 18, range: 34, color: 0x93c5fd, sqrt: true},
+        pluton: {min: 14, range: 9, color: 0xe2e8f0},
         terre: {min: 24, range: 0, color: 0xd1d5db},
       };
       planetBodies.forEach(b => {
@@ -983,7 +1120,7 @@ function solApp() {
           const px = st.min + (st.direct ? (s.distance_km - 37850) / (583500 - 37850) * st.range : t * st.range);
           const size = b.id === 'uranus' ? 2.2 + 1.6 * (1 - (s.distance_km - 37850) / 545650) : 2.4;
           const pv = moon(planets[b.id].grp, s.name.split(' ')[0], s.role, px, size, st.color, s.id);
-          moonOwner[s.id] = b.id;
+          moonOwner[s.id] = b.id; window.__moonOwner[s.id] = b.id;
           moonPivots.push(pv);
         });
       });
@@ -992,11 +1129,15 @@ function solApp() {
       planetBodies.filter(b => (b.court || []).length).forEach(b => {
         (b.court || []).forEach(c => {
           const pv = moon(planets[b.id].grp, c.name, c.role, 24 + Math.random() * 8, 2.4, COURT_COLOR[b.id] || 0xfcd34d, c.id);
-          moonOwner[c.id] = b.id;
+          moonOwner[c.id] = b.id; window.__moonOwner[c.id] = b.id;
           courtPivots.push(pv);
         });
       });
       const marsMoons = moonPivots.filter((_, i) => true);  // toutes les lunes animées ci-dessous
+      // suivi par id (toast « suivre ») — expose le mapping vers les meshes cliquables
+      const meshIndex = {};
+      clickables.forEach(c => { if (c.userData && c.userData.bodyId) meshIndex[c.userData.bodyId] = c; });
+      this._skyFollow = id => { const o = meshIndex[id]; if (o) { followObj = o; selectBody(o); } };
       const nebulaGrpRef = nebulaGrp;
 
       // contrôles orbitaux complets : rotation (gauche), zoom (molette), pan (droite), focus (double-clic)
@@ -1064,28 +1205,22 @@ function solApp() {
       el.addEventListener('dblclick', e => {
         const hit = raycast(e);
         if (!hit) return;
-        followObj = hit.object;                    // suivre ce corps
+        followObj = hit.object;                    // double-clic : suivre le corps
         selectBody(hit.object);
         dist = Math.max(55, Math.min(dist, 120));
+        const u = hit.object.userData || {};
+        if (u.bodyId) { this.bodyToast = null; this.openBodySmart(u.bodyId); }
       });
       el.addEventListener('click', e => {
         if (moved > 6) return;   // c'était un drag
         const hit = raycast(e);
-        if (!hit) { selectBody(null); followObj = null; return; }
+        if (!hit) { selectBody(null); followObj = null; this.bodyToast = null; return; }
         const u = hit.object.userData;
         if (!u || !u.bodyId) return;
-        selectBody(hit.object);
-        if (u.bodyId === 'sol') this.openModal('sol');
-        else if (u.bodyId === 'laplace') { this.refreshNebula(); this.openModal('laplace'); }
-        else if (u.bodyId === 'sebas') { this.refreshNebula(); this.openModal('sebas'); }
-        else if (u.bodyId === 'mars' || u.bodyId === 'phobos' || u.bodyId === 'deimos') {
-          this.loadArmory(); this.openModal('mars');
-        }
-        else if (u.bodyId === 'uranus') { this.selectedSat = 'uranus'; this.openModal('uranus'); }
-        else if (moonOwner[u.bodyId] === 'uranus') { this.selectedSat = u.bodyId; this.openModal('uranus'); }
-        else if (u.bodyId === 'venus') { this.selectedAnalyst = 'venus'; this.openModal('venus'); }
-        else if (moonOwner[u.bodyId] === 'venus') { this.selectedAnalyst = u.bodyId; this.openModal('venus'); }
-        else this.openBody(u.bodyId);              // nouveaux corps : modale agent générique
+        selectBody(hit.object);                    // clic simple : sélection + fiche rapide
+        this.bodyToast = {id: u.bodyId, name: u.name || u.bodyId};
+        clearTimeout(this._toastT);
+        this._toastT = setTimeout(() => this.bodyToast = null, 6000);
       });
       window.addEventListener('resize', () => {
         const w = container.clientWidth, h = container.clientHeight;
@@ -1100,6 +1235,7 @@ function solApp() {
         planetBodies.forEach((b, i) => { planets[b.id].pivot.rotation.y += 0.0013 - i * 0.00008; });
         nebulaGrp.rotation.y += 0.0007;
         sebasPivot.rotation.y += 0.004;
+        metatronPivot.rotation.y -= 0.0022;
         sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
         planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });
         moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0009; });

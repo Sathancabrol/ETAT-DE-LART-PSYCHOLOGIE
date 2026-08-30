@@ -13,7 +13,7 @@ Deimos ◦ conçoit) — recherche open source d'abord, maquette sinon.
 import re
 from typing import Any, Dict
 
-from cosmos import mars
+from cosmos import mars, metatron
 
 TOOL_RE = re.compile(
     r"\boutil\b|armurer|maquette|forge?r?\b|phobos|deimos|\bmars\b|"
@@ -26,12 +26,56 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
+# fauche / nettoyage → Hadès ♇ ; profil → analyse cognitive
+HADES_RE = re.compile(r"fauche|nettoy|purge|redondan|junk|obsol[èe]te|outdated|"
+                      r"optimis.*(espace|m[ée]moire)|aux\s+enfers", re.IGNORECASE)
+PROFIL_RE = re.compile(r"mon\s+profil|profil\s+cognitif|qui\s+suis.?je|mes\s+informations|"
+                       r"mes\s+donn[ée]es\s+cognitiv", re.IGNORECASE)
+
+
 def chat(message: str) -> Dict[str, Any]:
     """Réponse de Laplace ✳ — délègue l'état réel au moteur de SOL, route les outils vers Mars."""
     m = (message or "").strip()
     if not m:
         return {"reply": "✳ Laplace vous écoute.", "intent": "vide",
                 "speaker": "laplace", "data": {}}
+
+    # ✦ Métatron pré-analyse chaque requête (méta-prompting)
+    try:
+        analyse = metatron.analyze_request(m)
+    except Exception:
+        analyse = None
+
+    # ── Intention FAUCHE → Hadès ♇ scanne et fauche ──────────────────────
+    if HADES_RE.search(m):
+        from cosmos import hades
+        sc = hades.scan_system()
+        st = sc["stats"]
+        reply = ("♇ Hadès a inspecté tout le système solaire :\n"
+                 f"• {st['condamnes']} condamnés ({st['ko']} Ko) — "
+                 + ", ".join(f"{v} {k}" for k, v in st["par_type"].items()) + ".\n"
+                 f"• Politique de Styx ☠ : garder les {hades.POLITIQUE['runs_gardes']} runs les plus "
+                 f"plus récents, faucher le surplus, les doublons et le junk.\n"
+                 "• Dis « fauche Hadès » (ou bouton ♇ dans /sol) et Charon ⚰ exécute.")
+        if re.search(r"fauche|ex[ée]cute|vas.y|d[ée]truis", m, re.IGNORECASE):
+            r = hades.reap(confirm=True)
+            reply = (f"♇ La fauche est exécutée — {r['supprimes']} condamnés envoyés aux enfers, "
+                     f"{round(r['octets_liberes']/1024, 1)} Ko libérés. "
+                     "Le cycle peut repartir plus léger.")
+        return {"reply": reply, "intent": "fauche", "speaker": "laplace",
+                "data": {"hades": {"stats": st}}}
+
+    # ── Intention PROFIL → profil cognitif induit ────────────────────────
+    if PROFIL_RE.search(m):
+        from cosmos import cogniprofile
+        pr = cogniprofile.build_profile()
+        dims = " · ".join(f"{d['label']} {d['valeur']}" for d in pr["dimensions"])
+        reply = ("✦ Votre profil cognitif (induit de vos interactions) :\n"
+                 f"• {dims}\n" + "\n".join("• " + t for t in pr["traits"][:3])
+                 + "\n• Vue complète : console /agent → onglet 🧠 Profil.\n"
+                 "⚠️ Heuristiques statistiques — pas un test psychométrique validé.")
+        return {"reply": reply, "intent": "profil", "speaker": "laplace",
+                "data": {"profil": {d["id"]: d["valeur"] for d in pr["dimensions"]}}}
 
     # ── Intention INVENTAIRE → état de l'armurerie ───────────────────────
     if INVENTORY_RE.search(m) and not NEED_WORDS.search(m):
@@ -97,11 +141,15 @@ def chat(message: str) -> Dict[str, Any]:
         return {"reply": reply, "intent": "outil", "speaker": "laplace",
                 "data": {"request": {k: req[k] for k in
                                      ("id", "statut", "data_kind", "opensource",
-                                      "maquette", "outil") if k in req}}}
+                                      "maquette", "outil") if k in req},
+                         "metatron": analyse}}
 
     # ── Intention générale : moteur réel de SOL, signature de Laplace ────
     from cosmos import sol
     r = sol.chat(m)
     r["speaker"] = "laplace"
     r["via"] = "✳ Laplace (interlocuteur principal) · ☉ SOL approuve"
+    if analyse:
+        r["data"] = r.get("data") or {}
+        r["data"]["metatron"] = analyse
     return r

@@ -1762,3 +1762,53 @@ def mars_file(id: str, kind: str = "outil"):
     from pathlib import Path as _P
     from fastapi.responses import HTMLResponse
     return HTMLResponse(_P(path).read_text(encoding="utf-8"))
+
+
+# ──────────────── MÉTATRON ✦ (méta-prompting, satellite de Laplace) ────────────────
+
+class MetatronRequest(BaseModel):
+    message: str
+
+class MetatronSuggestRequest(BaseModel):
+    mission: str
+
+@app.post("/api/metatron/analyze")
+def metatron_analyze(req: MetatronRequest):
+    """Analyse méta-prompting d'une requête : intention, domaines, prompt enrichi."""
+    from cosmos import metatron
+    if not req.message.strip():
+        raise HTTPException(status_code=400, detail="Message vide")
+    return metatron.analyze_request(req.message.strip()[:800])
+
+@app.post("/api/metatron/suggest")
+def metatron_suggest(req: MetatronSuggestRequest):
+    """Spécification d'agent proposée par Métatron pour Laplace."""
+    from cosmos import metatron
+    if not req.mission.strip():
+        raise HTTPException(status_code=400, detail="Mission vide")
+    return metatron.suggest_agent_spec(req.mission.strip()[:800])
+
+# ──────────────── PLUTON ♇ / HADÈS (cycle de vie & optimisation) ────────────────
+
+@app.get("/api/hades/scan")
+def hades_scan():
+    """Hadès inventorie le système : redondances, outdated, junk, journaux."""
+    from cosmos import hades
+    return hades.scan_system()
+
+class HadesReapRequest(BaseModel):
+    confirm: bool = False
+
+@app.post("/api/hades/reap")
+def hades_reap(req: HadesReapRequest):
+    """La fauche : Charon exécute (confirm=false → simulation)."""
+    from cosmos import hades
+    return hades.reap(confirm=req.confirm)
+
+# ──────────────── PROFIL COGNITIF (induit des schémas d'utilisation) ────────────────
+
+@app.get("/api/profile/cognitive")
+def profile_cognitive():
+    """Profil cognitif de l'utilisateur, induit de ses interactions réelles."""
+    from cosmos import cogniprofile
+    return cogniprofile.build_profile()

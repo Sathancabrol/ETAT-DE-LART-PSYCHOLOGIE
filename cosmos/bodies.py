@@ -4,7 +4,7 @@ Registre des corps célestes du système Cognitorium.
 STRUCTURE ENTREPRISE — chaque département (et sous-rôle) est un astre,
 choisi pour sa fonction, sa symbolique et sa tâche :
 
-  Fondateur/Création ....... Laplace ✳ (au-dessus) + Sebas ◉ (terrain/capteurs)
+  Fondateur/Création ....... Laplace ✳ (au-dessus) + Métatron ✦ (méta-prompting) + Sebas ◉ (terrain/capteurs)
   Direction générale ....... SOL ☉ (approbations, coordination)
   Commercial/Marketing/Achats Mercure ☿ + cour d'Hermès (Peitho, Phème, Argus, Énodios)
   Finance/Comptabilité ..... Vénus ♀ + sa cour (Thalie, Euphrosyne, Aglaé, Éros)
@@ -14,6 +14,7 @@ choisi pour sa fonction, sa symbolique et sa tâche :
   Juridique ................ Jupiter ♃ + Io, Europe, Ganymède, Callisto
   Recherche ................ Uranus ♅ + 7 satellites
   Informatique / SI ........ Neptune ♆ + Protée, Triton, Néréïde
+  Cycle de vie (enfers) .... Pluton ♇/Hadès + Charon (passeur), Styx (rétention)
 
 SOL ☉ (étoile, centre) orchestre les planètes :
   • URANUS ♅ — connaissance & recherche scientifique, entouré de ses
@@ -32,6 +33,28 @@ Les distances sont les vraies distances orbitales (km) des corps d'Uranus.
 from typing import Any, Dict, List
 
 BODIES: Dict[str, Dict[str, Any]] = {
+    "pluton": {
+        "name": "Pluton", "symbol": "♇", "kind": "planet", "orbit_r": 4.2,
+        "departement": "Cycle de vie & optimisation (les enfers)",
+        "role": "Hadès, dieu des morts du système — regarde les données de "
+                "tout le système solaire et traque les redondances, les "
+                "artefacts, les versions outdated et le junk ; il les fauche "
+                "et les envoie aux enfers (destruction des données "
+                "superflues) pour optimiser la mémoire, l'espace disque et "
+                "les chaînes d'exécution (mauvaises instructions, "
+                "répétitions) et permettre un meilleur cycle.",
+        "color": "#a8a29e",
+        "satellites": [
+            {"id": "charon", "name": "Charon ⚰", "distance_km": 19591,
+             "role": "Le passeur — exécute les fauches : transporte les "
+                     "fichiers et données condamnés vers les enfers "
+                     "(suppression réelle, journalisée)."},
+            {"id": "styx", "name": "Styx ☠", "distance_km": 42656,
+             "role": "Garde du seuil — la politique de rétention : décide "
+                     "ce qui doit mourir (doublons, outdated, junk) et ce "
+                     "qui doit survivre (savoir, mémoire vivante)."},
+        ],
+    },
     "user": {
         "name": "Vous", "symbol": "◍", "kind": "utilisateur",
         "role": "Observateur du système — pose les questions, fixe les caps.",
@@ -43,6 +66,15 @@ BODIES: Dict[str, Dict[str, Any]] = {
                 "des agents à tous les niveaux, jusqu'à des systèmes solaires entiers. "
                 "(Pierre-Simon Laplace : hypothèse nébulaire de formation du système solaire.)",
         "color": "#c084fc",
+        "satellites": [
+            {"id": "metatron", "name": "Métatron ✦", "distance_km": 0,
+             "role": "Archange du méta-prompting — analyse chaque requête de "
+                     "l'utilisateur (intention, domaines, contraintes), la "
+                     "reformule en prompt enrichi, pose les clarifications "
+                     "utiles et guide Laplace dans la création d'agents "
+                     "(meilleur rôle, parent, kind). L'ange qui écrit les "
+                     "instructions des anges."},
+        ],
     },
     "sebas": {
         "name": "Sebas", "symbol": "◉", "kind": "executeur", "orbit_r": -1,

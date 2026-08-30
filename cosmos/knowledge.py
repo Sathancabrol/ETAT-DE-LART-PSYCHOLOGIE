@@ -70,6 +70,13 @@ DEPT_CONCEPTS: Dict[str, List[str]] = {
     "phobos": ["création de software", "forge d'outils", "calculs temps réel"],
     "deimos": ["innovation", "conception", "maquette", "prototypage"],
     "laplace": ["création d'agents", "architecture du système", "amélioration continue"],
+    "metatron": ["méta-prompting", "analyse d'intention", "reformulation", "enrichissement de requête",
+                 "clarification", "ingénierie d'instructions", "profil cognitif",
+                 "spécification d'agents", "décomposition de tâche"],
+    "pluton": ["redondances", "données obsolètes", "junk", "fauche", "cycle de vie",
+               "optimisation de l'espace", "rétention", "nettoyage", "chaînes d'exécution"],
+    "charon": ["suppression", "passeur", "transport des condamnés"],
+    "styx": ["politique de rétention", "seuils", "que garder", "que détruire"],
     "sebas": ["capteurs", "observations terrain", "webcam", "wifi", "téléphone"],
 }
 
