@@ -126,6 +126,7 @@ def system_state() -> Dict[str, Any]:
 # ────────────────────────── Chat SOL (interface utilisateur) ──────────────
 
 INTENTS = [
+    ("dossier", r"dossier|strat[ée]gie|roadmap|am[ée]liorer|impl[ée]menter|int[ée]grer|int[ée]gration|transform|organiser|d[ée]ployer|mise\s+en\s+place"),
     ("etat", r"[ée]tat|syst[èe]me|int[ée]grit|status|sant|comment va"),
     ("budget", r"budget|co[uû]t|d[ée]pense|argent|token|tarif|prix|financ|pr[ée]voi|projection|rentre"),
     ("interactions", r"interaction|message|historique|[ée]change|journal|activit"),
@@ -133,6 +134,25 @@ INTENTS = [
     ("mission", r"mission|recherch|cherche|analyse|synth[ée]tis|[ée]tudie"),
     ("aide", r"aide|help|que (peux|sais)|capacit|comment .*(utiliser|marche)"),
 ]
+
+
+def _mission_artifacts(trace: Dict[str, Any]) -> list:
+    """Collecte les artefacts produits par les étapes d'une mission."""
+    arts = []
+    for s in trace.get("steps", []):
+        for a in s.get("artifacts", []) or []:
+            name = a.split("/")[-1]
+            icon = "📄"
+            if a.endswith("_graph.json"):
+                icon = "🗺️"
+            elif a.endswith(".json"):
+                icon = "🧾"
+            elif a.endswith(".csv"):
+                icon = "📊"
+            elif a.endswith(".html"):
+                icon = "🖥️"
+            arts.append({"path": a, "name": name, "icon": icon, "skill": s.get("skill")})
+    return arts
 
 
 def detect_intent(message: str) -> str:
@@ -213,14 +233,48 @@ def chat(message: str) -> Dict[str, Any]:
             result = launch_mission(task)
             if result.get("ok"):
                 tr = result["trace"]
+                arts = _mission_artifacts(tr)
                 steps = [f"✅ {s['skill']} — {s['summary'][:80]}" for s in tr.get("steps", []) if s.get("ok")]
                 steps += [f"❌ {s['skill']} — {s['summary'][:80]}" for s in tr.get("steps", []) if not s.get("ok")]
                 reply = (f"♅ Mission Uranus accomplie ({tr.get('statut')}, run {tr.get('run_id')}):\n"
                          + "\n".join(steps[:8])
                          + f"\nRapport complet : output/agent_runs/{tr.get('run_id')}/report.md")
+                if any(a["name"].startswith("paper") for a in arts):
+                    reply += ("\n📄 Le système a généré un PAPIER SCIENTIFIQUE de synthèse "
+                              "et sa documentation — cliquez ci-dessous pour les consulter.")
+                if arts:
+                    reply += "\n📁 Documents produits (cliquables) :\n" + \
+                        "\n".join(f"  {a['icon']} {a['name']}" for a in arts[:8])
+                result["artifacts"] = arts
+                result["graph"] = next((a["path"] for a in arts if a["name"].endswith("_graph.json")), None)
             else:
                 reply = f"⛔ Mission refusée : {result.get('raison')}"
             data = result
+
+    elif intent == "dossier":
+        task = _extract_task(message) or message.strip()
+        result = launch_mission(f"dossier : {task}")
+        if result.get("ok"):
+            tr = result["trace"]
+            arts = _mission_artifacts(tr)
+            dossier_step = next((s for s in tr.get("steps", []) if s["skill"] == "build_dossier"), None)
+            reply = ("☉ Dossier stratégique confié à Uranus — accompli "
+                     f"({tr.get('statut')}, run {tr.get('run_id')}) :\n")
+            if dossier_step:
+                d = dossier_step.get("data") or {}
+                reply += f"• Plan en {len(d.get('phases', []))} phases (crescendo organique) : " + \
+                    " → ".join(f"Phase {p}" for p in d.get("phases", [])) + "\n"
+                reply += f"• {d.get('graph_nodes', 0)} nœuds de feuille de route visualisables\n"
+                reply += f"• {d.get('references', 0)} références mobilisées\n"
+            if arts:
+                reply += "📁 Documents produits (cliquables) :\n" + \
+                    "\n".join(f"  {a['icon']} {a['name']}" for a in arts[:8]) + "\n"
+            reply += f"Rapport complet : output/agent_runs/{tr.get('run_id')}/report.md"
+            result["artifacts"] = arts
+            result["graph"] = next((a["path"] for a in arts if a["name"] == "dossier_graph.json"), None)
+        else:
+            reply = f"⛔ Dossier refusé : {result.get('raison')}"
+        data = result
 
     elif intent == "aide":
         reply = ("☉ Je suis SOL, orchestrateur du système. Je peux :\n"

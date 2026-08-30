@@ -208,3 +208,75 @@ def test_api_cosmos():
     upd = c.post("/api/cosmos/budget", json={"daily_cap_usd": 2.5})
     assert upd.status_code == 200 and upd.json()["daily_cap_usd"] == 2.5
     venus.set_caps(daily_cap_usd=1.0)   # restaurer
+
+
+# ── Constellations de connaissances ─────────────────────────────────────────
+
+def test_knowledge_graphs_par_corps():
+    from cosmos.knowledge import knowledge_graph
+    for bid, min_nodes in [("uranus", 30), ("zeta", 8), ("venus", 15),
+                           ("thalie", 3), ("sol", 8), ("titania", 5)]:
+        g = knowledge_graph(bid)
+        assert g and len(g["nodes"]) >= min_nodes, f"{bid} trop pauvre"
+        assert all("source" in l and "target" in l for l in g["links"])
+
+
+def test_knowledge_graph_corps_inconnu():
+    from cosmos.knowledge import knowledge_graph
+    assert knowledge_graph("pluton") is None
+
+
+def test_zeta_graph_contient_ses_concepts():
+    from cosmos.knowledge import knowledge_graph
+    g = knowledge_graph("zeta")
+    labels = " ".join(n["label"] for n in g["nodes"])
+    assert "Neurosciences" in labels and "HUD" in labels
+
+
+# ── Papier scientifique généré ──────────────────────────────────────────────
+
+def test_pipeline_meta_analyse_genere_papier():
+    r = sol.chat("mission : méta-analyse sur l'attention 2024-2026, génère le papier scientifique")
+    assert r["intent"] == "mission" and r["data"]["ok"]
+    arts = [a["name"] for a in r["data"]["artifacts"]]
+    assert "paper.md" in arts and "paper_documentation.md" in arts
+    tr = r["data"]["trace"]
+    assert any(s["skill"] == "write_paper" and s["ok"] for s in tr["steps"])
+    from pathlib import Path as P
+    paper = P(tr["steps"][-1]["artifacts"][0])
+    content = paper.read_text(encoding="utf-8")
+    for section in ("Résumé", "Méthodologie", "Résultats", "Discussion", "Références"):
+        assert section in content
+
+
+# ── Dossier stratégique (cas BTP) ───────────────────────────────────────────
+
+def test_dossier_btp_complet():
+    msg = ("je veux améliorer l'infrastructure du btp avec l'ia : administratif automatisé, "
+           "puis visière hud sur terrain, puis robotique et chantiers autonomes")
+    r = sol.chat(msg)
+    assert r["intent"] == "dossier" and r["data"]["ok"]
+    arts = [a["name"] for a in r["data"]["artifacts"]]
+    assert "dossier_plan.md" in arts and "dossier_graph.json" in arts and "dossier.md" in arts
+    step = next(s for s in r["data"]["trace"]["steps"] if s["skill"] == "build_dossier")
+    assert step["data"]["phases"] == [1, 2, 3]          # crescendo détecté
+    assert step["data"]["graph_nodes"] >= 15
+    assert r["data"]["graph"] and r["data"]["graph"].endswith("dossier_graph.json")
+
+
+def test_plan_btp_detecte_les_trois_phases():
+    from agent.skills.build_dossier import _detect_phases
+    assert _detect_phases("administratif puis visière hud puis robotique autonome") == [1, 2, 3]
+    assert _detect_phases("de la bureautique") == [1]
+
+
+# ── API connaissances ───────────────────────────────────────────────────────
+
+def test_api_knowledge():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    r = c.get("/api/cosmos/knowledge/uranus")
+    assert r.status_code == 200 and len(r.json()["nodes"]) >= 30
+    assert c.get("/api/cosmos/knowledge/zeta").status_code == 200
+    assert c.get("/api/cosmos/knowledge/pluton").status_code == 404

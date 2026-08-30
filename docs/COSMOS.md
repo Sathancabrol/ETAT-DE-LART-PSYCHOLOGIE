@@ -127,3 +127,56 @@ tests/test_cosmos.py     # 23 tests système (100 % hors-ligne)
   système fonctionne intégralement à coût nul (Vénus le comptabilise).
 - Aucune clé API n'est stockée dans le dépôt (variables d'environnement).
 - Toutes les interactions sont **traçables** (qui → qui, quoi, statut, raison).
+
+## 🆕 Vue 3D, fenêtres d'agents & générations de documents
+
+### Vue 3D du système (page `/sol`)
+
+Rendu **Three.js** : SOL au centre (halo), orbites de Vénus et Uranus, **anneaux
+d'Uranus inclinés**, 7 satellites positionnés selon leurs **vraies distances
+relatives** (Zêta le plus proche → Obéron le plus lointain), cour des Charites
+autour de Vénus, champ d'étoiles. Rotation orbitale animée, caméra orbitale
+(glisser/molette), tooltips au survol.
+
+**Clic sur un corps → la fenêtre de l'agent s'ouvre :**
+
+| Corps | Fenêtre |
+|---|---|
+| ☉ SOL | Chat du système + boutons de vues (état, interactions, budget, constellation) |
+| ♅ Uranus | **Vue 3D** d'Uranus + ses 7 satellites (cliquables) ; en dessous, la **constellation de connaissances** (D3) du corps sélectionné — global ou par satellite |
+| ♀ Vénus | **Vue 3D** de Vénus + sa cour ; cartes financières (dépenses, caps, tokens, projection) + constellation financière D3 |
+| Satellites/cour | Clic dans la vue 3D principale → fenêtre de la planète directement focalisée sur le corps choisi |
+
+### Constellations de connaissances (`cosmos/knowledge.py`)
+
+Chaque corps expose un graphe `{nodes, links}` servi par
+`GET /api/cosmos/knowledge/{body_id}` :
+- **Uranus** : références de la base 42 champs + concepts (tags) + domaines ;
+- **Satellites** : concepts de leur domaine (Zêta : neurosciences, IHM, HUD…)
+  + références matchées par mots-clés ;
+- **Vénus/cour** : caps, dépenses, projections, tarifs des modèles ;
+- **SOL** : graphe de gouvernance.
+
+### Papier scientifique généré (compétence `write_paper`)
+
+Une demande de méta-analyse (« mission : méta-analyse …, génère le papier »)
+déclenche : recherche → déduplication → synthèse → **paper.md** (résumé,
+méthodologie PRISMA, résultats, discussion, références DOI) +
+**paper_documentation.md** (statut épistémique, évaluation, reproductibilité).
+SOL propose les documents en **chips cliquables** dans le chat (visionneuse
+markdown intégrée).
+
+### Dossier stratégique (compétence `build_dossier`)
+
+Les questions de transformation (« je veux améliorer le BTP avec l'IA »)
+déclenchent : recherche documentaire + **plan en crescendo organique**
+(phases détectées depuis la demande : administratif → visière/HUD terrain →
+robotique/autonomie, avec actions, KPI, risques, quick wins) + synthèse
+documentaire + **dossier_graph.json** (feuille de route visualisable en D3
+dans la visionneuse d'artefacts).
+
+### Nouvelles compétences Uranus (13 au total)
+
+`write_paper` (papier de synthèse + documentation) et `build_dossier`
+(dossier stratégique + graphe), intégrées au planificateur (déclencheurs
+« méta-analyse/papier » et « dossier/stratégie/améliorer/intégrer »).

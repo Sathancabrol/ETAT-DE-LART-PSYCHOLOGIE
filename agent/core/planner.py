@@ -25,6 +25,8 @@ from agent.core.registry import get_skill, list_skills
 
 SYSTEMATIC_RE = re.compile(r"syst[ée]matique|état\s+de\s+l.art|revue\s+de\s+litt[ée]rature|cartographie|exhausti", re.I)
 PIPELINE_RE = re.compile(r"pipeline|complet|cha[îi]ne|tout\s+le\s+processus|workflow", re.I)
+PAPER_RE = re.compile(r"m[ée]ta.?analys|papier|paper|article\s+scientifique|r[ée]dige|publication", re.I)
+DOSSIER_RE = re.compile(r"dossier|strat[ée]gie|roadmap|am[ée]liorer|impl[ée]menter|int[ée]grer|transformation", re.I)
 
 
 @dataclass
@@ -72,6 +74,10 @@ def build_plan(task: str) -> Plan:
         selected |= {"search_literature", "deduplicate", "prisma_flow", "synthesize"}
     if PIPELINE_RE.search(task_low):
         selected |= {"validate_entries", "trust_scoring", "bias_assessment", "synthesize"}
+    if PAPER_RE.search(task_low):
+        selected |= {"search_literature", "deduplicate", "synthesize", "write_paper"}
+    if DOSSIER_RE.search(task_low):
+        selected |= {"build_dossier"}
 
     # 3. Paramètres communs extraits de la tâche
     common: Dict[str, Any] = {}

@@ -167,6 +167,18 @@ DOMAIN_LEXICON: Dict[str, str] = {
     "meta-analyse": "meta-analysis psychology",
     "préenregistrement": "preregistration",
     "reenregistrement": "preregistration",
+    "btp": "construction automation robotics AI",
+    "construction": "construction automation robotics AI",
+    "travaux publics": "civil engineering construction automation",
+    "chantier": "construction site automation robotics",
+    "robotique": "construction robotics automation",
+    "visière": "augmented reality head-mounted display construction",
+    "visiere": "augmented reality head-mounted display construction",
+    "hud": "head-up display augmented reality",
+    "exosquelette": "exoskeleton construction worker",
+    "drone": "drone construction site monitoring",
+    "infrastructure": "infrastructure construction technology",
+    "jumeau numérique": "digital twin construction",
 }
 
 

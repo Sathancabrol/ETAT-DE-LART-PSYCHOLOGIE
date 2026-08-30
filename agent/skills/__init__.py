@@ -11,3 +11,5 @@ from agent.skills import prisma_flow          # noqa: F401
 from agent.skills import synthesize           # noqa: F401
 from agent.skills import visualize            # noqa: F401
 from agent.skills import monitor_watch        # noqa: F401
+from agent.skills import write_paper          # noqa: F401
+from agent.skills import build_dossier        # noqa: F401

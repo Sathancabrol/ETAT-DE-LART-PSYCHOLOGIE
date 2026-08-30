@@ -1,0 +1,182 @@
+{
+  "nodes": [
+    {
+      "id": "sujet",
+      "label": "je veux améliorer l infrastructure du btp avec l",
+      "type": "racine",
+      "color": "#818cf8"
+    },
+    {
+      "id": "phase2",
+      "label": "Augmentation sur le terrain",
+      "type": "phase",
+      "color": "#fbbf24"
+    },
+    {
+      "id": "phase2:Visières connectées / tablettes avec",
+      "label": "Visières connectées / tablettes avec HUD : plans, checklist,",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase2:Assistance photo-vidéo : « ce que je",
+      "label": "Assistance photo-vidéo : « ce que je vois » analysé (conform",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase2:Mode tutorat pour intérimaires et mo",
+      "label": "Mode tutorat pour intérimaires et montée en compétence accél",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase2:Remontée terrain automatique (avance",
+      "label": "Remontée terrain automatique (avancement, incidents, météo c",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase3",
+      "label": "Chantiers augmentés puis autonomes",
+      "type": "phase",
+      "color": "#fbbf24"
+    },
+    {
+      "id": "phase3:Lots pilotes robotisés (terrassement",
+      "label": "Lots pilotes robotisés (terrassement, ferraillage, contrôle)",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase3:Drones de suivi de chantier (photogr",
+      "label": "Drones de suivi de chantier (photogrammétrie, avancement 3D)",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase3:Exosquelettes pour postes pénibles (",
+      "label": "Exosquelettes pour postes pénibles (prévention TMS)",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "phase3:Jumeau numérique du chantier aliment",
+      "label": "Jumeau numérique du chantier alimenté en continu",
+      "type": "action",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "ref:10.1002/wps.21203",
+      "label": "Relative effects of psychotherapies for mental disorders: sy",
+      "type": "reference",
+      "color": "#34d399",
+      "doi": "10.1002/wps.21203"
+    },
+    {
+      "id": "ref:10.1037/bul0000439",
+      "label": "Negative intergroup contact: influences, consequences, and m",
+      "type": "reference",
+      "color": "#34d399",
+      "doi": "10.1037/bul0000439"
+    },
+    {
+      "id": "ref:10.1136/bjsports-2024-108589",
+      "label": "Effectiveness of physical activity interventions for improvi",
+      "type": "reference",
+      "color": "#34d399",
+      "doi": "10.1136/bjsports-2024-108589"
+    },
+    {
+      "id": "ref:10.1038/s41562-025-02159-9",
+      "label": "Technology engagement and cognitive aging: a longitudinal an",
+      "type": "reference",
+      "color": "#34d399",
+      "doi": "10.1038/s41562-025-02159-9"
+    },
+    {
+      "id": "ref:10.1016/j.lmot.2024.102015",
+      "label": "A meta-analysis of self-determination theory interventions i",
+      "type": "reference",
+      "color": "#34d399",
+      "doi": "10.1016/j.lmot.2024.102015"
+    }
+  ],
+  "links": [
+    {
+      "source": "sujet",
+      "target": "phase2",
+      "type": "phase"
+    },
+    {
+      "source": "phase2",
+      "target": "phase2:Visières connectées / tablettes avec",
+      "type": "action"
+    },
+    {
+      "source": "phase2",
+      "target": "phase2:Assistance photo-vidéo : « ce que je",
+      "type": "action"
+    },
+    {
+      "source": "phase2",
+      "target": "phase2:Mode tutorat pour intérimaires et mo",
+      "type": "action"
+    },
+    {
+      "source": "phase2",
+      "target": "phase2:Remontée terrain automatique (avance",
+      "type": "action"
+    },
+    {
+      "source": "sujet",
+      "target": "phase3",
+      "type": "phase"
+    },
+    {
+      "source": "phase3",
+      "target": "phase3:Lots pilotes robotisés (terrassement",
+      "type": "action"
+    },
+    {
+      "source": "phase3",
+      "target": "phase3:Drones de suivi de chantier (photogr",
+      "type": "action"
+    },
+    {
+      "source": "phase3",
+      "target": "phase3:Exosquelettes pour postes pénibles (",
+      "type": "action"
+    },
+    {
+      "source": "phase3",
+      "target": "phase3:Jumeau numérique du chantier aliment",
+      "type": "action"
+    },
+    {
+      "source": "sujet",
+      "target": "ref:10.1002/wps.21203",
+      "type": "source"
+    },
+    {
+      "source": "sujet",
+      "target": "ref:10.1037/bul0000439",
+      "type": "source"
+    },
+    {
+      "source": "sujet",
+      "target": "ref:10.1136/bjsports-2024-108589",
+      "type": "source"
+    },
+    {
+      "source": "sujet",
+      "target": "ref:10.1038/s41562-025-02159-9",
+      "type": "source"
+    },
+    {
+      "source": "sujet",
+      "target": "ref:10.1016/j.lmot.2024.102015",
+      "type": "source"
+    }
+  ]
+}

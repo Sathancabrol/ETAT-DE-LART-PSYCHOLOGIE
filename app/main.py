@@ -1063,3 +1063,12 @@ def cosmos_chat(req: SolChatRequest):
         raise HTTPException(status_code=400, detail="Message vide")
     get_system()
     return sol.chat(req.message.strip()[:600])
+
+@app.get("/api/cosmos/knowledge/{body_id}")
+def cosmos_knowledge(body_id: str):
+    """Constellation de connaissances d'un corps (graph D3 : nodes+links)."""
+    from cosmos.knowledge import knowledge_graph
+    g = knowledge_graph(body_id)
+    if g is None:
+        raise HTTPException(status_code=404, detail=f"Corps inconnu : {body_id}")
+    return g
