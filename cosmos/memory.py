@@ -36,6 +36,8 @@ ITEM_TYPES = {"question", "reference", "article", "these", "draft", "poster",
               "texte", "audio", "video", "memoire", "dossier", "papier",
               "plan", "graph", "rapport", "document", "veille"}
 
+SEED_VERSION = 2
+
 SEED_TAXONOMY: Dict[str, Any] = {
     "name": "Cognitorium",
     "children": [
@@ -65,6 +67,58 @@ SEED_TAXONOMY: Dict[str, Any] = {
                     {"name": "Drones & suivi", "children": []},
                     {"name": "Jumeaux numériques", "children": []}]},
             ]},
+            {"name": "Génie civil & infrastructures", "children": [
+                {"name": "Routes & terrassements", "children": []},
+                {"name": "Ouvrages d'art", "children": []},
+                {"name": "Réhabilitation & entretien", "children": []},
+                {"name": "Management de projet (conducteur de travaux)", "children": []}]},
+        ]},
+        {"name": "Robotique", "children": [
+            {"name": "Robotique de chantier", "children": [
+                {"name": "Terrassement automatisé", "children": []},
+                {"name": "Cobots de montage", "children": []},
+                {"name": "Ferraillage & préfabrication", "children": []},
+                {"name": "Impression 3D structurelle", "children": []}]},
+            {"name": "Drones", "children": [
+                {"name": "Photogrammétrie", "children": []},
+                {"name": "Suivi d'avancement", "children": []},
+                {"name": "Inspection d'ouvrages", "children": []}]},
+            {"name": "Exosquelettes", "children": [
+                {"name": "Prévention TMS", "children": []},
+                {"name": "Assistance au port de charges", "children": []}]},
+            {"name": "Perception & navigation", "children": [
+                {"name": "SLAM & localisation", "children": []},
+                {"name": "Vision par ordinateur embarquée", "children": []},
+                {"name": "Capteurs & IoT chantier", "children": []}]},
+            {"name": "Téléopération & autonomie", "children": [
+                {"name": "Niveaux d'autonomie", "children": []},
+                {"name": "Sécurité fonctionnelle", "children": []}]},
+            {"name": "Éthique & réglementation robotique", "children": []},
+        ]},
+        {"name": "Intelligence artificielle", "children": [
+            {"name": "IA génératives", "children": [
+                {"name": "LLM", "children": []},
+                {"name": "Agents autonomes", "children": []},
+                {"name": "RAG & bases documentaires", "children": []}]},
+            {"name": "Vision par ordinateur", "children": [
+                {"name": "Détection de défauts", "children": []},
+                {"name": "Segmentation de scènes", "children": []},
+                {"name": "Suivi d'avancement par image", "children": []}]},
+            {"name": "Apprentissage automatique", "children": [
+                {"name": "Séries temporelles & prévision", "children": []},
+                {"name": "Optimisation & planification", "children": []},
+                {"name": "Transfer learning", "children": []}]},
+            {"name": "IA embarquée & edge", "children": [
+                {"name": "Temps réel", "children": []},
+                {"name": "Sobriété énergétique", "children": []}]},
+            {"name": "Humain dans la boucle", "children": [
+                {"name": "Interaction homme-machine (IHM)", "children": []},
+                {"name": "HUD & réalité augmentée", "children": []},
+                {"name": "Explicabilité (XAI) & confiance", "children": []}]},
+            {"name": "Gouvernance des données", "children": [
+                {"name": "RGPD & données chantier", "children": []},
+                {"name": "Cybersécurité", "children": []},
+                {"name": "Jumeaux numériques & BIM", "children": []}]},
         ]},
         {"name": "Émergents (auto-enrichis)", "children": []},
     ],
@@ -72,9 +126,18 @@ SEED_TAXONOMY: Dict[str, Any] = {
 
 # Où ranger automatiquement un terme nouveau selon ses mots-clés
 _BRANCH_HINTS = [
-    (r"btp|tp\b|chantier|construction|travaux", "Construction", "BTP / TP"),
-    (r"s[ée]curit|epi\b|equipement|[ée]quipement|casque|visi[èe]re|gants?", "Construction", "BTP / TP", "Sécurité", "Équipement"),
-    (r"robot|drone|exosquel|autonom", "Construction", "BTP / TP", "Chantiers augmentés"),
+    (r"s[ée]curit|epi\b|casque|visi[èe]re|gants?", "Construction", "BTP / TP", "Sécurité", "Équipement"),
+    (r"robot|cobot", "Robotique", "Robotique de chantier"),
+    (r"exosquel", "Robotique", "Exosquelettes"),
+    (r"drone|photogramm", "Robotique", "Drones"),
+    (r"slam|t[ée]l[ée]op|autonom", "Robotique", "Téléopération & autonomie"),
+    (r"\bllm\b|g[ée]n[ée]rat|\brag\b|agent", "Intelligence artificielle", "IA génératives"),
+    (r"machine learning|pr[ée]vision|optimi", "Intelligence artificielle", "Apprentissage automatique"),
+    (r"hud|r[ée]alit[ée] (augment|mixte)|interface|homme.?machine|ihm", "Intelligence artificielle", "Humain dans la boucle"),
+    (r"vision|d[ée]faut|segmentation", "Intelligence artificielle", "Vision par ordinateur"),
+    (r"rgpd|cyber|jumeau|bim", "Intelligence artificielle", "Gouvernance des données"),
+    (r"btp|\btp\b|chantier|construction|travaux", "Construction", "BTP / TP"),
+    (r"g[ée]nie civil|route|terrassement|ouvrage", "Construction", "Génie civil & infrastructures"),
     (r"attention|m[ée]moire|executive|m[ée]tacogn", "Psychologie scientifique", "Cognition & attention"),
     (r"psychoth|d[ée]pres|anx|clinic", "Psychologie scientifique", "Clinique & santé"),
     (r"[ée]ducation|apprentissage|scolaire", "Psychologie scientifique", "Éducation & apprentissage"),
@@ -87,7 +150,17 @@ _BRANCH_HINTS = [
 def load_taxonomy() -> Dict[str, Any]:
     if TAXONOMY_PATH.exists():
         try:
-            return json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
+            tree = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
+            # Migration : ajouter les branches du seed absentes (ex. Robotique, IA en v2)
+            known = {c["name"].lower() for c in tree.get("children", [])}
+            changed = False
+            for branch in SEED_TAXONOMY["children"]:
+                if branch["name"].lower() not in known:
+                    tree.setdefault("children", []).append(branch)
+                    changed = True
+            if changed:
+                save_taxonomy(tree)
+            return tree
         except Exception:
             pass
     save_taxonomy(SEED_TAXONOMY)

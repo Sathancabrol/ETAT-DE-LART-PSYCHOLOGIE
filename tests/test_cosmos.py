@@ -305,13 +305,31 @@ def test_graphes_constellations_format_obsidian():
 
 # ── Mémoire évolutive ───────────────────────────────────────────────────────
 
-def test_taxonomie_seeed_construction():
+def test_taxonomie_seed_branches_completes():
     from cosmos import memory
     tree = memory.load_taxonomy()
+    branches = {c["name"] for c in tree["children"]}
+    # 5 branches racines attendues (v2)
+    assert {"Psychologie scientifique", "Construction", "Robotique",
+            "Intelligence artificielle", "Émergents (auto-enrichis)"} <= branches
     blob = json.dumps(tree, ensure_ascii=False)
-    for attendu in ("Construction", "BTP / TP", "Sécurité", "Équipement", "EPI",
-                    "Visière", "Modèle de vision connecté IA"):
+    for attendu in ("BTP / TP", "Sécurité", "Équipement", "EPI", "Visière",
+                    "Modèle de vision connecté IA", "Génie civil & infrastructures",
+                    "Robotique de chantier", "Drones", "Exosquelettes", "SLAM & localisation",
+                    "IA génératives", "LLM", "Vision par ordinateur", "HUD & réalité augmentée",
+                    "Gouvernance des données"):
         assert attendu in blob, f"{attendu} absent de la taxonomie seed"
+
+
+def test_migration_taxonomie_conserve_enrichissements():
+    from cosmos import memory
+    tree = memory.load_taxonomy()
+    memory.enrich_taxonomy(["cobot de pose de canalisation"])
+    tree2 = memory.load_taxonomy()          # recharge → passe par la migration
+    blob = json.dumps(tree2, ensure_ascii=False)
+    assert "Intelligence artificielle" in blob      # branche seed toujours là
+    assert "cobot de pose de canalisation" in blob  # enrichissement conservé
+    memory.save_taxonomy(memory.SEED_TAXONOMY)
 
 
 def test_enrichissement_taxonomie():
@@ -353,17 +371,42 @@ def test_concepts_partages_agreges():
 
 # ── Dashboard métriques ─────────────────────────────────────────────────────
 
-def test_dashboard_metrics_avec_formules():
+def test_dashboard_metrics_pedagogique():
     from fastapi.testclient import TestClient
     from app.main import app
     c = TestClient(app)
     d = c.get("/api/dashboard/metrics").json()
     metrics = {m["id"]: m for m in d["metrics"]}
-    assert "trust" in metrics and "M + R + O + C + T" in metrics["trust"]["formula"][0]
+    # formules présentes ou explicitement absentes
+    assert "M + R + O + C + T" in metrics["trust"]["formula"][0]
     assert metrics["integrite"]["formula"]
     assert metrics["references"]["formula"] is None          # compteur simple
     assert "Pas de formule" in metrics["references"]["legend"][0]
     assert "burn" in metrics and "prisma" in metrics and "memoire" in metrics
+    # trust : expliqué (quoi/100/comment) + jauge + décomposition
+    t = metrics["trust"]
+    assert t["viz"] == "gauge" and t["gauge"]["max"] == 100 and len(t["gauge"]["zones"]) == 4
+    assert any("100 = confiance maximale" in e for e in t["explain"])
+    assert any("73.2" in e or "moyenne" in e for e in t["explain"])
+    assert {b["label"][:1] for b in t["bars"]} >= {"M", "R", "O", "C", "T"}
+    # références : liste réelle (qui ?)
+    r = metrics["references"]
+    assert r["viz"] == "list" and len(r["items"]) == 14
+    assert all(i["main"] for i in r["items"])
+    # relations : répartition + exemples
+    rel = metrics["relations"]
+    assert rel["bars"] and rel["items"]
+    # citations : de qui
+    cit = metrics["citations"]
+    assert cit["viz"] == "bars" and len(cit["bars"]) >= 5
+    assert any("de qui" in (e or "").lower() for e in cit["explain"])
+    # intégrité : simulateur à 3 curseurs initialisé sur les valeurs réelles
+    integ = metrics["integrite"]
+    assert integ["viz"] == "sim" and len(integ["sim"]["inputs"]) == 3
+    assert all(i["value"] is not None for i in integ["sim"]["inputs"])
+    # mémoire : graphique par type
+    mem = metrics["memoire"]
+    assert "bars" in mem["viz"] and mem["bars_caption"]
 
 
 def test_api_constellations_et_concepts():

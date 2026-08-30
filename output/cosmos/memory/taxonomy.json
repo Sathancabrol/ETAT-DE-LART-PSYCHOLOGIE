@@ -102,6 +102,228 @@
                   "children": []
                 }
               ]
+            },
+            {
+              "name": "chantier",
+              "children": []
+            },
+            {
+              "name": "btp",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Génie civil & infrastructures",
+          "children": [
+            {
+              "name": "Routes & terrassements",
+              "children": []
+            },
+            {
+              "name": "Ouvrages d'art",
+              "children": []
+            },
+            {
+              "name": "Réhabilitation & entretien",
+              "children": []
+            },
+            {
+              "name": "Management de projet (conducteur de travaux)",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Robotique",
+      "children": [
+        {
+          "name": "Robotique de chantier",
+          "children": [
+            {
+              "name": "Terrassement automatisé",
+              "children": []
+            },
+            {
+              "name": "Cobots de montage",
+              "children": []
+            },
+            {
+              "name": "Ferraillage & préfabrication",
+              "children": []
+            },
+            {
+              "name": "Impression 3D structurelle",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Drones",
+          "children": [
+            {
+              "name": "Photogrammétrie",
+              "children": []
+            },
+            {
+              "name": "Suivi d'avancement",
+              "children": []
+            },
+            {
+              "name": "Inspection d'ouvrages",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Exosquelettes",
+          "children": [
+            {
+              "name": "Prévention TMS",
+              "children": []
+            },
+            {
+              "name": "Assistance au port de charges",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Perception & navigation",
+          "children": [
+            {
+              "name": "SLAM & localisation",
+              "children": []
+            },
+            {
+              "name": "Vision par ordinateur embarquée",
+              "children": []
+            },
+            {
+              "name": "Capteurs & IoT chantier",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Téléopération & autonomie",
+          "children": [
+            {
+              "name": "Niveaux d'autonomie",
+              "children": []
+            },
+            {
+              "name": "Sécurité fonctionnelle",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Éthique & réglementation robotique",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Intelligence artificielle",
+      "children": [
+        {
+          "name": "IA génératives",
+          "children": [
+            {
+              "name": "LLM",
+              "children": []
+            },
+            {
+              "name": "Agents autonomes",
+              "children": []
+            },
+            {
+              "name": "RAG & bases documentaires",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Vision par ordinateur",
+          "children": [
+            {
+              "name": "Détection de défauts",
+              "children": []
+            },
+            {
+              "name": "Segmentation de scènes",
+              "children": []
+            },
+            {
+              "name": "Suivi d'avancement par image",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Apprentissage automatique",
+          "children": [
+            {
+              "name": "Séries temporelles & prévision",
+              "children": []
+            },
+            {
+              "name": "Optimisation & planification",
+              "children": []
+            },
+            {
+              "name": "Transfer learning",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "IA embarquée & edge",
+          "children": [
+            {
+              "name": "Temps réel",
+              "children": []
+            },
+            {
+              "name": "Sobriété énergétique",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Humain dans la boucle",
+          "children": [
+            {
+              "name": "Interaction homme-machine (IHM)",
+              "children": []
+            },
+            {
+              "name": "HUD & réalité augmentée",
+              "children": []
+            },
+            {
+              "name": "Explicabilité (XAI) & confiance",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Gouvernance des données",
+          "children": [
+            {
+              "name": "RGPD & données chantier",
+              "children": []
+            },
+            {
+              "name": "Cybersécurité",
+              "children": []
+            },
+            {
+              "name": "Jumeaux numériques & BIM",
+              "children": []
             }
           ]
         }

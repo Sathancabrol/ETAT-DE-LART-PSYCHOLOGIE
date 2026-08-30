@@ -235,3 +235,46 @@ PRISMA). Le dashboard affiche aussi une **représentation du système solaire**
 Sur toutes les pages : petit soleil **en rotation avec plasma pulsant et
 éruptions solaires animées** (CSS pur). Un clic ouvre un mini-chat SOL
 (vues rapides état/budget/interactions/constellation, artefacts cliquables).
+
+## 🆕 Dashboard pédagogique & taxonomie v2
+
+### Chaque métrique explique sa valeur (quoi ? qui ? comment ?)
+
+La modale de chaque métrique du dashboard contient désormais, selon le cas :
+
+- **Trust factor** — *73.2/100 expliqué* : jauge à 4 zones (faible/modéré/élevé/très
+  élevé), texte « 100 = confiance maximale : méta-analyse préenregistrée, N≥1000
+  répliqué, 100 % open science… », et **décomposition moyenne réelle** en barres
+  M/R/O/C/T/P (ex. M=23,2 · R=8,0 · O=7,6 · C=15,0 · T=14,6 − P=1,8) + formule complète.
+- **Références** — la liste réelle des 14 publications (qui : Lee & Engle 2026…,
+  badge trust).
+- **Relations** — répartition par type (converging ×20, synthesis ×8…) + exemples
+  réels « Tünçok 2025 → operationalization → Lee & Engle 2026 ».
+- **Citations** — « de qui » : barres par référence (Alter & Oppenheimer 1245…).
+- **Intégrité système** — explication + **mini-simulateur** : 3 curseurs (taux
+  d'erreur, burn rate, part dégradée) initialisés sur les valeurs réelles ;
+  le score et le statut (🟢/🟡/🔴) se recalculent en direct selon la formule.
+- **Mémoire** — **graphique en barres par type** (questions, références, dossiers,
+  papiers…) + derniers éléments.
+- Les compteurs simples affichent explicitement « ⚠️ Pas de formule ».
+
+### Taxonomie enrichie v2 (`output/cosmos/memory/taxonomy.json`)
+
+Cinq branches racines :
+- **Psychologie scientifique** (cognition, clinique, éducation, méthodo)
+- **Construction** — BTP/TP (Sécurité → Équipement → **EPI / Visière → modèle de
+  vision connecté IA**, administratif augmenté, chantiers augmentés) +
+  **Génie civil & infrastructures** (routes, ouvrages d'art, réhabilitation,
+  management de projet)
+- **Robotique** — robotique de chantier (terrassement automatisé, cobots,
+  impression 3D), drones (photogrammétrie, suivi, inspection), exosquelettes,
+  perception & navigation (SLAM, vision embarquée, IoT), téléopération & autonomie,
+  éthique & réglementation
+- **Intelligence artificielle** — IA génératives (LLM, agents, RAG), vision par
+  ordinateur (détection de défauts, segmentation), apprentissage automatique,
+  IA embarquée & edge, humain dans la boucle (IHM, HUD/RA, XAI), gouvernance
+  des données (RGPD, cyber, jumeaux numériques/BIM)
+- **Émergents (auto-enrichis)** — paroles des missions et questions
+
+Migration automatique : les enrichissements existants sont conservés, les
+branches seed manquantes sont ajoutées au chargement.

@@ -1134,13 +1134,19 @@ def all_concepts():
 
 @app.get("/api/dashboard/metrics")
 def dashboard_metrics():
-    """Toutes les métriques du système, avec formules/légendes quand elles existent."""
+    """Toutes les métriques du système — pédagogique : chaque métrique explique
+    sa valeur (quoi/qui/comment), avec jauge, barres, liste réelle ou mini
+    simulateur quand c'est pertinent. Les formules sont toujours affichées,
+    ou signalées absentes (compteurs simples)."""
+    import csv as _csv
     import json as _json
+    from collections import Counter as _Counter
+    from pathlib import Path as _P
     from agent.core.registry import list_skills
-    from cosmos import memory, sol as sol_mod, venus as venus_mod, ledger
+    from agent.skills.trust_scoring import _heuristic_trust
+    from cosmos import memory, sol as sol_mod, venus as venus_mod
     from cosmos.bodies import BODIES
     from cosmos.system import get_system
-    from pathlib import Path as _P
     get_system()
     init_db()
 
@@ -1149,12 +1155,56 @@ def dashboard_metrics():
     ven = venus_mod.status()
     mem = memory.stats()
 
+    # Données réelles : références (CSV 42 champs) et relations (SQLite)
+    rows = []
+    csv_path = _P("data/nodes_etat_art_psychologie.csv")
+    if csv_path.exists():
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            rows = list(_csv.DictReader(f))
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT source_id, target_id, relation_type FROM reference_relations LIMIT 500")
+        rel_rows = [dict(r) for r in cur.fetchall()]
+    except Exception:
+        rel_rows = []
+    conn.close()
+    if not rel_rows:  # repli : champ `relations` du CSV
+        for r in rows:
+            for part in (r.get("relations") or "").split(";"):
+                if "->" in part and ":" in part:
+                    left, tgt = part.split("->")
+                    if ":" in left:
+                        s_, typ = left.split(":")
+                        rel_rows.append({"source_id": s_.strip(), "target_id": tgt.strip(),
+                                         "relation_type": typ.strip()})
+    ref_by_id = {r["id"]: r for r in rows}
+    rel_counts = _Counter(r["relation_type"] for r in rel_rows)
+
+    def _cit(r):
+        for k in ("citations_google_scholar", "citations_crossref", "citations_openalex"):
+            v = str(r.get(k) or "").strip()
+            if v.isdigit() and int(v) > 0:
+                return int(v)
+        return 0
+
+    # ── Trust : moyenne + décomposition heuristique réelle ──
+    declared = [int(r["trust_factor"]) for r in rows if str(r.get("trust_factor") or "").isdigit()]
+    avg_trust = round(sum(declared) / len(declared), 1) if declared else None
+    comp_avg = {}
+    if rows:
+        details = [_heuristic_trust(r)["detail"] for r in rows]
+        for k in ("M", "R", "O", "C", "T", "P"):
+            comp_avg[k] = round(sum(d[k] for d in details) / len(details), 1)
+    trust_dist = _Counter(("faible" if int(t) < 30 else "modéré" if int(t) < 60
+                           else "élevé" if int(t) < 85 else "très élevé") for t in declared)
+
     prisma = {"identifies": None, "dedup": None}
     ppath = _P("output/prisma_state.json")
     if ppath.exists():
         try:
-            p = _json.loads(ppath.read_text(encoding="utf-8"))
-            last = p.get("dernier") or (p.get("historique") or [{}])[-1]
+            ps = _json.loads(ppath.read_text(encoding="utf-8"))
+            last = ps.get("dernier") or (ps.get("historique") or [{}])[-1]
             prisma = {"identifies": last.get("identifies"), "dedup": last.get("apres_deduplication")}
         except Exception:
             pass
@@ -1162,61 +1212,161 @@ def dashboard_metrics():
     n_inter = len(sol_mod._bus.history(limit=500)) if sol_mod._bus else 0
     burn = round(ven["spend_today_usd"] / ven["budget"]["daily_cap_usd"], 3) if ven["budget"]["daily_cap_usd"] else 0
 
+    TRUST_FORMULA = ["Trust = M + R + O + C + T − P  (plafonné à 0–100)",
+                     "M · Méthodologie 0–30 : méta-analyse 30 · revue systématique 25 · empirique 15 (+5 triangulation ≥3)",
+                     "R · Réplication 0–20 : grand échantillon N≥1000 (+6), répliques",
+                     "O · Open science 0–20 : accès ouvert 6 + données 7 + code 3 + préenregistrement 4",
+                     "C · Cohérence 0–15 : question explicite 2 + tags ≥3 3",
+                     "T · Transparence 0–15 : peer review 5 + justification 2",
+                     "P · Pénalités 0–50 : non peer review +15 · preprint +10"]
+    TRUST_ZONES = [[0, 30, "faible", "#fb7185"], [30, 60, "modéré", "#fbbf24"],
+                   [60, 85, "élevé", "#34d399"], [85, 100, "très élevé", "#22d3ee"]]
+
     metrics = [
-        {"id": "trust", "label": "Trust factor moyen", "value": stats.get("average_trust_factor"),
-         "unit": "/100", "icon": "🛡️",
-         "formula": ["Trust = M + R + O + C + T − P",
-                     "M · Méthodologie : 0–30 (méta-analyse 30, revue 25, empirique 15…)",
-                     "R · Réplication : 0–20 (grand N, répliques)",
-                     "O · Open science : 0–20 (OA 6 + données 7 + code 3 + préenreg. 4)",
-                     "C · Cohérence : 0–15 (question explicite 2, tags ≥3 : 3)",
-                     "T · Transparence : 0–15 (peer review 5, justification 2)",
-                     "P · Pénalités : 0–50 (non peer review +15, preprint +10)"],
-         "legend": ["Moyenne calculée sur les trust_factor déclarés de la base 42 champs.",
-                    "Le recalcul heuristique est disponible via la compétence trust_scoring."]},
+        {"id": "trust", "label": "Trust factor moyen", "value": avg_trust, "unit": "/100",
+         "icon": "🛡️", "viz": "gauge", "gauge": {"max": 100, "zones": TRUST_ZONES},
+         "formula": TRUST_FORMULA,
+         "explain": [
+             "Ce score mesure la **confiance** que le système peut accorder aux connaissances de la base.",
+             "**100 = confiance maximale** : une méta-analyse préenregistrée, au grand échantillon répliqué, 100 % open science (accès ouvert + données + code + préenregistrement), parfaitement cohérente et transparente, sans aucune pénalité.",
+             f"**{avg_trust} = la moyenne des {len(declared)} références** enregistrées. La barre ci-dessous montre d'où viennent les points perdus : tout vient de M (méthodo solide) mais O (open science) et R (réplication) ne sont pas complets sur toutes les références.",
+             f"Répartition actuelle : {dict(trust_dist)}.",
+             "Paliers de lecture : <30 faible · 30–59 modéré · 60–84 élevé · ≥85 très élevé."],
+         "bars_caption": "Décomposition moyenne réelle (recalcul heuristique sur les références)",
+         "bars": [
+             {"label": "M · Méthodologie", "value": comp_avg.get("M"), "max": 30, "color": "#818cf8"},
+             {"label": "R · Réplication", "value": comp_avg.get("R"), "max": 20, "color": "#34d399"},
+             {"label": "O · Open science", "value": comp_avg.get("O"), "max": 20, "color": "#22d3ee"},
+             {"label": "C · Cohérence", "value": comp_avg.get("C"), "max": 15, "color": "#c084fc"},
+             {"label": "T · Transparence", "value": comp_avg.get("T"), "max": 15, "color": "#fbbf24"},
+             {"label": "P · Pénalités (retranchées)", "value": comp_avg.get("P"), "max": 15, "color": "#fb7185"}],
+         "legend": ["Moyenne des trust_factor déclarés dans la base 42 champs.",
+                    "Recalcul complet par référence : compétence trust_scoring."]},
+
         {"id": "integrite", "label": "Intégrité du système", "value": integ["score"], "unit": "/100",
-         "icon": "🟢", "status": integ["statut"],
+         "icon": "🟢", "status": integ["statut"], "viz": "sim",
          "formula": ["Score = 100 − min(40, taux_erreur × 100) − 15·[burn ≥ 0,8] − 10·[dégradé ≥ 50 %]",
-                     "taux_erreur = interactions failed ÷ total (les refus de politique ne comptent pas)"],
-         "legend": integ["alertes"] or ["Aucune alerte préventive."]},
+                     "taux_erreur = interactions `failed` ÷ total — les refus de politique (⛔) ne comptent PAS : c'est SOL qui fait son travail",
+                     "burn = dépense du jour ÷ cap journalier · dégradé = missions en mode hors-ligne"],
+         "explain": [
+             "**100 = système parfait** : aucune interaction en erreur, budget très en dessous du cap, missions en mode réel (pas dégradées).",
+             f"Actuellement **{integ['score']}/100 ({integ['statut']})** : {integ['interactions_total']} interactions journalisées, taux d'erreur {integ['taux_echec']:.0%}, burn {integ['burn_rate_budget']:.0%}, part dégradée {integ['part_mode_degrade']:.0%}.",
+             "**Mini-simulateur ci-dessous** : bougez les curseurs pour voir comment chaque facteur fait baisser le score et déclenche les alertes de SOL."],
+         "sim": {"inputs": [
+                     {"key": "err", "label": "Taux d'erreur des interactions", "min": 0, "max": 0.5, "step": 0.01, "value": integ["taux_echec"]},
+                     {"key": "burn", "label": "Burn rate budgétaire (dépense/cap)", "min": 0, "max": 1.5, "step": 0.05, "value": integ["burn_rate_budget"]},
+                     {"key": "deg", "label": "Part des missions en mode dégradé", "min": 0, "max": 1, "step": 0.05, "value": integ["part_mode_degrade"]}],
+                 "note": "Valeurs initiales = valeurs réelles actuelles du système."},
+         "legend": integ["alertes"] or ["Aucune alerte préventive — situation nominale."]},
+
         {"id": "references", "label": "Références (base 42 champs)", "value": stats.get("total_references"),
-         "unit": "", "icon": "📚", "formula": None,
+         "unit": "publ.", "icon": "📚", "viz": "list",
+         "formula": None,
+         "explain": [
+             f"**{stats.get('total_references')} publications scientifiques** sont enregistrées dans la base de données du projet (fichier `data/nodes_etat_art_psychologie.csv`, 42 champs par référence).",
+             "Ce sont des **articles, méta-analyses, revues systématiques** de psychologie cognitive (attention, mémoire, éducation, clinique…) et de méthodologie — la liste complète est ci-dessous.",
+             "La base s'agrandit à chaque mission de recherche d'Uranus et à chaque DOI enrichi."],
+         "items_caption": "Les références enregistrées (qui ?)",
+         "items": [{"main": r.get("reference_courte", r["id"]),
+                    "secondary": (r.get("theme") or "")[:90],
+                    "badge": f"trust {r.get('trust_factor')}",
+                    "badge_color": "#34d399" if str(r.get("trust_factor", "0")).isdigit() and int(r["trust_factor"]) >= 60 else "#fbbf24"}
+                   for r in rows],
          "legend": ["Pas de formule — indicateur compteur (lignes validées du CSV)."]},
-        {"id": "relations", "label": "Relations", "value": stats.get("total_relations"), "unit": "",
-         "icon": "🔗", "formula": None, "legend": ["Pas de formule — compteur de liens inter-références."]},
-        {"id": "citations", "label": "Citations moyennes", "value": stats.get("average_citations"),
-         "unit": "", "icon": "📈",
-         "formula": ["moyenne = Σ citations ÷ nombre de références"], "legend": []},
+
+        {"id": "relations", "label": "Relations entre références", "value": len(rel_rows),
+         "unit": "liens", "icon": "🔗", "viz": "bars+list",
+         "formula": None,
+         "explain": [
+             f"**{len(rel_rows)} liens** relient les références entre elles : qui **opérationnalise** qui, qui **converge**, qui **synthétise**, qui **falsifie** ou **révise** qui.",
+             "Exemple : une méta-analyse (Titania) *synthèse* plusieurs études primaires ; une réplication échouée *falsification* l'étude d'origine.",
+             "Répartition par type de relation ci-dessous, exemples réels ensuite."],
+         "bars_caption": "Répartition par type de relation",
+         "bars": [{"label": t, "value": n, "max": max(rel_counts.values()) if rel_counts else 1, "color": "#818cf8"}
+                  for t, n in rel_counts.most_common()],
+         "items_caption": "Exemples de liens (source → type → cible)",
+         "items": [{"main": f"{ref_by_id.get(r['source_id'], {}).get('reference_courte', r['source_id'])} → {r['relation_type']} → {ref_by_id.get(r['target_id'], {}).get('reference_courte', r['target_id'])}",
+                    "secondary": "", "badge": "", "badge_color": ""}
+                   for r in rel_rows[:12]],
+         "legend": ["Pas de formule — compteur de liens inter-références."]},
+
+        {"id": "citations", "label": "Citations (de qui ?)", "value": stats.get("average_citations"),
+         "unit": "moy./réf.", "icon": "📈", "viz": "bars",
+         "formula": ["moyenne = Σ citations de chaque référence ÷ nombre de références"],
+         "explain": [
+             "Chaque référence est citée par d'autres publications : plus une référence est citée, plus elle a influencé son domaine.",
+             f"La **moyenne est de {stats.get('average_citations')} citations par référence** — tirée vers le haut par quelques travaux très majeurs (voir la répartition ci-dessous : de qui viennent les citations).",
+             "Sources des comptages : Google Scholar / Crossref / OpenAlex, relevés à date dans la base."],
+         "bars_caption": "Citations par référence (qui pèse combien)",
+         "bars": sorted([{"label": r.get("reference_courte", r["id"]), "value": _cit(r),
+                          "max": max(_cit(r) for r in rows) if rows else 1, "color": "#38bdf8"}
+                         for r in rows if _cit(r) > 0], key=lambda b: -b["value"]),
+         "legend": []},
+
         {"id": "burn", "label": "Burn rate budgétaire", "value": burn, "unit": "",
-         "icon": "♀", "formula": ["burn = dépense du jour ÷ cap journalier",
-                                  "alerte SOL si burn ≥ 0,8"],
-         "legend": [f"Dépense : {ven['spend_today_usd']:.4f} $ · cap : {ven['budget']['daily_cap_usd']} $",
-                    f"Projection mois : {ven['forecast']['monthly_projection_usd']:.2f} $"]},
+         "icon": "♀", "viz": "gauge",
+         "gauge": {"max": 1.5, "zones": [[0, 0.5, "sobre", "#34d399"], [0.5, 0.8, "à surveiller", "#fbbf24"],
+                                         [0.8, 1.5, "dérive", "#fb7185"]]},
+         "formula": ["burn = dépense LLM du jour ÷ cap journalier",
+                     "alerte automatique de SOL si burn ≥ 0,8"],
+         "explain": [
+             "**Vénus ♀ plafonne les dépenses** : le burn rate dit où on en est du budget du jour.",
+             f"Aujourd'hui : {ven['spend_today_usd']:.4f} $ dépensés sur un cap de {ven['budget']['daily_cap_usd']} $. À 1,0 le cap est atteint — au-delà, Vénus refuse les missions LLM (bascule moteur à règles, coût nul)."],
+         "legend": [f"Projection mois : {ven['forecast']['monthly_projection_usd']:.2f} $"]},
+
         {"id": "tokens", "label": "Tokens aujourd'hui", "value": ven["tokens_today"], "unit": "tok",
-         "icon": "🪙", "formula": ["Σ tokens entrée et sortie des appels LLM du jour (grand livre)"],
-         "legend": ["Moteur à règles = 0 token (coût nul)."]},
+         "icon": "🪙",
+         "formula": ["Σ tokens entrée et sortie des appels LLM du jour (grand livre de Thalie)"],
+         "explain": ["Les tokens sont les « mots » consommés par les modèles de langage. Le grand livre les comptabilise à chaque requête pour facturer chaque mission.",
+                     "Moteur à règles (par défaut ici) = 0 token, 0 $."],
+         "legend": []},
+
         {"id": "prisma", "label": "PRISMA (dernier run)", "value": prisma["dedup"], "unit": "réf.",
-         "icon": "🔀",
-         "formula": ["après_déduplication = identifiés − doublons (DOI exact + titres ≥ 0,93)"],
-         "legend": [f"Identifiés : {prisma['identifies'] if prisma['identifies'] is not None else 'n/a'}"]},
-        {"id": "memoire", "label": "Éléments en mémoire", "value": mem["total"], "unit": "",
-         "icon": "🧠", "formula": None,
-         "legend": [f"Par type : {mem['par_type']}", "Questions, références, dossiers, papiers, ingesta…"]},
+         "icon": "🔀", "viz": "bars",
+         "formula": ["après_déduplication = identifiés − doublons (DOI identiques + titres similaires ≥ 0,93)"],
+         "explain": ["Le flux PRISMA trace le tamis documentaire : combien de références trouvées, combien conservées après suppression des doublons inter-bases."],
+         "bars": [{"label": "Identifiés (toutes bases)", "value": prisma["identifies"] or 0,
+                   "max": max(prisma["identifies"] or 1, prisma["dedup"] or 1), "color": "#818cf8"},
+                  {"label": "Après déduplication", "value": prisma["dedup"] or 0,
+                   "max": max(prisma["identifies"] or 1, prisma["dedup"] or 1), "color": "#34d399"}],
+         "legend": []},
+
+        {"id": "memoire", "label": "Mémoire du système", "value": mem["total"], "unit": "éléments",
+         "icon": "🧠", "viz": "bars+list",
+         "formula": None,
+         "explain": [
+             f"**{mem['total']} éléments** constituent la mémoire vivante du système : chaque **question** posée à SOL, chaque **référence** trouvée par Uranus, chaque **papier/dossier/plan** généré, et tout ce que vous ingérez (articles, thèses, drafts, posters, textes, audio, vidéo…).",
+             "La mémoire est **partagée** par tous les agents et alimente les concepts et la taxonomie.",
+             "Répartition par type ci-dessous + derniers éléments reçus."],
+         "bars_caption": "À quoi correspondent ces éléments (par type)",
+         "bars": [{"label": t, "value": n, "max": max(mem["par_type"].values()) if mem["par_type"] else 1, "color": "#38bdf8"}
+                  for t, n in sorted(mem["par_type"].items(), key=lambda kv: -kv[1])],
+         "items_caption": "Derniers éléments mémorisés",
+         "items": [{"main": f"[{i['type']}] {i['titre'][:70]}", "secondary": i["ts"][:16],
+                    "badge": i["corps"], "badge_color": "#fbbf24"}
+                   for i in memory.items(limit=8)],
+         "legend": ["Pas de formule — compteur d'éléments journalisés."]},
+
         {"id": "concepts", "label": "Concepts partagés", "value": mem["concepts"], "unit": "",
          "icon": "💠", "formula": None,
-         "legend": ["Agrégation : base 42 champs + satellites + cour + taxonomie + mémoire."]},
+         "explain": ["Tous les concepts manipulés par l'app et les agents : concepts 4E, tags de la base 42 champs, domaines des satellites d'Uranus et de la cour de Vénus, feuilles de taxonomie, tags de la mémoire — fusionnés en un registre unique (onglet Concepts)."],
+         "legend": ["Pas de formule — agrégation de registres."]},
         {"id": "taxonomy", "label": "Feuilles de taxonomie", "value": mem["taxonomy_feuilles"], "unit": "",
          "icon": "🌳", "formula": None,
-         "legend": ["S'enrichit automatiquement avec les missions (dossiers, questions, veilles)."]},
+         "explain": ["Nombre de sujets les plus fins de l'arbre de connaissances (Psychologie, Construction, Robotique, IA + Émergents). Chaque mission/question peut en ajouter."],
+         "legend": ["S'enrichit automatiquement (branchage par mots-clés)."]},
         {"id": "interactions", "label": "Interactions approuvées", "value": n_inter, "unit": "",
          "icon": "☰", "formula": None,
-         "legend": ["Toutes passent par SOL (bus journalisé dans output/cosmos/interactions.jsonl)."]},
+         "explain": ["Messages échangés entre corps (SOL, Uranus, Vénus, satellites, vous) — chacun approuvé par SOL et journalisé."],
+         "legend": ["Journal : output/cosmos/interactions.jsonl"]},
         {"id": "skills", "label": "Compétences Uranus", "value": len(list_skills()), "unit": "",
-         "icon": "⚙️", "formula": None, "legend": ["Registre extensible via le décorateur @skill."]},
-        {"id": "corps", "label": "Corps du système", "value": 3 + len(BODIES["uranus"]["satellites"])
-         + len(BODIES["venus"]["court"]), "unit": "",
-         "icon": "🪐", "formula": None,
-         "legend": ["SOL + 2 planètes + 7 satellites + 4 analystes."]},
+         "icon": "⚙️", "formula": None,
+         "explain": ["Capacités exécutables d'Uranus (recherche, enrichissement DOI, validation, trust, biais, PRISMA, synthèse, papier, dossier, veille…)."],
+         "legend": ["Registre extensible via le décorateur @skill."]},
+        {"id": "corps", "label": "Corps du système", "value": 3 + len(BODIES["uranus"]["satellites"]) + len(BODIES["venus"]["court"]),
+         "unit": "", "icon": "🪐", "formula": None,
+         "explain": ["SOL ☉ + 2 planètes (Uranus ♅ recherche, Vénus ♀ finances) + 7 satellites d'Uranus + 4 analystes de la cour de Vénus."],
+         "legend": []},
     ]
     return {"metrics": metrics,
             "system": {"integrite": integ, "spend_today_usd": ven["spend_today_usd"],
