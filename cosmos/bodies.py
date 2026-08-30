@@ -2,6 +2,8 @@
 Registre des corps célestes du système Cognitorium.
 
 SOL ☉ (étoile, centre) orchestre les planètes :
+  • MARS ♂ — l'armurier : création & innovation d'outils (Phobos = software,
+    Deimos = conception) pour les problèmes des autres agents ;
   • URANUS ♅ — connaissance & recherche scientifique, entouré de ses
     satellites (anneaux et lunes, du plus proche au plus lointain) ;
   • VÉNUS ♀ — finances, valeur & bien-être, entourée de sa cour
@@ -57,6 +59,24 @@ BODIES: Dict[str, Dict[str, Any]] = {
              "role": "Prévisions & budget — projections, saisonnalité, alertes."},
             {"id": "eros", "name": "Éros", "distance_km": 0,
              "role": "Contrats & négociation — accords entre planètes."},
+        ],
+    },
+    "mars": {
+        "name": "Mars", "symbol": "♂", "kind": "planet", "orbit_r": 1.5,
+        "role": "Armurier du système solaire — passe son temps à chercher des "
+                "solutions aux problèmes des autres agents : quand un agent a "
+                "besoin d'un outil spécifique pour calculer et visualiser des "
+                "données complexes, Mars cherche d'abord un outil open source à "
+                "reproduire et utiliser ; sinon Deimos conçoit la maquette et "
+                "Phobos forge l'outil.",
+        "color": "#f87171",
+        "satellites": [
+            {"id": "phobos", "name": "Phobos ◂", "distance_km": 9376,
+             "role": "Création de software — forge les outils fonctionnels de "
+                     "l'armurerie (code, calculs réels, visualisations)."},
+            {"id": "deimos", "name": "Deimos ◦", "distance_km": 23463,
+             "role": "Innovation & conception — dessine les maquettes et imagine "
+                     "les solutions originales avant la forge."},
         ],
     },
     "uranus": {
@@ -117,8 +137,14 @@ def celestial_registry() -> List[Dict[str, Any]]:
 
 
 def known_body_ids() -> set:
-    """IDs de corps connus, y compris ceux créés dynamiquement par Laplace."""
+    """IDs de corps connus : corps, satellites et cours, y compris ceux
+    créés dynamiquement par Laplace (nébuleuse)."""
     ids = set(BODIES.keys())
+    for b in BODIES.values():
+        for s in b.get("satellites", []) or []:
+            ids.add(s["id"])
+        for s in b.get("court", []) or []:
+            ids.add(s["id"])
     try:
         from cosmos.nebula import list_agents
         ids.update(a["id"] for a in list_agents())

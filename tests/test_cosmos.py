@@ -567,3 +567,110 @@ def test_run_api_accepts_skills_subjects():
     r = c.post("/api/agent/run", json={"task": "vérification", "skills": ["validate_entries"], "subjects": ["Psychologie"]})
     assert r.status_code == 200
     assert [s["skill"] for s in r.json()["steps"]] == ["validate_entries"]
+
+
+# ═══ MARS ♂ ARMURERIE / LAPLACE ✳ INTERLOCUTEUR ═══
+
+def test_mars_in_bodies_with_real_moon_distances():
+    """Mars ♂ (armurier) + Phobos (software) + Deimos (conception), vraies distances."""
+    from cosmos.bodies import BODIES, known_body_ids
+    mars = BODIES["mars"]
+    assert mars["kind"] == "planet" and 1 < mars["orbit_r"] < 2   # entre Vénus et Uranus
+    assert "armurier" in mars["role"].lower()
+    assert {s["id"] for s in mars["satellites"]} == {"phobos", "deimos"}
+    dist = {s["id"]: s["distance_km"] for s in mars["satellites"]}
+    assert dist["phobos"] == 9376 and dist["deimos"] == 23463   # distances réelles
+    assert "software" in mars["satellites"][0]["role"].lower()
+    assert "conception" in mars["satellites"][1]["role"].lower()
+    assert {"mars", "phobos", "deimos"} <= known_body_ids()
+
+def test_mars_armory_protocol(tmp_path, monkeypatch):
+    """Protocole : open source d'abord → sinon maquette Deimos → forge Phobos."""
+    from cosmos import mars
+    monkeypatch.setattr(mars, "ARMORY_PATH", tmp_path / "armory.json")
+    monkeypatch.setattr(mars, "ARMORY_DIR", tmp_path / "armory")
+    from cosmos import memory as _mem
+    monkeypatch.setattr(_mem, "MEMORY_DIR", tmp_path / "mem", raising=False)
+    monkeypatch.setattr(_mem, "ITEMS_PATH", tmp_path / "mem" / "items.jsonl", raising=False)
+
+    # 1. besoin couvert par l'open source (dashboard interactif → Plotly, score >= 2)
+    r1 = mars.request_tool("venus", "visualiser un dashboard interactif des coûts")
+    assert r1["statut"] == "opensource recommandé"
+    assert r1["recommandation"]["outil"] == "Plotly"
+    assert not r1.get("maquette")          # pas de réinvention
+
+    # 2. besoin original → maquette de Deimos
+    r2 = mars.request_tool("uranus", "explorer la corrélation entre charge cognitive et qualité de soudure")
+    assert r2["statut"] == "maquette conçue" and r2["concepteur"] == "deimos"
+    mq = Path(r2["maquette"])
+    assert mq.exists() and "MAQUETTE" in mq.read_text(encoding="utf-8")
+
+    # 3. forge par Phobos → outil fonctionnel avec calculs réels
+    r3 = mars.forge_tool(r2["id"])
+    assert r3["statut"] == "outil livré" and r3["forgeur"] == "phobos"
+    html = Path(r3["outil"]).read_text(encoding="utf-8")
+    assert "<canvas" in html and "stats" in html and "function stats" in html
+    assert "démonstration" in html                       # honnêteté des données
+    # re-forge idempotent
+    assert mars.forge_tool(r2["id"])["statut"] == "outil livré"
+
+    # 4. registre + recherche OSS
+    reqs = mars.list_requests()
+    assert {r["id"] for r in reqs} >= {r1["id"], r2["id"]}
+    oss = mars.search_opensource("tracer des courbes 2d statiques")
+    assert oss and oss[0]["name"] == "Matplotlib"
+    assert mars.detect_data_kind("réseau de neurones et graphe") == "reseau"
+
+    # 5. erreurs propres
+    import pytest
+    with pytest.raises(ValueError):
+        mars.request_tool("user", "  ")
+    with pytest.raises(ValueError):
+        mars.forge_tool("inconnu")
+
+def test_laplace_chat_main_interlocutor_and_tool_routing():
+    """Laplace ✳ remplace SOL en façade ; les outils partent chez Mars ; la forge marche."""
+    from cosmos import laplace, mars
+    # état général : réponse du moteur réel, signée Laplace
+    r = laplace.chat("état du système")
+    assert r["speaker"] == "laplace" and r["via"]
+    # inventaire : pas de fausse demande d'outil
+    inv = laplace.chat("armurerie de Mars")
+    assert inv["intent"] == "armurerie" and "Armurerie" in inv["reply"]
+    # besoin d'outil → routé vers Mars
+    t = laplace.chat("il me faut un outil pour calculer et visualiser des flux interactifs")
+    assert t["intent"] == "outil" and t["speaker"] == "laplace"
+    # forge explicite
+    f = laplace.chat("forger " + t["data"]["request"]["id"])
+    assert f["intent"] == "forge" and "Phobos" in f["reply"]
+
+def test_mars_api_endpoints():
+    from pathlib import Path as _P
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    r = c.post("/api/mars/request", json={"agent": "uranus",
+                "besoin": "outil pour explorer la cohésion des réseaux de concepts"})
+    assert r.status_code == 200
+    rid = r.json()["id"]
+    assert c.post("/api/mars/forge/" + rid).status_code == 200
+    tool = c.get("/api/mars/file", params={"id": rid, "kind": "outil"})
+    assert tool.status_code == 200 and "<canvas" in tool.text
+    maq = c.get("/api/mars/file", params={"id": rid, "kind": "maquette"})
+    assert maq.status_code == 200 and "MAQUETTE" in maq.text
+    assert c.get("/api/mars/armory").json()["requests"]
+    assert c.post("/api/mars/request", json={"besoin": "  "}).status_code == 400
+    # le chat du système répond désormais par Laplace
+    chat = c.post("/api/cosmos/chat", json={"message": "armurerie"})
+    assert chat.status_code == 200 and chat.json()["speaker"] == "laplace"
+
+def test_sol_widget_serves_nebula_image():
+    """Le bouton flottant affiche l'image de nébuleuse de Laplace."""
+    from pathlib import Path as _P
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    r = c.get("/static/nebula.png")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("image/")
+    widget = (_P(__file__).resolve().parents[1] / "app" / "static" / "sol_widget.js").read_text(encoding="utf-8")
+    assert "nebula.png" in widget and "Laplace" in widget and "open-laplace-chat" in widget

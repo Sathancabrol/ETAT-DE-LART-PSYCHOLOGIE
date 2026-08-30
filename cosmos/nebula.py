@@ -26,7 +26,7 @@ from cosmos import ledger
 NEBULA_PATH = ledger.COSMOS_DIR / "nebula.json"
 
 VALID_KINDS = {"satellite", "analyste", "planet", "agent", "star"}
-VALID_PARENTS_BASE = {"sol", "uranus", "venus", "laplace", "sebas"}
+VALID_PARENTS_BASE = {"sol", "uranus", "venus", "mars", "laplace", "sebas"}
 
 SENSORS: List[Dict[str, str]] = [
     {"id": "webcam", "label": "Webcam", "icon": "📷",

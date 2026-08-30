@@ -1060,13 +1060,14 @@ def cosmos_budget_update(req: BudgetUpdateRequest):
 
 @app.post("/api/cosmos/chat")
 def cosmos_chat(req: SolChatRequest):
-    """Chat avec SOL — réponses ancrées sur l'état réel du système."""
-    from cosmos import sol
+    """Chat du système — LAPLACE ✳ est l'interlocuteur principal (SOL ☉ approuve).
+    Les demandes d'outils sont routées vers l'armurerie de Mars ♂."""
+    from cosmos import laplace
     from cosmos.system import get_system
     if not req.message or not req.message.strip():
         raise HTTPException(status_code=400, detail="Message vide")
     get_system()
-    return sol.chat(req.message.strip()[:600])
+    return laplace.chat(req.message.strip()[:600])
 
 @app.get("/api/cosmos/knowledge/{body_id}")
 def cosmos_knowledge(body_id: str):
@@ -1602,3 +1603,50 @@ def memory_items(type: Optional[str] = None, limit: int = 300):
     from app.database import get_memory_items, sync_memory_items
     sync_memory_items()
     return {"items": get_memory_items(type_filter=type, limit=min(max(limit, 1), 1000))}
+
+
+# ──────────────── MARS ♂ : ARMURERIE DU SYSTÈME ────────────────
+
+class MarsToolRequest(BaseModel):
+    agent: str = "user"
+    besoin: str
+    donnees: str = ""
+
+@app.get("/api/mars/armory")
+def mars_armory():
+    """Registre de l'armurerie : demandes d'outils, maquettes, outils livrés."""
+    from cosmos import mars
+    return {"requests": mars.list_requests(),
+            "catalogue_opensource": mars.OSS_CATALOG}
+
+@app.post("/api/mars/request")
+def mars_request(req: MarsToolRequest):
+    """Protocole armurier : recherche open source → sinon maquette Deimos ◦."""
+    from cosmos import mars
+    try:
+        return mars.request_tool(req.agent, req.besoin, req.donnees)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/mars/forge/{request_id}")
+def mars_forge(request_id: str):
+    """Phobos ◂ forge l'outil fonctionnel depuis la maquette de Deimos ◦."""
+    from cosmos import mars
+    try:
+        return mars.forge_tool(request_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.get("/api/mars/file")
+def mars_file(id: str, kind: str = "outil"):
+    """Sert la maquette ou l'outil forgé (HTML autoportant)."""
+    from cosmos import mars
+    req = mars.get_request(id)
+    if req is None:
+        raise HTTPException(status_code=404, detail=f"demande inconnue : {id}")
+    path = req.get("maquette" if kind == "maquette" else "outil")
+    if not path:
+        raise HTTPException(status_code=404, detail=f"Pas encore de {kind} pour {id}")
+    from pathlib import Path as _P
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(_P(path).read_text(encoding="utf-8"))

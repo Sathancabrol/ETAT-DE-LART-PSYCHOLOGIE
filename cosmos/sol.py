@@ -179,9 +179,10 @@ def chat(message: str) -> Dict[str, Any]:
     if intent == "etat":
         st = system_state()
         integ = st["integrite"]
+        n_planetes = sum(1 for c in st["corps"] if c.get("kind") == "planet")
         icons = {"stable": "🟢", "vigilance": "🟡", "alerte": "🔴"}
         reply = (f"{icons.get(integ['statut'], '⚪')} Système {integ['statut']} (score d'intégrité {integ['score']}/100).\n"
-                 f"• {len(st['corps'])} corps enregistrés (2 planètes, leurs satellites et leur cour, SOL, vous).\n"
+                 f"• {len(st['corps'])} corps enregistrés ({n_planetes} planètes, leurs satellites et leur cour, SOL, Laplace, vous).\n"
                  f"• Interactions journalisées : {integ['interactions_total']} (taux d'échec {integ['taux_echec']:.0%}).\n"
                  f"• Budget du jour : {st['budget']['spend_today_usd']:.4f} / {st['budget']['daily_cap_usd']:.2f} $.\n"
                  f"• Projection mensuelle : {st['budget']['forecast_month_usd']:.2f} $.")

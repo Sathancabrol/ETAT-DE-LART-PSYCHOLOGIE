@@ -339,3 +339,51 @@ vers SQLite (`app.database.sync_memory_items`) :
   table scientifique `references_table` (préfixe `mem_`, DOI/année extraits).
 
 API : `POST /api/database/sync` · `GET /api/memory-items?type=&limit=`
+
+---
+
+## Mars ♂ — l'armurier du système solaire
+
+Cas d'usage : **un agent a besoin d'un outil spécifique pour calculer et
+visualiser des données complexes.** Mars passe son temps à chercher des
+solutions aux problèmes des autres agents ; ses deux satellites le servent :
+
+- **Phobos ◂** (9 376 km) — création de **software** : forge les outils ;
+- **Deimos ◦** (23 463 km) — **innovation & conception** : dessine les maquettes.
+
+Protocole armurier (`cosmos/mars.py`, registre `output/cosmos/armory.json`) :
+
+1. **Recherche open source** — si un outil libre couvre le besoin (catalogue de
+   10 références : Matplotlib, Plotly, D3.js, Three.js, NetworkX, SciPy…),
+   Mars recommande de le **reproduire et utiliser** (pas de réinvention) ;
+2. **Maquette** — sinon, Deimos ◦ conçoit une maquette interactive
+   (`output/cosmos/armory/{id}_maquette.html`, gabarit wireframe) ;
+3. **Forge** — Phobos ◂ transforme la maquette en **outil fonctionnel
+   autoportant** (HTML + canvas : visualisation selon le type de données —
+   réseau, distribution, séries, surface, dashboard — curseurs, **calculs
+   réels en JS** : moyenne, écart-type, min/max, tendance) ;
+4. **Livraison** — l'interaction est approuvée par ☉ SOL, journalisée au grand
+   livre et versée en mémoire (type `outil`, corps `mars`).
+
+Honnêteté : les outils forgés affichent « données de démonstration — branchez
+vos vraies données dans DATA » ; jamais de fausses mesures.
+
+API : `GET /api/mars/armory` · `POST /api/mars/request` ·
+`POST /api/mars/forge/{id}` · `GET /api/mars/file?id=&kind=maquette|outil`
+
+Dans `/sol` : Mars orbite entre Vénus et Uranus avec ses deux lunes
+(distances réelles relatives) ; clic → **modale armurerie** (demandes,
+protocole, forge, catalogue open source). Bouton « ♂ Armurerie » aussi dans
+la console Uranus.
+
+## Laplace ✳ — interlocuteur principal (remplace SOL en façade)
+
+Laplace devient l'interlocuteur principal du système (`cosmos/laplace.py`) :
+
+- **chat flottant** (bas droite de chaque page) : le soleil laisse place à
+  **l'image de nébuleuse** (`app/static/nebula.png`, repli CSS si absente) ;
+- `/api/cosmos/chat` répond par Laplace (`speaker: "laplace"`) — l'état réel
+  du système vient toujours du moteur de SOL ☉, qui **approuve** les
+  interactions ; SOL reste joignable (clic sur le soleil, bouton ☉) ;
+- intentions dédiées : **outil** (routage vers l'armurerie de Mars),
+  **forge** (« forger {id} »), **armurerie** (inventaire des demandes).
