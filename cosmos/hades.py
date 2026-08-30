@@ -49,6 +49,17 @@ def scan_system() -> Dict[str, Any]:
         except ValueError:
             return str(f)          # hors repo (tests) : chemin absolu
 
+    # tailles réelles des lignes mémoire (tokens épargnés honnêtes)
+    tailles_items: Dict[str, int] = {}
+    if MEM_ITEMS.exists():
+        for line in MEM_ITEMS.open(encoding="utf-8"):
+            if not line.strip():
+                continue
+            try:
+                tailles_items[json.loads(line).get("id", "?")] = len(line.encode("utf-8"))
+            except Exception:
+                pass
+
     # 1. runs outdated (régénérables) — on garde les N plus récents
     if RUNS_DIR.exists():
         runs = sorted([d for d in RUNS_DIR.iterdir() if d.is_dir()],
@@ -69,9 +80,11 @@ def scan_system() -> Dict[str, Any]:
     # 3. doublons exacts en mémoire (hash titre+contenu)
     dup = _doublons_memoire()
     for d in dup:
+        id_reel = str(d["cible"]).split("#")[-1]
+        oct = tailles_items.get(id_reel, 0) * d["copies"]
         targets.append({"type": "doublon_memoire", "cible": d["cible"],
                         "raison": f"doublon exact de {d['original']} "
-                                  f"(x{d['copies']})", "octets": 0})
+                                  f"(x{d['copies']})", "octets": oct})
 
     # 4. journaux qui gonflent
     for journal, maxi in (("interactions.jsonl", POLITIQUE["interactions_max"]),
@@ -85,6 +98,19 @@ def scan_system() -> Dict[str, Any]:
                                 "octets": p.stat().st_size, "lignes": n - maxi})
 
     total = sum(t["octets"] for t in targets)
+    # ── Prévision de tokens épargnés (indicateur honnête) ──
+    # Ratio standard : 1 token ≈ 4 octets pour du texte latin. Les données
+    # fauchées ne seront plus chargées, relues ni renvoyées dans les contextes.
+    tokens_par_type = {t: round(sum(x["octets"] for x in targets if x["type"] == t) / 4)
+                       for t in {x["type"] for x in targets}}
+    prevision_tokens = {
+        "estime": round(total / 4),
+        "par_type": tokens_par_type,
+        "octets_mesures": total,
+        "methode": "1 token ≈ 4 octets (ratio standard texte latin) — estimation des "
+                   "données qui ne seront plus chargées, relues ni renvoyées aux modèles "
+                   "une fois fauchées. Aucun compteur de tokens réel n'existe en sandbox.",
+    }
 
     # ── Traitement de données : ce que Hadès a réellement analysé ──
     n_runs = len([d for d in RUNS_DIR.iterdir() if d.is_dir()]) if RUNS_DIR.exists() else 0
@@ -120,7 +146,9 @@ def scan_system() -> Dict[str, Any]:
                       "ko": round(total / 1024, 1),
                       "par_type": {t: sum(1 for x in targets if x["type"] == t)
                                    for t in {x["type"] for x in targets}},
-                      "mo_octets": round(octets_output / 1024 / 1024, 2)},
+                      "mo_octets": round(octets_output / 1024 / 1024, 2),
+                      "tokens_epargnes": prevision_tokens["estime"]},
+            "prevision_tokens": prevision_tokens,
             "traitement": traitement,
             "moires": moires,
             "politique_styx": POLITIQUE,

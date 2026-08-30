@@ -189,11 +189,11 @@ def test_uranus_run_gouverne():
     from agent import Agent
     entries0 = ledger.aggregate()["entries"]
     bus = get_system()["bus"]
-    inter0 = len(bus.history(limit=300))
+    inter0 = len(bus.history(limit=5000))
     trace = Agent(use_llm=False).run("valider la base")
     assert trace["gouvernement"] is not None          # contraintes reçues
     assert ledger.aggregate()["entries"] > entries0   # étapes journalisées
-    assert len(bus.history(limit=300)) == inter0 + 1  # mission user→uranus approuvée
+    assert len(bus.history(limit=5000)) == inter0 + 1  # mission user→uranus approuvée
     last = bus.history(limit=1)[0]
     assert last["source"] == "user" and last["target"] == "uranus" and last["status"] == "delivered"
 
@@ -1018,3 +1018,59 @@ def test_sol_page_fiche_chat_chariot_et_3d():
                   "moirePivots", "apollonPivot", "Traitement des données",
                   "Les 3 Moires", "éligible au fauchage", "naissance_24h"):
         assert motif.lower() in html.lower(), motif
+
+
+# ═══ ROUND fil d'Ariane dashboard · tokens épargnés · fiche SOL réactive ═══
+
+def test_hades_prevision_tokens_epargnes(tmp_path, monkeypatch):
+    """Le scan prévoit les tokens épargnés par la fauche (estimation honnête)."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":"' + "a" * 400 + '"}', encoding="utf-8")
+    hades.MEM_ITEMS.write_text(
+        '{"id":"a","titre":"t","contenu":"' + "c" * 300 + '"}\n'
+        '{"id":"b","titre":"t","contenu":"' + "c" * 300 + '"}\n', encoding="utf-8")
+    sc = hades.scan_system()
+    pv = sc["prevision_tokens"]
+    assert pv["estime"] > 0 and pv["estime"] == round(pv["octets_mesures"] / 4)
+    assert pv["par_type"].get("run_outdated", 0) > 0
+    assert "4 octets" in pv["methode"] and "estimation" in pv["methode"].lower()
+    assert sc["stats"]["tokens_epargnes"] == pv["estime"]
+    # les doublons comptent maintenant leurs octets réels (lignes condamnées)
+    doublon = next(t for t in sc["targets"] if t["type"] == "doublon_memoire")
+    assert doublon["octets"] > 0
+
+def test_laplace_scan_mentionne_tokens():
+    from cosmos import laplace
+    r = laplace.chat("scan de Hadès : données, traitement, éligibles au fauchage")
+    assert "tokens épargnés" in r["reply"] and "4 octets" in r["reply"]
+
+def test_fil_ariane_sur_dashboard_principal():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # module déplacé sur le dashboard (avant la grille de stats, après les 3 fenêtres)
+    pos_3fen = html.find("Ma constellation")
+    pos_ariane = html.find("chaîne d'exécution de vos demandes")
+    pos_stats = html.find('grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6')
+    assert 0 < pos_3fen < pos_ariane < pos_stats
+    # liste roulante avec « Dernière entrée utilisateur » en premier + légende dynamique
+    for motif in ("Dernière entrée utilisateur", "arianeOptions", "arianeCaption",
+                  "setArianeCaption", "ariane-link-label", "Rejouer le parcours",
+                  "loadArianeRuns"):
+        assert motif in html, motif
+    # chargé à l'init (dashboard par défaut), plus dans le tab graph
+    assert "this.loadArianeRuns()]" in html or "loadProfilPerso(),this.loadArianeRuns()" in html
+
+def test_sol_fiche_reactive_et_chat_cote_a_cote():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("startSplit", "reactSide", "closeSplit", "sideView==='sol'",
+                  "sideView==='hades'", "sideView==='profil'", "sideView==='divination'",
+                  "Tokens épargnés", "discuter — chat à côté", "fiche réactive"):
+        assert motif in html, motif
+    # l'intent détecté change la fiche latérale
+    assert "fauche: 'hades'" in html and "profil: 'profil'" in html

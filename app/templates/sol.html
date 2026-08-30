@@ -108,11 +108,11 @@
             <div class="flex items-center gap-2 mb-2.5">
               <h3 class="text-[11px] font-semibold text-amber-200">☉ SOL vous parle — boutons proposés</h3>
               <span class="flex-1"></span>
-              <button @click="closeModal('body'); openModal('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 hover:bg-amber-500/25">💬 chat complet ↗</button>
+              <button @click="startSplit('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 hover:bg-amber-500/25">💬 discuter — chat à côté ◀</button>
             </div>
             <div class="flex flex-wrap gap-1.5">
               <button @click="solQuick('état du système')" class="chip">🟢 État système</button>
-              <button @click="solQuick('scan de Hadès : qui est éligible au fauchage ?')" class="chip">♇ Scan Hadès</button>
+              <button @click="solQuick('scan de Hadès : données, traitement, éligibles au fauchage')" class="chip">♇ Scan Hadès</button>
               <button @click="solQuick('mon profil cognitif')" class="chip">✦ Mon profil</button>
               <button @click="solQuick('budget du système')" class="chip">♀ Budget</button>
               <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 Chariot d'Apollon — divination</button>
@@ -197,12 +197,14 @@
         <button @click="closeModal('hades')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
 
-      <div class="grid grid-cols-4 gap-2 mt-4" x-show="hadesScan.stats">
+      <div class="grid grid-cols-5 gap-2 mt-4" x-show="hadesScan.stats">
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Condamnés</div><div class="mono text-lg text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Espace libérable</div><div class="mono text-lg text-rose-300" x-text="(hadesScan.stats?.ko ?? 0) + ' Ko'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Politique Styx</div><div class="text-[10px] text-slate-400 mt-1" x-text="'garder les ' + (hadesScan.politique_styx?.runs_gardes ?? 25) + ' derniers runs'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Données vues</div><div class="mono text-lg text-slate-300" x-text="(hadesScan.stats?.mo_octets ?? '—') + ' Mo'"></div></div>
+        <div class="glass-card rounded-lg p-2.5 border-emerald-500/25"><div class="text-[9px] uppercase text-emerald-400/90">🪙 Tokens épargnés</div><div class="mono text-lg text-emerald-300" x-text="(hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR')"></div><div class="text-[8.5px] text-slate-600">prévision si fauche</div></div>
       </div>
+      <p class="text-[9px] text-slate-600 mt-1.5" x-show="hadesScan.prevision_tokens" x-text="'🪙 ' + (hadesScan.prevision_tokens?.methode || '') + ' — détail : ' + Object.entries(hadesScan.prevision_tokens?.par_type || {}).map(([k,v]) => v.toLocaleString('fr-FR') + ' (' + k + ')').join(' · ')"></p>
 
       <!-- Traitement des données (5 étapes) -->
       <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Traitement des données <span class="text-slate-700 normal-case tracking-normal">— ce que le scan a réellement examiné</span></h3>
@@ -453,11 +455,151 @@
 
   <!-- ══════════════ MODALE SOL (chat + vues) ══════════════ -->
   <div x-show="modals.sol" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('sol')">
-    <div class="glass rounded-2xl w-full max-w-4xl h-[88vh] flex flex-col shadow-2xl fade-in">
+    <div class="glass rounded-2xl w-full h-[88vh] flex shadow-2xl fade-in" :class="split ? 'max-w-6xl' : 'max-w-4xl'">
+      <!-- ◀ FICHE RÉACTIVE (côté gauche, reste visible pendant le chat) -->
+      <div x-show="split" x-cloak class="w-[400px] shrink-0 border-r border-white/5 flex flex-col min-h-0">
+        <div class="px-4 py-2.5 border-b border-white/5 flex items-center gap-2">
+          <span class="text-[10px] uppercase tracking-[.12em] text-slate-500">Fiche</span>
+          <span class="text-[11px] font-semibold text-amber-200" x-text="({sol:'☉ SOL', hades:'♇ Hadès & Moires', profil:'✦ Profil cognitif', etat:'🟢 État du système', divination:'🏆 Apollon', sebas:'◉ Sebas', mars:'♂ Mars'})[sideView] || '—'"></span>
+          <span class="flex-1"></span>
+          <button @click="closeSplit()" class="text-[9.5px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400 hover:text-white">replier ✕</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-3.5 space-y-2.5">
+
+          <!-- vue : identité SOL -->
+          <template x-if="sideView==='sol' && sideSol">
+            <div class="space-y-2.5">
+              <div class="flex items-start gap-3">
+                <div class="text-3xl leading-none">☉</div>
+                <div>
+                  <p class="text-sm font-semibold text-white" x-text="sideSol.body.name"></p>
+                  <p class="text-[10.5px] text-amber-300/90" x-text="sideSol.body.departement"></p>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-snug" x-text="sideSol.body.role"></p>
+                </div>
+              </div>
+              <div class="grid grid-cols-4 gap-1.5">
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Interactions</div><div class="mono text-sm text-emerald-300" x-text="sideSol.stats.interactions"></div></div>
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Mémoire</div><div class="mono text-sm text-amber-300" x-text="sideSol.stats.memoire"></div></div>
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Concepts</div><div class="mono text-sm text-indigo-300" x-text="sideSol.stats.concepts"></div></div>
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Réf.</div><div class="mono text-sm text-cyan-300" x-text="sideSol.stats.references"></div></div>
+              </div>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[10px] text-slate-500 mb-1">Cour de SOL</p>
+                <template x-for="c in sideSol.body.court || []" :key="c.id">
+                  <p class="text-[10.5px] text-slate-300">🏆 <b x-text="c.name"></b> — <span class="text-slate-500" x-text="c.role"></span></p>
+                </template>
+              </div>
+              <p class="text-[9.5px] text-slate-600">La fiche change selon vos demandes : cliquez « scan Hadès », « profil », « divination »… ou posez la question librement.</p>
+            </div>
+          </template>
+
+          <!-- vue : Hadès (scan réactif) -->
+          <template x-if="sideView==='hades'">
+            <div class="space-y-2.5">
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Condamnés</div><div class="mono text-base text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Libérable</div><div class="mono text-base text-rose-300" x-text="(hadesScan.stats?.ko ?? 0) + ' Ko'"></div></div>
+                <div class="glass-card rounded-lg p-2"><div class="text-[8.5px] uppercase text-slate-600">Données vues</div><div class="mono text-base text-slate-300" x-text="(hadesScan.stats?.mo_octets ?? '—') + ' Mo'"></div></div>
+                <div class="glass-card rounded-lg p-2 border-emerald-500/25"><div class="text-[8.5px] uppercase text-emerald-400/90">🪙 Tokens épargnés</div><div class="mono text-base text-emerald-300" x-text="(hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR')"></div></div>
+              </div>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Traitement des données</p>
+                <template x-for="(t, i) in hadesScan.traitement || []" :key="i">
+                  <p class="text-[10px] text-slate-400"><span class="mono text-rose-400/70" x-text="(i+1)+'.'"></span> <b class="text-slate-300" x-text="t.etape"></b> — <span x-text="t.detail"></span></p>
+                </template>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5">
+                <div class="glass-card rounded-lg p-2 border-pink-500/15"><p class="text-[10px] text-pink-300 font-semibold">🧵 Clotho</p><p class="mono text-sm text-pink-300" x-text="hadesScan.moires?.clotho?.naissance_24h ?? '—'"></p><p class="text-[8.5px] text-slate-600">naissances/24 h</p></div>
+                <div class="glass-card rounded-lg p-2 border-pink-500/15"><p class="text-[10px] text-violet-300 font-semibold">📏 Lachésis</p><p class="mono text-sm text-violet-300" x-text="(hadesScan.moires?.lachesis?.age_moyen_runs_jours ?? '—') + ' j'"></p><p class="text-[8.5px] text-slate-600">âge moyen</p></div>
+                <div class="glass-card rounded-lg p-2 border-pink-500/15"><p class="text-[10px] text-rose-300 font-semibold">✂️ Atropos</p><p class="mono text-sm text-rose-300" x-text="hadesScan.moires?.atropos?.condamnes ?? '—'"></p><p class="text-[8.5px] text-slate-600">condamnés</p></div>
+              </div>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Condamnés (top 5)</p>
+                <template x-for="(t, i) in (hadesScan.targets || []).slice(0,5)" :key="i">
+                  <p class="text-[10px] text-slate-400 truncate mono" x-text="t.cible"></p>
+                </template>
+                <p x-show="!(hadesScan.targets?.length)" class="text-[10px] text-emerald-300/80 italic">système propre — rien à faucher</p>
+              </div>
+              <button @click="loadHades(); openModal('hades')" class="w-full text-[10.5px] px-3 py-1.5 rounded-lg bg-slate-500/10 border border-slate-500/30 text-slate-300 hover:bg-slate-500/20">♇ modale Hadès complète ↗</button>
+            </div>
+          </template>
+
+          <!-- vue : profil cognitif -->
+          <template x-if="sideView==='profil'">
+            <div class="space-y-2">
+              <template x-for="d in sideProfil.dimensions || []" :key="d.id">
+                <div>
+                  <div class="flex justify-between text-[10.5px]"><span class="text-slate-300" x-text="d.label"></span><span class="mono text-indigo-300" x-text="d.valeur"></span></div>
+                  <div class="h-1.5 bg-black/30 rounded-full overflow-hidden mt-0.5"><div class="h-full bg-indigo-500/60 rounded-full" :style="'width:'+d.valeur+'%'"></div></div>
+                </div>
+              </template>
+              <p class="text-[9px] uppercase text-slate-600 pt-1">Biais induits</p>
+              <template x-for="b in sideProfil.biais || []" :key="b.id">
+                <div>
+                  <div class="flex justify-between text-[10.5px]"><span class="text-slate-300" x-text="b.label"></span><span class="mono" :class="b.valeur>=70?'text-rose-300':b.valeur>=40?'text-amber-300':'text-emerald-300'" x-text="b.valeur+'%'"></span></div>
+                  <div class="h-1.5 bg-black/30 rounded-full overflow-hidden mt-0.5"><div class="h-full rounded-full" :class="b.valeur>=70?'bg-rose-500/70':b.valeur>=40?'bg-amber-500/70':'bg-emerald-500/70'" :style="'width:'+b.valeur+'%'"></div></div>
+                </div>
+              </template>
+              <p class="text-[9px] text-slate-600">⚠️ heuristiques statistiques — pas un test psychométrique validé</p>
+            </div>
+          </template>
+
+          <!-- vue : état système -->
+          <template x-if="sideView==='etat' && sideEtat">
+            <div class="space-y-2">
+              <div class="glass-card rounded-lg p-3"><div class="text-[9px] uppercase text-slate-600">Intégrité</div>
+                <div class="mono text-lg" :class="sideEtat.integrite.statut==='stable'?'text-emerald-300':'text-amber-300'" x-text="sideEtat.integrite.score+'/100 · '+sideEtat.integrite.statut"></div></div>
+              <div class="glass-card rounded-lg p-3"><div class="text-[9px] uppercase text-slate-600">Corps en ligne</div>
+                <div class="mono text-lg text-slate-300" x-text="(sideEtat.corps||[]).length"></div></div>
+              <div class="glass-card rounded-lg p-3"><div class="text-[9px] uppercase text-slate-600">Dépense du jour</div>
+                <div class="mono text-lg text-amber-300" x-text="sideEtat.budget.spend_today_usd.toFixed(4) + ' $ / ' + sideEtat.budget.daily_cap_usd + ' $'"></div></div>
+              <div class="glass-card rounded-lg p-3" x-show="sideEtat.integrite.alertes.length">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Alertes préventives</p>
+                <template x-for="(a, i) in sideEtat.integrite.alertes" :key="i"><p class="text-[10px] text-amber-300/90" x-text="'⚠️ ' + a"></p></template>
+              </div>
+            </div>
+          </template>
+
+          <!-- vue : divination Apollon -->
+          <template x-if="sideView==='divination' && sideDivination">
+            <div class="space-y-2">
+              <p class="text-[11px] text-amber-200 font-semibold" x-text="'🏆 ' + sideDivination.verdict"></p>
+              <template x-for="(pr, i) in sideDivination.presages || []" :key="i">
+                <div class="glass-card rounded-lg p-2.5 border-amber-500/15">
+                  <p class="text-[10.5px] text-amber-200 font-semibold" x-text="({bon:'🟢',moyen:'🟡',mauvais:'🔴'})[pr.tone] + ' ' + pr.titre"></p>
+                  <p class="text-[10px] text-slate-300 mt-0.5" x-text="pr.lecture"></p>
+                  <p class="text-[9.5px] text-slate-500 italic mt-1" x-text="'« ' + pr.oracle + ' »'"></p>
+                </div>
+              </template>
+              <p class="text-[9px] text-slate-600" x-text="sideDivination.methode"></p>
+            </div>
+          </template>
+
+          <!-- vue : Sebas / Mars (identités) -->
+          <template x-if="sideView==='sebas' || sideView==='mars'">
+            <div class="space-y-2">
+              <div class="flex items-start gap-3">
+                <div class="text-3xl" x-text="sideView==='sebas' ? '◉' : '♂'"></div>
+                <div>
+                  <p class="text-sm font-semibold text-white" x-text="sideView==='sebas' ? 'Sebas — exécutant divin' : 'Mars — armurier'"></p>
+                  <p class="text-[10px] text-slate-400 mt-1 leading-snug" x-text="sideView==='sebas'
+                    ? 'Exécute les commandes divines de Laplace : observer, écouter, consigner, faucher, état. Capteurs non détectés en sandbox — observation déclarative, aucune donnée fabriquée.'
+                    : 'Forge les outils : recherche open source d\'abord, maquette Deimos puis forge Phobos si besoin.'"></p>
+                </div>
+              </div>
+              <button @click="sideView==='sebas' ? openBodySmart('sebas') : openBodySmart('mars')" class="w-full text-[10.5px] px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20">fiche complète ↗</button>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ▶ COLONNE CHAT -->
+      <div class="flex-1 flex flex-col min-w-0 min-h-0">
       <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2.5">
         <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200">☉</span>
         <div class="flex-1"><h2 class="text-sm font-semibold">✳ Laplace — interlocuteur principal <span class="text-[9.5px] text-amber-300/80 font-normal">· ☉ SOL approuve chaque réponse</span></h2>
         <p class="text-[10px] text-slate-600">réponses ancrées sur les données réelles · toute interaction inter-corps est approuvée & journalisée</p></div>
+        <button x-show="!split" @click="startSplit('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white" title="afficher la fiche réactive à côté du chat">⬅ fiche</button>
         <button @click="closeModal('sol')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
       <!-- vues -->
@@ -504,6 +646,7 @@
         <button @click="send('scan de Hadès : données, traitement, éligibles au fauchage')" class="chip">♇ scan Hadès</button>
         <button @click="send('mon profil cognitif')" class="chip">✦ profil</button>
         <button @click="setView('interactions')" class="chip">☰ interactions</button>
+        <button @click="send('Sebas, observe le chantier')" class="chip">◉ Sebas</button>
         <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 divination</button>
       </div>
       <!-- saisie -->
@@ -512,6 +655,7 @@
           class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-xl px-3 py-2 text-[12px] text-slate-200 placeholder-slate-600 focus:border-amber-500/60 focus:outline-none resize-none max-h-24"></textarea>
         <button @click="send()" :disabled="busy || !input.trim()"
           class="px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-100 bg-gradient-to-r from-amber-500/80 to-amber-600/80 hover:from-amber-400/90 disabled:opacity-40 transition" x-text="busy ? '…' : '➤'"></button>
+      </div>
       </div>
     </div>
   </div>
@@ -619,6 +763,7 @@ function solApp() {
     modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false},
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false,
+    split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null,
     metatronBox: {query: '', result: null},
     laplace: {agents: [], systems: []}, sebas: [],
     armory: [], ossCatalogue: [],
@@ -705,7 +850,30 @@ function solApp() {
       const t = this.bodyToast; this.bodyToast = null;
       if (t && this._skyFollow) this._skyFollow(t.id);
     },
-    solQuick(text) { this.closeModal('body'); this.openModal('sol'); this.send(text); },
+    solQuick(text) { this.closeModal('body'); this.openModal('sol'); this.split = true; this.send(text); },
+    async startSplit(view) {
+      this.closeModal('body'); this.openModal('sol'); this.split = true;
+      await this.setSide(view || 'sol');
+    },
+    closeSplit() { this.split = false; this.sideView = null; },
+    reactSide(intent) {
+      // la fiche visible à côté du chat change selon la demande réelle
+      if (!this.split) return;
+      const map = {fauche: 'hades', etat: 'etat', profil: 'profil', divination: 'divination',
+                   commande_divine: 'sebas', budget: 'etat', armurerie: 'mars'};
+      const v = map[intent];
+      if (v) this.setSide(v);
+    },
+    async setSide(view) {
+      this.sideView = view;
+      if (view === 'sol' && !this.sideSol) {
+        try { this.sideSol = await (await fetch('/api/cosmos/body/sol')).json(); } catch (e) {}
+      }
+      if (view === 'hades') await this.loadHades();
+      if (view === 'profil') { try { this.sideProfil = await (await fetch('/api/profile/cognitive')).json(); } catch (e) {} }
+      if (view === 'etat') { try { this.sideEtat = await (await fetch('/api/cosmos/state')).json(); } catch (e) {} }
+      if (view === 'divination') await this.apollonDivine();
+    },
     async apollonDivine() {
       let d;
       try { d = await (await fetch('/api/apollon/divination', {method: 'POST',
@@ -724,10 +892,11 @@ function solApp() {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">${cards}</div>
         <p class="text-[9px] text-slate-600 mt-2">${d.methode||''}</p>
       </div>`;
-      // dans la fiche SOL et/ou le panneau de vue du chat
+      // fiche SOL, panneau latéral du chat scindé, et/ou panneau de vue
       const panel = document.getElementById('apollonPanel');
       if (panel && this.modals.body) panel.innerHTML = html;
-      if (this.modals.sol) { this.view = 'divination'; this.viewPanel = html; }
+      if (this.split) { this.sideDivination = d; this.sideView = 'divination'; }
+      else if (this.modals.sol) { this.view = 'divination'; this.viewPanel = html; }
     },
     async loadHades() {
       try { this.hadesScan = await (await fetch('/api/hades/scan')).json(); this.hadesMsg = ''; }
@@ -867,6 +1036,7 @@ function solApp() {
         const data = await res.json();
         const arts = data.data?.artifacts || data.artifacts || [];
         this.messages.push({role: 'laplace', text: data.reply, intent: data.intent, artifacts: arts});
+        this.reactSide(data.intent);   // la fiche de côté s'actualise selon la demande
         const graphPath = data.data?.graph || data.graph;
         if (graphPath) { const g = await this.tryFetchGraph(graphPath); if (g) this.graphs['#dossier'] = g; }
         try {

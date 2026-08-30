@@ -565,3 +565,32 @@ Le hero « Psychologie Cognitive & Sciences de l'Apprentissage » est remplacé 
   le fil (bouton ▶ Rejouer) ;
 - volant taxonomie de droite : **＋1 niveau / －1 niveau** sur la branche
   sélectionnée (révèle/replie un anneau entier de la branche).
+
+## Round HYPO1 — fil d'Ariane sur le dashboard, tokens épargnés, fiche réactive
+
+### 🪙 Prévision de tokens épargnés (module de fauchage)
+`scan_system()` expose `prevision_tokens` : `{estime, par_type, octets_mesures,
+methode}` — estimation honnête (1 token ≈ 4 octets, ratio standard texte latin)
+des données qui ne seront plus chargées, relues ni renvoyées aux modèles une
+fois fauchées. Les doublons mémoire comptent désormais leurs octets réels
+(longueur des lignes condamnées). Affiché : carte dédiée dans la modale ♇,
+panneau latéral Hadès, et ligne « 🪙 Prévision tokens épargnés » dans la
+réponse chat du scan. `stats.tokens_epargnes` exposé aussi.
+
+### 🧵 Fil d'Ariane sur le dashboard principal (HYPO1 : chaîne d'exécution)
+Le module entier est déplacé de l'onglet Graphe vers le **dashboard principal**
+(sous les 3 fenêtres). Liste roulante : « ↪ Dernière entrée utilisateur » en
+premier, puis l'historique des runs (tâche · statut · heure). ▶ Rejouer anime
+le parcours réel : particules or→scarlet, nœud courant agrandi, **libellés des
+liaisons** (question → routage divin → méta-prompt → approbation → exécution →
+livraison → remise) qui s'allument au franchissement, et **légende dynamique**
+sous le graphe : « étape i/n — acteur : fonction du moment » (fonctions réelles
+tirées de la trace : rationale Métatron, skills exécutés, artefacts livrés).
+
+### ☉ Fiche SOL réactive + chat côte à côte
+Dans /sol, « 💬 discuter » ouvre le chat **dans un panneau latéral** : la fiche
+reste visible à gauche. La fiche **s'actualise selon la demande** (boutons ou
+langage libre, via l'intent détecté) : scan Hadès → fiche Hadès (condamnés,
+traitement, Moires, tokens épargnés) · profil → jauges cognitives · état →
+intégrité/budget/alertes · divination → présages d'Apollon · commande divine →
+Sebas · armurerie → Mars. Bouton « replier ✕ » pour revenir au chat plein écran.

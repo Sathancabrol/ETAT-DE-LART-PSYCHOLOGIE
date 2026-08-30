@@ -87,6 +87,8 @@ def chat(message: str) -> Dict[str, Any]:
                  f"• 🧵 Clotho : {mo['clotho']['naissance_24h']} naissance(s)/24 h · "
                  f"📏 Lachésis : {mo['lachesis']['age_moyen_runs_jours']} j d'âge moyen · "
                  f"✂️ Atropos : {mo['atropos']['condamnes']} condamné(s).\n"
+                 f"• 🪙 Prévision tokens épargnés par la fauche : {sc['prevision_tokens']['estime']:,} tokens" \
+                 f" (ratio 1 token ≈ 4 octets — estimation, pas un compteur réel).\n"
                  f"• Politique de Styx ☠ : garder les {hades.POLITIQUE['runs_gardes']} runs les plus "
                  f"récents, faucher le surplus, les doublons et le junk.\n"
                  "• Dis « lance la fauche » (ou bouton ♇ dans /sol) et Charon ⚰ exécute réellement.")
