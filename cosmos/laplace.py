@@ -26,9 +26,14 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
-# fauche / nettoyage → Hadès ♇ ; profil → analyse cognitive
-HADES_RE = re.compile(r"fauche|nettoy|purge|redondan|junk|obsol[èe]te|outdated|"
-                      r"optimis.*(espace|m[ée]moire)|aux\s+enfers", re.IGNORECASE)
+# commandes divines → Sebas ◉ ; chariot → Apollon
+SEBAS_RE = re.compile(r"\bsebas\b|commande\s+divine|ord(on|re)\s+(à|a|de)", re.IGNORECASE)
+CHARIOT_RE = re.compile(r"chariot|divination|pr[ée]sage|oracle|apollon|pr[ée]vi(s|tion)", re.IGNORECASE)
+
+HADES_RE = re.compile(r"fauch(e|age)|nettoy|purge|redondan|junk|obsol[èe]te|outdated|"
+                      r"optimis.*\b(espace|m[ée]moire)\b|aux\s+enfers|had[èe]s|pluton|"
+                      r"\bmoires?\b|anank|[ée]ligib|condamn|scan\s+(de\s+|le\s+|l')?"
+                      r"(had|pluton|syst)", re.IGNORECASE)
 PROFIL_RE = re.compile(r"mon\s+profil|profil\s+cognitif|qui\s+suis.?je|mes\s+informations|"
                        r"mes\s+donn[ée]es\s+cognitiv", re.IGNORECASE)
 
@@ -46,18 +51,46 @@ def chat(message: str) -> Dict[str, Any]:
     except Exception:
         analyse = None
 
+    # ── Commande divine → Sebas ◉ exécute ─────────────────────────────────
+    if SEBAS_RE.search(m):
+        from cosmos import sebas
+        ordre = re.sub(r"^\s*(sebas\s*,?\s*)?", "", m, flags=re.IGNORECASE).strip() or m
+        r = sebas.execute(ordre, agent="user")
+        return {"reply": r["reponse"] + "\n— exécution d'une commande divine (◉ Sebas, "
+                "exécutant de ✳ Laplace), approuvée par ☉ SOL.",
+                "intent": "commande_divine", "speaker": "laplace",
+                "data": {"action": r["action"]}}
+
+    # ── Chariot d'Apollon → divination ────────────────────────────────────
+    if CHARIOT_RE.search(m):
+        from cosmos import apollon
+        d = apollon.divination(m)
+        lignes = ["🏆 Le chariot d'Apollon traverse le système et prononce :"]
+        for p in d["presages"]:
+            icon = {"bon": "🟢", "moyen": "🟡", "mauvais": "🔴"}[p["ton"]]
+            lignes.append(f"{icon} {p['titre']} — {p['lecture']}. Oracle : {p['oracle']}.")
+        lignes.append(d["verdict"])
+        return {"reply": "\n".join(lignes), "intent": "divination", "speaker": "laplace",
+                "data": {"presages": d["presages"]}}
+
     # ── Intention FAUCHE → Hadès ♇ scanne et fauche ──────────────────────
     if HADES_RE.search(m):
         from cosmos import hades
         sc = hades.scan_system()
         st = sc["stats"]
-        reply = ("♇ Hadès a inspecté tout le système solaire :\n"
+        mo = sc["moires"]
+        reply = ("♇ Hadès ⧉ secondé par les 3 Moires a inspecté tout le système :\n"
                  f"• {st['condamnes']} condamnés ({st['ko']} Ko) — "
                  + ", ".join(f"{v} {k}" for k, v in st["par_type"].items()) + ".\n"
+                 f"• Traitement des données ({st['mo_octets']} Mo vus) : "
+                 + " → ".join(t["etape"] for t in sc["traitement"]) + ".\n"
+                 f"• 🧵 Clotho : {mo['clotho']['naissance_24h']} naissance(s)/24 h · "
+                 f"📏 Lachésis : {mo['lachesis']['age_moyen_runs_jours']} j d'âge moyen · "
+                 f"✂️ Atropos : {mo['atropos']['condamnes']} condamné(s).\n"
                  f"• Politique de Styx ☠ : garder les {hades.POLITIQUE['runs_gardes']} runs les plus "
-                 f"plus récents, faucher le surplus, les doublons et le junk.\n"
-                 "• Dis « fauche Hadès » (ou bouton ♇ dans /sol) et Charon ⚰ exécute.")
-        if re.search(r"fauche|ex[ée]cute|vas.y|d[ée]truis", m, re.IGNORECASE):
+                 f"récents, faucher le surplus, les doublons et le junk.\n"
+                 "• Dis « lance la fauche » (ou bouton ♇ dans /sol) et Charon ⚰ exécute réellement.")
+        if re.search(r"fauche(r|z|s)?\b|ex[ée]cute\b|vas.y|d[ée]truis", m, re.IGNORECASE):
             r = hades.reap(confirm=True)
             reply = (f"♇ La fauche est exécutée — {r['supprimes']} condamnés envoyés aux enfers, "
                      f"{round(r['octets_liberes']/1024, 1)} Ko libérés. "

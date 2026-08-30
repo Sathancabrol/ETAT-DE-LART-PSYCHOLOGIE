@@ -103,6 +103,23 @@
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Références</div><div class="mono text-sm text-cyan-300" x-text="bodyData.stats.references"></div></div>
           </div>
 
+          <!-- ☉ Panneau SOL : chat à boutons + chariot d'Apollon -->
+          <div x-show="bodyData.body.id==='sol'" class="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/[.04] p-3.5">
+            <div class="flex items-center gap-2 mb-2.5">
+              <h3 class="text-[11px] font-semibold text-amber-200">☉ SOL vous parle — boutons proposés</h3>
+              <span class="flex-1"></span>
+              <button @click="closeModal('body'); openModal('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 hover:bg-amber-500/25">💬 chat complet ↗</button>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <button @click="solQuick('état du système')" class="chip">🟢 État système</button>
+              <button @click="solQuick('scan de Hadès : qui est éligible au fauchage ?')" class="chip">♇ Scan Hadès</button>
+              <button @click="solQuick('mon profil cognitif')" class="chip">✦ Mon profil</button>
+              <button @click="solQuick('budget du système')" class="chip">♀ Budget</button>
+              <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 Chariot d'Apollon — divination</button>
+            </div>
+            <div id="apollonPanel" class="mt-2.5"></div>
+          </div>
+
           <div class="flex items-center justify-between mt-4 mb-2">
             <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600">Constellation de connaissances <span class="text-slate-700 normal-case tracking-normal">(cliquez un nœud pour l'inspecter)</span></h3>
             <a :href="'/agent?agent=' + bodyData.body.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20">Console missions ↗</a>
@@ -175,15 +192,62 @@
       <div class="flex items-start justify-between">
         <div>
           <h2 class="text-sm font-semibold">♇ Pluton / Hadès — cycle de vie & optimisation</h2>
-          <p class="text-[10.5px] text-slate-500">Le dieu des morts du système · ⚰ Charon (passeur) · ☠ Styx (politique de rétention) — fauche redondances, versions outdated et junk</p>
+          <p class="text-[10.5px] text-slate-500">Le dieu des morts du système · ⚰ Charon (passeur) · ☠ Styx (rétention) · ⧉ secondé par les 3 Moires d'Ananké — fauche redondances, outdated et junk</p>
         </div>
         <button @click="closeModal('hades')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mt-4" x-show="hadesScan.stats">
+      <div class="grid grid-cols-4 gap-2 mt-4" x-show="hadesScan.stats">
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Condamnés</div><div class="mono text-lg text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Espace libérable</div><div class="mono text-lg text-rose-300" x-text="(hadesScan.stats?.ko ?? 0) + ' Ko'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Politique Styx</div><div class="text-[10px] text-slate-400 mt-1" x-text="'garder les ' + (hadesScan.politique_styx?.runs_gardes ?? 25) + ' derniers runs'"></div></div>
+        <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Données vues</div><div class="mono text-lg text-slate-300" x-text="(hadesScan.stats?.mo_octets ?? '—') + ' Mo'"></div></div>
+      </div>
+
+      <!-- Traitement des données (5 étapes) -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Traitement des données <span class="text-slate-700 normal-case tracking-normal">— ce que le scan a réellement examiné</span></h3>
+      <div class="space-y-1.5">
+        <template x-for="(t, i) in hadesScan.traitement || []" :key="i">
+          <div class="flex items-start gap-2.5 glass-card rounded-lg px-3 py-2">
+            <span class="mono text-[9px] text-rose-400/80 mt-0.5 w-4 shrink-0" x-text="(i+1)+'.'"></span>
+            <div class="min-w-0">
+              <p class="text-[10.5px] text-slate-200 font-medium" x-text="t.etape"></p>
+              <p class="text-[9.5px] text-slate-500" x-text="t.detail"></p>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Les 3 Moires -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">⧉ Les 3 Moires <span class="text-slate-700 normal-case tracking-normal">— elles filelent, mesurent et coupent la vie des données</span></h3>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
+          <p class="text-[10.5px] text-pink-300 font-semibold">🧵 Clotho</p>
+          <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.clotho?.role"></p>
+          <p class="mono text-lg text-pink-300" x-text="hadesScan.moires?.clotho?.naissance_24h ?? '—'"></p>
+          <p class="text-[9px] text-slate-600">naissances de données / 24 h</p>
+        </div>
+        <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
+          <p class="text-[10.5px] text-violet-300 font-semibold">📏 Lachésis</p>
+          <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.lachesis?.role"></p>
+          <p class="mono text-lg text-violet-300" x-text="(hadesScan.moires?.lachesis?.age_moyen_runs_jours ?? '—') + ' j'"></p>
+          <p class="text-[9px] text-slate-600">âge moyen · <span x-text="hadesScan.moires?.lachesis?.duree_visee"></span></p>
+        </div>
+        <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
+          <p class="text-[10.5px] text-rose-300 font-semibold">✂️ Atropos</p>
+          <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.atropos?.role"></p>
+          <p class="mono text-lg text-rose-300" x-text="hadesScan.moires?.atropos?.condamnes ?? '—'"></p>
+          <p class="text-[9px] text-slate-600" x-text="hadesScan.moires?.atropos?.verdict"></p>
+        </div>
+      </div>
+
+      <!-- Éligibilité au fauchage -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Qui est éligible au fauchage ?</h3>
+      <div class="grid grid-cols-2 gap-1.5">
+        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">📦 <b>run_outdated</b></p><p class="text-[9px] text-slate-600">run au-delà de la fenêtre Styx (25 derniers) — utile pour la postérité, mort pour la performance</p></div>
+        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">🕳️ <b>junk_vide</b></p><p class="text-[9px] text-slate-600">fichier vide (0 octet) — la matière n'a jamais été fileuse</p></div>
+        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">👯 <b>doublon_memoire</b></p><p class="text-[9px] text-slate-600">élément mémoire strictement identique (hash SHA-256 du titre+contenu)</p></div>
+        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">📜 <b>journal</b></p><p class="text-[9px] text-slate-600">journal d'interactions au-delà du seuil — l'histoire garde l'essentiel</p></div>
       </div>
 
       <div class="flex items-center gap-2 mt-4">
@@ -193,7 +257,7 @@
       </div>
       <p x-show="hadesMsg" class="text-[11px] mt-2" :class="hadesDone ? 'text-emerald-300' : 'text-slate-400'" x-text="hadesMsg"></p>
 
-      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Condamnés <span x-text="'(' + (hadesScan.targets?.length || 0) + ')'"></span></h3>
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Condamnés par Atropos <span x-text="'(' + (hadesScan.targets?.length || 0) + ')'"></span></h3>
       <div class="space-y-1 max-h-64 overflow-y-auto pr-1">
         <template x-for="(t, i) in hadesScan.targets || []" :key="i">
           <div class="glass-card rounded-lg px-3 py-2 flex items-center gap-2">
@@ -433,6 +497,15 @@
           </div>
         </template>
       </div>
+      <!-- boutons proposés -->
+      <div class="px-4 pt-2 flex flex-wrap gap-1.5">
+        <span class="text-[9px] text-slate-600 self-center mr-1">proposé :</span>
+        <button @click="send('état du système')" class="chip">🟢 état système</button>
+        <button @click="send('scan de Hadès : données, traitement, éligibles au fauchage')" class="chip">♇ scan Hadès</button>
+        <button @click="send('mon profil cognitif')" class="chip">✦ profil</button>
+        <button @click="setView('interactions')" class="chip">☰ interactions</button>
+        <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 divination</button>
+      </div>
       <!-- saisie -->
       <div class="px-4 pb-3 flex gap-2 items-end border-t border-white/5 pt-3">
         <textarea x-model="input" rows="1" @keydown.enter.prevent="send()" placeholder="Parlez à Laplace ✳ — Métatron ✦ affine vos requêtes…"
@@ -616,7 +689,7 @@ function solApp() {
     },
     openBodySmart(id) {
       // modales dédiées pour les corps qui en ont une, fiche générique sinon
-      if (id === 'sol') this.openModal('sol');
+      if (id === 'sol') this.openBody('sol');   // fiche standard, comme les planètes
       else if (id === 'laplace') { this.refreshNebula(); this.openModal('laplace'); }
       else if (id === 'sebas') { this.refreshNebula(); this.openModal('sebas'); }
       else if (id === 'metatron') this.openBody('metatron');
@@ -631,6 +704,30 @@ function solApp() {
     async followFromToast() {
       const t = this.bodyToast; this.bodyToast = null;
       if (t && this._skyFollow) this._skyFollow(t.id);
+    },
+    solQuick(text) { this.closeModal('body'); this.openModal('sol'); this.send(text); },
+    async apollonDivine() {
+      let d;
+      try { d = await (await fetch('/api/apollon/divination', {method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question: 'comment le système fonctionnera-t-il ?'})})).json(); }
+      catch (e) { return; }
+      const cards = (d.presages||[]).map(pr =>
+        `<div class="glass-card rounded-lg p-2.5 border-amber-500/15">
+           <p class="text-[10.5px] text-amber-200 font-semibold">${pr.titre}</p>
+           <p class="text-[10px] text-slate-300 mt-0.5">${pr.lecture}</p>
+           <p class="text-[9.5px] text-slate-500 italic mt-1">« ${pr.oracle} »</p>
+         </div>`).join('');
+      const html = `<div class="rounded-xl border border-amber-500/30 bg-amber-500/[.05] p-3">
+        <p class="text-[11px] font-semibold text-amber-200 mb-0.5">🏆 ${d.devin||'Apollon'} — ${d.chariot||'chariot'}</p>
+        <p class="text-[11.5px] text-amber-100 mb-2">${d.verdict||''}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">${cards}</div>
+        <p class="text-[9px] text-slate-600 mt-2">${d.methode||''}</p>
+      </div>`;
+      // dans la fiche SOL et/ou le panneau de vue du chat
+      const panel = document.getElementById('apollonPanel');
+      if (panel && this.modals.body) panel.innerHTML = html;
+      if (this.modals.sol) { this.view = 'divination'; this.viewPanel = html; }
     },
     async loadHades() {
       try { this.hadesScan = await (await fetch('/api/hades/scan')).json(); this.hadesMsg = ''; }
@@ -1036,6 +1133,63 @@ function solApp() {
       nebulaGrp.add(metatronPivot);
       clickables.push(metatronMesh);
 
+      // ⧉ ANANKÉ — nécessité inaltérable, orbite Laplace ; ses 3 Moires l'accompagnent
+      const anankePivot = new THREE.Group();
+      const anankeGrp = new THREE.Group();
+      anankeGrp.position.set(150, -30, 0);
+      const anankeMesh = body(6.5, 0xf472b6, true);
+      anankeMesh.userData = {bodyId: 'ananke', name: '⧉ Ananké',
+        role: 'Déesse primordiale de la nécessité inaltérable — la fatalité qui contraint tout le système ; ses 3 Moires secondent Hadès.'};
+      const anankeLbl = label('⧉ Ananké', '#f9a8d4'); anankeLbl.position.y = 16;
+      anankeGrp.add(anankeMesh, anankeLbl);
+      const anankeRing = new THREE.Mesh(new THREE.RingGeometry(9.2, 10.4, 48),
+        new THREE.MeshBasicMaterial({color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: .35}));
+      anankeRing.rotation.x = Math.PI / 2.4;
+      anankeGrp.add(anankeRing);
+      // les 3 Moires autour d'Ananké
+      const moirePivots = [];
+      const MOIRES = [
+        {id: 'clotho', sym: '🧵', name: 'Clotho', role: 'la Fileuse — file le fil de chaque donnée à sa naissance', col: 0xf9a8d4},
+        {id: 'lachesis', sym: '📏', name: 'Lachésis', role: 'la Répartitrice — mesure la durée de vie des données', col: 0xc4b5fd},
+        {id: 'atropos', sym: '✂️', name: 'Atropos', role: 'l\'Inflexible — coupe le fil, prononce la mort des données', col: 0xfda4af},
+      ];
+      MOIRES.forEach((m, i) => {
+        const pv = new THREE.Group();
+        const g = new THREE.Group();
+        const ang = i * (Math.PI * 2 / 3);
+        g.position.set(Math.cos(ang) * 13.5, Math.sin(ang * 2) * 2.5, Math.sin(ang) * 13.5);
+        const mm = body(2.3, m.col, true);
+        mm.userData = {bodyId: m.id, name: m.sym + ' ' + m.name, role: m.role};
+        const ml = label(m.name, '#e9d5ff', 34); ml.scale.set(30, 7.5, 1); ml.position.y = 7;
+        g.add(mm, ml);
+        pv.add(g); anankeGrp.add(pv); moirePivots.push(pv);
+        clickables.push(mm);
+      });
+      const anankeOrbitLine = new THREE.Mesh(new THREE.RingGeometry(152.4, 153.2, 90),
+        new THREE.MeshBasicMaterial({color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: .16}));
+      anankeOrbitLine.rotation.x = Math.PI / 2;
+      nebulaGrp.add(anankeOrbitLine);
+      anankePivot.add(anankeGrp);
+      nebulaGrp.add(anankePivot);
+      clickables.push(anankeMesh);
+
+      // 🏆 APOLLON — cour de SOL, devin du chariot
+      const apollonPivot = new THREE.Group();
+      const apollonGrp = new THREE.Group();
+      apollonGrp.position.set(58, 10, 0);
+      const apollonMesh = body(3.6, 0xfde047, true);
+      apollonMesh.userData = {bodyId: 'apollon', name: '🏆 Apollon',
+        role: 'Devin du chariot — lit les présages du système (trésor, santé, fardeau, feu des morts) et prononce des divinations.'};
+      const apollonLbl = label('🏆 Apollon', '#fde047', 36); apollonLbl.scale.set(34, 8.5, 1); apollonLbl.position.y = 11;
+      apollonGrp.add(apollonMesh, apollonLbl);
+      const apollonOrbit = new THREE.Mesh(new THREE.RingGeometry(57.5, 58.3, 80),
+        new THREE.MeshBasicMaterial({color: 0xfde047, side: THREE.DoubleSide, transparent: true, opacity: .22}));
+      apollonOrbit.rotation.x = Math.PI / 2;
+      sol.add(apollonOrbit);
+      apollonPivot.add(apollonGrp);
+      sol.add(apollonPivot);
+      clickables.push(apollonMesh);
+
       // orbites + planètes — structure entreprise complète (toutes les planètes du registre)
       const ORBIT = {mercure: 105, venus: 150, terre: 190, mars: 230, ceres: 258, jupiter: 300, uranus: 355, neptune: 405, pluton: 452};
       const RADIUS = {mercure: 7, venus: 11, terre: 9, mars: 9, ceres: 5.5, jupiter: 14, uranus: 16, neptune: 12, pluton: 6};
@@ -1236,6 +1390,9 @@ function solApp() {
         nebulaGrp.rotation.y += 0.0007;
         sebasPivot.rotation.y += 0.004;
         metatronPivot.rotation.y -= 0.0022;
+        anankePivot.rotation.y += 0.0016;          // ⧉ Ananké orbite lentement Laplace
+        moirePivots.forEach((pv, i) => { pv.rotation.y += 0.011 + i * 0.004; });  // Moires virevoltent
+        apollonPivot.rotation.y -= 0.008;          // 🏆 chariot d'Apollon autour de SOL
         sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
         planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });
         moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0009; });

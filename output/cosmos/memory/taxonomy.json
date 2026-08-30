@@ -331,7 +331,104 @@
     },
     {
       "name": "Émergents (auto-enrichis)",
-      "children": []
+      "children": [
+        {
+          "name": "webcam",
+          "children": []
+        },
+        {
+          "name": "terrain",
+          "children": []
+        },
+        {
+          "name": "validate_entries",
+          "children": []
+        },
+        {
+          "name": "synchro",
+          "children": []
+        },
+        {
+          "name": "wifi",
+          "children": []
+        },
+        {
+          "name": "armurerie",
+          "children": []
+        },
+        {
+          "name": "mars",
+          "children": []
+        },
+        {
+          "name": "dashboard",
+          "children": []
+        },
+        {
+          "name": "openalex",
+          "children": []
+        },
+        {
+          "name": "2024",
+          "children": []
+        },
+        {
+          "name": "2025",
+          "children": []
+        },
+        {
+          "name": "crossref",
+          "children": []
+        },
+        {
+          "name": "search_literature",
+          "children": []
+        },
+        {
+          "name": "synthesize",
+          "children": []
+        },
+        {
+          "name": "reseau",
+          "children": []
+        },
+        {
+          "name": "hades",
+          "children": []
+        },
+        {
+          "name": "cycle",
+          "children": []
+        },
+        {
+          "name": "commande",
+          "children": []
+        },
+        {
+          "name": "observer",
+          "children": []
+        },
+        {
+          "name": "etat",
+          "children": []
+        },
+        {
+          "name": "faucher",
+          "children": []
+        },
+        {
+          "name": "ecouter",
+          "children": []
+        },
+        {
+          "name": "profil",
+          "children": []
+        },
+        {
+          "name": "déclaratif",
+          "children": []
+        }
+      ]
     }
   ]
 }

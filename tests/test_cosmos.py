@@ -876,3 +876,145 @@ def test_metatron_hades_profile_api():
     # l'état général reste signé Laplace avec l'analyse Métatron attachée
     et = c.post("/api/cosmos/chat", json={"message": "état du système"}).json()
     assert et["speaker"] == "laplace" and "metatron" in et.get("data", {})
+
+
+# ═══ ROUND Ananké/Moires · Apollon · Sebas divin · mini-dashboard · fil d'Ariane ═══
+
+def test_ananke_et_ses_trois_moires():
+    """⧉ Ananké orbite Laplace ; Clotho/Lachésis/Atropos l'accompagnent."""
+    from cosmos.bodies import BODIES, find_body
+    an = BODIES["ananke"]
+    assert an["kind"] == "destin" and an["orbit_r"] == -1   # orbite autour de Laplace
+    assert "nécessité" in an["role"].lower() or "fatalité" in an["role"].lower()
+    moires = {s["id"] for s in an["satellites"]}
+    assert {"clotho", "lachesis", "atropos"} <= moires
+    roles = " ".join(s["role"] for s in an["satellites"]).lower()
+    assert "file" in roles and "mesure" in roles and "coupe" in roles
+    corp, par = find_body("atropos")
+    assert par["name"] == "Ananké"
+
+def test_laplace_divinite_et_sebas_executant():
+    from cosmos.bodies import BODIES
+    assert "divinité" in BODIES["laplace"]["departement"].lower()
+    assert "contrôle absolu" in BODIES["laplace"]["departement"].lower()
+    assert "commandes divines" in BODIES["sebas"]["departement"].lower()
+
+def test_sol_court_apollon():
+    from cosmos.bodies import BODIES
+    court = {c["id"]: c for c in BODIES["sol"].get("court", [])}
+    assert "apollon" in court and "divination" in court["apollon"]["role"].lower()
+
+def test_apollon_divination_quatre_presages():
+    from cosmos import apollon
+    d = apollon.divination("le système tiendra-t-il ?")
+    for k in ("devin", "chariot", "presages", "verdict", "methode"):
+        assert k in d
+    assert len(d["presages"]) == 4
+    for p in d["presages"]:
+        assert {"titre", "lecture", "oracle", "ton"} <= set(p)
+        assert p["ton"] in ("bon", "moyen", "mauvais")
+    assert any("réel" in d["methode"].lower() for _ in [0]) or d["methode"]
+
+def test_sebas_execute_commandes_divines(tmp_path, monkeypatch):
+    from cosmos import sebas, hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    r = sebas.execute("observe le chantier", agent="laplace")
+    assert r["ok"] and r["action"] == "observer"
+    assert "sandbox" in r["reponse"].lower() and "aucune donnée fabriquée" in r["reponse"]
+    r2 = sebas.execute("rapporte l'état du système", agent="user")
+    assert r2["action"] == "etat" and "intégrité" in r2["reponse"]
+    r3 = sebas.execute("fauche les condamnés", agent="laplace")
+    assert r3["action"] == "faucher" and "fauche" in r3["reponse"].lower()
+    assert not sebas.execute("  ")["ok"]
+
+def test_hades_scan_traitement_et_moires(tmp_path, monkeypatch):
+    """Le scan affiche : données vues, traitement en 5 étapes, les 3 Moires."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(3):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":1}', encoding="utf-8")
+    sc = hades.scan_system()
+    etapes = [t["etape"] for t in sc["traitement"]]
+    assert len(etapes) == 5
+    assert etapes[0] == "inventaire" and "rétention" in etapes[1] and "journaux" in etapes[-1]
+    assert all(t["detail"] for t in sc["traitement"])
+    mo = sc["moires"]
+    assert {"clotho", "lachesis", "atropos"} == set(mo)
+    assert isinstance(mo["clotho"]["naissance_24h"], int)
+    assert mo["lachesis"]["age_moyen_runs_jours"] >= 0
+    assert mo["atropos"]["condamnes"] == sc["stats"]["condamnes"]
+    assert sc["stats"]["mo_octets"] >= 0
+
+def test_cogniprofile_biais_et_effets():
+    from cosmos import cogniprofile
+    pr = cogniprofile.build_profile()
+    biais = {b["id"]: b for b in pr["biais"]}
+    assert {"confirmation", "recence", "ancrage", "disponibilite"} <= set(biais)
+    for b in pr["biais"]:
+        assert 0 <= b["valeur"] <= 100 and b["explication"]
+    effets = {e["id"] for e in pr["effets"]}
+    assert {"priming", "dosing"} <= effets
+    assert isinstance(pr["traits_declares"], list)
+
+def test_laplace_route_scan_sans_faucher(tmp_path, monkeypatch):
+    """« scan de Hadès … éligibles au fauchage » SCANNE sans détruire ; « lance la fauche » fauche."""
+    from cosmos import hades, laplace
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":1}', encoding="utf-8")
+    r = laplace.chat("scan de Hadès : données, traitement, éligibles au fauchage")
+    assert r["intent"] == "fauche"
+    assert "Traitement des données" in r["reply"] and "Clotho" in r["reply"]
+    assert len(list(hades.RUNS_DIR.iterdir())) == 28      # rien détruit par un scan
+    r2 = laplace.chat("Hadès, lance la fauche")
+    assert "fauche est exécutée" in r2["reply"]
+    restants = [d for d in hades.RUNS_DIR.iterdir() if d.is_dir()]
+    assert len(restants) == 25
+
+def test_laplace_route_commande_divine_et_divination():
+    from cosmos import laplace
+    cd = laplace.chat("Sebas, observe le chantier")
+    assert cd["intent"] == "commande_divine" and "Sebas" in cd["reply"]
+    dv = laplace.chat("quelle divination pour le système ?")
+    assert dv["intent"] == "divination" and "Apollon" in dv["reply"]
+    assert len(dv["data"]["presages"]) == 4
+
+def test_apollon_sebas_traits_endpoints():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    d = c.post("/api/apollon/divination", json={"question": "prévoir le fonctionnement"}).json()
+    assert len(d["presages"]) == 4 and d["verdict"]
+    s = c.post("/api/sebas/execute", json={"commande": "écoute le réseau wifi"}).json()
+    assert s["ok"] and s["action"] == "ecouter"
+    t = c.post("/api/profile/traits", json={"trait": "curieux-de-tout"}).json()
+    assert t["id"] and t["corps"] == "user"
+
+def test_index_mini_dashboard_fils_et_chips():
+    """Le hero est remplacé par 3 fenêtres ; graphe : chips + fil d'Ariane ; taxonomie ±1."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("profilMetricsSvg", "profilGraphSvg", "Mes métriques", "Profil cognitif",
+                  "Ma constellation", "fil d'Ariane", "FIL D'ARIANE",
+                  "arianeSvg", "playAriane", "loadConstellation(v)", "taxLevel(1)", "taxLevel(-1)"):
+        assert motif.lower() in html.lower(), motif
+    assert "Choisir sa constellation" not in html          # dropdown supprimé → chips
+
+def test_sol_page_fiche_chat_chariot_et_3d():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("apollonDivine", "solQuick", "Chariot d'Apollon", "anankePivot",
+                  "moirePivots", "apollonPivot", "Traitement des données",
+                  "Les 3 Moires", "éligible au fauchage", "naissance_24h"):
+        assert motif.lower() in html.lower(), motif

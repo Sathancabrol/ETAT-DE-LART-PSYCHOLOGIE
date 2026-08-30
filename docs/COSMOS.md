@@ -496,3 +496,72 @@ chat Laplace : « montre-moi mon profil cognitif » · `GET /api/profile/cogniti
 - **double-clic** = suivre le corps en caméra + ouvrir sa fiche ;
 - le chat de la modale du soleil parle désormais en **✳ Laplace** (titre,
   avatar, messages) — SOL ☉ reste mentionné comme approbateur.
+
+## Round divinités — Laplace divinité, Sebas exécutant, Ananké & Moires, Apollon
+
+### ✳ Laplace est une divinité
+`departement` : « Divinité — contrôle absolu du système ». Cadre narratif :
+contrôle absolu sur toutes les données du système et les entités de son
+environnement ; en pratique, tout passe par lui (chat, routage, commandes).
+
+### ◉ Sebas exécute les commandes divines
+`cosmos/sebas.py` — `execute(commande, agent)` : routage par règles
+(observer / écouter / faucher / état / consigner), mémoire + grand livre +
+interaction bus. Honnêteté sandbox conservée : « capteurs physiques non
+détectés — observation déclarative, aucune donnée fabriquée ». Département :
+« Exécutant des commandes divines de Laplace ».
+Chat : « Sebas, observe le chantier » → intent `commande_divine` ·
+`POST /api/sebas/execute {commande, agent}`.
+
+### ⧉ Ananké et les 3 Moires (orbite Laplace)
+Ananké `kind=destin`, `orbit_r=-1` (orbite autour de la nébuleuse Laplace) :
+déesse primordiale de la nécessité inaltérable / fatalité / contrainte.
+Ses 3 Moires (satellites) secondent Hadès :
+- 🧵 **Clotho** file le fil à la naissance (`naissance_24h` — éléments de
+  mémoire nés sur 24 h) ;
+- 📏 **Lachésis** mesure et déroule (`age_moyen_runs_jours`, `duree_visee`) ;
+- ✂️ **Atropos** coupe et prononce la mort (`condamnes`, `verdict`).
+Dans /sol : Ananké orbite Laplace en 3D avec ses 3 Moires virevoltantes.
+
+### ♇ Scan Hadès enrichi (données + traitement + éligibilité)
+`scan_system()` expose désormais `traitement` (5 étapes : inventaire →
+rétention (Lachésis) → doublons hash SHA-256 → junk → journaux) et `moires`
+(Clotho/Lachésis/Atropos), `stats.mo_octets` (Mo réellement vus). La modale
+♇ de /sol affiche : stats, **traitement des données**, cartes des 3 Moires,
+**qui est éligible au fauchage** (run_outdated / junk_vide / doublon_memoire
+/ journal) et les condamnés. Le chat comprend « scan le système », « scan de
+Hadès », « Moires », « Ananké » — sans déclencher la fauche ; seule la
+formulation explicite (« lance la fauche », « fauche Hadès ») exécute la
+suppression réelle.
+
+### 🏆 Apollon — devin du chariot (cour de SOL)
+`cosmos/apollon.py` — `divination(question)` : 4 présages **ancrés sur les
+données réelles** (trésor = budget Vénus, santé = intégrité SOL, fardeau =
+condamnés Hadès/Moires, feu des morts = activité/rythme), verdict + méthode.
+En 3D, Apollon 🏆 orbite SOL ; fiche SOL (désormais une fiche standard comme
+les planètes) avec boutons proposés + « Chariot d'Apollon — divination » ;
+chips « 🏆 divination » dans le chat. `POST /api/apollon/divination`.
+
+### Profil : biais & effets cognitifs induits
+`cogniprofile.build_profile()` ajoute `biais` (confirmation, récence,
+ancrage, disponibilité — avec explication), `effets` (amorçage/priming,
+saturation/dosing) et `traits_declares` (saisis par l'utilisateur via
+`POST /api/profile/traits {trait}` — réels, corps user).
+
+### Mini-dashboard 3 fenêtres (hero de /agent)
+Le hero « Psychologie Cognitive & Sciences de l'Apprentissage » est remplacé :
+- **gauche — Mes métriques** : choix de l'indicateur (biais, dimensions,
+  rythme…) ET du type de graphe (jauge / barres / radar), valeurs réelles ;
+- **milieu — Profil cognitif** : jauges % des biais et effets ;
+- **droite — Ma constellation** : graphe Obsidian centré sur Moi
+  (dimensions, biais, effets, domaines, traits déclarés), traits ajoutables.
+
+### Graphe Obsidian : chips + fil d'Ariane animé + taxonomie ±1
+- sélection de constellation **par chips fluides** (plus de liste déroulante),
+  repères de couleurs des types de nœuds et explication ;
+- **🧵 fil d'Ariane** : parcours réel d'une demande (Vous → Laplace →
+  Métatron → SOL → skills → artefacts → Remise) reconstruit depuis la trace
+  du run choisi, animé d'un pulse **or → scarlet** avec particules suivant
+  le fil (bouton ▶ Rejouer) ;
+- volant taxonomie de droite : **＋1 niveau / －1 niveau** sur la branche
+  sélectionnée (révèle/replie un anneau entier de la branche).

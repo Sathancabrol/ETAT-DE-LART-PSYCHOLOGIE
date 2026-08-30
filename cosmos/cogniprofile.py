@@ -135,11 +135,48 @@ def build_profile() -> Dict[str, Any]:
     if domaines:
         traits.append("Domaines récurrents : " + ", ".join(domaines[:6]))
 
+    # ── biais cognitifs induits (heuristiques transparentes, données réelles) ──
+    n = max(1, len(corpus))
+    conf = sum(1 for c in corpus if re.search(r"v[ée]rifi|prouve|confirme|valide|preuve", c.lower()))
+    ancres = Counter(domaines).most_common(1)
+    ancrage = round(100 * sum(blobs.count(d.lower()) for d in domaines[:5]) / max(1, len(blobs.split()))) if domaines else 0
+    recentes = sum(1 for r in runs if r.get("date", "") >= "2026-08-29")
+    biais = [
+        {"id": "confirmation", "label": "Biais de confirmation", "valeur": min(100, round(conf * 100 / n + 12)),
+         "explication": f"{conf}/{len(corpus)} requêtes cherchent à vérifier/confirmer — "
+                        "tendance à chercher ce qui confirme plutôt qu'à explorer l'inattendu."},
+        {"id": "recence", "label": "Biais de récence", "valeur": min(100, round(recentes * 100 / max(1, len(runs)))),
+         "explication": f"{recentes}/{len(runs)} missions très récentes — le présent pèse "
+                        "plus que l'historique dans vos usages."},
+        {"id": "ancrage", "label": "Ancrage", "valeur": min(100, ancrage),
+         "explication": "poids des 5 domaines récurrents dans le vocabulaire total — "
+                        "les premières habitudes structurent les demandes."},
+        {"id": "disponibilite", "label": "Biais de disponibilité", "valeur": min(100, len(set(domaines)) * 8),
+         "explication": f"{len(set(domaines))} domaines distincts — plus c'est varié, moins "
+                        "les exemples récents dominent le jugement."},
+    ]
+
+    # ── traits déclaratifs (l'utilisateur décrit lui-même son profil) ──
+    traits_declares = [q.get("titre", "") for q in questions if q.get("type") == "profil"]
+
+    # ── effets induits ──
+    effets = [
+        {"id": "priming", "label": "Effet d'amorçage", "valeur": min(100, int(creativite * .7)),
+         "explication": "les mots de vos requêtes précédentes réapparaissent dans les suivantes "
+                        "(mesuré par récurrence lexicale)."},
+        {"id": "dosing", "label": "Effet de saturation", "valeur": min(100, activite),
+         "explication": "densité d'usage : au-delà de ~80, les sessions longues dominent — "
+                        "attention à la fatigue de décision."},
+    ]
+
     return {
         "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source_donnees": {"questions": len(questions), "missions": len(runs),
                            "domaines": len(set(domaines))},
         "dimensions": dims,
+        "biais": biais,
+        "effets": effets,
+        "traits_declares": traits_declares,
         "traits": traits,
         "rythme": rythme,
         "style_scores": scores_style,

@@ -41,6 +41,10 @@
 
     /* ─── OBSIDIAN GRAPH ─── */
     #obsidianGraph { background: radial-gradient(ellipse at center, #080c18 0%, #030508 70%); position:relative; overflow:hidden; }
+    .chip { font-size:10.5px; padding:4px 10px; border-radius:9999px; border:1px solid rgba(255,255,255,.08); color:#94a3b8; background:rgba(255,255,255,.02); transition:all .15s; white-space:nowrap; }
+    .chip:hover { border-color:rgba(255,255,255,.25); color:#e2e8f0; transform:translateY(-1px); }
+    #arianeSvg { background:linear-gradient(90deg,rgba(251,191,36,.03),rgba(225,29,72,.03)); border-radius:10px; }
+    .ariane-node-lit circle.an-ring { stroke:#fbbf24 !important; stroke-opacity:1 !important; }
     #obsidianGraph svg { width:100%; height:100%; display:block; }
     .obs-node circle { cursor:pointer; transition: filter 0.2s; }
     .obs-node text { pointer-events:none; fill:#cbd5e1; font-size:10px; text-shadow:0 0 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7); opacity:0; transition:opacity 0.3s; }
@@ -91,15 +95,79 @@
 
   <!-- ══════════ DASHBOARD ══════════ -->
   <section x-show="activeTab==='dashboard'" class="space-y-5 fade-in">
-    <div class="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-[#0a0f1c] via-[#0d1225] to-[#0a0f1c] p-6">
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(129,140,248,.06),transparent_60%)]"></div>
-      <div class="relative z-10 max-w-3xl">
-        <div class="flex items-center space-x-2 mb-2">
-          <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Cartographie Critique</span>
-          <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PRISMA 2020</span>
+    <!-- ══ MINI-DASHBOARD 3 FENÊTRES : métriques · profil cognitif · constellation personnelle ══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <!-- ◀ FENÊTRE GAUCHE : mes métriques en graphiques -->
+      <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">📊</span>Mes métriques</h3>
+          <a href="/agent?agent=uranus" class="text-[9px] text-slate-600 hover:text-indigo-300">tout voir ↗</a>
         </div>
-        <h2 class="text-2xl font-extrabold tracking-tight">Psychologie Cognitive & Sciences de l'Apprentissage</h2>
-        <p class="mt-2 text-xs text-slate-500 leading-relaxed">Base de <strong class="text-slate-300" x-text="stats.total_references"></strong> références sur 42 champs normalisés • <strong class="text-slate-300" x-text="stats.total_relations"></strong> relations • <strong class="text-slate-300">60+</strong> nœuds conceptuels • 10 concepts 4E opérationnalisés</p>
+        <div class="flex flex-wrap gap-1 mb-1.5">
+          <template x-for="ind in profilIndicateurs" :key="ind.id">
+            <button @click="profilInd=ind.id" class="chip" :class="profilInd===ind.id && '!border-indigo-500/60 !text-indigo-300'" x-text="ind.label"></button>
+          </template>
+        </div>
+        <div class="flex flex-wrap gap-1 mb-2">
+          <template x-for="ct in ['jauge','barres','radar']" :key="ct">
+            <button @click="profilChart=ct" class="chip" :class="profilChart===ct && '!border-cyan-500/60 !text-cyan-300'" x-text="ct"></button>
+          </template>
+        </div>
+        <svg id="profilMetricsSvg" class="flex-1 w-full" style="min-height:190px"></svg>
+        <p class="text-[9px] text-slate-600 mt-1.5" x-text="profilExplication"></p>
+      </div>
+
+      <!-- ◀ FENÊTRE MILIEU : profil cognitif (jauges biais & effets) -->
+      <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🧠</span>Profil cognitif</h3>
+          <a href="/agent" class="text-[9px] text-slate-600 hover:text-indigo-300">profil complet ↗</a>
+        </div>
+        <p class="text-[9px] uppercase tracking-[.12em] text-slate-600 mb-1.5">Biais & effets induits (jauges %)</p>
+        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+          <template x-for="b in profilPerso.biais || []" :key="b.id">
+            <div>
+              <div class="flex items-center justify-between text-[10.5px]">
+                <span class="text-slate-300" x-text="b.label"></span>
+                <span class="mono" :class="b.valeur>=70?'text-rose-300':b.valeur>=40?'text-amber-300':'text-emerald-300'" x-text="b.valeur + '%'"></span>
+              </div>
+              <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
+                <div class="h-full rounded-full transition-all duration-700" :class="b.valeur>=70?'bg-rose-500/70':b.valeur>=40?'bg-amber-500/70':'bg-emerald-500/70'" :style="'width:'+b.valeur+'%'"></div>
+              </div>
+              <p class="text-[8.5px] text-slate-600 leading-snug mt-0.5" x-text="b.explication"></p>
+            </div>
+          </template>
+          <template x-for="e in profilPerso.effets || []" :key="e.id">
+            <div>
+              <div class="flex items-center justify-between text-[10.5px]">
+                <span class="text-indigo-200/80" x-text="e.label"></span>
+                <span class="mono text-indigo-300" x-text="e.valeur + '%'"></span>
+              </div>
+              <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
+                <div class="h-full rounded-full bg-indigo-500/60 transition-all duration-700" :style="'width:'+e.valeur+'%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="flex flex-wrap gap-1 mt-1.5" x-show="(profilPerso.rythme||{}).length">
+          <template x-for="(n, h) in profilPerso.rythme || {}" :key="h">
+            <span class="text-[8px] mono px-1 py-0.5 rounded bg-cyan-500/10 text-cyan-300/70" x-text="h+'h'"></span>
+          </template>
+        </div>
+      </div>
+
+      <!-- ◀ FENÊTRE DROITE : ma constellation (graphe Obsidian, centre = moi) -->
+      <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">✨</span>Ma constellation</h3>
+          <span class="text-[9px] text-slate-600">centre = moi · cliquez un nœud</span>
+        </div>
+        <div class="flex gap-1.5 mb-2">
+          <input x-model="nouveauTrait" @keydown.enter="addTrait()" placeholder="✎ ajouter un trait à mon profil (ex : analytique)…" class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-[11px] text-slate-200 placeholder-slate-600 focus:border-indigo-500">
+          <button @click="addTrait()" :disabled="!nouveauTrait.trim()" class="px-2.5 py-1.5 rounded-lg text-[11px] text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40">+</button>
+        </div>
+        <svg id="profilGraphSvg" class="flex-1 w-full" style="min-height:210px"></svg>
+        <p class="text-[9px] text-slate-600 mt-1.5">dimensions · biais · effets · domaines · traits déclarés — créés et modifiables (ajout au centre-ville de votre profil)</p>
       </div>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -275,23 +343,6 @@
           <p class="text-[10px] text-slate-600">Style Obsidian • <span x-text="graphData.nodes?.length||0"></span> nœuds • <span x-text="graphData.links?.length||0"></span> liens • Drag, zoom, clic pour explorer</p>
         </div>
         <div class="flex items-center space-x-2">
-          <div class="relative">
-            <button @click="showConstPicker=!showConstPicker" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] border border-amber-500/30 hover:border-amber-400/60 text-amber-300 bg-amber-500/5 transition">
-              <span>✦</span><span>Choisir sa constellation</span><span class="text-[8px]" x-text="showConstPicker?'▲':'▼'"></span>
-            </button>
-            <div x-show="showConstPicker" @click.outside="showConstPicker=false" x-cloak class="absolute right-0 top-9 w-80 glass rounded-xl p-2 z-50 max-h-[70vh] overflow-y-auto shadow-2xl">
-              <p class="text-[9px] uppercase tracking-[.12em] text-slate-600 px-2 py-1">Constellations du système</p>
-              <template x-for="v in constellations" :key="v.id">
-                <button @click="loadConstellation(v)" :class="currentConst===v.id ? 'bg-indigo-500/15 border-indigo-500/40' : 'border-transparent hover:bg-white/[.04]'" class="w-full text-left px-2.5 py-2 rounded-lg border transition flex items-start gap-2.5">
-                  <span class="text-base leading-none mt-0.5" x-text="v.symbol"></span>
-                  <span class="min-w-0">
-                    <span class="block text-[11px] font-medium text-slate-200" x-text="v.label"></span>
-                    <span class="block text-[9.5px] text-slate-500 leading-snug" x-text="v.description"></span>
-                  </span>
-                </button>
-              </template>
-            </div>
-          </div>
           <input type="text" x-model="graphSearch" @input="searchGraph()" placeholder="Rechercher un nœud..." class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-1 text-[11px] text-slate-300 w-44 focus:border-indigo-500 focus:outline-none">
           <template x-for="ft in nodeFilters" :key="ft.type">
             <button @click="ft.active=!ft.active; applyGraphFilters()" :class="ft.active ? 'border-opacity-60 bg-opacity-10' : 'border-opacity-20 bg-transparent opacity-40'" class="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] border transition" :style="`border-color:${ft.color};color:${ft.color};background:${ft.color}15`">
@@ -301,6 +352,35 @@
           </template>
         </div>
       </div>
+
+      <!-- 🧵 FIL D'ARIANE : l'impact réel de votre demande, animé -->
+      <div class="glass-card rounded-xl p-3 mb-2 border-amber-500/15">
+        <div class="flex flex-wrap items-center gap-2 mb-1.5">
+          <h3 class="text-[11px] font-semibold flex items-center"><span class="mr-1.5">🧵</span>Fil d'Ariane — ce que le système a réellement fait de votre demande</h3>
+          <span class="text-[9px] text-slate-600" x-text="arianeInfo"></span>
+          <span class="flex-1"></span>
+          <select x-model="arianeRun" @change="buildAriane()" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2 py-1 text-[10px] text-slate-300 max-w-[240px]">
+            <template x-for="r in arianeRuns" :key="r.run_id">
+              <option :value="r.run_id" x-text="r.tache.slice(0,42) + ' · ' + r.statut"></option>
+            </template>
+          </select>
+          <button @click="playAriane()" class="text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 hover:bg-amber-500/25">▶ Rejouer le parcours</button>
+        </div>
+        <svg id="arianeSvg" style="width:100%;height:104px"></svg>
+      </div>
+
+      <!-- ✦ Sélection fluide par chips + repères -->
+      <div class="flex flex-wrap items-center gap-1.5 mb-2">
+        <span class="text-[9px] uppercase tracking-[.12em] text-slate-600 mr-1">✦ Constellation :</span>
+        <button @click="loadConstellation({id:'base'})" :class="currentConst==='base' ? '!border-indigo-500/60 !text-indigo-300 !bg-indigo-500/10' : ''" class="chip" x-text="'🌐 Base complète'"></button>
+        <template x-for="v in constellations" :key="v.id">
+          <button @click="loadConstellation(v)" :class="currentConst===v.id ? '!border-indigo-500/60 !text-indigo-300 !bg-indigo-500/10' : ''" class="chip" :title="v.description" x-text="v.symbol + ' ' + v.label"></button>
+        </template>
+        <span class="flex-1"></span>
+        <span class="text-[9px] text-slate-600">repères : <span class="text-emerald-400">●</span> concepts · <span class="text-sky-400">●</span> études · <span class="text-amber-400">●</span> sources · <span class="text-violet-400">●</span> méthodes · <span class="text-rose-400">●</span> théoriciens — cliquez un nœud = sa fiche complète</span>
+      </div>
+      <p class="text-[9.5px] text-slate-600 mb-2 -mt-1">Ce graphe relie les <b class="text-slate-400">concepts</b> (ce que le système sait), les <b class="text-slate-400">études</b> (les preuves, taillées par leur trust) et les <b class="text-slate-400">sources</b> : suivez un lien pour comprendre pourquoi deux idées sont reliées. Filtrez par type ci-dessus, zoomez (molette), déplacez (clic gauche).</p>
+
       <!-- Graph -->
       <div id="obsidianGraph" class="flex-1 rounded-xl border border-white/5 relative" style="min-height:500px">
         <svg id="obsSvg"></svg>
@@ -453,6 +533,14 @@
               <div class="flex items-center space-x-3 text-[10px] text-slate-600">
                 <span>Profondeur: <span class="text-slate-400" x-text="selectedTaxNode.depth"></span></span>
                 <span>Enfants: <span class="text-slate-400" x-text="(selectedTaxNode.children||selectedTaxNode._children||[]).length"></span></span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15">
+                <span class="text-[9px] text-emerald-300 uppercase font-semibold">Ouvrir / réduire cette branche, niveau par niveau</span>
+                <div class="flex items-center gap-1.5 mt-1.5">
+                  <button @click="taxLevel(1)" class="text-[10px] px-2.5 py-1 rounded bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/25">＋1 niveau</button>
+                  <button @click="taxLevel(-1)" class="text-[10px] px-2.5 py-1 rounded bg-white/5 border border-white/10 text-slate-400 hover:text-white">－1 niveau</button>
+                  <span class="text-[9px] text-slate-600" x-text="taxLevelInfo"></span>
+                </div>
               </div>
               <!-- Path -->
               <div>
@@ -614,6 +702,7 @@ function app() {
     // Graph
     graphData:{nodes:[],links:[]}, graphSearch:'', selectedObsNode:null, connectedNodes:[], graphZoom:1, visibleNodes:0,
     constellations:[], showConstPicker:false, currentConst:'base',
+    arianeRuns:[], arianeRun:'', arianeInfo:'', taxLevelInfo:'',
     nodeFilters:[
       {type:'study',label:'Études',color:'#818cf8',active:true},
       {type:'concept',label:'Concepts',color:'#22d3ee',active:true},
@@ -627,6 +716,14 @@ function app() {
 
     // Dashboard métriques
     dashMetrics:[], dashSystem:{}, metricDetail:null, showMetricModal:false,
+    // mini-dashboard profil (3 fenêtres)
+    profilPerso:{}, profilInd:'dimensions', profilChart:'jauge', nouveauTrait:'', _profilGraphSim:null,
+    profilIndicateurs:[
+      {id:'dimensions', label:'🧠 dimensions'},
+      {id:'biais', label:'⚖️ biais'},
+      {id:'effets', label:'🌀 effets'},
+      {id:'rythme', label:'🕒 rythme'},
+    ],
 
     // Taxonomy
     taxSearch:'', selectedTaxNode:null,
@@ -637,8 +734,118 @@ function app() {
     srlData:{session_id:'s-'+Math.random().toString(36).slice(2,8),objective:'',criteria:'',constraints:'',ai_query:'',ai_response:'',evaluation:'',confidence:75,action_plan:''},
 
     async init(){
-      await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics()]);
+      await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();});
+    },
+
+    async loadProfilPerso(){
+      try{const r=await fetch('/api/profile/cognitive'); this.profilPerso=await r.json();}catch(e){this.profilPerso={};}
+      this.$nextTick(()=>{this.renderProfilChart();this.renderProfilGraph();});
+    },
+    get profilSeries(){ // série de valeurs selon l'indicateur choisi
+      const p=this.profilPerso;
+      if(this.profilInd==='biais')return (p.biais||[]).map(b=>({label:b.label,valeur:b.valeur}));
+      if(this.profilInd==='effets')return (p.effets||[]).map(e=>({label:e.label,valeur:e.valeur}));
+      if(this.profilInd==='rythme')return Object.entries(p.rythme||{}).map(([h,n])=>({label:h+'h',valeur:Math.min(100,n*10)}));
+      return (p.dimensions||[]).map(d=>({label:d.label,valeur:d.valeur}));
+    },
+    get profilExplication(){
+      const p=this.profilPerso;
+      if(this.profilInd==='biais')return 'Biais induits de vos interactions — heuristiques transparentes, pas un test clinique.';
+      if(this.profilInd==='effets')return 'Effets cognitifs estimés (amorçage, saturation).';
+      if(this.profilInd==='rythme')return 'Activité par heure (0-100 = intensité relative).';
+      return 'Dimensions cognitives induites : curiosité, profondeur, créativité, méthode, activité.';
+    },
+    renderProfilChart(){
+      const svg=document.getElementById('profilMetricsSvg');
+      if(!svg)return;
+      d3.select(svg).selectAll('*').remove();
+      const s=this.profilSeries;
+      if(!s.length){d3.select(svg).append('text').attr('x','50%').attr('y','50%').attr('text-anchor','middle').attr('fill','#475569').attr('font-size',11).text('chargement…');return;}
+      const W=svg.clientWidth||340,H=svg.clientHeight||200;
+      svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+      const g=d3.select(svg);
+      if(this.profilChart==='jauge'&&s.length){
+        // jauges circulaires en % (grille 2 colonnes)
+        const cw=W/2, ch=Math.min(H/s.length*2, 86);
+        s.slice(0,6).forEach((d,i)=>{
+          const col=i%2, row=Math.floor(i/2);
+          const cx=cw*col+cw/2, cy=row*ch+ch/2+4, R=Math.min(cw,ch)/2-16;
+          const pct=Math.max(0,Math.min(100,d.valeur));
+          const color=pct>=70?'#fb7185':pct>=40?'#fbbf24':'#34d399';
+          g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','none').attr('stroke','#1e293b').attr('stroke-width',7);
+          const arc=d3.arc().innerRadius(R-4).outerRadius(R+3).startAngle(-Math.PI/2)
+            .endAngle(-Math.PI/2+2*Math.PI*pct/100).cornerRadius(4);
+          g.append('path').attr('d',arc()).attr('fill',color).attr('transform',`translate(${cx},${cy})`);
+          g.append('text').attr('x',cx).attr('y',cy+2).attr('text-anchor','middle').attr('font-size',R*.42).attr('font-weight',700).attr('fill','#e2e8f0').text(pct+'%');
+          g.append('text').attr('x',cx).attr('y',cy+R+11).attr('text-anchor','middle').attr('font-size',8.5).attr('fill','#64748b').text(d.label.slice(0,16));
+        });
+      } else if(this.profilChart==='barres'){
+        const bw=Math.min(46,(W-30)/s.length-10);
+        const max=100, sc=(H-34)/max;
+        s.forEach((d,i)=>{
+          const x=18+i*((W-30)/s.length), bh=d.valeur*sc;
+          g.append('rect').attr('x',x).attr('y',H-22-bh).attr('width',bw).attr('height',Math.max(2,bh)).attr('rx',4)
+            .attr('fill',d.valeur>=70?'#fb7185':d.valeur>=40?'#fbbf24':'#34d399').attr('opacity',.85);
+          g.append('text').attr('x',x+bw/2).attr('y',H-22-bh-4).attr('text-anchor','middle').attr('font-size',8.5).attr('fill','#94a3b8').text(d.valeur);
+          g.append('text').attr('x',x+bw/2).attr('y',H-9).attr('text-anchor','middle').attr('font-size',7.5).attr('fill','#475569').text(d.label.slice(0,10));
+        });
+      } else { // radar
+        const cx=W/2,cy=H/2+6,R=Math.min(W,H)/2-34,n=s.length;
+        const ang=i=>2*Math.PI*i/n-Math.PI/2;
+        const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v/100,cy+Math.sin(ang(i))*R*v/100];
+        for(let r=1;r<=3;r++)g.append('polygon').attr('points',s.map((_,i)=>pt(i,r*33).join(',')).join(' ')).attr('fill','none').attr('stroke','#1e293b').attr('stroke-dasharray','2 4');
+        g.append('polygon').attr('points',s.map((d,i)=>pt(i,d.valeur).join(',')).join(' ')).attr('fill','rgba(129,140,248,.25)').attr('stroke','#818cf8').attr('stroke-width',1.5);
+        s.forEach((d,i)=>{const[x,y]=pt(i,120);g.append('text').attr('x',x).attr('y',y).attr('text-anchor','middle').attr('font-size',7.5).attr('fill','#64748b').text(d.label.slice(0,9));});
+      }
+    },
+    renderProfilGraph(){
+      const svg=document.getElementById('profilGraphSvg');
+      if(!svg)return;
+      d3.select(svg).selectAll('*').remove();
+      const p=this.profilPerso;
+      const cats=[
+        {id:'cat:dim',label:'dimensions',color:'#818cf8',items:(p.dimensions||[]).map(d=>d.label+' '+d.valeur)},
+        {id:'cat:biais',label:'biais',color:'#fb7185',items:(p.biais||[]).map(b=>b.label)},
+        {id:'cat:effets',label:'effets',color:'#a78bfa',items:(p.effets||[]).map(e=>e.label)},
+        {id:'cat:dom',label:'domaines',color:'#34d399',items:(p.domaines||[]).slice(0,8)},
+        {id:'cat:traits',label:'traits déclarés',color:'#fbbf24',items:(p.traits_declares||[])},
+      ].filter(c=>c.items.length);
+      const nodes=[{id:'moi',label:'Moi',type:'centre',color:'#fcd34d'}];
+      const links=[];
+      cats.forEach(c=>{nodes.push({id:c.id,label:c.label,type:'categorie',color:c.color});links.push({source:'moi',target:c.id});
+        c.items.slice(0,6).forEach((it,i)=>{const nid=c.id+':'+i;nodes.push({id:nid,label:it,type:'element',color:c.color});links.push({source:c.id,target:nid});});});
+      const W=svg.clientWidth||340,H=svg.clientHeight||220;
+      svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+      const g=d3.select(svg).append('g');
+      d3.select(svg).call(d3.zoom().scaleExtent([.3,4]).on('zoom',e=>g.attr('transform',e.transform)));
+      const sim=d3.forceSimulation(nodes)
+        .force('link',d3.forceLink(links).id(d=>d.id).distance(l=>l.source.id==='moi'?70:34).strength(.5))
+        .force('charge',d3.forceManyBody().strength(-140))
+        .force('center',d3.forceCenter(W/2,H/2))
+        .force('collide',d3.forceCollide(d=>d.type==='centre'?26:10));
+      const link=g.selectAll('line').data(links).join('line').attr('stroke','#33415588');
+      const node=g.selectAll('g').data(nodes).join('g').style('cursor','pointer')
+        .call(d3.drag().on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+                         .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+                         .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}));
+      node.append('circle').attr('r',d=>d.type==='centre'?16:d.type==='categorie'?8:4.5).attr('fill',d=>d.color).attr('stroke','#0d1320').attr('stroke-width',1.4);
+      node.append('text').text(d=>d.label.length>16?d.label.slice(0,15)+'…':d.label).attr('x',d=>d.type==='centre'?0:d.type==='categorie'?11:8).attr('y',d=>d.type==='centre'?4:3)
+        .attr('font-size',d=>d.type==='centre'?11:d.type==='categorie'?9:7.5)
+        .attr('text-anchor',d=>d.type==='centre'?'middle':'start')
+        .attr('fill',d=>d.type==='centre'?'#fde68a':d.type==='categorie'?'#cbd5e1':'#94a3b8');
+      node.append('title').text(d=>d.label);
+      sim.on('tick',()=>{link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+        node.attr('transform',d=>`translate(${d.x},${d.y})`);});
+    },
+    async addTrait(){
+      const t=this.nouveauTrait.trim();
+      if(!t)return;
+      try{
+        await fetch('/api/profile/traits',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trait:t})});
+        this.nouveauTrait='';
+        await this.loadProfilPerso();
+      }catch(e){}
     },
 
     async loadStats(){try{const r=await fetch('/api/stats');this.stats=await r.json();}catch(e){}},
@@ -667,7 +874,7 @@ function app() {
       this.activeTab=tab;
       this.$nextTick(()=>{lucide.createIcons();
         if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();}
-        if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
+        if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();this.loadArianeRuns();}
         if(tab==='taxonomy')setTimeout(()=>this.initTaxonomy(),200);
         if(tab==='timeline')setTimeout(()=>this.initTimeline(),200);
       });
@@ -693,6 +900,121 @@ function app() {
     },
 
     // ─── OBSIDIAN GRAPH ───
+    // ═══ 🧵 FIL D'ARIANE : parcours réel d'une demande, animé or/scarlet + particules ═══
+    async loadArianeRuns(){
+      try{
+        const r = await fetch('/api/agent/runs');
+        const j = await r.json();
+        this.arianeRuns = Array.isArray(j) ? j : (j.runs||[]);
+        if(this.arianeRuns.length && !this.arianeRun){ this.arianeRun = this.arianeRuns[0].run_id; }
+        this.buildAriane();
+      }catch(e){ this.arianeInfo='aucun run encore'; }
+    },
+    async buildAriane(){
+      if(!this.arianeRun){ this.arianeInfo=''; return; }
+      let trace=null;
+      try{ const r = await fetch('/api/agent/runs/'+this.arianeRun); trace = await r.json(); }catch(e){}
+      const run = this.arianeRuns.find(x=>x.run_id===this.arianeRun);
+      const tache = (run && run.tache) || (trace && trace.tache) || 'demande';
+      const steps = (trace && trace.steps) || [];
+      const gov = (trace && trace.gouvernement) || {};
+      const plan = (trace && trace.plan) || {};
+      const nodes = [
+        {icon:'◍', label:'Vous', sub:(tache||'').slice(0,30), col:'#e2e8f0'},
+        {icon:'✳', label:'Laplace', sub:'prend connaissance', col:'#f472b6'},
+        {icon:'✦', label:'Métatron', sub:(plan.rationale||'analyse sémantique').slice(0,30), col:'#a78bfa'},
+        {icon:'☉', label:'SOL', sub:gov.gouverne===false?'délégué':'approuve le plan', col:'#fbbf24'}];
+      let nArt=0;
+      steps.filter(s=>s.skill).slice(0,5).forEach(s=>{
+        nArt += (s.artifacts||[]).length;
+        nodes.push({icon:'⚙️', label:s.skill, sub:((s.description||s.summary||'').slice(0,26)), col:'#38bdf8'});
+      });
+      if(nArt) nodes.push({icon:'📦', label:'Artefacts', sub:nArt+' livré'+(nArt>1?'s':''), col:'#34d399'});
+      nodes.push({icon:'🏆', label:'Remise', sub:'réponse rendue', col:'#e11d48'});
+      this.renderAriane(nodes);
+      this.arianeInfo = nodes.length+' étapes'+(trace?' (trace réelle)':'');
+      if(this._autoAriane!==false){ this.playAriane(); this._autoAriane=false; }
+    },
+    renderAriane(nodes){
+      const svg = document.getElementById('arianeSvg'); if(!svg) return;
+      d3.select(svg).selectAll('*').remove();
+      const W = svg.clientWidth||900, H = 104, n = nodes.length;
+      const gap = Math.min(150, (W-90)/Math.max(1,n-1));
+      const startX = Math.max(45, (W-gap*(n-1))/2);
+      const pts = nodes.map((d,i)=>({x:startX+gap*i, y:H/2-8}));
+      const g = d3.select(svg);
+      const defs = g.append('defs');
+      const grad = defs.append('linearGradient').attr('id','agrad');
+      grad.append('stop').attr('offset','0%').attr('stop-color','#fbbf24');
+      grad.append('stop').attr('offset','100%').attr('stop-color','#e11d48');
+      const line = d3.line().x(d=>d.x).y(d=>d.y).curve(d3.curveCatmullRom.alpha(.6));
+      const path = g.append('path').datum(pts).attr('d',line)
+        .attr('fill','none').attr('stroke','url(#agrad)').attr('stroke-width',1.6)
+        .attr('stroke-dasharray','3 4').attr('opacity',.5).style('display','none');
+      path.attr('d', line(pts)).style('display',null);
+      const node = g.selectAll('.an').data(nodes).enter().append('g')
+        .attr('class','ariane-node').attr('transform',(d,i)=>`translate(${pts[i].x},${pts[i].y})`);
+      node.append('circle').attr('class','an-ring').attr('r',14).attr('fill','rgba(8,12,24,.9)')
+        .attr('stroke',d=>d.col).attr('stroke-width',1.2).attr('stroke-opacity',.45);
+      node.append('text').attr('text-anchor','middle').attr('dy',4).attr('font-size',11).text(d=>d.icon);
+      node.append('text').attr('text-anchor','middle').attr('y',26).attr('font-size',8.5).attr('fill','#94a3b8').text(d=>d.label);
+      node.append('text').attr('text-anchor','middle').attr('y',36).attr('font-size',7.5).attr('fill','#475569').text(d=>(d.sub||'').slice(0,26));
+      this._ariane = {pathEl: path.node(), nodeEls: node.nodes(), L: path.node().getTotalLength()};
+    },
+    playAriane(){
+      if(!this._ariane){ this.buildAriane(); return; }
+      const {pathEl, nodeEls, L} = this._ariane;
+      const T = 4200, t0 = performance.now();
+      nodeEls.forEach(el=>el.classList.remove('ariane-node-lit'));
+      const svg = document.getElementById('arianeSvg');
+      const parts = [];
+      for(let i=0;i<5;i++){
+        const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('r', i===0?5:2+Math.random()*2);
+        c.setAttribute('fill', i===0?'#fde68a':['#fbbf24','#f59e0b','#fb7185','#e11d48'][i]);
+        c.setAttribute('opacity', i===0?1:.65);
+        c.style.filter = 'drop-shadow(0 0 4px '+(i===0?'#fbbf24':'#e11d48')+')';
+        svg.appendChild(c); parts.push(c);
+      }
+      const halo = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      halo.setAttribute('r',9); halo.setAttribute('fill','none'); halo.setAttribute('stroke','#fde68a');
+      halo.setAttribute('stroke-width',1.5); halo.setAttribute('opacity','.8');
+      svg.appendChild(halo);
+      const path = pathEl;
+      const anim = (now)=>{
+        const k = Math.min(1,(now-t0)/T);
+        const ease = k<.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;
+        const p = ease*L;
+        parts.forEach((c,i)=>{
+          const pp = Math.max(0, p - i*(26+i*7));
+          const pt = path.getPointAtLength(pp);
+          c.setAttribute('cx',pt.x); c.setAttribute('cy',pt.y);
+        });
+        const hp = path.getPointAtLength(p);
+        halo.setAttribute('cx',hp.x); halo.setAttribute('cy',hp.y);
+        nodeEls.forEach((el,i)=>{ if(p >= (i/(nodeEls.length-1))*L - 2) el.classList.add('ariane-node-lit'); });
+        if(k<1) requestAnimationFrame(anim);
+        else { parts.forEach(c=>c.remove()); halo.remove(); }
+      };
+      requestAnimationFrame(anim);
+    },
+    // ═══ Taxonomie : ouvrir/réduire la branche sélectionnée, niveau par niveau ═══
+    taxLevel(delta){
+      if(!this._taxRoot || !this.selectedTaxNode){ this.taxLevelInfo='sélectionnez un nœud'; return; }
+      const target = this.selectedTaxNode;
+      const sub = [];
+      const walk = m => { let inside = (m===target); [m.children,m._children].forEach(c=>c&&c.forEach(k=>{ inside = walk(k)||inside; })); if(inside) sub.push(m); return inside; };
+      walk(this._taxRoot);
+      let n = 0;
+      if(delta>0){
+        sub.filter(m=>!m.children && m._children).forEach(m=>{ m.children=m._children; m._children=null; n++; });
+        this.taxLevelInfo = n ? ('+'+n+' nœud'+(n>1?'s':'')+' révélé'+(n>1?'s':'')) : 'branche entièrement ouverte';
+      } else {
+        sub.filter(m=>m.children && m.children.length && m.children.every(c=>!c.children)).forEach(m=>{ m._children=m.children; m.children=null; n++; });
+        this.taxLevelInfo = n ? ('−'+n+' nœud'+(n>1?'s':'')+' replié'+(n>1?'s':'')) : 'branche déjà au minimum';
+      }
+      this._taxUpdate(this._taxRoot);
+    },
     async loadConstellations(){
       if(this.constellations.length)return;
       try{const r=await fetch('/api/cosmos/constellations');this.constellations=await r.json();}catch(e){}

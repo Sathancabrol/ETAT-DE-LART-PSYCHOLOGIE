@@ -85,13 +85,79 @@ def scan_system() -> Dict[str, Any]:
                                 "octets": p.stat().st_size, "lignes": n - maxi})
 
     total = sum(t["octets"] for t in targets)
+
+    # ── Traitement de données : ce que Hadès a réellement analysé ──
+    n_runs = len([d for d in RUNS_DIR.iterdir() if d.is_dir()]) if RUNS_DIR.exists() else 0
+    n_items = sum(1 for _ in MEM_ITEMS.open(encoding="utf-8")) if MEM_ITEMS.exists() else 0
+    octets_output = _dir_size(OUT) if OUT.exists() else 0
+    traitement = [
+        {"etape": "inventaire", "detail": f"{n_runs} runs analysés · {n_items} éléments de mémoire · "
+                   f"{round(octets_output/1024/1024, 2)} Mo de données au total dans output/"},
+        {"etape": "rétention (Lachésis)", "detail": f"politique : garder les {POLITIQUE['runs_gardes']} runs "
+                   f"les plus récents → {max(0, n_runs - POLITIQUE['runs_gardes'])} runs deviennent outdated"},
+        {"etape": "doublons (hash SHA-256)", "detail": f"{len(_doublons_memoire())} groupes d'éléments "
+                   "strictement identiques (titre+contenu) en mémoire"},
+        {"etape": "junk", "detail": "fichiers vides (0 octet) hors mémoire vivante"},
+        {"etape": "journaux", "detail": f"seuils : interactions {POLITIQUE['interactions_max']} lignes · "
+                   f"ledger {POLITIQUE['ledger_max']} lignes"},
+    ]
+
+    # ── Les 3 Moires (elles aident Hadès dans son élagage) ──
+    moires = {
+        "clotho": {"role": "la Fileuse — a filé les nouvelles données",
+                   "naissance_24h": _naissance_24h()},
+        "lachesis": {"role": "la Répartitrice — mesure la durée de vie",
+                     "age_moyen_runs_jours": _age_moyen_runs(),
+                     "duree_visee": f"{POLITIQUE['runs_gardes']} runs les plus récents"},
+        "atropos": {"role": "l'Inflexible — prononce la mort",
+                    "condamnes": len(targets),
+                    "verdict": f"{len(targets)} condamnés — la coupe est sans appel" if targets
+                               else "rien à couper : le système est sain"},
+    }
+
     return {"targets": targets,
             "stats": {"condamnes": len(targets), "octets": total,
                       "ko": round(total / 1024, 1),
                       "par_type": {t: sum(1 for x in targets if x["type"] == t)
-                                   for t in {x["type"] for x in targets}}},
+                                   for t in {x["type"] for x in targets}},
+                      "mo_octets": round(octets_output / 1024 / 1024, 2)},
+            "traitement": traitement,
+            "moires": moires,
             "politique_styx": POLITIQUE,
             "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+
+
+def _naissance_24h() -> int:
+    """Clotho : éléments de mémoire nés dans les dernières 24 h."""
+    if not MEM_ITEMS.exists():
+        return 0
+    from datetime import timedelta
+    hier = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    n = 0
+    for line in MEM_ITEMS.read_text(encoding="utf-8").splitlines():
+        try:
+            it = json.loads(line)
+        except Exception:
+            continue
+        if (it.get("ts") or "") >= hier:
+            n += 1
+    return n
+
+
+def _age_moyen_runs() -> float:
+    """Lachésis : âge moyen des runs en jours."""
+    if not RUNS_DIR.exists():
+        return 0.0
+    ages = []
+    for d in RUNS_DIR.iterdir():
+        if not d.is_dir():
+            continue
+        try:
+            t = json.loads((d / "trace.json").read_text(encoding="utf-8"))["date"]
+            ages.append((datetime.now(timezone.utc) - datetime.fromisoformat(t)).total_seconds() / 86400)
+        except Exception:
+            continue
+    return round(sum(ages) / len(ages), 2) if ages else 0.0
 
 
 def _doublons_memoire() -> List[Dict[str, Any]]:

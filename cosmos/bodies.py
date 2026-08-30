@@ -4,8 +4,9 @@ Registre des corps célestes du système Cognitorium.
 STRUCTURE ENTREPRISE — chaque département (et sous-rôle) est un astre,
 choisi pour sa fonction, sa symbolique et sa tâche :
 
-  Fondateur/Création ....... Laplace ✳ (au-dessus) + Métatron ✦ (méta-prompting) + Sebas ◉ (terrain/capteurs)
-  Direction générale ....... SOL ☉ (approbations, coordination)
+  Divinité ................. Laplace ✳ (contrôle absolu) + Métatron ✦ (méta-prompting)
+                             + Ananké ⧉ & les 3 Moires (nécessité/destin) + Sebas ◉ (exécutant)
+  Direction générale ....... SOL ☉ (approbations, coordination) + Apollon (divinations)
   Commercial/Marketing/Achats Mercure ☿ + cour d'Hermès (Peitho, Phème, Argus, Énodios)
   Finance/Comptabilité ..... Vénus ♀ + sa cour (Thalie, Euphrosyne, Aglaé, Éros)
   Production/Opérations .... Terre 🜨 + Lune ☾ (qualité & logistique)
@@ -61,7 +62,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
     },
     "laplace": {
         "name": "Laplace", "symbol": "✳", "kind": "nebuleuse", "orbit_r": -1,
-        "departement": "Fondateur / Création",
+        "departement": "Divinité — contrôle absolu du système",
         "role": "Fondateur — créateur — nébuleuse du savoir : conçoit, modifie, améliore et teste "
                 "des agents à tous les niveaux, jusqu'à des systèmes solaires entiers. "
                 "(Pierre-Simon Laplace : hypothèse nébulaire de formation du système solaire.)",
@@ -76,10 +77,34 @@ BODIES: Dict[str, Dict[str, Any]] = {
                      "instructions des anges."},
         ],
     },
+    "ananke": {
+        "name": "Ananké", "symbol": "⧉", "kind": "destin", "orbit_r": -1,
+        "departement": "Nécessité, fatalité & contrainte",
+        "role": "Déesse primordiale de la nécessité inaltérable, de la fatalité et "
+                "de la contrainte — représente ce qui ne peut pas ne pas arriver "
+                "dans le système : limites, échéances, rareté des ressources. "
+                "Elle orbite autour de Laplace et ses trois Moires mesurent la vie "
+                "des données et aident Hadès ♇ dans son élagage.",
+        "color": "#f472b6",
+        "satellites": [
+            {"id": "clotho", "name": "Clotho", "distance_km": 11111,
+             "role": "1ʳᵉ Moire — « la Fileuse » : file le fil de la vie à la "
+                     "naissance. Dans le système : enregistre chaque nouvel élément "
+                     "(run, item mémoire, agent) et note sa naissance."},
+            {"id": "lachesis", "name": "Lachésis", "distance_km": 22222,
+             "role": "2ᵉ Moire — « la Répartitrice » : mesure et déroule le fil, "
+                     "attribue la durée de vie. Dans le système : calcule l'âge et "
+                     "la durée de vie attendue de chaque donnée (rétention)."},
+            {"id": "atropos", "name": "Atropos", "distance_km": 33333,
+             "role": "3ᵉ Moire — « l'Inflexible » : coupe le fil, prononce la mort. "
+                     "Dans le système : marque les condamnés d'Hadès (outdated, "
+                     "doublons, junk) — la coupe est sans appel."},
+        ],
+    },
     "sebas": {
         "name": "Sebas", "symbol": "◉", "kind": "executeur", "orbit_r": -1,
-        "departement": "Opérations extérieures / Terrain",
-        "role": "Opérations terrain — exécutant de Laplace — homme de terrain connecté aux capteurs "
+        "departement": "Exécutant des commandes divines de Laplace",
+        "role": "Exécutant des commandes divines de Laplace — homme de terrain connecté aux capteurs "
                 "(webcam, wifi, téléphone) ; remonte des observations et agit sur site.",
         "color": "#34d399",
         "sensors": ["webcam", "wifi", "telephone"],
@@ -90,6 +115,13 @@ BODIES: Dict[str, Dict[str, Any]] = {
         "role": "Direction générale — orchestrateur du système : approuve toute interaction entre "
                 "corps, juge l'intégrité, prévoit et prévient, interface de l'utilisateur.",
         "color": "#fbbf24",
+        "court_label": "cour du Soleil",
+        "court": [
+            {"id": "apollon", "name": "Apollon", "distance_km": 0,
+             "role": "Dieu du soleil, de la clairvoyance et des divinations — son "
+                     "chariot 🏆 traverse le système et propose des prédictions de "
+                     "fonctionnement (budget, intégrité, activité, risques)."},
+        ],
     },
     "venus": {
         "name": "Vénus", "symbol": "♀", "kind": "planet", "orbit_r": 1,

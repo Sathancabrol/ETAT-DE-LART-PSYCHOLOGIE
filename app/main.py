@@ -1812,3 +1812,42 @@ def profile_cognitive():
     """Profil cognitif de l'utilisateur, induit de ses interactions réelles."""
     from cosmos import cogniprofile
     return cogniprofile.build_profile()
+
+
+# ──────────────── APOLLON (divinations) · SEBAS (commandes divines) · TRAITS ═══════════════
+
+class DivinationRequest(BaseModel):
+    question: str = ""
+
+@app.post("/api/apollon/divination")
+def apollon_divination(req: DivinationRequest):
+    """Le chariot d'Apollon 🏆 prononce une prévision de fonctionnement du système."""
+    from cosmos import apollon
+    return apollon.divination(req.question.strip()[:300])
+
+class SebasCommandRequest(BaseModel):
+    commande: str
+    agent: str = "laplace"
+
+@app.post("/api/sebas/execute")
+def sebas_execute(req: SebasCommandRequest):
+    """Sebas ◉ exécute une commande divine de Laplace (routage règles, honnête)."""
+    from cosmos import sebas
+    if not req.commande.strip():
+        raise HTTPException(status_code=400, detail="Commande vide")
+    return sebas.execute(req.commande.strip()[:400], agent=req.agent[:30])
+
+class TraitRequest(BaseModel):
+    trait: str
+
+@app.post("/api/profile/traits")
+def profile_add_trait(req: TraitRequest):
+    """Ajoute un trait déclaré par l'utilisateur à son profil cognitif (il se
+    décrit lui-même — le graphe de profil devient modifiable)."""
+    from cosmos import memory
+    t = req.trait.strip()
+    if not t:
+        raise HTTPException(status_code=400, detail="Trait vide")
+    item = memory.record_item("profil", t[:140], contenu="trait déclaré par l'utilisateur",
+                              tags=["profil", "déclaratif"], source="user", corps="user")
+    return item
