@@ -1069,6 +1069,38 @@ def cosmos_chat(req: SolChatRequest):
     get_system()
     return laplace.chat(req.message.strip()[:600])
 
+@app.get("/api/cosmos/body/{body_id}")
+def cosmos_body(body_id: str):
+    """Fiche complète d'un corps : identité entreprise, constellation de
+    connaissances, interactions approuvées, mémoire, stats."""
+    from cosmos.bodies import find_body
+    from cosmos.knowledge import knowledge_graph
+    from cosmos import memory
+    from cosmos.system import get_system
+    b, par = find_body(body_id)
+    if b is None:
+        raise HTTPException(status_code=404, detail=f"Corps inconnu : {body_id}")
+    parent = None
+    if par is not None:
+        from cosmos.bodies import BODIES as _BD
+        pid = next(k for k, v in _BD.items()
+                   if any(s["id"] == body_id for s in v.get("satellites") or [])
+                   or any(c["id"] == body_id for c in v.get("court") or []))
+        parent = {"id": pid, "name": par["name"], "symbol": par["symbol"],
+                  "departement": par.get("departement"),
+                  "cour": "court" in par}
+    g = knowledge_graph(body_id) or {"nodes": [], "links": []}
+    hist = [m for m in get_system()["bus"].history(limit=400)
+            if body_id in (m.get("source"), m.get("target"))][:40]
+    items = [i for i in memory.items(limit=400) if i.get("corps") == body_id][:40]
+    return {"body": {**b, "id": body_id, "parent": parent},
+            "graph": g,
+            "interactions": hist,
+            "memoire": items,
+            "stats": {"interactions": len(hist), "memoire": len(items),
+                      "concepts": sum(1 for n in g["nodes"] if n.get("type") == "concept"),
+                      "references": sum(1 for n in g["nodes"] if n.get("type") == "reference")}}
+
 @app.get("/api/cosmos/knowledge/{body_id}")
 def cosmos_knowledge(body_id: str):
     """Constellation de connaissances d'un corps (graph D3 : nodes+links)."""
@@ -1395,9 +1427,71 @@ def agent_subjects():
             "domaines": domaines[:12]}
 
 
+def _agent_metrics_for(agent_id: str):
+    """Métriques d'un agent précis : interactions, mémoire, concepts, tokens."""
+    from collections import Counter as _Counter
+    from cosmos import memory, ledger as _ledger
+    from cosmos.bodies import find_body
+    from cosmos.knowledge import knowledge_graph
+    from cosmos.system import get_system
+    _b, _par = find_body(agent_id)
+    b = _b or {}
+    if _par is not None:
+        b = {**b, "departement": f"{_par.get('departement')} · {_b.get('role', '')[:60]}"}
+    hist = [m for m in get_system()["bus"].history(limit=1000)
+            if agent_id in (m.get("source"), m.get("target"))]
+    st = {"approved": sum(1 for m in hist if m.get("status") in ("approved", "delivered")),
+          "denied": sum(1 for m in hist if m.get("status") == "denied"),
+          "failed": sum(1 for m in hist if m.get("status") == "failed")}
+    g = knowledge_graph(agent_id) or {"nodes": [], "links": []}
+    items = [i for i in memory.items(limit=1000) if i.get("corps") == agent_id]
+    par_type = _Counter(i["type"] for i in items)
+    entries = [e for e in _ledger.read_ledger() if e.get("agent") == agent_id]
+    tokens = sum(e["tokens_in"] + e["tokens_out"] for e in entries)
+    n_concepts = sum(1 for n in g["nodes"] if n.get("type") == "concept")
+    cards = [
+        {"id": "identite", "label": "Identité", "value": None, "unit": "",
+         "icon": b.get("symbol") or "◍",
+         "explain": [f"**{b.get('name', agent_id)}** — {b.get('departement') or b.get('kind', 'corps')}.",
+                     b.get("role", "")],
+         "detail": []},
+        {"id": "interactions", "label": "Interactions approuvées", "value": len(hist), "unit": "échanges",
+         "icon": "✅",
+         "explain": [f"{st['approved']} approuvées/livrées · {st['denied']} refusées (budget SOL) · "
+                     f"{st['failed']} échecs.", "Toute interaction passe par l'approbation de ☉ SOL."],
+         "detail": [{"main": f"{m.get('source')}→{m.get('target')} · {(m.get('reason') or m.get('type') or '')[:50]}",
+                     "secondary": (m.get("ts") or "")[11:16],
+                     "badge": m.get("status", ""), "badge_color": "#34d399"} for m in hist[:15]]},
+        {"id": "memoire", "label": "Mémoire du corps", "value": len(items), "unit": "items",
+         "icon": "🧠",
+         "explain": ["Éléments versés en mémoire au nom de ce corps (type, titre, date)."],
+         "detail": [{"main": i["titre"][:80], "secondary": i["ts"][:16],
+                     "badge": i["type"], "badge_color": "#fbbf24"} for i in items[:15]]},
+        {"id": "concepts", "label": "Concepts de sa constellation", "value": n_concepts,
+         "unit": "concepts", "icon": "💠",
+         "explain": [f"Constellation : {len(g['nodes'])} nœuds, {len(g['links'])} liens, "
+                     f"{sum(1 for n in g['nodes'] if n.get('type') == 'reference')} références matchées."],
+         "detail": [{"main": n["label"][:80], "secondary": n.get("type", ""),
+                     "badge": (n.get("doi") or "")[:18], "badge_color": "#38bdf8"}
+                    for n in g["nodes"] if n.get("type") in ("concept", "reference")][:15]},
+        {"id": "tokens", "label": "Tokens consommés", "value": tokens, "unit": "tok",
+         "icon": "🪙",
+         "explain": [f"Coût cumulé {round(sum(e['cost_usd'] for e in entries), 6)} $ au grand livre de Vénus.",
+                     "Moteur à règles = 0 token — ce corps fonctionne surtout par règles."],
+         "detail": [{"main": e["model"], "secondary": f"{e['tokens_in']}+{e['tokens_out']} tok",
+                     "badge": "", "badge_color": ""} for e in entries[-10:]]},
+    ]
+    return {"agent": agent_id, "cards": cards,
+            "summary": {"interactions": len(hist), "memoire": len(items),
+                        "concepts": n_concepts, "tokens": tokens,
+                        "par_type": dict(par_type)}}
+
+
 @app.get("/api/agent/metrics")
-def agent_metrics():
-    """Dashboard d'Uranus : tâches, tokens, ressources consultées/fournies/créées + détails."""
+def agent_metrics(agent: Optional[str] = None):
+    """Dashboard agent : global (Uranus) si pas de paramètre, sinon fiche de l'agent."""
+    if agent and agent not in ("uranus", ""):
+        return _agent_metrics_for(agent)
     import json as _json
     from collections import Counter as _Counter
     from pathlib import Path as _P
@@ -1479,16 +1573,34 @@ def agent_metrics():
 
 
 @app.get("/api/agent/timeline")
-def agent_timeline():
-    """Timeline 4D des actions d'Uranus : nœuds et liens horodatés (temps + espace)."""
+def agent_timeline(agent: Optional[str] = None, limit_runs: int = 12):
+    """Timeline 4D des actions : runs d'Uranus (global) ou interactions+mémoire d'un agent."""
     import json as _json
     from datetime import datetime as _dt, timedelta as _td
     from pathlib import Path as _P
     nodes, links = [], []
+    if agent and agent not in ("uranus", ""):
+        from cosmos import memory
+        from cosmos.system import get_system
+        hist = [m for m in get_system()["bus"].history(limit=2000)
+                if agent in (m.get("source"), m.get("target"))]
+        anchor_ts = hist[0]["ts"] if hist else _dt.now().isoformat()
+        nodes.append({"id": "corps:" + agent, "label": agent, "type": "run", "ts": anchor_ts})
+        for m in hist:
+            mid = "it:" + m.get("id", "")
+            nodes.append({"id": mid, "label": f"{m.get('source')}→{m.get('target')}",
+                          "type": "skill", "ts": m.get("ts"),
+                          "ok": m.get("status") in ("approved", "delivered")})
+            links.append({"source": "corps:" + agent, "target": mid, "type": "execute"})
+        for it in [i for i in memory.items(limit=1000) if i.get("corps") == agent]:
+            nid = "mem:" + it["id"]
+            nodes.append({"id": nid, "label": it["titre"][:34], "type": "artifact", "ts": it["ts"]})
+            links.append({"source": "corps:" + agent, "target": nid, "type": "produit"})
+        return {"nodes": nodes, "links": links}
     runs_dir = _P("output/agent_runs")
     if not runs_dir.exists():
         return {"nodes": [], "links": []}
-    for d in sorted(runs_dir.iterdir()):
+    for d in sorted(runs_dir.iterdir(), reverse=True)[:max(1, min(limit_runs, 40))]:
         tj = d / "trace.json"
         if not tj.exists():
             continue

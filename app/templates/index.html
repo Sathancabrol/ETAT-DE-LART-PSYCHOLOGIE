@@ -326,6 +326,49 @@
                   <p class="text-[10px] text-slate-400 mt-1" x-text="selectedObsNode.gap"></p>
                 </div>
               </template>
+              <template x-if="selectedObsNode.solidite !== undefined && selectedObsNode.solidite !== null">
+                <div class="flex items-center justify-between p-2 rounded-lg bg-black/30">
+                  <span class="text-[9px] text-slate-600 uppercase font-semibold">Solidité conceptuelle</span>
+                  <span class="text-[11px] font-bold" :class="selectedObsNode.solidite>=4?'text-emerald-400':selectedObsNode.solidite>=3?'text-amber-400':'text-rose-400'" x-text="selectedObsNode.solidite + '/5'"></span>
+                </div>
+              </template>
+              <template x-if="selectedObsNode.mecanismes && selectedObsNode.mecanismes.length">
+                <div class="p-2.5 rounded-lg bg-indigo-500/5 border border-indigo-500/15">
+                  <span class="text-[9px] text-indigo-300 uppercase font-semibold">Mécanismes</span>
+                  <ul class="mt-1 space-y-1">
+                    <template x-for="(m, i) in selectedObsNode.mecanismes.slice(0,5)" :key="i">
+                      <li class="text-[10px] text-slate-400 leading-relaxed">• <span x-text="m"></span></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+              <template x-if="selectedObsNode.applications && selectedObsNode.applications.length">
+                <div class="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15">
+                  <span class="text-[9px] text-emerald-300 uppercase font-semibold">Applications</span>
+                  <ul class="mt-1 space-y-1">
+                    <template x-for="(a, i) in selectedObsNode.applications.slice(0,5)" :key="i">
+                      <li class="text-[10px] text-slate-400 leading-relaxed">• <span x-text="a"></span></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+              <template x-if="selectedObsNode.gaps && selectedObsNode.gaps.length">
+                <div class="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/15">
+                  <span class="text-[9px] text-amber-400 uppercase font-semibold">Gaps & Limites</span>
+                  <ul class="mt-1 space-y-1">
+                    <template x-for="(g, i) in selectedObsNode.gaps.slice(0,4)" :key="i">
+                      <li class="text-[10px] text-slate-400 leading-relaxed">• <span x-text="g"></span></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
+              <template x-if="selectedObsNode.sources && selectedObsNode.sources.length">
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="s in selectedObsNode.sources" :key="s">
+                    <span class="text-[8px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300/80" x-text="'src: ' + s"></span>
+                  </template>
+                </div>
+              </template>
               <template x-if="selectedObsNode.trust">
                 <div class="flex items-center space-x-3">
                   <div class="flex-1 p-2 rounded-lg bg-black/30 text-center">
@@ -796,7 +839,7 @@ function app() {
       cap:'#fb7185',montant:'#fbbf24',modele:'#38bdf8',phase:'#fbbf24',action:'#38bdf8',
       racine:'#818cf8',item:'#38bdf8',question:'#fb7185'}[d.type]||'#818cf8';},
 
-    selectObsNode(d,nodes,links){
+    async selectObsNode(d,nodes,links){
       this.selectedObsNode=d;
       this.connectedNodes=[];
       links.forEach(l=>{
@@ -805,7 +848,18 @@ function app() {
         if(sid===d.id){const t=nodes.find(n=>n.id===tid);if(t)this.connectedNodes.push({node:t,relation:l.relation_type||l.type});}
         if(tid===d.id){const s=nodes.find(n=>n.id===sid);if(s)this.connectedNodes.push({node:s,relation:l.relation_type||l.type});}
       });
-      this.$nextTick(()=>lucide.createIcons());
+      // enrichissement 4E : mécanismes, applications, gaps, solidité du concept
+      if ((d.type === 'concept' || !d.desc) && !d.mecanismes) {
+        try {
+          if (!this._concepts4e) this._concepts4e = await (await fetch('/api/concepts')).json();
+          const c = this._concepts4e.find(x => x.id === d.id || x.label === d.label
+                                              || x.label.toLowerCase() === (d.label || '').toLowerCase());
+          if (c) this.selectedObsNode = {...d, desc: c.description || d.desc,
+            mecanismes: c.mecanismes || [], applications: c.applications || [],
+            gaps: c.gaps || [], solidite: c.solidite, sources: c.sources || []};
+        } catch (e) {}
+      }
+      this.$nextTick(()=>{try{lucide.createIcons();}catch(e){}});
     },
 
     focusNode(d){

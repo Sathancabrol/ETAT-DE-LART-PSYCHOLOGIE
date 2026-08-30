@@ -674,3 +674,70 @@ def test_sol_widget_serves_nebula_image():
     assert r.status_code == 200 and r.headers["content-type"].startswith("image/")
     widget = (_P(__file__).resolve().parents[1] / "app" / "static" / "sol_widget.js").read_text(encoding="utf-8")
     assert "nebula.png" in widget and "Laplace" in widget and "open-laplace-chat" in widget
+
+
+# ═══ STRUCTURE ENTREPRISE (mapping validé par l'utilisateur) ═══
+
+def test_structure_entreprise_complete():
+    """Chaque département de l'entreprise a son astre, avec sous-rôles et vraies distances."""
+    from cosmos.bodies import BODIES, planets, find_body, known_body_ids
+    # 10 départements couverts
+    depts = {b.get("departement") for b in BODIES.values() if b.get("departement")}
+    for mot in ("Direction générale", "Finance", "Commercial", "Production",
+                "Ressources humaines", "Juridique", "Informatique", "Recherche"):
+        assert any(mot in d for d in depts), f"département manquant : {mot}"
+    # sous-rôles avec vraies distances
+    jup = {s["id"]: s["distance_km"] for s in BODIES["jupiter"]["satellites"]}
+    assert jup == {"io": 421700, "europe": 671100, "ganymede": 1070400, "callisto": 1882700}
+    nep = {s["id"]: s["distance_km"] for s in BODIES["neptune"]["satellites"]}
+    assert nep["proteus"] == 117647 and nep["triton"] == 354759
+    assert BODIES["terre"]["satellites"][0]["distance_km"] == 384400
+    assert BODIES["mars"]["satellites"][0]["distance_km"] == 9376
+    # cours mythologiques (pas de lunes en réalité)
+    assert {c["id"] for c in BODIES["mercure"]["court"]} == {"peitho", "pheme", "argus", "enodios"}
+    assert {c["id"] for c in BODIES["ceres"]["court"]} == {"thallo", "auxo", "karpo"}
+    # ordre orbital cohérent (Mercure < Vénus < Terre < Mars < Cérès < Jupiter < Uranus < Neptune)
+    orbr = {pid: b["orbit_r"] for pid, b in BODIES.items() if b["kind"] == "planet"}
+    assert (orbr["mercure"] < orbr["venus"] < orbr["terre"] < orbr["mars"]
+            < orbr["ceres"] < orbr["jupiter"] < orbr["uranus"] < orbr["neptune"])
+    assert len(planets()) == 8
+    # find_body retrouve satellites et cours + leur parent
+    io, par = find_body("io")
+    assert io and par["name"] == "Jupiter"
+    peitho, par2 = find_body("peitho")
+    assert peitho and par2["name"] == "Mercure"
+    assert find_body("pluton") == (None, None)
+    # tous connus de SOL
+    assert {"io", "peitho", "lune", "triton", "thallo", "callisto"} <= known_body_ids()
+
+def test_constellations_des_nouveaux_corps():
+    from cosmos.knowledge import knowledge_graph
+    for bid in ("mercure", "terre", "ceres", "jupiter", "neptune", "io", "peitho", "lune"):
+        g = knowledge_graph(bid)
+        assert g and g["nodes"], f"constellation vide : {bid}"
+    g = knowledge_graph("mercure")
+    labels = " ".join(n["label"] for n in g["nodes"])
+    assert "prospection" in labels and "gestion des stocks" in labels
+
+def test_fiche_body_et_metrics_par_agent():
+    """Console séparée par agent : fiche complète + dashboard dédié + timeline dédiée."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    # fiche d'un satellite juridique
+    r = c.get("/api/cosmos/body/io").json()
+    assert r["body"]["parent"]["name"] == "Jupiter"
+    assert "Conformité" in r["body"]["role"]
+    assert r["graph"]["nodes"]
+    assert c.get("/api/cosmos/body/pluton").status_code == 404
+    # dashboard dédié : identité + interactions + mémoire + concepts + tokens
+    m = c.get("/api/agent/metrics", params={"agent": "io"}).json()
+    ids = {x["id"] for x in m["cards"]}
+    assert {"identite", "interactions", "memoire", "concepts", "tokens"} <= ids
+    assert m["cards"][0]["explain"][0].startswith("**Io**")
+    # dashboard global inchangé
+    g = c.get("/api/agent/metrics").json()
+    assert "taches" in {x["id"] for x in g["cards"]}
+    # timeline dédiée : interactions + mémoire du corps
+    t = c.get("/api/agent/timeline", params={"agent": "venus"}).json()
+    assert t["nodes"] and t["nodes"][0]["id"] == "corps:venus"

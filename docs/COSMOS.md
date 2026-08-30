@@ -387,3 +387,52 @@ Laplace devient l'interlocuteur principal du système (`cosmos/laplace.py`) :
   interactions ; SOL reste joignable (clic sur le soleil, bouton ☉) ;
 - intentions dédiées : **outil** (routage vers l'armurerie de Mars),
   **forge** (« forger {id} »), **armurerie** (inventaire des demandes).
+
+---
+
+## Structure entreprise — chaque département est un astre (mapping validé)
+
+Le système solaire reflète la structure d'une entreprise ; chaque rôle et
+sous-rôle est un astre choisi pour sa fonction, sa symbolique et sa tâche :
+
+| Département | Astre | Sous-rôles (vraies distances) |
+|---|---|---|
+| Fondateur / Création | Laplace ✳ (au-dessus) | Sebas ◉ terrain & capteurs |
+| Direction générale | SOL ☉ | — (approbations, coordination) |
+| Commercial / Ventes · Marketing · Achats | Mercure ☿ | cour d'Hermès : Peitho (ventes), Phème (marketing), Argus (études de marché), Énodios (achats & stocks) |
+| Finance / Comptabilité | Vénus ♀ | Thalie (compta), Euphrosyne (arbitrage), Aglaé (budget), Éros (contrats) |
+| Production / Opérations | Terre 🜨 | Lune ☾ (qualité & logistique — 384 400 km) |
+| R&D — développement d'outils | Mars ♂ | Phobos ◂ software (9 376 km), Deimos ◦ conception (23 463 km) |
+| Ressources humaines | Cérès ⚳ | cour des Heures : Thallo (recrutement), Auxo (formation), Karpô (rémunération) |
+| Juridique | Jupiter ♃ | Io conformité (421 700), Europe contrats (671 100), Ganymède PI (1 070 400), Callisto contentieux (1 882 700 km) |
+| R&D — recherche | Uranus ♅ | 7 satellites (Zêta → Obéron) |
+| Informatique / SI | Neptune ♆ | Protée cyber (117 647), Triton infra (354 759), Néréïde support (5 513 800 km) |
+
+- `cosmos/bodies.py` : 12 corps, 8 planètes, `find_body()` retrouve tout corps
+  (planète, satellite, cour) et son parent ; ordre orbital réel respecté.
+- `cosmos/knowledge.py` : `DEPT_CONCEPTS` + `generic_graph()` — chaque nouveau
+  corps a sa constellation (concepts du département + références matchées).
+- Vue `/sol` : toutes les planètes, navigation complète — **clic gauche** =
+  rotation, **molette** = zoom, **clic droit** = se déplacer, **double-clic** =
+  suivre un corps ; anneau de sélection **collé à l'objet** (suit son orbite).
+- Modale « fiche corps » générique (clic sur Mercure, Terre, Cérès, Jupiter,
+  Neptune, leurs lunes/cours) : identité, constellation, interactions
+  approuvées, mémoire ; lien vers **sa console missions**.
+
+## Une console par agent (`/agent?agent=<id>`)
+
+- Sélecteur d'agents (création/direction, chaque planète et ses satellites et
+  sa cour) ; **carte d'identité** : symbole, département/fonction, rôle,
+  spécialités, parent — on sait toujours à qui on parle.
+- Dashboard dédié (`/api/agent/metrics?agent=`) : identité, interactions
+  approuvées, mémoire du corps, concepts de sa constellation, tokens ;
+  graphiques sans débordement (défilement horizontal, barres par type).
+- Timeline 4D dédiée (`/api/agent/timeline?agent=`) ; refonte des 3 vues :
+  **⏱ Temps** (axe chronologique + couloirs par type + curseur vertical),
+  **🌌 Espace** (graphe Obsidian complet, zoom/pan), **🌀 Mixte** (positions
+  spatiales + naissance chronologique progressive des nœuds et liens).
+- Missions pour un corps : le corps devient le **sujet** de la mission
+  (exécutée par Uranus) — cohérent avec l'architecture.
+- Inspecteur de nœud : clic sur un nœud (constellations `/sol`, production,
+  timeline, graphe base) → panneau d'infos complet (mécanismes, applications,
+  gaps, solidité, DOI, trust — données 4E fusionnées dans la sidebar base).

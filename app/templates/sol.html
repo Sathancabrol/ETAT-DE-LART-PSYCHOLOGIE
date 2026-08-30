@@ -43,7 +43,7 @@
       <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-base text-amber-200 select-none">☉</div>
       <div class="flex-1 min-w-0">
         <h1 class="text-sm font-semibold tracking-wide">SOL <span class="text-slate-500 font-normal">· orchestrateur du système <span class="text-slate-600">· Cognitorium</span></span></h1>
-        <p class="text-[10.5px] text-slate-500 truncate">Cliquez sur un corps pour ouvrir sa fenêtre — SOL ouvre le chat du système</p>
+        <p class="text-[10.5px] text-slate-500 truncate">Clic sur un corps = sa fenêtre · double-clic = le suivre · molette = zoom · clic droit = se déplacer</p>
       </div>
       <div class="hidden md:flex items-center gap-2">
         <span class="text-[11px] px-2.5 py-1 rounded-full border" :class="integClass()" x-text="integ.label"></span>
@@ -64,7 +64,7 @@
     <div id="sky3d" class="absolute inset-0"></div>
     <div class="absolute top-3 left-4 z-10 pointer-events-none">
       <h2 class="text-[11px] uppercase tracking-[.14em] text-slate-500">Système — vue 3D</h2>
-      <p class="text-[10px] text-slate-600 mt-0.5">✳ Laplace (nébuleuse, créateur) · ◉ Sebas (terrain) · SOL ☉ au centre · ♀ Vénus (cour) · ♂ Mars ◂◦ (armurerie) · ♅ Uranus (anneaux + 7 satellites)</p>
+      <p class="text-[10px] text-slate-600 mt-0.5">✳ Laplace (créateur) · ☉ SOL (direction générale) · ☿ Mercure (commercial) · ♀ Vénus (finance) · 🜨 Terre+☾ (production) · ♂ Mars ◂◦ (R&D outils) · ⚳ Cérès (RH) · ♃ Jupiter (juridique) · ♅ Uranus (recherche) · ♆ Neptune (IT)</p>
     </div>
     <div class="absolute bottom-3 right-4 z-10 text-[10px] text-slate-600 text-right leading-relaxed pointer-events-none">
       <div>glisser = tourner · molette = zoom</div>
@@ -75,6 +75,88 @@
       <div class="text-[9.5px] text-slate-500 max-w-[240px]" x-text="hover.role"></div>
     </div>
   </main>
+
+  <!-- ══════════════ MODALE CORPS GÉNÉRIQUE (fiche agent entreprise) ══════════════ -->
+  <div x-show="modals.body" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('body')">
+    <div class="glass rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-5 fade-in">
+      <template x-if="bodyData">
+        <div>
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="text-3xl leading-none mt-0.5" x-text="bodyData.body.symbol"></div>
+              <div>
+                <h2 class="text-sm font-semibold"><span x-text="bodyData.body.name"></span>
+                  <span class="text-[10px] text-slate-500 font-normal" x-show="bodyData.body.parent" x-text="bodyData.body.parent ? '· satellite de ' + bodyData.body.parent.name : ''"></span></h2>
+                <p class="text-[10.5px] text-cyan-300/90 mt-0.5" x-text="bodyData.body.departement || bodyData.body.kind"></p>
+                <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed" x-text="bodyData.body.role"></p>
+              </div>
+            </div>
+            <button @click="closeModal('body')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+            <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Interactions</div><div class="mono text-sm text-emerald-300" x-text="bodyData.stats.interactions"></div></div>
+            <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Mémoire</div><div class="mono text-sm text-amber-300" x-text="bodyData.stats.memoire"></div></div>
+            <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Concepts</div><div class="mono text-sm text-indigo-300" x-text="bodyData.stats.concepts"></div></div>
+            <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Références</div><div class="mono text-sm text-cyan-300" x-text="bodyData.stats.references"></div></div>
+          </div>
+
+          <div class="flex items-center justify-between mt-4 mb-2">
+            <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600">Constellation de connaissances <span class="text-slate-700 normal-case tracking-normal">(cliquez un nœud pour l'inspecter)</span></h3>
+            <a :href="'/agent?agent=' + bodyData.body.id" class="text-[10px] px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20">Console missions ↗</a>
+          </div>
+          <svg id="bodygraph" style="width:100%;height:280px"></svg>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+            <div>
+              <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mb-2">Dernières interactions (approuvées SOL)</h3>
+              <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+                <template x-for="(m, i) in bodyData.interactions.slice(0, 12)" :key="i">
+                  <div class="text-[10.5px] glass-card rounded px-2.5 py-1.5 flex items-center gap-2">
+                    <span x-text="{'delivered':'✅','approved':'✔︎','denied':'⛔','failed':'❌'}[m.status] || '•'"></span>
+                    <span class="text-slate-300 truncate flex-1" x-text="m.source + ' → ' + m.target + ' · ' + (m.reason || m.type || '').slice(0, 44)"></span>
+                    <span class="text-slate-600 mono text-[9px]" x-text="(m.ts || '').slice(11, 16)"></span>
+                  </div>
+                </template>
+                <p x-show="!bodyData.interactions.length" class="text-[10.5px] text-slate-600 italic">Aucune interaction encore.</p>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mb-2">Mémoire du corps</h3>
+              <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+                <template x-for="(it, i) in bodyData.memoire.slice(0, 12)" :key="i">
+                  <div class="text-[10.5px] glass-card rounded px-2.5 py-1.5 flex items-center gap-2">
+                    <span class="px-1.5 rounded bg-amber-500/10 text-amber-300 text-[8.5px] mono" x-text="it.type"></span>
+                    <span class="text-slate-300 truncate flex-1" x-text="it.titre"></span>
+                    <span class="text-slate-600 mono text-[9px]" x-text="it.ts.slice(5, 10)"></span>
+                  </div>
+                </template>
+                <p x-show="!bodyData.memoire.length" class="text-[10.5px] text-slate-600 italic">Mémoire vide pour ce corps.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ══════════════ INSPECTEUR DE NŒUD (global) ══════════════ -->
+  <div x-show="inspectN" x-cloak class="fixed bottom-24 left-4 z-[60] w-72 glass rounded-xl p-3.5 fade-in" style="border-color:rgba(56,189,248,.25)">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <p class="text-[12px] text-slate-100 font-semibold truncate" x-text="inspectN?.label"></p>
+        <p class="text-[9px] mono uppercase tracking-wider" style="color:#7dd3fc" x-text="inspectN?.type"></p>
+      </div>
+      <button @click="inspectN=null" class="text-slate-500 hover:text-white text-base leading-none">✕</button>
+    </div>
+    <div class="mt-2 space-y-1 text-[10.5px] text-slate-400">
+      <p x-show="inspectN?.doi"><span class="text-slate-600">DOI :</span> <a class="text-cyan-300 underline" :href="'https://doi.org/' + inspectN?.doi" target="_blank" x-text="inspectN?.doi"></a></p>
+      <p x-show="inspectN?.trust !== undefined && inspectN?.trust !== null"><span class="text-slate-600">Trust :</span> <span class="mono text-emerald-300" x-text="inspectN?.trust"></span></p>
+      <p x-show="inspectN?.id"><span class="text-slate-600">id :</span> <span class="mono" x-text="inspectN?.id"></span></p>
+      <p class="text-slate-500 leading-relaxed" x-show="inspectN?.type === 'concept'">Concept de la constellation — relié à son corps et aux références matchées de la base.</p>
+      <p class="text-slate-500 leading-relaxed" x-show="inspectN?.type === 'reference'">Référence scientifique de la base, matchée sur les mots-clés du domaine du corps.</p>
+    </div>
+  </div>
 
   <!-- ══════════════ MODALE MARS ♂ (armurerie du système) ══════════════ -->
   <div x-show="modals.mars" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('mars')">
@@ -390,7 +472,8 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false},
+    bodyData: null, inspectN: null,
     laplace: {agents: [], systems: []}, sebas: [],
     armory: [], ossCatalogue: [],
     marsReq: {agent: 'user', besoin: ''}, marsMsg: '',
@@ -458,6 +541,15 @@ function solApp() {
       const r = await fetch('/api/mars/forge/' + encodeURIComponent(id), {method: 'POST'});
       if (r.ok) { this.marsMsg = '⚒ Outil forgé et livré.'; await this.loadArmory(); }
     },
+    async openBody(id) {
+      try {
+        const r = await (await fetch('/api/cosmos/body/' + encodeURIComponent(id))).json();
+        this.bodyData = r;
+        this.openModal('body');
+        this.$nextTick(() => this.renderGraph('bodygraph', r.graph));
+      } catch (e) {}
+    },
+    inspect(d) { this.inspectN = d; },
     async refreshNebula() {
       try {
         const r = await (await fetch('/api/laplace')).json();
@@ -691,6 +783,7 @@ function solApp() {
       node.append('text').text(d => d.label.length > 26 ? d.label.slice(0, 25) + '…' : d.label)
         .attr('x', 11).attr('y', 3.5).attr('font-size', d => d.type === 'planet' || d.type === 'racine' ? 11 : 9)
         .attr('fill', d => d.type === 'planet' || d.type === 'racine' ? '#c7d2fe' : '#94a3b8');
+      node.on('click', (e, d) => { e.stopPropagation(); this.inspect(d); });
       sim.on('tick', () => {
         link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
             .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
@@ -807,8 +900,10 @@ function solApp() {
       nebulaGrp.add(sebasPivot);
       clickables.push(sebasMesh);
 
-      // orbites + planètes
-      const ORBIT = {venus: 150, mars: 205, uranus: 265};
+      // orbites + planètes — structure entreprise complète (toutes les planètes du registre)
+      const ORBIT = {mercure: 105, venus: 150, terre: 190, mars: 230, ceres: 258, jupiter: 300, uranus: 355, neptune: 405};
+      const RADIUS = {mercure: 7, venus: 11, terre: 9, mars: 9, ceres: 5.5, jupiter: 14, uranus: 16, neptune: 12};
+      const COLOR_FIX = {venus: 0xd9a066, uranus: 0x7dd3fc};
       const planets = {};
       const makePlanet = (id, symbol, name, role, radius, color, angle0, ringed) => {
         const orbit = new THREE.Mesh(new THREE.RingGeometry(ORBIT[id] - .4, ORBIT[id] + .4, 128),
@@ -831,9 +926,13 @@ function solApp() {
         planets[id] = {pivot, grp, mesh, angle: angle0};
         return grp;
       };
-      makePlanet('venus', '♀', 'Vénus', "Finances, valeur & bien-être — budget, tokens, prévisions, arbitrage", 11, 0xd9a066, -0.9, false);
-      const marsGrp = makePlanet('mars', '♂', 'Mars', "Armurier du système — crée des outils pour les autres agents (open source d'abord, maquette Deimos puis forge Phobos)", 9, 0xf87171, 0.9, false);
-      const uraGrp = makePlanet('uranus', '♅', 'Uranus', "Recherche scientifique — cartographe du ciel de la connaissance", 16, 0x7dd3fc, 2.2, true);
+      const planetBodies = this.bodies.filter(b => b.kind === 'planet');
+      planetBodies.forEach((b, i) => {
+        const color = COLOR_FIX[b.id] !== undefined ? COLOR_FIX[b.id]
+          : parseInt((b.color || '#818cf8').replace('#', ''), 16);
+        makePlanet(b.id, b.symbol, b.name, b.role, RADIUS[b.id] || 9, color, -1.3 + i * 0.9, b.id === 'uranus');
+      });
+      const uraGrp = planets.uranus.grp;
 
       // anneaux d'Uranus (inclinés ~98°)
       const ring = new THREE.Mesh(new THREE.RingGeometry(22, 40, 90),
@@ -845,7 +944,7 @@ function solApp() {
       ring2.rotation.x = Math.PI / 2 - 0.5;
       uraGrp.add(ring2);
 
-      // satellites d'Uranus (distances réelles relatives) + cour de Vénus
+      // lunes (distances réelles relatives, compressées par système) + cours
       const moon = (parent, name, role, distPx, size, color, id) => {
         const pivot = new THREE.Group();
         const m = new THREE.Mesh(new THREE.SphereGeometry(size, 18, 18),
@@ -858,51 +957,124 @@ function solApp() {
         pivot.add(m, lbl);
         pivot.rotation.y = Math.random() * Math.PI * 2;
         parent.add(pivot);
+        moonOwner[id] = parent.userData && parent.userData.planetId || null;
         return pivot;
       };
-      const moonPivots = [];
-      this.satellites.forEach(s => {
-        const d = s.distance_km || 40000;
-        const px = 52 + (d - 37850) / (583500 - 37850) * 52;   // 52 → 104 px
-        moonPivots.push(moon(uraGrp, s.name.split(' ')[0], s.role, px, 2.2 + 1.6 * (1 - (d - 37850) / 545650), 0xa5b4fc, s.id));
+      const moonOwner = {};           // satellite/cour → planète propriétaire
+      const moonPivots = [];          // lunes orbitales (distances réelles)
+      const courtPivots = [];         // cours mythologiques (Vénus, Mercure, Cérès)
+      const MOON_STYLE = {
+        uranus: {min: 52, range: 52, color: 0xa5b4fc, direct: true},
+        mars: {min: 18, range: 12, color: 0xfca5a5},
+        jupiter: {min: 26, range: 32, color: 0xfdba74},
+        neptune: {min: 18, range: 34, color: 0x93c5fd, sqrt: true},
+        terre: {min: 24, range: 0, color: 0xd1d5db},
+      };
+      planetBodies.forEach(b => {
+        planets[b.id].grp.userData = {planetId: b.id};
+        const sats = b.satellites || [];
+        if (!sats.length) return;
+        const st = MOON_STYLE[b.id] || {min: 24, range: 20, color: 0xa5b4fc};
+        const ds = sats.map(s => s.distance_km || 0);
+        const dmin = Math.min(...ds), dmax = Math.max(...ds);
+        sats.forEach(s => {
+          let t = dmax > dmin ? (s.distance_km - dmin) / (dmax - dmin) : 0;
+          if (st.sqrt) t = Math.sqrt(t);
+          const px = st.min + (st.direct ? (s.distance_km - 37850) / (583500 - 37850) * st.range : t * st.range);
+          const size = b.id === 'uranus' ? 2.2 + 1.6 * (1 - (s.distance_km - 37850) / 545650) : 2.4;
+          const pv = moon(planets[b.id].grp, s.name.split(' ')[0], s.role, px, size, st.color, s.id);
+          moonOwner[s.id] = b.id;
+          moonPivots.push(pv);
+        });
       });
-      const venGrp = planets.venus.grp;
-      const courtPivots = this.court.map(c => moon(venGrp, c.name, c.role, 26 + Math.random() * 8, 2.4, 0xfcd34d, c.id));
-      // satellites de Mars ♂ : Phobos (software) et Deimos (conception) — vraies distances relatives
-      this.marsSats = (this.bodies.find(b => b.id === 'mars') || {}).satellites || [];
-      const marsMoons = [];
-      this.marsSats.forEach((s, i) => {
-        const px = 18 + i * 12;   // Phobos proche (9 376 km), Deimos loin (23 463 km)
-        marsMoons.push(moon(marsGrp, s.name.split(' ')[0], s.role, px, i === 0 ? 2.4 : 2.0, 0xfca5a5, s.id));
+      // cours (Vénus, Mercure, Cérès) — mythe : pas de lunes, cour d'analystes
+      const COURT_COLOR = {venus: 0xfcd34d, mercure: 0x7dd3fc, ceres: 0xa3e635};
+      planetBodies.filter(b => (b.court || []).length).forEach(b => {
+        (b.court || []).forEach(c => {
+          const pv = moon(planets[b.id].grp, c.name, c.role, 24 + Math.random() * 8, 2.4, COURT_COLOR[b.id] || 0xfcd34d, c.id);
+          moonOwner[c.id] = b.id;
+          courtPivots.push(pv);
+        });
       });
+      const marsMoons = moonPivots.filter((_, i) => true);  // toutes les lunes animées ci-dessous
+      const nebulaGrpRef = nebulaGrp;
 
-      // contrôles orbitaux
-      let theta = 0.35, phi = 1.15, dist = 460, drag = false, lx = 0, ly = 0, moved = 0;
+      // contrôles orbitaux complets : rotation (gauche), zoom (molette), pan (droite), focus (double-clic)
+      let theta = 0.35, phi = 1.12, dist = 640, drag = false, panning = false, lx = 0, ly = 0, moved = 0;
+      const target = new THREE.Vector3(0, 0, 0);
+      let followObj = null;                      // corps suivi (double-clic)
       const applyCam = () => {
-        camera.position.set(dist * Math.sin(phi) * Math.cos(theta), dist * Math.cos(phi), dist * Math.sin(phi) * Math.sin(theta));
-        camera.lookAt(0, 0, 0);
+        camera.position.set(
+          target.x + dist * Math.sin(phi) * Math.cos(theta),
+          target.y + dist * Math.cos(phi),
+          target.z + dist * Math.sin(phi) * Math.sin(theta));
+        camera.lookAt(target);
       };
       applyCam();
+      // anneau de sélection — suit l'objet sélectionné
+      const selRing = new THREE.Mesh(new THREE.RingGeometry(1, 1.15, 48),
+        new THREE.MeshBasicMaterial({color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: .9}));
+      selRing.visible = false;
+      scene.add(selRing);
+      let selObj = null;
+      const selectBody = obj3d => {
+        selObj = obj3d || null;
+        selRing.visible = !!selObj;
+      };
       const el = renderer.domElement;
-      el.addEventListener('pointerdown', e => { drag = true; moved = 0; lx = e.clientX; ly = e.clientY; });
+      el.addEventListener('contextmenu', e => e.preventDefault());
+      el.addEventListener('wheel', e => {
+        e.preventDefault();
+        dist *= (1 + Math.sign(e.deltaY) * 0.11);
+        dist = Math.max(55, Math.min(1600, dist));
+        applyCam();
+      }, {passive: false});
+      el.addEventListener('pointerdown', e => {
+        drag = true; panning = (e.button === 2 || e.ctrlKey);
+        moved = 0; lx = e.clientX; ly = e.clientY;
+        el.setPointerCapture(e.pointerId);
+      });
       el.addEventListener('pointermove', e => {
         this.hoverMove(e);
         if (!drag) return;
-        moved += Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly);
-        theta -= (e.clientX - lx) * 0.005; phi = Math.max(.25, Math.min(Math.PI - .25, phi - (e.clientY - ly) * 0.005));
-        lx = e.clientX; ly = e.clientY; applyCam();
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        moved += Math.abs(dx) + Math.abs(dy);
+        if (panning) {
+          // pan : déplacer la cible dans le plan de la caméra
+          const scale = dist * 0.0016;
+          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+          const up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+          target.addScaledVector(right, -dx * scale).addScaledVector(up, dy * scale);
+          followObj = null;                        // pan manuel = on lâche le suivi
+        } else {
+          theta -= dx * 0.005;
+          phi = Math.max(.18, Math.min(Math.PI - .18, phi - dy * 0.005));
+        }
+        lx = e.clientX; ly = e.clientY;
+        applyCam();
       });
-      el.addEventListener('pointerup', e => { drag = false; });
-      el.addEventListener('click', e => {
-        if (moved > 6) return;   // c'était un drag
+      el.addEventListener('pointerup', e => { drag = false; panning = false; });
+      const raycast = e => {
         const ray = new THREE.Raycaster();
         const r = el.getBoundingClientRect();
         const m = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
         ray.setFromCamera(m, camera);
-        const hit = ray.intersectObjects(clickables, false)[0];
+        return ray.intersectObjects(clickables, false)[0];
+      };
+      el.addEventListener('dblclick', e => {
+        const hit = raycast(e);
         if (!hit) return;
+        followObj = hit.object;                    // suivre ce corps
+        selectBody(hit.object);
+        dist = Math.max(55, Math.min(dist, 120));
+      });
+      el.addEventListener('click', e => {
+        if (moved > 6) return;   // c'était un drag
+        const hit = raycast(e);
+        if (!hit) { selectBody(null); followObj = null; return; }
         const u = hit.object.userData;
         if (!u || !u.bodyId) return;
+        selectBody(hit.object);
         if (u.bodyId === 'sol') this.openModal('sol');
         else if (u.bodyId === 'laplace') { this.refreshNebula(); this.openModal('laplace'); }
         else if (u.bodyId === 'sebas') { this.refreshNebula(); this.openModal('sebas'); }
@@ -910,9 +1082,10 @@ function solApp() {
           this.loadArmory(); this.openModal('mars');
         }
         else if (u.bodyId === 'uranus') { this.selectedSat = 'uranus'; this.openModal('uranus'); }
+        else if (moonOwner[u.bodyId] === 'uranus') { this.selectedSat = u.bodyId; this.openModal('uranus'); }
         else if (u.bodyId === 'venus') { this.selectedAnalyst = 'venus'; this.openModal('venus'); }
-        else if (this.satellites.some(s => s.id === u.bodyId)) { this.selectedSat = u.bodyId; this.openModal('uranus'); }
-        else if (this.court.some(c => c.id === u.bodyId)) { this.selectedAnalyst = u.bodyId; this.openModal('venus'); }
+        else if (moonOwner[u.bodyId] === 'venus') { this.selectedAnalyst = u.bodyId; this.openModal('venus'); }
+        else this.openBody(u.bodyId);              // nouveaux corps : modale agent générique
       });
       window.addEventListener('resize', () => {
         const w = container.clientWidth, h = container.clientHeight;
@@ -920,21 +1093,28 @@ function solApp() {
       });
 
       const clock = new THREE.Clock();
+      const _wp = new THREE.Vector3();
       const animate = () => {
         requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
-        planets.venus.pivot.rotation.y += 0.0011;
-        planets.uranus.pivot.rotation.y += 0.0005;
-        planets.mars.pivot.rotation.y += 0.0009;
-        marsMoons.forEach((pv, i) => pv.rotation.y += 0.006 - i * 0.002);
+        planetBodies.forEach((b, i) => { planets[b.id].pivot.rotation.y += 0.0013 - i * 0.00008; });
         nebulaGrp.rotation.y += 0.0007;
         sebasPivot.rotation.y += 0.004;
         sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
-        planets.uranus.mesh.rotation.y += 0.004;
-        planets.venus.mesh.rotation.y += 0.01;
-        moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0012; });
-        courtPivots.forEach((p, i) => { p.rotation.y += 0.006 + i * 0.0015; });
+        planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });
+        moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0009; });
+        courtPivots.forEach((p, i) => { p.rotation.y += 0.006 + i * 0.0012; });
         solCore.rotation.y += 0.002;
+        // suivi du corps focus + anneau de sélection collé à l'objet
+        if (followObj) { followObj.getWorldPosition(_wp); target.lerp(_wp, 0.12); applyCam(); }
+        if (selObj && selRing.visible) {
+          selObj.getWorldPosition(_wp);
+          selRing.position.copy(_wp);
+          selRing.quaternion.copy(camera.quaternion);
+          const rr = Math.max(6, (selObj.geometry && selObj.geometry.parameters
+                       ? selObj.geometry.parameters.radius : 8) * 2.1);
+          selRing.scale.set(rr, rr, 1);
+        }
         renderer.render(scene, camera);
       };
       animate();

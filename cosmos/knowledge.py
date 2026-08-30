@@ -37,6 +37,42 @@ SATELLITE_CONCEPTS: Dict[str, List[str]] = {
                "Réplication"],
 }
 
+# ── Concepts des corps « entreprise » (mercure, terre, ceres, jupiter, neptune, mars) ──
+DEPT_CONCEPTS: Dict[str, List[str]] = {
+    "mercure": ["prospection", "négociation", "fidélisation client", "chiffre d'affaires",
+                "positionnement", "communication", "étude de marché", "promotion",
+                "sourcing fournisseurs", "appels d'offres", "gestion des stocks"],
+    "peitho": ["prospection", "persuasion", "négociation commerciale", "fidélisation"],
+    "pheme": ["positionnement", "communication", "promotion", "branding"],
+    "argus": ["étude de marché", "veille concurrentielle", "signaux faibles", "sondages"],
+    "enodios": ["sourcing fournisseurs", "appels d'offres", "stocks", "logistique d'achat"],
+    "terre": ["fabrication", "livraison de service", "qualité", "logistique",
+              "traçabilité", "lean", "sécurité production"],
+    "lune": ["assurance qualité", "contrôle", "logistique", "stabilité du processus"],
+    "ceres": ["recrutement", "formation", "rémunération", "relations sociales",
+              "fidélisation des talents", "bien-être au travail"],
+    "thallo": ["recrutement", "marque employeur", "onboarding"],
+    "auxo": ["formation", "montée en compétences", "gestion des carrières"],
+    "karpo": ["rémunération", "rétention", "reconnaissance"],
+    "jupiter": ["conformité", "RGPD", "contrats", "propriété intellectuelle",
+                "contentieux", "réglementation", "audit"],
+    "io": ["conformité", "RGPD", "protection des données", "audit"],
+    "europe": ["contrats", "clauses", "exécution des accords"],
+    "ganymede": ["propriété intellectuelle", "brevets", "licences"],
+    "callisto": ["contentieux", "litiges", "arbitrage"],
+    "neptune": ["systèmes d'information", "infrastructure", "cybersécurité",
+                "support", "réseau", "sauvegardes", "déploiement continu"],
+    "proteus": ["cybersécurité", "chiffrement", "intrusion", "défense en profondeur"],
+    "triton": ["infrastructure", "serveurs", "réseau", "déploiement"],
+    "nereide": ["support", "assistance utilisateurs", "tickets"],
+    "mars": ["outils sur mesure", "open source", "maquette", "forge", "calcul",
+             "visualisation de données"],
+    "phobos": ["création de software", "forge d'outils", "calculs temps réel"],
+    "deimos": ["innovation", "conception", "maquette", "prototypage"],
+    "laplace": ["création d'agents", "architecture du système", "amélioration continue"],
+    "sebas": ["capteurs", "observations terrain", "webcam", "wifi", "téléphone"],
+}
+
 COUR_CONCEPTS: Dict[str, List[str]] = {
     "thalie": ["Grand livre", "Tokens entrée/sortie", "Coût par requête", "Journal JSONL"],
     "euphrosyne": ["Arbitrage", "Rendement par dollar", "Choix de modèle", "Réduction de portée"],
@@ -221,4 +257,41 @@ def knowledge_graph(body_id: str) -> Dict[str, Any] | None:
                           if l["source"] in keep and l["target"] in keep]}
     if body_id == "sol":
         return sol_graph()
+    if body_id in BODIES or body_id in DEPT_CONCEPTS:
+        return generic_graph(body_id)
     return None
+
+
+def generic_graph(body_id: str) -> Dict[str, Any]:
+    """Constellation générique d'un corps « entreprise » : sous-rôles + concepts
+    du département (+ références matchées de la base, comme les satellites)."""
+    b = BODIES.get(body_id)
+    concepts = DEPT_CONCEPTS.get(body_id, [])
+    nodes, links = [], []
+    color = (b or {}).get("color", "#818cf8")
+    nodes.append(_node(body_id, (b or {}).get("name", body_id),
+                       (b or {}).get("kind", "agent"), {"color": color}))
+    for c in concepts:
+        cid = f"{body_id}:c:{c}"
+        nodes.append(_node(cid, c, "concept", {"color": "#34d399"}))
+        links.append({"source": body_id, "target": cid, "type": "concept"})
+    # sous-rôles : satellites ou cour
+    for sub in (b or {}).get("satellites", []) or (b or {}).get("court", []) or []:
+        sid = sub["id"]
+        nodes.append(_node(sid, sub["name"], "satellite", {"color": "#a5b4fc"}))
+        links.append({"source": body_id, "target": sid, "type": "orbite"})
+        for c in DEPT_CONCEPTS.get(sid, [])[:3]:
+            nodes.append(_node(f"{sid}:c:{c}", c, "concept", {"color": "#34d399"}))
+            links.append({"source": sid, "target": f"{sid}:c:{c}", "type": "concept"})
+    # références de la base matchées par mots-clés des concepts
+    kws = [c.lower() for c in concepts][:10]
+    for r in _read_refs():
+        blob = " ".join([(r.get(k) or "").lower() for k in
+                         ("theme", "tags", "question_scientifique", "reference_courte")])
+        if any(k in blob for k in kws):
+            rid = r.get("id")
+            nodes.append(_node(rid, r.get("reference_courte", rid), "reference",
+                               {"doi": r.get("doi"), "trust": r.get("trust_factor"),
+                                "color": "#38bdf8"}))
+            links.append({"source": body_id, "target": rid, "type": "source"})
+    return {"nodes": nodes, "links": links}
