@@ -628,3 +628,31 @@ bonne ≥ 60 interactions, moyenne ≥ 20, faible en dessous. Badge visible
 au-dessus des jauges de biais du dashboard : « incertitude : bonne — 420
 interactions observées… ». Un score sans donnée suffisante est une hypothèse,
 pas une mesure.
+
+## Round drill-down calcul tokens · guide ? · affordance
+
+### 🪙 « Tokens épargnés » : le chiffre devient traçable
+La carte est **cliquable** et ouvre une fenêtre **par-dessus la fiche Hadès** :
+- **① Mesuré** — table par catégorie : nb de cibles, taille réelle sur disque,
+  taille moyenne, octets → tokens ;
+- **② Estimé** — le calcul en 3 étapes (Mesurer `octets relevés` → Convertir
+  `1 token ≈ 4 octets` → Diviser `= résultat`), grand total, ce que ça change
+  concrètement (contextes plus courts, lectures plus rapides), et pourquoi ce
+  ratio (tokenizers ~4 caractères/token en texte latin, ~3 pour code/JSON) ;
+- **③ Limites** — estimation pas compteur réel, variance ± 25 % selon
+  tokenizer, périmètre = données condamnées sur disque.
+`prevision_tokens` expose `detail[]`, `calcul[]`, `pourquoi_ratio`,
+`ce_que_ca_veut_dire`, `limites[]` — cohérence vérifiée (Σ détail = estimé).
+
+### ? Guide « utiliser Cognitorium en 6 gestes »
+Bouton **?** dans la barre du haut de /sol : explorer la 3D (clic/dbl-clic),
+discuter (boutons proposés + fiche réactive), comprendre les chiffres
+(drill-down + incertitude), faucher en connaissance de cause, fil d'Ariane,
+règle d'or (mesuré/estimé/absent — jamais de fausse donnée).
+
+### 🎯 Conseils de lisibilité appliqués
+Tooltips explicites sur tous les boutons de la barre (Hadès, Armurerie,
+Sebas…), sur les cartes condamnés et les 3 Moires (rôle en une phrase) ;
+affordance visible (« comment ? ↗ » au survol de la carte tokens) ; « Base »
+renommé « 📊 Dashboard » ; tests blindés contre la croissance du runtime
+(limites de comptage explicites — 110 tests stables).

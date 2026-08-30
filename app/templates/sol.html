@@ -48,15 +48,14 @@
       <div class="hidden md:flex items-center gap-2">
         <span class="text-[11px] px-2.5 py-1 rounded-full border" :class="integClass()" x-text="integ.label"></span>
         <span class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 mono" x-text="budget.spend_today_usd != null ? budget.spend_today_usd.toFixed(4) + ' $ / ' + (budget.budget?.daily_cap_usd ?? '—') + ' $' : '…'"></span>
-        <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 transition font-semibold">💬 Laplace</button>
+        <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 transition font-semibold" title="Parler à Laplace ✳ — l'interlocuteur principal (SOL approuve chaque réponse)">💬 Laplace</button>
         <button @click="dispatchEvent(new Event('open-laplace-chat'))" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300/80 transition" title="Chat flottant (nébuleuse, en bas à droite)">✳</button>
-        <button @click="loadArmory(); openModal('mars')" class="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 transition">♂ Armurerie</button>
-        <button @click="loadHades(); openModal('hades')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/30 text-slate-300 transition">♇ Hadès</button>
-        <button @click="openModal('sol')" class="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition">☉ SOL</button>
-        <button @click="refreshNebula(); openModal('laplace')" class="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 transition">✳ Laplace</button>
-        <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition">◉ Sebas</button>
-        <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition">♅ Uranus</a>
-        <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition">Base</a>
+        <button @click="loadHades(); openModal('hades')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-500/10 hover:bg-slate-500/20 border border-slate-500/30 text-slate-300 transition" title="Cycle de vie : ce qui peut être fauché, pourquoi, et ce qui est toujours conservé">♇ Hadès</button>
+        <button @click="loadArmory(); openModal('mars')" class="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 transition" title="Outils du système : open source d'abord, forge sinon">♂ Armurerie</button>
+        <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition" title="Exécutant des commandes divines — aucune fausse donnée capteur">◉ Sebas</button>
+        <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition" title="Console missions de l'agent chercheur">♅ Uranus</a>
+        <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition" title="Dashboard principal : profil, fil d'Ariane, base de données">📊 Dashboard</a>
+        <button @click="openModal('aide')" class="text-[11px] w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 transition font-bold" title="Comment utiliser ce système ?">?</button>
       </div>
     </div>
   </header>
@@ -198,11 +197,15 @@
       </div>
 
       <div class="grid grid-cols-5 gap-2 mt-4" x-show="hadesScan.stats">
-        <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Condamnés</div><div class="mono text-lg text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
+        <div class="glass-card rounded-lg p-2.5" title="éléments que le scan a condamnés — détail et raisons plus bas"><div class="text-[9px] uppercase text-slate-600">Condamnés</div><div class="mono text-lg text-rose-300" x-text="hadesScan.stats?.condamnes ?? '—'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Espace libérable</div><div class="mono text-lg text-rose-300" x-text="(hadesScan.stats?.ko ?? 0) + ' Ko'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Politique Styx</div><div class="text-[10px] text-slate-400 mt-1" x-text="'garder les ' + (hadesScan.politique_styx?.runs_gardes ?? 25) + ' derniers runs'"></div></div>
         <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Données vues</div><div class="mono text-lg text-slate-300" x-text="(hadesScan.stats?.mo_octets ?? '—') + ' Mo'"></div></div>
-        <div class="glass-card rounded-lg p-2.5 border-emerald-500/25"><div class="text-[9px] uppercase text-emerald-400/90">🪙 Tokens épargnés</div><div class="mono text-lg text-emerald-300" x-text="(hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR')"></div><div class="text-[8.5px] text-slate-600">prévision si fauche</div></div>
+        <button @click="openTokensDetail()" title="cliquez : comment ce chiffre est calculé" class="glass-card rounded-lg p-2.5 border-emerald-500/25 hover:border-emerald-400/60 hover:bg-emerald-500/[.06] transition text-left group relative">
+          <div class="text-[9px] uppercase text-emerald-400/90">🪙 Tokens épargnés</div>
+          <div class="mono text-lg text-emerald-300" x-text="(hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR')"></div>
+          <div class="text-[8.5px] text-slate-600">prévision si fauche <span class="text-emerald-400 opacity-0 group-hover:opacity-100 transition">— comment ? ↗</span></div>
+        </button>
       </div>
       <p class="text-[9px] text-slate-600 mt-1.5" x-show="hadesScan.prevision_tokens" x-text="'🪙 ' + (hadesScan.prevision_tokens?.methode || '') + ' — détail : ' + Object.entries(hadesScan.prevision_tokens?.par_type || {}).map(([k,v]) => v.toLocaleString('fr-FR') + ' (' + k + ')').join(' · ')"></p>
 
@@ -224,19 +227,19 @@
       <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">⧉ Les 3 Moires <span class="text-slate-700 normal-case tracking-normal">— elles filelent, mesurent et coupent la vie des données</span></h3>
       <div class="grid grid-cols-3 gap-2">
         <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
-          <p class="text-[10.5px] text-pink-300 font-semibold">🧵 Clotho</p>
+          <p class="text-[10.5px] text-pink-300 font-semibold" title="Clotho file le fil : compte les données nées dans les dernières 24 h">🧵 Clotho</p>
           <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.clotho?.role"></p>
           <p class="mono text-lg text-pink-300" x-text="hadesScan.moires?.clotho?.naissance_24h ?? '—'"></p>
           <p class="text-[9px] text-slate-600">naissances de données / 24 h</p>
         </div>
         <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
-          <p class="text-[10.5px] text-violet-300 font-semibold">📏 Lachésis</p>
+          <p class="text-[10.5px] text-violet-300 font-semibold" title="Lachésis mesure le fil : âge moyen des runs, durée de conservation visée">📏 Lachésis</p>
           <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.lachesis?.role"></p>
           <p class="mono text-lg text-violet-300" x-text="(hadesScan.moires?.lachesis?.age_moyen_runs_jours ?? '—') + ' j'"></p>
           <p class="text-[9px] text-slate-600">âge moyen · <span x-text="hadesScan.moires?.lachesis?.duree_visee"></span></p>
         </div>
         <div class="glass-card rounded-lg p-2.5 border-pink-500/15">
-          <p class="text-[10.5px] text-rose-300 font-semibold">✂️ Atropos</p>
+          <p class="text-[10.5px] text-rose-300 font-semibold" title="Atropos coupe le fil : prononce la mort des condamnés, sans appel">✂️ Atropos</p>
           <p class="text-[9px] text-slate-500 mb-1.5" x-text="hadesScan.moires?.atropos?.role"></p>
           <p class="mono text-lg text-rose-300" x-text="hadesScan.moires?.atropos?.condamnes ?? '—'"></p>
           <p class="text-[9px] text-slate-600" x-text="hadesScan.moires?.atropos?.verdict"></p>
@@ -285,6 +288,85 @@
         </template>
         <p x-show="!(hadesScan.targets?.length)" class="text-[11px] text-emerald-300/80 italic">Le système est propre — rien à faucher. ☠ Styx approuve.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE ? GUIDE — comment utiliser ce système ══════════════ -->
+  <div x-show="modals.aide" x-cloak class="fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('aide')">
+    <div class="glass rounded-2xl w-full max-w-xl max-h-[88vh] overflow-y-auto p-5 fade-in">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">? Guide — utiliser Cognitorium en 6 gestes</h2>
+          <p class="text-[10.5px] text-slate-500">chaque écran explique ce qu'il montre — voici la logique d'ensemble</p>
+        </div>
+        <button @click="closeModal('aide')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+      <div class="space-y-2 mt-4">
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🪐 1 · Explorer le système</p><p class="text-[10px] text-slate-500 mt-0.5">Dans la vue 3D : <b>clic simple</b> = sélectionner un astre, <b>double-clic</b> = le suivre et ouvrir sa fiche. Chaque corps a un rôle réel (Laplace le savoir, Hadès le cycle de vie, Mars les outils…).</p></div>
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">💬 2 · Discuter</p><p class="text-[10px] text-slate-500 mt-0.5">Le bouton 💬 ouvre Laplace ✳ (interlocuteur principal ; ☉ SOL approuve chaque réponse). Les <b>boutons proposés</b> sous la saisie évitent de deviner quoi demander — et la fiche à gauche s'actualise selon votre question.</p></div>
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🔢 3 · Comprendre les chiffres</p><p class="text-[10px] text-slate-500 mt-0.5">Tout chiffre clé est cliquable et montre <b>d'où il vient</b> : ex. la carte 🪙 tokens épargnés de Hadès ouvre son calcul complet (mesuré → estimé → limites). Le badge « incertitude » du profil dit à quel point y croire.</p></div>
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">⚖ 4 · Faucher en connaissance de cause</p><p class="text-[10px] text-slate-500 mt-0.5">Hadès ne détruit rien sans montrer <b>quoi</b>, <b>pourquoi</b>, et <b>ce qui reste toujours conservé</b> — puis une confirmation détaillée, puis un bilan. La suppression est réelle et journalisée.</p></div>
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🧵 5 · Voir la chaîne d'exécution</p><p class="text-[10px] text-slate-500 mt-0.5">Sur le 📊 Dashboard : le fil d'Ariane rejoue le parcours réel d'une demande (Vous → Laplace → Métatron → SOL → exécution → remise), liaison par liaison.</p></div>
+        <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🛡 6 · Règle d'or du système</p><p class="text-[10px] text-slate-500 mt-0.5">Aucune fausse donnée : ce qui est mesuré est dit mesuré, ce qui est estimé est dit estimé (avec ses limites), les capteurs absents sont dits absents. Soldez votre confiance en conséquence.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE 🪙 TOKENS ÉPARGNÉS — comment le chiffre est calculé (par-dessus Hadès) ══════════════ -->
+  <div x-show="modals.tokens" x-cloak class="fixed inset-0 z-[60] modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('tokens')">
+    <div class="glass rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-5 fade-in border-emerald-500/20">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">🪙 Tokens épargnés — d'où vient ce chiffre ?</h2>
+          <p class="text-[10.5px] text-slate-500">Le détail complet du calcul, mesuré sur le disque · fenêtre au-dessus de la fiche Hadès</p>
+        </div>
+        <button @click="closeModal('tokens')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+
+      <!-- ① Mesuré -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-emerald-400/90 mt-4 mb-1.5">① Mesuré — tailles réelles des cibles</h3>
+      <div class="space-y-1">
+        <template x-for="d in hadesScan.prevision_tokens?.detail || []" :key="d.type">
+          <div class="glass-card rounded-lg px-3 py-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px]" x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[d.type]||'⚰'"></span>
+              <p class="text-[10.5px] text-slate-200 flex-1 min-w-0 truncate" x-text="d.type"></p>
+              <span class="mono text-[10px] text-slate-400" x-text="d.condamnes + ' × ' + Math.round(d.taille_moyenne_octets/1024*10)/10 + ' Ko'"></span>
+            </div>
+            <p class="text-[9.5px] text-slate-500 mt-0.5" x-text="d.quoi"></p>
+            <p class="text-[9.5px] mono text-slate-400" x-text="d.octets.toLocaleString('fr-FR') + ' octets → ' + d.tokens.toLocaleString('fr-FR') + ' tokens'"></p>
+          </div>
+        </template>
+      </div>
+
+      <!-- ② Estimé -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-amber-400/90 mt-4 mb-1.5">② Estimé — le calcul en 3 étapes</h3>
+      <div class="space-y-1.5">
+        <template x-for="(c, i) in hadesScan.prevision_tokens?.calcul || []" :key="i">
+          <div class="flex items-start gap-2.5 glass-card rounded-lg px-3 py-2">
+            <span class="text-[9.5px] font-semibold text-amber-300 shrink-0 mt-0.5" x-text="c.etape"></span>
+            <div class="min-w-0 flex-1">
+              <p class="text-[9.5px] text-slate-500" x-text="c.detail"></p>
+            </div>
+            <span class="mono text-[11px] text-amber-200 shrink-0" x-text="c.valeur"></span>
+          </div>
+        </template>
+      </div>
+      <div class="mt-2 rounded-xl border border-emerald-500/25 bg-emerald-500/[.05] px-4 py-3 text-center">
+        <p class="text-[9px] uppercase text-emerald-400/80">Résultat</p>
+        <p class="mono text-2xl text-emerald-300" x-text="(hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR') + ' tokens'"></p>
+        <p class="text-[9.5px] text-slate-500 mt-1" x-text="hadesScan.prevision_tokens?.ce_que_ca_veut_dire || ''"></p>
+      </div>
+      <p class="text-[9.5px] text-slate-500 mt-2 leading-snug" x-text="hadesScan.prevision_tokens?.pourquoi_ratio || ''"></p>
+
+      <!-- ③ Limites -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-rose-400/90 mt-4 mb-1.5">③ Limites — à lire avant de s'y fier</h3>
+      <div class="space-y-1">
+        <template x-for="(l, i) in hadesScan.prevision_tokens?.limites || []" :key="i">
+          <p class="text-[9.5px] text-slate-400">• <span x-text="l"></span></p>
+        </template>
+      </div>
+      <p class="text-[9px] text-slate-600 mt-3">Principe affiché partout dans Cognitorium : distinguer le <b class="text-emerald-400/80">mesuré</b>, l'<b class="text-amber-300/80">estimé</b> et ses <b class="text-rose-300/80">limites</b> — jamais de certitude artificielle.</p>
     </div>
   </div>
 
@@ -782,7 +864,7 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false},
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false,
     split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null,
@@ -920,6 +1002,7 @@ function solApp() {
       if (this.split) { this.sideDivination = d; this.sideView = 'divination'; }
       else if (this.modals.sol) { this.view = 'divination'; this.viewPanel = html; }
     },
+    openTokensDetail() { if (!this.hadesScan.prevision_tokens) this.loadHades().then(() => this.openModal('tokens')); else this.openModal('tokens'); },
     async loadHades() {
       try { this.hadesScan = await (await fetch('/api/hades/scan')).json(); this.hadesMsg = ''; }
       catch (e) { this.hadesScan = {}; }

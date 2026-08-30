@@ -370,9 +370,9 @@ def test_question_enregistree_par_chat():
     from cosmos.system import get_system
     get_system()
     from cosmos import memory
-    n0 = len(memory.items(type_="question"))
+    n0 = len(memory.items(limit=10**6, type_="question"))
     sol.chat("question test pour la mémoire 12345")
-    assert len(memory.items(type_="question")) == n0 + 1
+    assert len(memory.items(limit=10**6, type_="question")) == n0 + 1
 
 
 def test_concepts_partages_agreges():
@@ -537,8 +537,10 @@ def test_database_memory_sync(tmp_path, monkeypatch):
     cols = [c[1] for c in sqlite3.connect(str(db)).execute("PRAGMA table_info(memory_items)")]
     assert set(cols) >= {"id", "ts", "type", "titre", "corps", "tags"}
     # 4. un item récent se retrouve bien en base
-    ids_in_db = {r["id"] for r in database.get_memory_items(limit=1000)}
-    items_ids = {it["id"] for it in memory.items(limit=1000)}
+    # (le serveur live écrit des items en parallèle des tests → re-synchro avant comparaison)
+    database.sync_memory_items()
+    ids_in_db = {r["id"] for r in database.get_memory_items(limit=10**6)}
+    items_ids = {it["id"] for it in memory.items(limit=10**6)}
     assert items_ids <= ids_in_db
     # 5. les références de la mémoire alimentent aussi la table scientifique
     import sqlite3 as _sq
@@ -1150,3 +1152,55 @@ def test_ui_fauchage_explicite():
         assert motif in html, motif
     idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
     assert "profilPerso.confiance" in idx and "incertitude :" in idx
+
+
+# ═══ ROUND drill-down tokens (calcul traçable) · guide ? · affordance ═══
+
+def test_prevision_tokens_detail_calcul_traconnable(tmp_path, monkeypatch):
+    """Le chiffre de tokens épargnés est traçable : détail par type + calcul 3 étapes + limites."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":"' + "a" * 300 + '"}', encoding="utf-8")
+    sc = hades.scan_system()
+    pv = sc["prevision_tokens"]
+    # détail par type : chaque ligne porte compte, octets, tokens, taille moyenne, quoi
+    det = [d for d in pv["detail"] if d["type"] == "run_outdated"]
+    assert det and det[0]["condamnes"] == 3
+    assert det[0]["octets"] > 0 and det[0]["tokens"] == round(det[0]["octets"] / 4)
+    assert det[0]["taille_moyenne_octets"] > 0 and det[0]["quoi"]
+    # la somme des détails = l'estimation (à l'arrondi près)
+    assert abs(sum(d["tokens"] for d in pv["detail"]) - pv["estime"]) <= len(pv["detail"])
+    # le calcul est expliqué en 3 étapes lisibles
+    etapes = [c["etape"] for c in pv["calcul"]]
+    assert any("Mesurer" in e for e in etapes) and any("Convertir" in e for e in etapes)
+    assert any("Diviser" in e for e in etapes) and all(c["valeur"] for c in pv["calcul"])
+    # pourquoi ce ratio + limites honnêtes
+    assert "token" in pv["pourquoi_ratio"].lower() and len(pv["limites"]) >= 3
+    assert "contexte" in pv["ce_que_ca_veut_dire"] or "chargé" in pv["ce_que_ca_veut_dire"]
+
+def test_sol_fenetre_tokens_au_dessus_hades():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    # la carte est cliquable et ouvre une fenêtre par-dessus (z-[60] > z-50 d'Hadès)
+    assert "openTokensDetail" in html and "z-[60]" in html
+    assert "modals.tokens" in html or "tokens: false" in html
+    # la fenêtre montre le calcul complet : mesuré / estimé / limites
+    for motif in ("d'où vient ce chiffre", "prevision_tokens?.detail", "prevision_tokens?.calcul",
+                  "prevision_tokens?.limites", "taille_moyenne_octets", "pourquoi_ratio"):
+        assert motif in html, motif
+
+def test_sol_guide_et_affordance():
+    """Bouton ? (guide 6 gestes) + tooltips explicites sur les contrôles clés."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    assert "openModal('aide')" in html and "aide: false" in html
+    for motif in ("utiliser Cognitorium en 6 gestes", "Comprendre les chiffres",
+                  "Faucher en connaissance de cause", "cliquez : comment ce chiffre est calculé",
+                  "📊 Dashboard"):
+        assert motif in html, motif
+    # tooltips Moires = le rôle de chacune en une phrase
+    assert "file le fil" in html and "mesure le fil" in html and "coupe le fil" in html

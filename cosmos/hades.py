@@ -125,15 +125,51 @@ def scan_system() -> Dict[str, Any]:
                                 "octets": p.stat().st_size, "lignes": n - maxi})
 
     total = sum(t["octets"] for t in targets)
-    # ── Prévision de tokens épargnés (indicateur honnête) ──
+    # ── Prévision de tokens épargnés (indicateur honnête, calcul traçable) ──
     # Ratio standard : 1 token ≈ 4 octets pour du texte latin. Les données
     # fauchées ne seront plus chargées, relues ni renvoyées dans les contextes.
-    tokens_par_type = {t: round(sum(x["octets"] for x in targets if x["type"] == t) / 4)
-                       for t in {x["type"] for x in targets}}
+    types_presents = sorted({x["type"] for x in targets})
+    detail = []
+    for t in types_presents:
+        cibles_t = [x for x in targets if x["type"] == t]
+        oct_t = sum(x["octets"] for x in cibles_t)
+        detail.append({
+            "type": t,
+            "condamnes": len(cibles_t),
+            "octets": oct_t,
+            "tokens": round(oct_t / 4),
+            "taille_moyenne_octets": round(oct_t / len(cibles_t)) if cibles_t else 0,
+            "quoi": POURQUOI.get(t, {}).get("quoi", ""),
+        })
+    estime = round(total / 4)
     prevision_tokens = {
-        "estime": round(total / 4),
-        "par_type": tokens_par_type,
+        "estime": estime,
+        "par_type": {d["type"]: d["tokens"] for d in detail},
         "octets_mesures": total,
+        "detail": detail,
+        "calcul": [
+            {"etape": "1 · Mesurer", "detail": f"relever la taille réelle sur le disque de chaque "
+                        f"cible du scan : {len(targets)} cibles, {total:,} octets".replace(",", " "),
+             "valeur": f"{total:,} octets".replace(",", " ")},
+            {"etape": "2 · Convertir", "detail": "appliquer le ratio standard de tokenisation du "
+                        "texte latin : 1 token ≈ 4 octets (les tokenizers découpent en morceaux "
+                        "de 3 à 5 caractères ; 4 est la moyenne communément retenue)",
+             "valeur": "1 token ≈ 4 octets"},
+            {"etape": "3 · Diviser", "detail": f"{total:,} octets ÷ 4 = {estime:,} tokens".replace(",", " "),
+             "valeur": f"≈ {estime:,} tokens".replace(",", " ")},
+        ],
+        "pourquoi_ratio": "un « token » est le morceau de texte qu'un modèle de langage lit "
+                          "réellement : pour du texte latin (français, anglais), les tokenizers "
+                          "produisent en moyenne un token tous les ~4 caractères. Ce chiffre "
+                          "varie selon le modèle (GPT ≈ 4 car/token, code et JSON ≈ 3).",
+        "ce_que_ca_veut_dire": "autant de texte qui ne sera plus jamais chargé, relu ni renvoyé "
+                               "dans un contexte de modèle après la fauche : contextes plus courts, "
+                               "lectures disque plus rapides, mémoire plus légère.",
+        "limites": [
+            "estimation, pas un compteur réel — aucun modèle n'a tokenisé ces fichiers en sandbox",
+            "le ratio exact dépend du tokenizer utilisé (± 25 % selon texte/code/JSON)",
+            "ne compte que les données condamnées accessibles sur le disque (output/)",
+        ],
         "methode": "1 token ≈ 4 octets (ratio standard texte latin) — estimation des "
                    "données qui ne seront plus chargées, relues ni renvoyées aux modèles "
                    "une fois fauchées. Aucun compteur de tokens réel n'existe en sandbox.",
