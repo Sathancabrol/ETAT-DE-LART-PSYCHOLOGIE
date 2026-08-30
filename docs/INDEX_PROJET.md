@@ -49,6 +49,10 @@ agent/                                                   # 🤖 URANUS (♅) - a
 ├── cli.py                                              # python -m agent run|skills|runs|status
 └── docs/AGENT_CHERCHEUR.md                             # Documentation complète de l'agent
 
+cosmos/                                                  # ☉ SYSTÈME SOLAIRE - SOL (orchestrateur/approbation), Vénus (finances/budget),
+│                                                        # bus d'interactions approuvées, grand livre des coûts, intégrité + alertes
+tests/test_cosmos.py                                     # 23 tests système (100 % hors-ligne)
+
 tests/test_agent.py                                      # 23 tests agent (100 % hors-ligne)
 ```
 

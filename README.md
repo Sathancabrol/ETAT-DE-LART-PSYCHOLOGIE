@@ -63,6 +63,21 @@ uvicorn app.main:app   # → http://localhost:8000/agent
 
 Documentation complète : `docs/AGENT_CHERCHEUR.md`
 
+## ☉ Système solaire — SOL · Uranus · Vénus (nouveau)
+
+Architecture multi-agents gouvernée : **SOL ☉** orchestre et approuve toute interaction entre corps, juge l'intégrité, prévoit et prévient ; **Uranus ♅** produit la connaissance (7 satellites, Zêta en premier lieutenant) ; **Vénus ♀** gère les finances (coûts tokens par requête, caps budgétaires, prévisions, arbitrage — cour des Charites).
+
+- **Page `/sol`** : vue du système solaire (SOL au centre, orbites, satellites animés) + **chat SOL** avec boutons de vues (état système, interactions, budget, constellation) ; « mission : \<tâche\> » transmet à Uranus
+- **Gouvernement** : toute mission passe par SOL (approbation, débit) et Vénus (garde-fous budgétaires — refus LLM → bascule moteur à règles à coût nul)
+- **Traçabilité totale** : `output/cosmos/interactions.jsonl` (bus) + `ledger.jsonl` (grand livre des coûts) + intégrité scorée 0-100 avec alertes préventives
+- Sans clé API : système complet à coût nul (moteur à règles) ; avec clé : coûts réels comptés par requête
+
+```bash
+uvicorn app.main:app   # → http://localhost:8000/sol
+```
+
+Documentation complète : `docs/COSMOS.md`
+
 ## 🎯 12 Domaines couverts (analyse critique)
 
 | Domaine | Couverture initiale | Gap identifié | Références ajoutées version 2.0 |

@@ -1006,3 +1006,60 @@ def _trace_public(trace: Dict[str, Any]) -> Dict[str, Any]:
             s["data"]["resultats"] = s["data"]["resultats"][:8]
     light["llm_status"] = trace.get("llm", {})
     return light
+
+# ──────────────── COSMOS / SOL — SYSTÈME MULTI-AGENTS ────────────────
+
+class SolChatRequest(BaseModel):
+    message: str
+
+class BudgetUpdateRequest(BaseModel):
+    daily_cap_usd: Optional[float] = None
+    per_mission_cap_usd: Optional[float] = None
+    monthly_cap_usd: Optional[float] = None
+    income_monthly_usd: Optional[float] = None
+
+@app.get("/sol", response_class=HTMLResponse)
+def sol_page(request: Request):
+    from agent.core.context import AGENT_NAME
+    return templates.TemplateResponse(request, "sol.html", {"request": request, "agent_name": AGENT_NAME})
+
+@app.get("/api/cosmos/bodies")
+def cosmos_bodies():
+    from cosmos.bodies import celestial_registry
+    return celestial_registry()
+
+@app.get("/api/cosmos/state")
+def cosmos_state():
+    from cosmos import sol
+    from cosmos.system import get_system
+    get_system()
+    return sol.system_state()
+
+@app.get("/api/cosmos/interactions")
+def cosmos_interactions(limit: int = 50):
+    from cosmos.system import get_system
+    sysdict = get_system()
+    return sysdict["bus"].history(limit=min(max(limit, 1), 200))
+
+@app.get("/api/cosmos/budget")
+def cosmos_budget():
+    from cosmos import venus
+    return venus.status()
+
+@app.post("/api/cosmos/budget")
+def cosmos_budget_update(req: BudgetUpdateRequest):
+    from cosmos import venus
+    return venus.set_caps(daily_cap_usd=req.daily_cap_usd,
+                          per_mission_cap_usd=req.per_mission_cap_usd,
+                          monthly_cap_usd=req.monthly_cap_usd,
+                          income_monthly_usd=req.income_monthly_usd)
+
+@app.post("/api/cosmos/chat")
+def cosmos_chat(req: SolChatRequest):
+    """Chat avec SOL — réponses ancrées sur l'état réel du système."""
+    from cosmos import sol
+    from cosmos.system import get_system
+    if not req.message or not req.message.strip():
+        raise HTTPException(status_code=400, detail="Message vide")
+    get_system()
+    return sol.chat(req.message.strip()[:600])

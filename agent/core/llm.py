@@ -23,6 +23,9 @@ import requests
 
 TIMEOUT = 30
 
+# Journal des consommations LLM réelles (remontées au grand livre de Vénus)
+USAGE: list = []
+
 
 def llm_status() -> Dict[str, Any]:
     """Décrit la disponibilité du LLM sans divulguer les clés."""
@@ -54,7 +57,11 @@ def _chat(system: str, user: str, max_tokens: int = 1200) -> Optional[str]:
                       "system": system, "messages": [{"role": "user", "content": user}]},
                 timeout=TIMEOUT)
             r.raise_for_status()
-            return "".join(b.get("text", "") for b in r.json().get("content", []))
+            data = r.json()
+            u = data.get("usage") or {}
+            USAGE.append({"model": st["model"], "in": u.get("input_tokens", 0),
+                          "out": u.get("output_tokens", 0)})
+            return "".join(b.get("text", "") for b in data.get("content", []))
         r = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
@@ -63,7 +70,11 @@ def _chat(system: str, user: str, max_tokens: int = 1200) -> Optional[str]:
                                {"role": "user", "content": user}]},
             timeout=TIMEOUT)
         r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        data = r.json()
+        u = data.get("usage") or {}
+        USAGE.append({"model": st["model"], "in": u.get("prompt_tokens", 0),
+                      "out": u.get("completion_tokens", 0)})
+        return data["choices"][0]["message"]["content"]
     except Exception:
         return None
 

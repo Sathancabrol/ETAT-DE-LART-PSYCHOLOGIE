@@ -33,11 +33,11 @@ class Agent:
 
     # ── Planification ──────────────────────────────────────────────────────
 
-    def plan(self, task: str) -> Plan:
+    def plan(self, task: str, allow_llm: bool = True) -> Plan:
         plan = build_plan(task)
         status = llm_mod.llm_status()
-        want_llm = self.use_llm if self.use_llm is not None else status["available"]
-        if want_llm and status["available"]:
+        want_llm = allow_llm and (self.use_llm if self.use_llm is not None else True) and status["available"]
+        if want_llm:
             llm_steps = llm_mod.plan_with_llm(task, catalog())
             if llm_steps:
                 from agent.core.planner import Step
@@ -53,7 +53,18 @@ class Agent:
         ctx = AgentContext(max_results=self.max_results, timeout=self.timeout)
         ctx.state["task"] = task
 
-        plan = self.plan(task)
+        # Gouvernement SOL/Vénus (optionnel — si le paquet cosmos est présent)
+        gov = _governor()
+        constraints: Dict[str, Any] = {}
+        want_llm = self.use_llm if self.use_llm is not None else True
+        if gov is not None and not dry_run:
+            constraints = gov.clear_mission(task, use_llm=want_llm)
+            want_llm = constraints.get("allow_llm", want_llm)
+            if constraints.get("max_results"):
+                ctx.max_results = min(ctx.max_results, constraints["max_results"])
+
+        plan = self.plan(task, allow_llm=want_llm)
+        usage_t0 = len(llm_mod.USAGE)
 
         steps_report: List[Dict[str, Any]] = []
         if not dry_run:
@@ -72,6 +83,9 @@ class Agent:
                                   "artifacts": [], "data": {}})
                 entry["duration_s"] = round(time.time() - t0, 2)
                 steps_report.append(entry)
+                if gov is not None:
+                    gov.charge_step(step.skill, entry.get("ok", False),
+                                    entry.get("duration_s", 0.0), entry.get("degraded", False))
 
         duration = round(time.time() - started, 2)
         ok_steps = sum(1 for s in steps_report if s.get("ok"))
@@ -86,6 +100,7 @@ class Agent:
             "cerveau": plan.to_dict()["brain"],
             "rationale": plan.rationale,
             "llm": llm_mod.llm_status(),
+            "gouvernement": constraints or None,
             "statut": status,
             "duree_s": duration,
             "mode_degrade": ctx.offline_hits > 0,
@@ -94,12 +109,28 @@ class Agent:
         }
         ctx.save_json("trace.json", trace)
 
+        # Clôture de mission auprès du gouverneur (grand livre de Vénus)
+        if gov is not None and not dry_run:
+            used = llm_mod.USAGE[usage_t0:]
+            gov.complete_mission(ctx.run_id, status, len(steps_report),
+                                 sum(u["in"] for u in used), sum(u["out"] for u in used),
+                                 used[-1]["model"] if used else "regles")
+
         # Rapport markdown lisible
         if not dry_run:
             report = _build_report(task, trace)
             ctx.save_md("report.md", report)
 
         return trace
+
+
+def _governor():
+    """Gouverneur SOL/Vénus si le paquet cosmos est disponible (optionnel)."""
+    try:
+        from cosmos import system as _cosmos_system
+        return _cosmos_system
+    except Exception:
+        return None
 
 
 def _build_report(task: str, trace: Dict[str, Any]) -> str:

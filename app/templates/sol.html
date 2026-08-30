@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>☉ SOL — Système Cognitorium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    :root {
+      --bg0:#030508; --bg1:#070b14; --bg2:#0d1320; --bg3:#151d2e;
+      --border:#1e293b; --border2:#334155;
+      --text1:#f1f5f9; --text2:#94a3b8; --text3:#64748b;
+      --indigo:#818cf8; --cyan:#22d3ee; --emerald:#34d399; --amber:#fbbf24; --rose:#fb7185;
+    }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg0); color:var(--text1); }
+    ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    .glass{background:rgba(13,19,32,0.8);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05)}
+    .glass-card{background:rgba(21,29,46,0.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeInUp .35s ease-out}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .sat-orbit{animation:spin 90s linear infinite}
+    .court-orbit{animation:spin 60s linear infinite}
+    @keyframes solPulse{0%,100%{opacity:.55;r:36}50%{opacity:.9;r:40}}
+    .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+    .clickable{cursor:pointer}
+    .clickable:hover{filter:brightness(1.35)}
+    .sky-bg{background:radial-gradient(ellipse at 50% 50%, rgba(251,191,36,.05), transparent 55%)}
+  </style>
+</head>
+<body class="h-full">
+<div x-data="solApp()" x-init="init()" class="min-h-full flex flex-col">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="glass sticky top-0 z-40 border-b border-white/5">
+    <div class="max-w-[1600px] mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-lg text-amber-200 select-none">☉</div>
+      <div class="flex-1">
+        <h1 class="text-sm font-semibold tracking-wide">SOL <span class="text-slate-500 font-normal">· orchestrateur du système <span class="text-slate-600">· Cognitorium</span></span></h1>
+        <p class="text-[11px] text-slate-500">Toute interaction entre les corps lui est soumise — intégrité, budget, prévention</p>
+      </div>
+      <div class="hidden sm:flex items-center gap-2">
+        <span class="text-[11px] px-2.5 py-1 rounded-full border" :class="integBadge()" x-text="integ.label"></span>
+        <span class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 mono" x-text="budget.spend_today_usd != null ? budget.spend_today_usd.toFixed(4) + ' $ / ' + (budget.budget ? budget.budget.daily_cap_usd : '—') + ' $' : '…'"></span>
+        <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition">♅ <span x-text="agentName"></span></a>
+        <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition">Base</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5">
+
+    <!-- ═══ CARTE DU SYSTÈME ═══ -->
+    <section class="glass rounded-2xl sky-bg relative overflow-hidden min-h-[520px]">
+      <div class="absolute top-3 left-4 z-10">
+        <h2 class="text-[11px] uppercase tracking-[.14em] text-slate-500">Vue du système</h2>
+        <p class="text-[10px] text-slate-600 mt-0.5">Cliquez sur un corps — SOL ouvre le chat, les planètes affichent leur fiche</p>
+      </div>
+      <svg id="skymap" viewBox="0 0 900 620" class="w-full h-full min-h-[520px]" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="absolute bottom-3 right-4 text-[10px] text-slate-600 text-right leading-relaxed">
+        <div><span class="text-indigo-300">♅ Uranus</span> — recherche · 7 satellites (Zêta en premier lieutenant)</div>
+        <div><span class="text-amber-300">♀ Vénus</span> — finances · cour des Charites (+ Éros)</div>
+      </div>
+    </section>
+
+    <!-- ═══ CHAT SOL ═══ -->
+    <aside class="glass rounded-2xl flex flex-col max-h-[78vh] min-h-[520px]">
+      <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2">
+        <span class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200 text-sm">☉</span>
+        <div class="flex-1">
+          <h2 class="text-xs font-semibold">Chat SOL</h2>
+          <p class="text-[10px] text-slate-600">interface du système — réponses ancrées sur les données réelles</p>
+        </div>
+        <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">en ligne</span>
+      </div>
+
+      <!-- Messages -->
+      <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3" x-ref="msgs">
+        <template x-for="(m, i) in messages" :key="i">
+          <div class="fade-in">
+            <!-- message utilisateur -->
+            <template x-if="m.role==='user'">
+              <div class="flex justify-end">
+                <div class="max-w-[85%] bg-indigo-500/15 border border-indigo-500/30 text-slate-200 text-[12px] rounded-xl rounded-br-sm px-3 py-2" x-text="m.text"></div>
+              </div>
+            </template>
+            <!-- message SOL -->
+            <template x-if="m.role==='sol'">
+              <div class="flex gap-2">
+                <span class="w-6 h-6 shrink-0 rounded-full bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-[11px] text-amber-300 mt-0.5">☉</span>
+                <div class="max-w-[90%]">
+                  <div class="glass-card text-[12px] text-slate-300 leading-relaxed rounded-xl rounded-tl-sm px-3 py-2 whitespace-pre-wrap" x-text="m.text"></div>
+                  <!-- chips budget -->
+                  <div class="flex flex-wrap gap-1.5 mt-1.5" x-show="m.chips">
+                    <template x-for="(c, j) in (m.chips || [])" :key="j">
+                      <span class="text-[10px] mono px-2 py-0.5 rounded-md bg-[var(--bg2)] border border-[var(--border)] text-slate-400" x-text="c"></span>
+                    </template>
+                  </div>
+                  <div class="text-[9px] text-slate-700 mt-1 mono" x-show="m.intent" x-text="'intent : ' + m.intent"></div>
+                </div>
+              </div>
+            </template>
+            <!-- fiche corps (clic sur la carte) -->
+            <template x-if="m.role==='system'">
+              <div class="flex gap-2">
+                <span class="w-6 h-6 shrink-0 rounded-full bg-slate-500/15 border border-slate-500/30 flex items-center justify-center text-[11px] text-slate-300 mt-0.5" x-text="m.symbol"></span>
+                <div class="max-w-[92%] glass-card rounded-xl px-3 py-2.5 text-[12px] text-slate-300 leading-relaxed">
+                  <div class="font-semibold text-slate-200" x-text="m.title"></div>
+                  <p class="text-slate-400 mt-1" x-text="m.text"></p>
+                  <div class="mt-2 space-y-0.5" x-show="m.sub && m.sub.length">
+                    <template x-for="(s, j) in (m.sub || [])" :key="j">
+                      <div class="text-[11px] text-slate-500 flex gap-1.5">
+                        <span class="text-slate-700">·</span><span x-text="s"></span>
+                      </div>
+                    </template>
+                  </div>
+                  <a x-show="m.link" :href="m.link" class="inline-block mt-2 text-[11px] text-indigo-300 hover:text-indigo-200 underline underline-offset-2" x-text="'→ ' + (m.linkLabel || 'ouvrir')"></a>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+
+      <!-- Boutons de visualisation (au-dessus de la saisie) -->
+      <div class="px-3 pb-2 border-t border-white/5 pt-2.5">
+        <p class="text-[9px] uppercase tracking-[.14em] text-slate-600 mb-1.5">Vues du système</p>
+        <div class="flex flex-wrap gap-1.5">
+          <button @click="send('état du système')" class="view-btn">🟢 État système</button>
+          <button @click="send('interactions')" class="view-btn">☰ Interactions</button>
+          <button @click="send('budget et coûts tokens')" class="view-btn">♀ Budget</button>
+          <button @click="send('constellation')" class="view-btn">✦ Constellation</button>
+        </div>
+      </div>
+
+      <!-- Saisie -->
+      <div class="px-3 pb-3 flex gap-2 items-end">
+        <textarea x-model="input" rows="1" @keydown.enter.prevent="send()" placeholder="Parlez à SOL… ex : mission : rechercher les méta-analyses attention 2024-2026"
+          class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-xl px-3 py-2 text-[12px] text-slate-200 placeholder-slate-600 focus:border-amber-500/60 focus:outline-none resize-none max-h-24"></textarea>
+        <button @click="send()" :disabled="busy || !input.trim()"
+          class="px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-100 bg-gradient-to-r from-amber-500/80 to-amber-600/80 hover:from-amber-400/90 disabled:opacity-40 transition">➤</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="text-center text-[10px] text-slate-700 py-3">
+    ☉ SOL · ♅ <span x-text="agentName"></span> (recherche) · ♀ Vénus (finances) — interactions approuvées & journalisées dans <span class="mono">output/cosmos/</span>
+  </footer>
+</div>
+
+<style>
+  .view-btn{font-size:11px;padding:5px 10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);color:#94a3b8;transition:all .15s}
+  .view-btn:hover{border-color:rgba(251,191,36,.4);color:#fcd34d;background:rgba(251,191,36,.06)}
+</style>
+
+<script>
+function solApp() {
+  return {
+    agentName: 'Uranus',
+    messages: [], input: '', busy: false,
+    integ: {label: '…', statut: 'stable', score: null},
+    budget: {},
+    bodies: [],
+
+    async init() {
+      this.welcome();
+      try {
+        const st = await (await fetch('/api/cosmos/state')).json();
+        this.bodies = st.corps;
+        this.integ = {label: (st.integrite.statut === 'stable' ? '🟢' : st.integrite.statut === 'vigilance' ? '🟡' : '🔴') + ' ' + st.integrite.statut + ' · ' + st.integrite.score + '/100',
+                      statut: st.integrite.statut, score: st.integrite.score};
+        this.drawMap(st.corps);
+      } catch (e) { console.error(e); }
+      try { this.budget = await (await fetch('/api/cosmos/budget')).json(); } catch (e) {}
+    },
+
+    welcome() {
+      this.messages.push({role: 'sol', intent: 'accueil', text:
+        "☉ Bonjour. Je suis SOL, orchestrateur du système.\n" +
+        "Je supervise ♅ Uranus (recherche — satellites dont Zêta, premier lieutenant) et ♀ Vénus (finances — cour des Charites).\n" +
+        "Toute interaction entre corps passe par moi : je l'approuve, la journalise, juge l'intégrité et préviens les dérives budgétaires.\n" +
+        "Utilisez les boutons de vues ci-dessous, ou lancez une mission : « mission : <tâche> »."});
+    },
+
+    integBadge() {
+      return this.integ.statut === 'stable'
+        ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+        : this.integ.statut === 'vigilance' ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+        : 'bg-rose-500/10 text-rose-300 border-rose-500/30';
+    },
+
+    async send(quick) {
+      const text = (quick || this.input).trim();
+      if (!text || this.busy) return;
+      this.input = '';
+      this.messages.push({role: 'user', text});
+      this.busy = true;
+      try {
+        const res = await fetch('/api/cosmos/chat', {method: 'POST',
+          headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: text})});
+        const data = await res.json();
+        const chips = [];
+        if (data.intent === 'budget' && data.data && data.data.budget) {
+          chips.push('jour : ' + (data.data.spend_today_usd ?? 0).toFixed(4) + ' $');
+          chips.push('cap : ' + data.data.budget.daily_cap_usd + ' $');
+          chips.push('mois projeté : ' + (data.data.forecast?.monthly_projection_usd ?? 0).toFixed(2) + ' $');
+        }
+        this.messages.push({role: 'sol', text: data.reply, intent: data.intent, chips});
+        // rafraîchir les badges après une éventuelle mission
+        try {
+          const st = await (await fetch('/api/cosmos/state')).json();
+          this.integ = {label: (st.integrite.statut === 'stable' ? '🟢' : st.integrite.statut === 'vigilance' ? '🟡' : '🔴') + ' ' + st.integrite.statut + ' · ' + st.integrite.score + '/100',
+                        statut: st.integrite.statut, score: st.integrite.score};
+          this.budget = await (await fetch('/api/cosmos/budget')).json();
+        } catch (e) {}
+      } catch (e) {
+        this.messages.push({role: 'sol', text: '⚠️ Erreur : ' + e.message, intent: 'erreur'});
+      }
+      this.busy = false;
+      this.$nextTick(() => this.$refs.msgs.scrollTop = this.$refs.msgs.scrollHeight);
+    },
+
+    selectBody(id) {
+      const b = this.bodies.find(x => x.id === id);
+      if (!b) return;
+      if (id === 'sol') {
+        this.$refs && this.$refs.msgs && (this.$refs.msgs.scrollTop = this.$refs.msgs.scrollHeight);
+        this.messages.push({role: 'sol', intent: 'fiche', text:
+          "☉ SOL à votre écoute. Vues disponibles : état du système, interactions, budget, constellation. " +
+          "Ou transmettez une mission à Uranus : « mission : <tâche> »."});
+        return;
+      }
+      const sub = (b.satellites || b.court || []).map(s => s.name + ' — ' + s.role);
+      this.messages.push({role: 'system', symbol: b.symbol, title: b.symbol + ' ' + b.name,
+        text: b.role, sub,
+        link: id === 'uranus' ? '/agent' : null,
+        linkLabel: id === 'uranus' ? 'ouvrir la console d\u2019Uranus' : null});
+      this.$nextTick(() => this.$refs.msgs.scrollTop = this.$refs.msgs.scrollHeight);
+    },
+
+    // ── Carte du système (SVG généré) ─────────────────────────────
+    drawMap(bodies) {
+      const svg = document.getElementById('skymap');
+      if (!svg) return;
+      const NS = 'http://www.w3.org/2000/svg';
+      const CX = 450, CY = 300;
+      const el = (tag, attrs, parent) => {
+        const e = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+        (parent || svg).appendChild(e); return e;
+      };
+      const orbitR = {1: 148, 2: 255};
+      const angles = {venus: -55, uranus: 148};
+
+      // Ortes
+      [1, 2].forEach(lvl => el('circle', {cx: CX, cy: CY, r: orbitR[lvl], fill: 'none',
+        stroke: '#1e293b', 'stroke-dasharray': '3 6', 'stroke-width': 1}));
+
+      // SOL
+      const solG = el('g', {class: 'clickable'});
+      solG.addEventListener('click', () => this.selectBody('sol'));
+      el('circle', {cx: CX, cy: CY, r: 74, fill: 'url(#solGlow)'}, solG);
+      el('circle', {cx: CX, cy: CY, r: 30, fill: 'url(#solGrad)', stroke: '#fbbf24', 'stroke-width': 1.4}, solG);
+      const solT = el('text', {x: CX, y: CY + 6, 'text-anchor': 'middle', 'font-size': 20, fill: '#78350f'}, solG);
+      solT.textContent = '☉';
+      const solL = el('text', {x: CX, y: CY + 52, 'text-anchor': 'middle', 'font-size': 11, fill: '#fcd34d', 'font-weight': 600}, solG);
+      solL.textContent = 'SOL';
+      const solR = el('text', {x: CX, y: CY + 66, 'text-anchor': 'middle', 'font-size': 8.5, fill: '#64748b'}, solG);
+      solR.textContent = 'orchestrateur · intégrité · budget';
+
+      // Planètes
+      bodies.filter(b => b.kind === 'planet').forEach(b => {
+        const ang = (angles[b.id] ?? 0) * Math.PI / 180;
+        const r = orbitR[b.orbit_r ?? 2] ?? 255;
+        const px = CX + r * Math.cos(ang), py = CY + r * Math.sin(ang);
+        const g = el('g', {class: 'clickable'});
+        g.addEventListener('click', () => this.selectBody(b.id));
+        const halo = el('circle', {cx: px, cy: py, r: 24, fill: b.color || '#818cf8', opacity: 0.12}, g);
+        el('circle', {cx: px, cy: py, r: 15, fill: b.color || '#818cf8', opacity: 0.85, stroke: '#0d1320', 'stroke-width': 2}, g);
+        const t = el('text', {x: px, y: py + 4.5, 'text-anchor': 'middle', 'font-size': 13}, g);
+        t.textContent = b.symbol;
+        const lb = el('text', {x: px, y: py + 32, 'text-anchor': 'middle', 'font-size': 10.5, fill: '#cbd5e1', 'font-weight': 600}, g);
+        lb.textContent = b.name;
+        const rl = el('text', {x: px, y: py + 44, 'text-anchor': 'middle', 'font-size': 8, fill: '#64748b'}, g);
+        rl.textContent = b.id === 'venus' ? 'finances · budget' : 'recherche · constellation';
+
+        // Satellites / cour
+        const subs = b.satellites || b.court || [];
+        const isSat = !!b.satellites;
+        const n = subs.length;
+        subs.forEach((s, i) => {
+          let orbPx = 26;
+          if (isSat) {
+            const d = s.distance_km || 40000;
+            orbPx = 20 + (d - 37850) / (583500 - 37850) * 30;
+          }
+          const a = (i * (360 / n) - 20) * Math.PI / 180;
+          const sx = px + orbPx * Math.cos(a), sy = py + orbPx * Math.sin(a);
+          const sg = el('g', {class: isSat ? 'sat-orbit' : 'court-orbit',
+            style: `transform-origin:${px}px ${py}px; transform-box:view-box`});
+          const c = el('circle', {cx: sx, cy: sy, r: isSat ? 3.4 : 3, fill: isSat ? '#a5b4fc' : '#fcd34d', opacity: 0.9}, sg);
+          const ti = el('title', {}, sg);
+          ti.textContent = s.name + ' — ' + s.role;
+          if (i === 0 && isSat) {
+            const zl = el('text', {x: sx + 6, y: sy + 3, 'font-size': 8.5, fill: '#818cf8'}, sg);
+            zl.textContent = 'ζ Zêta';
+          }
+          g.appendChild(sg);
+        });
+      });
+
+      // Dégradés
+      const defs = el('defs', {});
+      const g1 = el('radialGradient', {id: 'solGrad'}, defs);
+      el('stop', {offset: '0%', 'stop-color': '#fef3c7'}, g1);
+      el('stop', {offset: '60%', 'stop-color': '#fbbf24'}, g1);
+      el('stop', {offset: '100%', 'stop-color': '#b45309'}, g1);
+      const g2 = el('radialGradient', {id: 'solGlow'}, defs);
+      el('stop', {offset: '0%', 'stop-color': 'rgba(251,191,36,.28)'}, g2);
+      el('stop', {offset: '100%', 'stop-color': 'rgba(251,191,36,0)'}, g2);
+    },
+  };
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{"ts": "2026-08-30T00:21:01+00:00", "agent": "uranus", "action": "skill:validate_entries", "model": "regles", "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "meta": {"ok": true, "duree_s": 0.01, "degrade": false}}
+{"ts": "2026-08-30T00:21:01+00:00", "agent": "uranus", "action": "mission:run_20260830_002101_7610", "model": "regles", "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "meta": {"statut": "succès", "etapes": 1}}
+{"ts": "2026-08-30T00:21:14+00:00", "agent": "uranus", "action": "skill:search_literature", "model": "regles", "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "meta": {"ok": true, "duree_s": 0.0, "degrade": true}}
+{"ts": "2026-08-30T00:21:14+00:00", "agent": "uranus", "action": "mission:run_20260830_002114_abb5", "model": "regles", "tokens_in": 0, "tokens_out": 0, "cost_usd": 0.0, "meta": {"statut": "succès", "etapes": 1}}
