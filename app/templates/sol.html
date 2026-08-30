@@ -243,13 +243,25 @@
         </div>
       </div>
 
-      <!-- Éligibilité au fauchage -->
-      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Qui est éligible au fauchage ?</h3>
-      <div class="grid grid-cols-2 gap-1.5">
-        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">📦 <b>run_outdated</b></p><p class="text-[9px] text-slate-600">run au-delà de la fenêtre Styx (25 derniers) — utile pour la postérité, mort pour la performance</p></div>
-        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">🕳️ <b>junk_vide</b></p><p class="text-[9px] text-slate-600">fichier vide (0 octet) — la matière n'a jamais été fileuse</p></div>
-        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">👯 <b>doublon_memoire</b></p><p class="text-[9px] text-slate-600">élément mémoire strictement identique (hash SHA-256 du titre+contenu)</p></div>
-        <div class="glass-card rounded-lg px-3 py-2"><p class="text-[10px] text-slate-300">📜 <b>journal</b></p><p class="text-[9px] text-slate-600">journal d'interactions au-delà du seuil — l'histoire garde l'essentiel</p></div>
+      <!-- Éligibilité : QUOI sera détruit, POURQUOI, et pourquoi c'est sûr -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-1">Qui est éligible au fauchage — et pourquoi</h3>
+      <p class="text-[9.5px] text-slate-600 mb-2">Avant toute fauche, lisez ce qui suit : <b class="text-slate-400">rien n'est détruit sans explication</b>. Chaque catégorie indique ce qui sera supprimé, la raison, et ce qui reste conservé.</p>
+      <div class="space-y-1.5">
+        <template x-for="(pk, tid) in (hadesScan.pourquoi || {})" :key="tid">
+          <div class="glass-card rounded-lg px-3 py-2 border-l-2" :class="{'border-rose-500/40': (hadesScan.stats?.par_type?.[tid]||0)>0, 'border-white/5': !(hadesScan.stats?.par_type?.[tid]||0)}">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px]" x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[tid] || '⚰'"></span>
+              <p class="text-[10.5px] text-slate-200 font-medium" x-text="tid"></p>
+              <span class="mono text-[10px] px-1.5 py-0.5 rounded" :class="(hadesScan.stats?.par_type?.[tid]||0)>0 ? 'bg-rose-500/15 text-rose-300' : 'bg-white/5 text-slate-600'" x-text="(hadesScan.stats?.par_type?.[tid]||0) + ' condamné(s)'"></span>
+            </div>
+            <p class="text-[9.5px] text-slate-400 mt-1"><span class="text-slate-500">Quoi :</span> <span x-text="pk.quoi"></span></p>
+            <p class="text-[9.5px] text-slate-400"><span class="text-slate-500">Pourquoi :</span> <span x-text="pk.raison"></span></p>
+            <p class="text-[9.5px] text-emerald-300/70"><span class="text-slate-500">Ce qui reste conservé :</span> <span x-text="pk.sur"></span></p>
+          </div>
+        </template>
+      </div>
+      <div class="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[.05] px-3 py-2">
+        <p class="text-[9.5px] text-emerald-300/90">🛡 <b>Toujours conservé, quoi qu'il arrive :</b> <span x-text="hadesScan.ce_qui_est_conserve || 'les 25 derniers runs · la mémoire vivante · le grand livre'"></span></p>
       </div>
 
       <div class="flex items-center gap-2 mt-4">
@@ -519,6 +531,16 @@
                   <p class="text-[10px] text-slate-400 truncate mono" x-text="t.cible"></p>
                 </template>
                 <p x-show="!(hadesScan.targets?.length)" class="text-[10px] text-emerald-300/80 italic">système propre — rien à faucher</p>
+              </div>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Pourquoi faucher ? (quoi / raison / conservé)</p>
+                <template x-for="(pk, tid) in (hadesScan.pourquoi || {})" :key="tid">
+                  <p class="text-[9.5px] text-slate-400 leading-snug" x-show="(hadesScan.stats?.par_type?.[tid]||0)>0">
+                    <span x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[tid]||'⚰'"></span>
+                    <b class="text-slate-300" x-text="tid"></b> : <span x-text="pk.quoi"></span> — <span x-text="pk.raison"></span>. <span class="text-emerald-300/70" x-text="'Conservé : '+pk.sur"></span>
+                  </p>
+                </template>
+                <p class="text-[9.5px] text-emerald-300/80 mt-1">🛡 <span x-text="hadesScan.ce_qui_est_conserve || ''"></span></p>
               </div>
               <button @click="loadHades(); openModal('hades')" class="w-full text-[10.5px] px-3 py-1.5 rounded-lg bg-slate-500/10 border border-slate-500/30 text-slate-300 hover:bg-slate-500/20">♇ modale Hadès complète ↗</button>
             </div>
@@ -903,13 +925,21 @@ function solApp() {
       catch (e) { this.hadesScan = {}; }
     },
     async reapHades() {
-      if (!confirm('⚖ Hadès va détruire les ' + (this.hadesScan.stats?.condamnes ?? '?') +
-                   ' condamnés (runs obsolètes, doublons, junk). Charon ⚰ exécute réellement. Continuer ?')) return;
+      const st = this.hadesScan.stats, pq = this.hadesScan.pourquoi || {};
+      const detail = Object.entries(st?.par_type || {})
+        .map(([t, n]) => '• ' + n + ' × ' + t + (pq[t] ? ' — ' + pq[t].quoi : '')).join('\n');
+      if (!confirm(
+        '⚖ HADÈS VA DÉTRUIRE — DÉFINITIVEMENT — ' + (st?.condamnes ?? '?') + ' élément(s) :\n\n' +
+        detail + '\n\n' +
+        '🪙 ' + ((this.hadesScan.prevision_tokens?.estime ?? 0).toLocaleString('fr-FR')) + ' tokens épargnés (estimation).\n' +
+        '🛡 Conservé : ' + (this.hadesScan.ce_qui_est_conserve || 'les 25 derniers runs, la mémoire vivante, le grand livre') + '.\n\n' +
+        'Charon ⚰ exécute réellement la suppression. Continuer ?')) return;
       const r = await (await fetch('/api/hades/reap', {method: 'POST',
         headers: {'Content-Type': 'application/json'}, body: JSON.stringify({confirm: true})})).json();
       this.hadesDone = r.supprimes !== undefined;
+      const bil = r.bilan ? Object.entries(r.bilan).map(([t, n]) => n + '×' + t).join(', ') : '';
       this.hadesMsg = r.statut + (r.supprimes !== undefined
-        ? ' — ' + r.supprimes + ' condamnés, ' + (r.octets_liberes / 1024).toFixed(1) + ' Ko libérés.' : '');
+        ? ' — ' + r.supprimes + ' condamnés détruits (' + bil + '), ' + (r.octets_liberes / 1024).toFixed(1) + ' Ko libérés, 🪙 ' + (r.tokens_epargnes || 0).toLocaleString('fr-FR') + ' tokens épargnés.' : '');
       await this.loadHades();
     },
     async metatronAnalyze() {

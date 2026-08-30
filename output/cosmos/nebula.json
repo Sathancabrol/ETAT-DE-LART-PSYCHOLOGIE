@@ -237,6 +237,23 @@
       "dernier_statut": "delivered",
       "ameliorations": 1,
       "version": 2
+    },
+    {
+      "id": "agent-test-api-15",
+      "name": "Agent Test API",
+      "symbol": "✦",
+      "role": "cq v2",
+      "kind": "satellite",
+      "parent": "uranus",
+      "system": "cognitorium",
+      "created": "2026-08-30T19:18:45+00:00",
+      "tests": 1,
+      "statut": "actif",
+      "createur": "laplace",
+      "dernier_test": "2026-08-30T19:18:45+00:00",
+      "dernier_statut": "delivered",
+      "ameliorations": 1,
+      "version": 2
     }
   ],
   "systems": [

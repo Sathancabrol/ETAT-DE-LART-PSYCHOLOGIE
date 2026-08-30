@@ -594,3 +594,37 @@ langage libre, via l'intent détecté) : scan Hadès → fiche Hadès (condamné
 traitement, Moires, tokens épargnés) · profil → jauges cognitives · état →
 intégrité/budget/alertes · divination → présages d'Apollon · commande divine →
 Sebas · armurerie → Mars. Bouton « replier ✕ » pour revenir au chat plein écran.
+
+## Round fauchage explicite · Language Decoder · confiance affichée
+
+### ⚖ Faucher en sachant exactement quoi et pourquoi
+`scan_system()` expose `pourquoi` (par catégorie : **quoi** sera détruit,
+**raison**, **ce qui reste conservé**) et `ce_qui_est_conserve` (les 25
+derniers runs · la mémoire vivante · les 1 500 dernières lignes de journaux ·
+le grand livre, jamais fauché). La modale ♇ affiche ces trois lignes par
+catégorie AVANT tout bouton ; la confirmation listant chaque catégorie et son
+contenu est obligatoire ; le bilan post-fauche détaille ce qui a été détruit
+et les tokens réellement épargnés. `reap()` renvoie `bilan` (par catégorie),
+`pourquoi`, `tokens_epargnes`, `ce_qui_est_conserve` — dry-run compris.
+
+### 🗣 Language Decoder (docs/language-decoder/)
+Archive de la discussion sur le langage de l'humain et son interface :
+chaîne en 8 étapes (observer → identifier les langages → mesurer → extraire →
+contextualiser → estimer un état latent → afficher la confiance → adapter),
+métaphore de la langue et sa limite (biomarqueur ≠ mot : ambigu, continu,
+contextuel), modèle d'observation JSON (données / hypothèses / action),
+interface adaptative réversible, 5 couches du modèle d'orientation, principes
+CNIL de minimisation. **Les 3 questions finales sont répondues** (format
+HTML : HTML5 sémantique + tokens CSS + zéro dépendance ; incertitude :
+dégradés, intervalles ±, hachures pour l'estimé, badge n=, 3 sections
+mesuré/interprété/action ; minimisation : collecte liée à la décision,
+agrégats, durée de conservation exécutée = politique Styx, local-first,
+droits outillés). Prototype autonome `index.html` (données simulées marquées)
++ tableau de correspondance « conseil → application Cognitorium ».
+
+### 🎯 Confiance du profil cognitif (incertitude affichée)
+`cogniprofile.confiance` : `{niveau, echantillon, intervalle, lecture}` —
+bonne ≥ 60 interactions, moyenne ≥ 20, faible en dessous. Badge visible
+au-dessus des jauges de biais du dashboard : « incertitude : bonne — 420
+interactions observées… ». Un score sans donnée suffisante est une hypothèse,
+pas une mesure.

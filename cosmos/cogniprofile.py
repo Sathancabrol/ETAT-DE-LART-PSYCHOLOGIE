@@ -48,6 +48,20 @@ def _runs() -> List[Dict[str, Any]]:
     return out
 
 
+def _confiance(n_echantillon: int) -> Dict[str, Any]:
+    """Niveau de confiance de l'ensemble du profil selon la taille d'échantillon."""
+    if n_echantillon >= 60:
+        niveau, plu, mini = "bonne", 100, 70
+    elif n_echantillon >= 20:
+        niveau, plu, mini = "moyenne", 70, 40
+    else:
+        niveau, plu, mini = "faible", 40, 10
+    return {"niveau": niveau, "echantillon": n_echantillon,
+            "intervalle": [mini, plu],
+            "lecture": f"{n_echantillon} interactions observées — plus vous utilisez le "
+                       f"système, plus les jauges se fiabilisent (intervalle ± estimé {mini}–{plu})"}
+
+
 def build_profile() -> Dict[str, Any]:
     """Construit le profil cognitif induit : dimensions, traits, rythme,
     domaines, style — à partir des données d'utilisation réelles."""
@@ -173,6 +187,11 @@ def build_profile() -> Dict[str, Any]:
         "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source_donnees": {"questions": len(questions), "missions": len(runs),
                            "domaines": len(set(domaines))},
+        # incertitude honnête : la confiance dépend de la taille d'échantillon
+        # (principe Language Decoder : afficher l'incertitude plutôt qu'une
+        # certitude artificielle — un score sans donnée suffisante est une
+        # hypothèse, pas une mesure)
+        "confiance": _confiance(len(questions) + len(runs)),
         "dimensions": dims,
         "biais": biais,
         "effets": effets,

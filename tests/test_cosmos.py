@@ -1074,3 +1074,79 @@ def test_sol_fiche_reactive_et_chat_cote_a_cote():
         assert motif in html, motif
     # l'intent détecté change la fiche latérale
     assert "fauche: 'hades'" in html and "profil: 'profil'" in html
+
+
+# ═══ ROUND fauchage explicite (quoi/pourquoi) · Language Decoder · confiance ═══
+
+def test_hades_scan_explique_quoi_et_pourquoi(tmp_path, monkeypatch):
+    """Le scan explique ce qui sera détruit, pourquoi, et ce qui reste conservé."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":1}', encoding="utf-8")
+    sc = hades.scan_system()
+    # chaque catégorie éligible porte quoi / raison / ce qui est conservé
+    assert set(sc["pourquoi"]) >= {"run_outdated", "junk_vide", "doublon_memoire", "journal"}
+    for pk in sc["pourquoi"].values():
+        assert pk["quoi"] and pk["raison"] and pk["sur"]
+    # préservation explicite, visible avant toute fauche
+    assert "25 runs" in sc["ce_qui_est_conserve"] and "grand livre" in sc["ce_qui_est_conserve"]
+    # la raison d'un condamné explique le remplacement
+    run = next(t for t in sc["targets"] if t["type"] == "run_outdated")
+    assert "reproductible" in run["raison"]
+
+def test_hades_reap_bilan_et_tokens(tmp_path, monkeypatch):
+    """Dry-run : bilan prévisionnel sans destruction ; fauche : bilan réel + tokens."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":"' + "a" * 200 + '"}', encoding="utf-8")
+    dry = hades.reap(confirm=False)
+    assert dry["supprimes"] == 0 and len(list(hades.RUNS_DIR.iterdir())) == 28
+    assert dry["bilan"].get("run_outdated") == 3 and dry["tokens_epargnes"] > 0
+    r = hades.reap(confirm=True)
+    assert r["bilan"].get("run_outdated") == 3
+    assert r["tokens_epargnes"] > 0 and r["pourquoi"]["run_outdated"]["sur"]
+    assert "ce_qui_est_conserve" in r
+
+def test_cogniprofile_confiance_avec_ensemble():
+    """Le profil affiche son incertitude : niveau + échantillon + intervalle."""
+    from cosmos import cogniprofile
+    pr = cogniprofile.build_profile()
+    c = pr["confiance"]
+    assert c["niveau"] in ("faible", "moyenne", "bonne")
+    assert c["echantillon"] >= 0
+    lo, hi = c["intervalle"]
+    assert 0 <= lo < hi <= 100
+    assert "interactions observées" in c["lecture"]
+
+def test_language_decoder_archived():
+    base = Path(__file__).resolve().parents[1] / "docs" / "language-decoder"
+    disc = (base / "discussion.md").read_text(encoding="utf-8")
+    # la discussion est archivée avec ses principes et les 3 réponses
+    for motif in ("Observer les signes", "hypothèse probabiliste", "minimisation",
+                  "Minimisation", "indicateurs visuels", "mesure / interprétation / action"):
+        assert motif.lower() in disc.lower(), motif
+    # le tableau d'application dans Cognitorium existe
+    assert "Où chaque conseil est appliqué" in disc
+    proto = (base / "index.html").read_text(encoding="utf-8")
+    assert "Données 100 % simulées" in proto and "hatched" in proto
+    assert (base / "README.md").exists()
+
+def test_ui_fauchage_explicite():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("hadesScan.pourquoi", "ce_qui_est_conserve", "Ce qui reste conservé",
+                  "HADÈS VA DÉTRUIRE", "condamnés détruits", "tokens épargnés"):
+        assert motif in html, motif
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "profilPerso.confiance" in idx and "incertitude :" in idx

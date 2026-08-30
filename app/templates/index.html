@@ -124,6 +124,11 @@
           <a href="/agent" class="text-[9px] text-slate-600 hover:text-indigo-300">profil complet ↗</a>
         </div>
         <p class="text-[9px] uppercase tracking-[.12em] text-slate-600 mb-1.5">Biais & effets induits (jauges %)</p>
+        <div class="flex items-center gap-1.5 mb-2 rounded-lg bg-black/25 border border-white/5 px-2 py-1">
+          <span class="text-[9px] text-slate-500">incertitude :</span>
+          <span class="text-[9.5px] font-semibold" :class="{'bonne':'text-emerald-300','moyenne':'text-amber-300','faible':'text-rose-300'}[(profilPerso.confiance||{}).niveau||'faible']" x-text="(profilPerso.confiance||{}).niveau || '—'"></span>
+          <span class="text-[9px] text-slate-600" x-text="(profilPerso.confiance||{}).lecture || ''"></span>
+        </div>
         <div class="space-y-2 flex-1 overflow-y-auto pr-1">
           <template x-for="b in profilPerso.biais || []" :key="b.id">
             <div>

@@ -26,6 +26,32 @@ OUT = REPO / "output"
 RUNS_DIR = OUT / "agent_runs"
 MEM_ITEMS = OUT / "cosmos" / "memory" / "items.jsonl"
 
+# Pourquoi chaque catégorie est fauchée — et pourquoi c'est sûr (rien d'essentiel ne perd)
+POURQUOI = {
+    "run_outdated": {
+        "quoi": "les dossiers de runs au-delà des 25 plus récents (traces, rapports, artefacts)",
+        "raison": "la politique Styx garde une fenêtre de 25 runs : au-delà, ce sont d'anciens "
+                  "exemplaires remplacés par des runs plus récents",
+        "sur": "les 25 derniers runs — les plus riches et les plus récents — sont intégralement "
+               "conservés ; un run fauché est reproductible (mêmes données, mêmes compétences)",
+    },
+    "junk_vide": {
+        "quoi": "les fichiers strictement vides (0 octet)",
+        "raison": "un fichier vide n'a jamais reçu de contenu : il n'est relié à aucune donnée",
+        "sur": "aucune information n'existe dans un fichier de 0 octet — il n'y a rien à perdre",
+    },
+    "doublon_memoire": {
+        "quoi": "les copies STRICTEMENT identiques d'un élément de mémoire (titre + contenu, hash SHA-256)",
+        "raison": "un même souvenir conservé plusieurs fois encombre la mémoire et fausse les comptages",
+        "sur": "l'original est toujours conservé — seule la copie au octets près est emportée",
+    },
+    "journal": {
+        "quoi": "les lignes les plus anciennes des journaux au-delà du seuil (1 500 lignes)",
+        "raison": "les journaux gonflent indéfiniment et ralentissent les lectures",
+        "sur": "les 1 500 lignes les plus récentes sont conservées — seul l'historique ancien est tronqué",
+    },
+}
+
 # Politique de rétention — Styx ☠
 POLITIQUE = {
     "runs_gardes": 25,            # les N runs les plus récents survivent
@@ -66,7 +92,8 @@ def scan_system() -> Dict[str, Any]:
                       key=lambda d: d.name, reverse=True)
         for d in runs[POLITIQUE["runs_gardes"]:]:
             targets.append({"type": "run_outdated", "cible": _rel(d),
-                            "raison": f"run antérieur aux {POLITIQUE['runs_gardes']} plus récents "
+                            "raison": f"run antérieur aux {POLITIQUE['runs_gardes']} plus récents — "
+                                      f"remplacé par des runs plus récents, reproductible "
                                       "(artefacts régénérables)",
                             "octets": _dir_size(d)})
 
@@ -150,6 +177,11 @@ def scan_system() -> Dict[str, Any]:
                       "tokens_epargnes": prevision_tokens["estime"]},
             "prevision_tokens": prevision_tokens,
             "traitement": traitement,
+            "pourquoi": POURQUOI,
+            "ce_qui_est_conserve": (
+                f"les {POLITIQUE['runs_gardes']} runs les plus récents · la mémoire vivante "
+                "(originaux des souvenirs) · les {POLITIQUE['interactions_max']} lignes les plus "
+                "récentes des journaux · le grand livre (ledger, jamais fauché)"),
             "moires": moires,
             "politique_styx": POLITIQUE,
             "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")}
@@ -221,7 +253,9 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
     scan = scan_system()
     if not confirm:
         return {"statut": "simulation (dry-run) — rien n'a été détruit",
-                **scan, "supprimes": 0, "octets_liberes": 0}
+                **scan, "supprimes": 0, "octets_liberes": 0,
+                "bilan": scan["stats"]["par_type"],
+                "tokens_epargnes": scan["prevision_tokens"]["estime"]}
 
     supprimes, liberés = 0, 0
     details = []
@@ -255,6 +289,10 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
         except Exception:
             continue
 
+    bilan = {}
+    for t in scan["targets"]:
+        bilan[t["type"]] = bilan.get(t["type"], 0) + 1
+
     # journal + mémoire + approbation SOL
     ledger.record(agent="pluton", action="fauche", model="regles",
                   meta={"supprimes": supprimes, "octets": liberés})
@@ -273,5 +311,9 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
     except Exception:
         pass
     return {"statut": "fauche exécutée — les condamnés sont aux enfers",
+            "bilan": bilan,                      # quoi a été détruit, par catégorie
+            "pourquoi": POURQUOI,                # pourquoi chaque catégorie, et ce qui est conservé
+            "tokens_epargnes": round(liberés / 4),   # estimation honnête (1 token ≈ 4 octets)
+            "ce_qui_est_conserve": scan["ce_qui_est_conserve"],
             **{k: scan[k] for k in ("stats", "politique_styx", "ts")},
             "supprimes": supprimes, "octets_liberes": liberés, "details": details[:30]}
