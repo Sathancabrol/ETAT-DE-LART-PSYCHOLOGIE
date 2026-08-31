@@ -665,9 +665,27 @@
         <span class="text-cyan-300">4.</span> livraison approuvée par ☉ SOL.
       </div>
 
-      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Demandes de l'armurerie <span x-text="'(' + armory.length + ')'"></span></h3>
-      <div class="space-y-2">
-        <template x-for="r in armory" :key="r.id">
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Inventaire de l'armurerie <span x-text="'(' + armory.length + ' · ' + (armoryCats || []).length + ' catégorie(s))'"></span></h3>
+      <!-- ✂ élagage : Deimos audite, Hadès fauche les inutiles (résidu conservé) -->
+      <div class="rounded-xl border border-orange-500/20 bg-orange-500/[.03] p-2.5 mb-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <p class="text-[10px] text-orange-200/90 flex-1 min-w-[180px]">✂ <span class="font-semibold">Élagage Deimos</span> <span class="text-slate-500">— doublons fonctionnels &amp; maquettes mortes → Hadès (résidu conservé)</span></p>
+          <button @click="pruneArmory(false)" :disabled="pruneBusy" class="text-[9.5px] px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 disabled:opacity-40" x-text="pruneBusy ? '…' : '🔍 auditer (dry-run)'"></button>
+          <button @click="pruneArmory(true)" :disabled="pruneBusy" class="text-[9.5px] px-2 py-1 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-300 hover:bg-rose-500/25 disabled:opacity-40">✂ faucher</button>
+        </div>
+        <p x-show="pruneMsg" class="text-[9.5px] mt-1.5 text-orange-200/90 leading-snug" x-text="pruneMsg"></p>
+        <div x-show="pruneAudit && pruneAudit.condamnes && pruneAudit.condamnes.length" class="mt-1.5 max-h-28 overflow-y-auto space-y-0.5">
+          <template x-for="c in pruneAudit.condamnes.slice(0, 12)" :key="c.id">
+            <p class="text-[8.5px] text-slate-500 leading-tight">• <span class="text-slate-400" x-text="c.besoin"></span> <span class="text-rose-300/80" x-text="'— ' + c.raison"></span></p>
+          </template>
+          <p class="text-[8.5px] text-slate-600" x-show="pruneAudit.condamnes.length > 12" x-text="'+ ' + (pruneAudit.condamnes.length - 12) + ' autre(s)'"></p>
+        </div>
+      </div>
+      <template x-for="g in armoryCats" :key="g.categorie.id">
+        <div class="mb-3">
+          <p class="text-[10px] font-semibold text-slate-400 mb-1.5"><span x-text="g.categorie.icon"></span> <span x-text="g.categorie.nom"></span> <span class="text-slate-600 font-normal" x-text="'— ' + g.outils.length + ' outil(s)'"></span></p>
+          <div class="space-y-2">
+            <template x-for="r in g.outils" :key="r.id">
           <div class="glass-card rounded-lg p-3">
             <div class="flex items-start gap-2">
               <span class="text-base mt-0.5" x-text="{'outil livré':'⚒','maquette conçue':'📐','opensource recommandé':'♻'}[r.statut] || '♂'"></span>
@@ -677,15 +695,17 @@
                 <p class="text-[9.5px] text-emerald-300/80 mt-1" x-show="r.recommandation" x-text="r.recommandation ? '→ ' + r.recommandation.consigne : ''"></p>
               </div>
               <div class="flex flex-col gap-1 shrink-0">
-                <a x-show="r.maquette" :href="'/api/mars/file?kind=maquette&id=' + encodeURIComponent(r.id)" target="_blank" class="text-[9.5px] px-2 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20">📐 maquette</a>
+                <a x-show="r.maquette" :href="'/api/mars/file?kind=maquette&id=' + encodeURIComponent(r.id)" target="_blank" @click="markToolUsed(r.id)" class="text-[9.5px] px-2 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20">📐 maquette</a>
                 <a x-show="r.outil" :href="'/api/mars/file?kind=outil&id=' + encodeURIComponent(r.id)" target="_blank" class="text-[9.5px] px-2 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 text-center">⚒ outil</a>
                 <button x-show="r.maquette && !r.outil" @click="forgeTool(r.id)" class="text-[9.5px] px-2 py-1 rounded bg-indigo-500/15 border border-indigo-500/40 text-indigo-200 hover:bg-indigo-500/25">▸ Phobos forge</button>
               </div>
             </div>
           </div>
-        </template>
-        <p x-show="!armory.length" class="text-[11px] text-slate-600 italic">Aucune demande — décrivez un besoin ci-dessous.</p>
-      </div>
+            </template>
+          </div>
+        </div>
+      </template>
+      <p x-show="!armory.length" class="text-[11px] text-slate-600 italic">Aucune demande — décrivez un besoin ci-dessous.</p>
 
       <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Demander un outil à Mars</h3>
       <div class="flex flex-col gap-2">
@@ -1248,7 +1268,7 @@ function solApp() {
     split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null, sideThemis: null,
     metatronBox: {query: '', result: null},
     laplace: {agents: [], systems: []}, sebas: [],
-    armory: [], ossCatalogue: [],
+    armory: [], armoryCats: [], pruneMsg: '', pruneAudit: null, pruneBusy: false, ossCatalogue: [],
     marsReq: {agent: 'user', besoin: ''}, marsMsg: '',
     nlAgent: {name: '', role: '', parent: 'uranus', kind: 'satellite'},
     nlSystem: {name: ''}, obs: {sensor: 'webcam', contenu: ''}, obsMsg: '',
@@ -1295,6 +1315,7 @@ function solApp() {
       try {
         const r = await (await fetch('/api/mars/armory')).json();
         this.armory = r.requests;
+        this.armoryCats = r.par_categorie || [];
         this.ossCatalogue = r.catalogue_opensource;
       } catch (e) {}
     },
@@ -1607,7 +1628,25 @@ function solApp() {
       try {
         const r = await (await fetch('/api/mars/armory')).json();
         this.armory = r.requests || r || [];
+        this.armoryCats = r.par_categorie || [];
       } catch (e) {}
+    },
+    async markToolUsed(id) {
+      try { await fetch('/api/mars/use', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id})}); } catch (e) {}
+    },
+    async pruneArmory(confirm) {
+      if (confirm && !this.pruneAudit) { await this.pruneArmory(false); }
+      if (confirm && !confirm('✂ Deimos va faucher les outils inutiles (âmes au Tartare, résidu conservé). Confirmer ?')) return;
+      this.pruneBusy = true;
+      try {
+        const r = await (await fetch('/api/mars/prune', {method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({confirm})})).json();
+        this.pruneMsg = r.statut;
+        this.pruneAudit = r.audit || null;
+        if (r.ok && r.elagues) { await this.loadArmory(); if (!this.armoryCats.length) await this.loadArmoryQuiet(); else await this.loadArmoryQuiet(); }
+      } catch (e) { this.pruneMsg = '⚠️ ' + e.message; }
+      this.pruneBusy = false;
     },
     async loadGodseye() {
       try { this.godseye = await (await fetch('/api/godseye')).json(); } catch (e) { this.godseye = null; }

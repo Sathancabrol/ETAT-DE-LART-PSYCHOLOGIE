@@ -941,3 +941,49 @@ vigilance grimpent pendant que l'inhibition s'effondre.
 
 **Tests : 143** (138 + Sera/bureau/équipe + lieu Olympe + forge R&D +
 endpoints/UI OMBRE + HUD temps réel).
+
+## Round catégories d'outils · élagage Deimos ✂ · cas de simulation · opérateur 1ʳᵉ fenêtre
+
+**Outils classés par catégorie.** `TOOL_CATEGORIES` (8 catégories : 🕵
+surveillance & espionnage, 🌐 visualisation 3D & cartes, 🕸 graphes & réseaux,
+📊 statistiques & calcul, 📈 séries temporelles, 🗃 données & tableaux, 🖥
+dashboards, 🎓 pédagogie & animation) ; `categoriser()` applique des règles sur
+le besoin puis retombe sur la nature des données. L'inventaire de la modale
+Armurerie est affiché **groupé par catégorie**, et l'API expose
+`par_categorie`.
+
+**✂ Élagage de l'inventaire — le process (défini ce round).** Un membre de
+l'équipe de Mars, **Deimos ◦ (innovation & conception)**, est responsable de
+l'élagage :
+1. Deimos **audite** chaque outil : est inutile (a) un *doublon fonctionnel*
+   d'un outil plus récent (même catégorie + nature + besoin), ou (b) une
+   *maquette morte* — jamais livrée, jamais ouverte, > 3 jours ;
+2. **dry-run par défaut** (🔍 auditer) : bilan lisible, rien n'est touché ;
+3. sur **confirmation**, Hadès ♇ fauche : les outils quittent l'armurerie et
+   partent au **Tartare avec leur résidu complet** (l'outil entier est conservé
+   dans l'âme — rien n'est jamais vraiment supprimé) ;
+4. Phobos ◂ met à jour le registre ; le bilan est présenté dans la modale.
+Compteur d'utilisation : ouvrir une maquette marque l'outil comme utilisé
+(`POST /api/mars/use`), `POST /api/mars/prune` déclenche l'élagage.
+
+**Cerveau de simulation = même forme que la vue du haut.** Constructeur partagé
+`buildBrainShape()` : deux hémisphères de 1 500 points plissés
+(circonvolutions identiques), cervelet, tronc cérébral, 60 neurones, 110
+connexions, impulsions — utilisé par la vue 3D de l'onglet Cerveau, par la
+simulation (colorée par zones cognitives) et par l'opérateur.
+
+**Cas de simulation multiples.** Sélecteur au-dessus des canvas : 🎬 film
+d'horreur (salon), 🗣 réunion d'équipe (question piège), ⏰ rush deadline (bug
+de dernière minute), 🧘 méditation (lâcher prise), 📚 révision active (trou de
+mémoire). Trois peintres de scène (salon avec télé, bureau avec écran de work,
+chambre avec fenêtre lunaire) ; chaque cas a ses phases et ses intensités
+cérébrales, le HUD processus suit en temps réel.
+
+**Opérateur en première fenêtre.** La fenêtre Opérateur est désormais la
+**première** du dashboard. Le bouton **🧠 cerveau** ne change plus d'onglet :
+il **bascule l'animation visuelle de l'opérateur** — son corps maillé T-pose
+devient **son cerveau** (même forme que la vue du haut, régions anatomiques,
+impulsions animées) et inversement (🕺 corps).
+
+**Tests : 147** (143 + catégories + process d'élagage complet + endpoints/UI +
+même cerveau/cas multiples + opérateur première fenêtre/toggle).

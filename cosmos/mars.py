@@ -468,3 +468,139 @@ def forge_advance(fid: str) -> Dict[str, Any]:
 
 def forge_list() -> List[Dict[str, Any]]:
     return _forge_load()["forge"]
+
+
+# ═══ Catégories d'outils + élagage de l'inventaire (équipe de Mars) ══════════
+TOOL_CATEGORIES: List[Dict[str, Any]] = [
+    {"id": "surveillance", "nom": "🕵 Surveillance & espionnage", "icon": "👁",
+     "pour": r"espion|satellite|osint|surveill|veille|crise|flight|ads.?b|\bais\b|march[ée]|financ|radar"},
+    {"id": "vis3d", "nom": "🌐 Visualisation 3D & cartes", "icon": "🧊",
+     "pour": r"3d|trois dimensions|globe|carte|terrain|volume|orbite|plan[èe]te"},
+    {"id": "graphes", "nom": "🕸 Graphes & réseaux", "icon": "🕸",
+     "pour": r"graphe|r[ée]seau|liens?|n[œoe]uds?|relation|constellation|arbre"},
+    {"id": "stats", "nom": "📊 Statistiques & calcul", "icon": "📐",
+     "pour": r"statist|corr[ée]lat|r[ée]gress|optimis|calcul|moyenne|variance|impact"},
+    {"id": "series", "nom": "📈 Séries temporelles", "icon": "📈",
+     "pour": r"s[ée]rie|temporel|temps|courbe|[ée]volution|tendanc|chronolog"},
+    {"id": "donnees", "nom": "🗃 Données & tableaux", "icon": "🗃",
+     "pour": r"donn[ée]es|tableau|csv|nettoyage|d[ée]doublonn|fusion|base de donn"},
+    {"id": "dashboard", "nom": "🖥 Dashboards interactifs", "icon": "🖥",
+     "pour": r"dashboard|tableau de bord|interactif|explorat"},
+    {"id": "pedagogie", "nom": "🎓 Pédagogie & animation", "icon": "🎓",
+     "pour": r"animation|p[ée]dagog|vid[ée]o|expliquer|enseign"},
+]
+_KIND_FALLBACK = {"reseau": "graphes", "series": "series", "surface": "vis3d",
+                  "distribution": "stats", "dashboard": "dashboard"}
+
+
+def categoriser(besoin: str, data_kind: str = "") -> Dict[str, Any]:
+    """Classe un outil dans sa catégorie (règles d'abord, nature des données ensuite)."""
+    m = (besoin or "").lower()
+    for cat in TOOL_CATEGORIES:
+        if re.search(cat["pour"], m):
+            return {"id": cat["id"], "nom": cat["nom"], "icon": cat["icon"]}
+    fid = _KIND_FALLBACK.get((data_kind or "").lower(), "dashboard")
+    cat = next(c for c in TOOL_CATEGORIES if c["id"] == fid)
+    return {"id": cat["id"], "nom": cat["nom"], "icon": cat["icon"]}
+
+
+def armory_by_category() -> List[Dict[str, Any]]:
+    """L'inventaire complet, groupé par catégorie."""
+    groups: Dict[str, Dict[str, Any]] = {}
+    for r in list_requests():
+        c = categoriser(r.get("besoin", ""), r.get("data_kind", ""))
+        g = groups.setdefault(c["id"], {"categorie": c, "outils": []})
+        g["outils"].append({**r, "categorie": c["nom"]})
+    return sorted(groups.values(), key=lambda g: -len(g["outils"]))
+
+
+def _age_jours(r: Dict[str, Any]) -> float:
+    try:
+        from datetime import datetime, timezone as tz
+        t = datetime.fromisoformat(r["ts"])
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=tz.utc)
+        return (datetime.now(tz.utc) - t).total_seconds() / 86400
+    except Exception:
+        return 0.0
+
+
+def audit_elagage() -> Dict[str, Any]:
+    """🔍 Deimos audite l'inventaire de Mars : critères d'outils inutiles.
+
+    Process défini :
+      1. Deimos ◦ (innovation) audite chaque outil de l'armurerie ;
+      2. un outil est INUTILE s'il est (a) doublon fonctionnel d'un outil plus
+         récent (même catégorie + même nature + même besoin tronqué), ou
+         (b) maquette jamais livrée, jamais ouverte, et âgée de plus de 3 jours ;
+      3. les condamnés partent chez Hadès ♇ : âme enregistrée au Tartare avec
+         l'outil entier (rien n'est jamais vraiment supprimé — résidu complet) ;
+      4. Phobos ◂ met à jour le registre, le bilan est présenté.
+    """
+    reqs = list_requests()
+    condamnes: List[Dict[str, Any]] = []
+    vus: Dict[str, str] = {}
+    for r in sorted(reqs, key=lambda x: x.get("ts", ""), reverse=True):  # récents d'abord
+        c = categoriser(r.get("besoin", ""), r.get("data_kind", ""))
+        cle = f"{c['id']}|{r.get('data_kind')}|{(r.get('besoin') or '')[:18].lower()}"
+        raison = None
+        if cle in vus:
+            raison = f"doublon fonctionnel de {vus[cle]} (même catégorie, besoin identique)"
+        elif (r.get("statut") == "maquette conçue" and not r.get("utilisations")
+              and _age_jours(r) > 3):
+            raison = "maquette jamais livrée ni ouverte depuis plus de 3 jours"
+        if raison:
+            condamnes.append({"id": r["id"], "besoin": (r.get("besoin") or "")[:60],
+                              "categorie": c["nom"], "raison": raison})
+        vus[cle] = r["id"]                 # tout outil vu marque sa clé (même condamné)
+    return {"condamnes": condamnes, "total": len(reqs), "utiles": len(reqs) - len(condamnes)}
+
+
+def elaguer(confirm: bool = False) -> Dict[str, Any]:
+    """✂ Deimos élide l'inventaire : dry-run par défaut, fauche réelle si confirm."""
+    audit = audit_elagage()
+    if not confirm:
+        return {"ok": False, "audit": audit,
+                "statut": f"🔍 Deimos a audité {audit['total']} outil(s) : "
+                          f"{len(audit['condamnes'])} inutile(s) — confirmation requise pour faucher"}
+    cond = {c["id"] for c in audit["condamnes"]}
+    if not cond:
+        return {"ok": True, "audit": audit, "elagues": 0,
+                "statut": "✂ rien à élaguer — Deimos garde tout l'inventaire"}
+    data = _load()
+    gardes, elagues = [], []
+    for r in data["requests"]:
+        if r["id"] in cond:
+            elagues.append(r)
+        else:
+            gardes.append(r)
+    data["requests"] = gardes
+    _save(data)
+    # âmes au Tartare : l'outil entier est conservé (reconstruction possible)
+    try:
+        from cosmos import underworld
+        for r in elagues:
+            underworld.record_soul({
+                "id": "outil-" + r["id"][:24] + "-" + datetime.now(timezone.utc).strftime("%H%M%S"),
+                "type": "outil_inutile", "region": "tartare",
+                "cible": "armory:" + r["id"], "raison": "élagage Deimos : " + next(
+                    c["raison"] for c in audit["condamnes"] if c["id"] == r["id"]),
+                "octets": len(json.dumps(r, ensure_ascii=False)),
+                "outil": r, "gardien": "Cerbère 🐾",
+                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    except Exception:
+        pass
+    return {"ok": True, "audit": audit, "elagues": len(elagues),
+            "statut": f"✂ {len(elagues)} outil(s) élagué(s) par Deimos — âmes au "
+                      f"Tartare (résidu complet conservé), {len(gardes)} outil(s) utile(s) gardés"}
+
+
+def marquer_utilisation(rid: str) -> Dict[str, Any]:
+    """Compteur d'utilisation — un outil ouvert n'est plus « jamais utilisé »."""
+    data = _load()
+    r = next((x for x in data["requests"] if x["id"] == rid), None)
+    if not r:
+        return {"ok": False, "statut": "outil inconnu"}
+    r["utilisations"] = int(r.get("utilisations", 0)) + 1
+    _save(data)
+    return {"ok": True, "utilisations": r["utilisations"]}

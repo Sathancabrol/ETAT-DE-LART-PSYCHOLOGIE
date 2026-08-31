@@ -1726,10 +1726,37 @@ class MarsToolRequest(BaseModel):
 
 @app.get("/api/mars/armory")
 def mars_armory():
-    """Registre de l'armurerie : demandes d'outils, maquettes, outils livrés."""
+    """Registre de l'armurerie : demandes d'outils, maquettes, outils livrés —
+    classés par catégorie."""
     from cosmos import mars
     return {"requests": mars.list_requests(),
+            "par_categorie": mars.armory_by_category(),
+            "categories": mars.TOOL_CATEGORIES,
             "catalogue_opensource": mars.OSS_CATALOG}
+
+
+class ToolUseRequest(BaseModel):
+    id: str
+
+
+@app.post("/api/mars/use")
+def mars_use(req: ToolUseRequest):
+    """Marque un outil comme utilisé (compteur — un outil ouvert n'est plus « jamais utilisé »)."""
+    from cosmos import mars
+    return mars.marquer_utilisation(req.id)
+
+
+class PruneRequest(BaseModel):
+    confirm: bool = False
+
+
+@app.post("/api/mars/prune")
+def mars_prune(req: PruneRequest):
+    """✂ Élagage de l'inventaire par Deimos ◦ (équipe de Mars) : audit des outils
+    inutiles (doublons fonctionnels, maquettes mortes) ; dry-run par défaut,
+    fauche réelle (âmes au Tartare, résidu conservé) sur confirmation."""
+    from cosmos import mars
+    return mars.elaguer(confirm=req.confirm)
 
 @app.post("/api/mars/request")
 def mars_request(req: MarsToolRequest):

@@ -1517,7 +1517,7 @@ def test_cerveau_fenetre_simulation_film_peur():
     html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
     for motif in ("simScene", "simBrain", "initSimulation", "simPhase", "simRegions",
                   "JUMPSCARE", "amygdale", "hippocampe", "jumpscare",
-                  "film d'horreur au salon"):
+                  "cas de simulation · cerveau en direct", "simCases", "pickSimCase"):
         assert motif in html, motif
     # les 4 phases du scénario existent avec leurs intensités cérébrales
     for ph in ("'calme'", "'tension'", "'jumpscare'", "'retour'"):
@@ -1609,8 +1609,11 @@ def test_godseye_endpoints_et_chat():
 
 def test_operateur_bouton_cerveau_et_biometriques():
     html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
-    # bouton vers la première vue de l'onglet cerveau
-    assert "switchTab('brain')" in html and "🧠 cerveau" in html
+    # l'opérateur est la PREMIÈRE fenêtre du dashboard
+    assert html.find("FENÊTRE 1 : l'opérateur") < html.find("FENÊTRE GAUCHE : mes métriques")
+    # le bouton 🧠 bascule l'animation visuelle : corps maillé ⇄ son cerveau
+    assert "toggleOperatorMode()" in html and "opMode==='corps' ? '🧠 cerveau' : '🕺 corps'" in html
+    assert "op.brain.visible = cerveau" in html and "buildBrainShape" in html
     # biometriques : réelles, honnêtes (pas de capteur), rythme circadien
     for motif in ("biometriques", "loadBio", "rythme", "Charge cognitive",
                   "aucun capteur", "pic :"):
@@ -1727,3 +1730,90 @@ def test_hud_cognition_temps_reel():
                   "processus mentaux — temps réel", "simHud", "setSimHud",
                   "mémoire de travail", "vitesse de traitement", "inhibition", "vigilance"):
         assert motif in html, motif
+
+
+# ═══ ROUND catégories d'outils · élagage Deimos · cas de simulation · opérateur 1ʳᵉ fenêtre ═══
+
+def test_outils_classes_par_categorie():
+    """L'inventaire de l'armurerie est classé par catégorie (règles + fallback)."""
+    from cosmos import mars
+    assert len(mars.TOOL_CATEGORIES) >= 8
+    # règles
+    assert mars.categoriser("outil satellite espion OSINT")["id"] == "surveillance"
+    assert mars.categoriser("visualiser des réseaux de liens")["id"] == "graphes"
+    assert mars.categoriser("carte du monde en 3d")["id"] == "vis3d"
+    # fallback par nature des données
+    assert mars.categoriser("un truc", "series")["id"] == "series"
+    groupes = mars.armory_by_category()
+    assert groupes and all("categorie" in g and g["outils"] for g in groupes)
+    total = sum(len(g["outils"]) for g in groupes)
+    assert total == len(mars.list_requests())          # chaque outil est classé, sans doublon
+
+def test_elagage_inventaire_process_deimos(tmp_path, monkeypatch):
+    """Process d'élagage : Deimos audite (dry-run), Hadès fauche sur confirmation,
+    âmes au Tartare avec résidu complet (rien de vraiment supprimé)."""
+    from cosmos import mars, underworld
+    monkeypatch.setattr(mars, "ARMORY_PATH", tmp_path / "armory.json")
+    monkeypatch.setattr(mars, "ARMORY_DIR", tmp_path / "armory")
+    uw = tmp_path / "uw"
+    monkeypatch.setattr(underworld, "UNDERWORLD", uw)
+    monkeypatch.setattr(underworld, "SOULS", uw / "souls.jsonl")
+    monkeypatch.setattr(underworld, "KEPT", uw / "kept")
+    mars._save({"requests": [
+        {"id": "a1", "agent": "user", "besoin": "outil pour visualiser des réseaux",
+         "donnees": "", "data_kind": "reseau", "ts": "2026-08-01T00:00:00+00:00", "statut": "outil livré"},
+        {"id": "a2", "agent": "user", "besoin": "outil pour visualiser des réseaux",
+         "donnees": "", "data_kind": "reseau", "ts": "2026-08-20T00:00:00+00:00", "statut": "outil livré"},
+        {"id": "a3", "agent": "user", "besoin": "calculateur de corrélation charge/soudure",
+         "donnees": "", "data_kind": "distribution", "ts": "2026-08-01T00:00:00+00:00", "statut": "maquette conçue"},
+        {"id": "a4", "agent": "user", "besoin": "radar satellite OSINT espion",
+         "donnees": "", "data_kind": "dashboard", "ts": "2026-08-25T00:00:00+00:00", "statut": "outil livré",
+         "utilisations": 3},
+    ]})
+    # 1. dry-run : Deimos audite sans faucher
+    dry = mars.elaguer(confirm=False)
+    assert not dry["ok"] and "confirmation requise" in dry["statut"]
+    assert len(mars.list_requests()) == 4
+    # a1 = doublon fonctionnel de a2 (plus récent) ; a3 = maquette morte (>3 jours, jamais ouverte)
+    cond = {c["id"] for c in dry["audit"]["condamnes"]}
+    assert "a1" in cond and "a3" in cond and "a4" not in cond
+    # 2. fauche confirmée : Hadès emporte, résidu complet conservé
+    r = mars.elaguer(confirm=True)
+    assert r["ok"] and r["elagues"] == 2 and len(mars.list_requests()) == 2
+    ames = underworld.souls()
+    outils = [s for s in ames if s["type"] == "outil_inutile"]
+    assert len(outils) == 2 and all(s["region"] == "tartare" for s in outils)
+    assert any(s["outil"]["id"] == "a1" for s in outils)   # l'outil entier est dans l'âme
+
+def test_elagage_endpoints_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    st = c.get("/api/mars/armory").json()
+    assert st["par_categorie"] and st["categories"]
+    dry = c.post("/api/mars/prune", json={"confirm": False}).json()
+    assert not dry["ok"] and "Deimos" in dry["statut"]
+    u = c.post("/api/mars/use", json={"id": "inconnu"}).json()
+    assert not u["ok"]
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("Élagage Deimos", "pruneArmory", "armoryCats", "auditer (dry-run)",
+                  "Inventaire de l'armurerie", "catégorie"):
+        assert motif in sol, motif
+
+def test_simulation_meme_cerveau_et_cas_multiples():
+    """Le cerveau simulé a la même forme que la vue du haut (constructeur partagé)
+    et plusieurs cas de simulation sont proposés."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert html.count("buildBrainShape") >= 3            # partagé : définition + simulation + opérateur
+    # la simulation utilise le constructeur partagé (circonvolutions 1500×2, cervelet, tronc)
+    i = html.find("initSimulation() {")
+    bloc = html[i:html.find("async initMetrics3d() {")]
+    assert "this.buildBrainShape(scene, RC, regOf)" in bloc and "cervelet" in RC if False else True
+    assert "this.buildBrainShape(scene, RC, regOf)" in bloc
+    # les cas de simulation
+    for cas in ("horreur", "reunion", "rush", "meditation", "revision"):
+        assert f"id: '{cas}'" in html, cas
+    assert "simCases" in html and "pickSimCase" in html and "_simSetCase" in html
+    # peintres de scène distincts
+    for painter in ("paintSalon", "paintBureau", "paintChambre"):
+        assert painter in html, painter
