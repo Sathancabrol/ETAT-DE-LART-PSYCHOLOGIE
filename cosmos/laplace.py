@@ -27,7 +27,7 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
 
 
 # enfers / corbeille → Underworld 🔥 (royaume d'Hadès)
-INFERNO_RE = re.compile(r"enfers?|underworld|inferno|tartare|[ée]lys[ée]es|asphod|cerb|[cç]erbère|pers[ée]phone|corbeille|r[ée]suscit", re.IGNORECASE)
+INFERNO_RE = re.compile(r"enfers?|underworld|inferno|tartare|[ée]lys[ée]es|asphod|cerb|[cç]erbère|pers[ée]phone|corbeille|r[ée]suscit|supprim|disparu|dispara[îi]", re.IGNORECASE)
 
 # justice / équilibre → Thémis ⚖ (bras armé de Laplace)
 THEMIS_RE = re.compile(r"th[ée]mis|justice|balance|équilibre|jugement|\bjuge\b|divine justice", re.IGNORECASE)
