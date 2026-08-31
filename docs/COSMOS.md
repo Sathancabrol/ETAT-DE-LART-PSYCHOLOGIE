@@ -851,3 +851,48 @@ meilleur alignement possible (avatar dans l'en-tête du chat, pulsation douce).
 
 **Tests : 133** (128 + opérateur lancé au chargement + fenêtre simulation + graphe
 3D métriques + killchain/dialogues + Laplace cartoon/nébuleuse).
+
+## Round God's Eye View 👁 · biometriques · jauges · vraies incarnations planétaires
+
+**👁 God's Eye View (`cosmos/godseye.py`).** Outil open source (MIT, Bilawal Sidhu) :
+satellite-espion dans le navigateur, **données réelles** — aviation, navires,
+satellites, séismes, trafic, incendies (NASA FIRMS), caméras publiques,
+barrages, datacentres, câbles sous-marins — sur globe 3D photoréaliste
+(CesiumJS), pilotable à la voix (28 outils). **Sebas 🛠 manie l'œil pour aider
+Mercure/Hermès ✉** : prospection ancrée, études de marché vivantes (Argus),
+veille infrastructure, contexte de négociation (Éros). Limites affichées
+honnêtement : aucune reconnaissance faciale ni suivi de personnes ; données
+potentiellement retardées/incomplètes (avis officiel du projet).
+
+**🕵 Agence de l'ombre.** Si l'œil ne suffit pas, Sebas demande la création de
+nouveaux astres — ses astres-espions en orbite autour de lui (`parent: sebas`,
+nébuleuse réelle, validation ☉ SOL). UI : panneau Sebas de /sol (mission libre +
+bouton « + astre espion »), état d'installation de l'outil, lien direct vers le
+repo — **l'utilisateur accède aussi à l'outil**. API : `GET /api/godseye`,
+`POST /api/godseye/spy`. Chat : intent `godseye` (god's eye / œil de dieu /
+espion / satellite…) — l'intent `outil` (forge de Mars) reste intact.
+
+**📟 Biometriques de l'opérateur.** La fenêtre Opérateur du dashboard gagne un
+bandeau biometrique : charge cognitive (moyenne réelle des 5 dimensions),
+activité système (interactions journalisées), mémoire (éléments retenus) et
+**rythme circadien** (barres 24 h, heure pic). Aucun capteur n'étant connecté,
+le bandeau l'affiche : métriques comportementales réelles uniquement — aucune
+donnée fabriquée. + bouton **🧠 cerveau** qui ouvre la première vue de l'onglet
+Cerveau.
+
+**⏲ Jauges de performance cognitive.** En tête du panneau droit de l'onglet
+Cerveau : 6 demi-cercles (curiosité, profondeur, créativité, méthode, activité)
+sur les valeurs réelles du profil, code couleur, /100.
+
+**🪐 Vraies incarnations planétaires.** Chaque astre de la vue 3D a désormais sa
+texture procédurale distinctive (`planetPainters`) : la **Terre** a ses océans
+bleus, continents verts/ocre, nuages et calottes polaires ; **Mars** son oxyde
+ferrique, ses maria sombres et sa calotte ; **Jupiter** ses bandes et sa grande
+tache rouge ; **Vénus** ses nuages soufrés ; **Mercure** ses cratères gris ;
+**Uranus** son cyan pâle lisse ; **Neptune** son bleu profond et sa tache
+sombre ; **Cérès** ses points brillants (Occator) ; **Pluton** son cœur
+caractéristique (Tombaugh Regio) ; la **Lune** et les lunes cratérisées ; le
+**Soleil** sa granulation et ses taches — en plus des légendes et icônes.
+
+**Tests : 138** (133 + godseye module + endpoints/chat + bouton/biometriques +
+jauges + textures planétaires).

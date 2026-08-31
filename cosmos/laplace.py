@@ -26,6 +26,9 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
+# œil de Dieu / agence de l'ombre → God's Eye View 👁 (Sebas outille Mercure)
+GODEYE_RE = re.compile(r"gods?['’ ]?s? ?eye|œil de dieu|oeil de dieu|agence de l'ombre|espion|shadow agency|satellite", re.IGNORECASE)
+
 # enfers / corbeille → Underworld 🔥 (royaume d'Hadès)
 INFERNO_RE = re.compile(r"enfers?|underworld|inferno|tartare|[ée]lys[ée]es|asphod|cerb|[cç]erbère|pers[ée]phone|corbeille|r[ée]suscit|supprim|disparu|dispara[îi]", re.IGNORECASE)
 
@@ -56,6 +59,22 @@ def chat(message: str) -> Dict[str, Any]:
         analyse = metatron.analyze_request(m)
     except Exception:
         analyse = None
+
+    # ── Œil de Dieu → Sebas outille Mercure/Hermès (datas réelles du monde) ──
+    if GODEYE_RE.search(m):
+        from cosmos import godseye
+        st = godseye.state()
+        t = st["outil"]
+        lignes = [f"👁 {t['nom']} — {t['nature']} (MIT, {t['auteur']}).",
+                  f"Sebas 🛠 manie l'œil pour aider Mercure/Hermès ✉ : {t['role_dans_le_systeme']}",
+                  "Données réelles : " + ", ".join(t["donnees_reelles"][:6]) + "…",
+                  f"Limites : {t['limites']}",
+                  f"Agence de l'ombre : {len(st['agence'])} astre(s)-espion(s) en orbite autour de Sebas."]
+        for mi in st["missions_hermes"][:2]:
+            lignes.append(f"• {mi['titre']} — {mi['detail']}")
+        lignes.append("Vous avez aussi accès à l'outil : " + t["repo"] + " · fiche Sebas dans /sol pour commander un espion.")
+        return {"reply": "\n".join(lignes), "intent": "godseye", "speaker": "laplace",
+                "data": {"installe": st["installe"], "agence": len(st["agence"])}}
 
     # ── Enfers → le royaume d'Hadès (rien ne disparaît vraiment) ─────────
     if INFERNO_RE.search(m):

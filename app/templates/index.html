@@ -231,10 +231,46 @@
       <div class="glass-card rounded-2xl p-4 flex flex-col holo-frame">
         <div class="flex items-center justify-between mb-1">
           <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🕺</span>Opérateur</h3>
-          <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">humain · masculin · maillage</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">humain · masculin · maillage</span>
+            <button @click="switchTab('brain')" class="text-[9px] px-2 py-1 rounded-lg bg-violet-500/15 border border-violet-500/40 text-violet-200 hover:bg-violet-500/25 transition" title="voir la première vue de l'onglet Cerveau (le cerveau en 3D)">🧠 cerveau</button>
+          </div>
         </div>
-        <canvas id="operatorCanvas" class="flex-1 w-full" style="min-height:230px"></canvas>
-        <p class="text-[9px] text-slate-600 mt-1">vous, en T-pose — maillage holographique · glissez pour tourner</p>
+        <canvas id="operatorCanvas" class="w-full" style="min-height:175px"></canvas>
+        <p class="text-[9px] text-slate-600 mt-0.5">vous, en T-pose — maillage holographique · glissez pour tourner</p>
+        <!-- 📟 biometriques de l'opérateur (données comportementales réelles du système) -->
+        <div class="mt-2 rounded-xl border border-cyan-500/20 bg-cyan-500/[.03] p-2.5">
+          <div class="flex items-center gap-1.5 mb-1.5">
+            <p class="text-[9px] uppercase tracking-[.14em] text-cyan-300/80">📟 biometriques</p>
+            <span class="flex-1"></span>
+            <span class="text-[7.5px] px-1.5 py-0.5 rounded-full bg-slate-500/10 text-slate-500 border border-white/10">🚫 aucun capteur — données comportementales réelles</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5">
+            <div class="rounded-lg bg-black/25 p-1.5">
+              <p class="text-[8px] text-slate-600 uppercase">Charge cognitive</p>
+              <p class="mono text-sm" :class="(bio?.charge??0)>=70?'text-amber-300':'text-cyan-300'" x-text="(bio?.charge ?? '—') + '%'"></p>
+              <p class="text-[7.5px] text-slate-600">moyenne des 5 dimensions</p>
+            </div>
+            <div class="rounded-lg bg-black/25 p-1.5">
+              <p class="text-[8px] text-slate-600 uppercase">Activité système</p>
+              <p class="mono text-sm text-emerald-300" x-text="bio?.interactions ?? '—'"></p>
+              <p class="text-[7.5px] text-slate-600">interactions journalisées</p>
+            </div>
+            <div class="rounded-lg bg-black/25 p-1.5">
+              <p class="text-[8px] text-slate-600 uppercase">Mémoire</p>
+              <p class="mono text-sm text-violet-300" x-text="bio?.memoire ?? '—'"></p>
+              <p class="text-[7.5px] text-slate-600">éléments retenus</p>
+            </div>
+          </div>
+          <div class="mt-1.5">
+            <p class="text-[8px] text-slate-600 uppercase mb-0.5">Rythme circadien — interactions par heure <span class="normal-case" x-text="'(pic : ' + (bio?.pic ?? '—') + 'h)'"></span></p>
+            <svg viewBox="0 0 240 34" class="w-full" style="height:34px">
+              <template x-for="(b, i) in (bio?.rythme || [])" :key="i">
+                <rect :x="i * 10" :y="30 - (b.v / (bio?.max || 1)) * 26" width="7" :height="Math.max(1, (b.v / (bio?.max || 1)) * 26)" rx="1.5" :fill="b.v === (bio?.max) ? '#22d3ee' : 'rgba(56,189,248,.4)'"></rect>
+              </template>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -420,6 +456,21 @@
         </div>
       </div>
       <div class="glass-card rounded-2xl p-4 overflow-y-auto">
+        <!-- ⏲ jauges de performance de la cognition -->
+        <h3 class="text-xs font-semibold mb-2 flex items-center"><span class="mr-1.5">⏲</span>Performance cognitive <span class="text-[8.5px] font-normal text-slate-600 ml-1.5">profil réel · /100</span></h3>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <template x-for="(g, i) in cogGauges" :key="g.id">
+            <div class="rounded-xl border border-white/5 bg-white/[.02] p-1.5 text-center">
+              <svg viewBox="0 0 120 66" class="w-full" style="max-height:52px">
+                <path d="M 14 58 A 46 46 0 0 1 106 58" fill="none" stroke="#1e293b" stroke-width="9" stroke-linecap="round"/>
+                <path d="M 14 58 A 46 46 0 0 1 106 58" fill="none" :stroke="g.couleur" stroke-width="9" stroke-linecap="round"
+                      :stroke-dasharray="(g.valeur / 100 * 144.5) + ' 144.5'"/>
+                <text x="60" y="50" text-anchor="middle" class="mono" font-size="19" font-weight="700" fill="#f1f5f9" x-text="g.valeur"></text>
+              </svg>
+              <p class="text-[8.5px] text-slate-500 leading-tight" x-text="g.label"></p>
+            </div>
+          </template>
+        </div>
         <h3 class="text-xs font-semibold mb-1">Régions &amp; données réelles</h3>
         <p class="text-[9.5px] text-slate-600 mb-3">chaque région s'active sur une mesure réelle du système — aucune simulation</p>
         <template x-for="r in brainRegions" :key="r.id">
@@ -879,7 +930,7 @@ function app() {
 
     async init(){
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
-      this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();});
+      this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();this.loadBio();});
       // ⬇ arrivée depuis une fiche (« aller vers · Obsidian ») : ?const=<corps>&tab=graph
       try{
         const q = new URLSearchParams(location.search);
@@ -1030,6 +1081,7 @@ function app() {
     mdInline(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong class="text-slate-200">$1</strong>').replace(/`([^`]+)`/g,'<code class="text-cyan-300">$1</code>');},
 
     brainRegions: [], brainSel: null, simPhase: '🎬 simulation prête', simRegions: [], metRows: [],
+    bio: null, cogGauges: [],
 
     initOperator() {
       if (typeof THREE === 'undefined') return;
@@ -1119,6 +1171,22 @@ function app() {
           assoc: .45,
         };
       } catch (e) { this.brainRegions = []; this._brainVals = null; }
+    },
+
+    async loadBio() {
+      try {
+        const pr = await (await fetch('/api/profile/cognitive')).json();
+        const dm = await (await fetch('/api/dashboard/metrics')).json();
+        const met = {}; (dm.metrics || []).forEach(m => met[m.id] = m.value);
+        const dims = pr.dimensions || [];
+        const charge = dims.length ? Math.round(dims.reduce((s, d) => s + d.valeur, 0) / dims.length) : null;
+        const rythme = Array.from({length: 24}, (_, h) => ({h, v: (pr.rythme || {})[String(h)] || 0}));
+        this.bio = {charge, interactions: met.interactions ?? null, memoire: met.memoire ?? null,
+                    rythme, max: Math.max(1, ...rythme.map(b => b.v)),
+                    pic: rythme.reduce((a, b) => b.v > a.v ? b : a, {h: 0, v: -1}).h};
+        const GC = {curiosite: '#34d399', profondeur: '#818cf8', creativite: '#f472b6', methode: '#22d3ee', activite: '#fbbf24'};
+        this.cogGauges = dims.map(d => ({id: d.id, label: d.label, valeur: d.valeur, couleur: GC[d.id] || '#818cf8'}));
+      } catch (e) { this.bio = null; }
     },
 
     async initBrain() {
@@ -1454,7 +1522,7 @@ function app() {
       this.activeTab=tab;
       this.$nextTick(()=>{lucide.createIcons();
         if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();this.initOperator();}
-        if(tab==='brain'){setTimeout(()=>{this.initBrain();this.initSimulation();this.initMetrics3d();},200);}
+        if(tab==='brain'){this.loadBio();setTimeout(()=>{this.initBrain();this.initSimulation();this.initMetrics3d();},200);}
         if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
         if(tab==='taxonomy')setTimeout(()=>this.initTaxonomy(),200);
         if(tab==='timeline')setTimeout(()=>this.initTimeline(),200);

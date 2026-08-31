@@ -1566,3 +1566,73 @@ def test_laplace_cartoon_nebuleuse_non_humaine():
     # le mascot cartoon est en place (sprite 2×2 animé)
     js = (Path(__file__).resolve().parents[1] / "app" / "static" / "sol_widget.js").read_text(encoding="utf-8")
     assert "laplace_sprite.png" in js and "solw-frames" in js
+
+
+# ═══ ROUND God's Eye View 👁 · biometriques · jauges · vraies planètes ═══
+
+def test_godseye_outil_sebas_agence_ombre():
+    """God's Eye View : fiche outil OSS exacte, agence de l'ombre de Sebas,
+    création d'astres-espions, accès utilisateur."""
+    from cosmos import godseye
+    st = godseye.state()
+    t = st["outil"]
+    assert t["repo"] == "https://github.com/bilawalsidhu/gods-eye-view"
+    assert t["licence"] == "MIT"
+    assert "reconnaissance faciale" in t["limites"]          # limites honnêtes
+    assert any("Hermès" in m["titre"] or "Hermès" in m["detail"] for m in st["missions_hermes"])
+    assert "utilisateur" in st["acces_utilisateur"].lower() or "public" in st["acces_utilisateur"]
+    # Sebas peut demander un nouvel astre-espion (parent sebas, nébuleuse réelle)
+    ag = godseye.request_shadow_astre("test — veille round")
+    assert ag.get("parent") == "sebas" and "agence de l'ombre" in ag.get("role", "")
+    ids = [a["id"] for a in godseye.shadow_agency()]
+    assert ag["id"] in ids
+
+def test_godseye_endpoints_et_chat():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from cosmos import laplace
+    c = TestClient(app)
+    st = c.get("/api/godseye").json()
+    assert st["outil"]["nom"].startswith("God's Eye View")
+    assert isinstance(st["agence"], list) and st["missions_hermes"]
+    r = c.post("/api/godseye/spy", json={"mission": "endpoint — espion de test"}).json()
+    assert r["ok"] and "Sebas" in r["statut"]
+    # le chat route l'œil (orthographe variable) sans voler l'intent forge
+    for msg in ("parle-moi de l'outil god's eye view", "œil de dieu", "lance un satellite espion"):
+        assert laplace.chat(msg)["intent"] == "godseye", msg
+    r2 = laplace.chat("j'ai besoin d'un outil pour visualiser des réseaux")
+    assert r2["intent"] == "outil"                          # la forge de Mars reste
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("God's Eye View", "agence de l'ombre", "orderSpy", "spyMission",
+                  "accès utilisateur", "NASA FIRMS"):
+        assert motif in sol, motif
+
+def test_operateur_bouton_cerveau_et_biometriques():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # bouton vers la première vue de l'onglet cerveau
+    assert "switchTab('brain')" in html and "🧠 cerveau" in html
+    # biometriques : réelles, honnêtes (pas de capteur), rythme circadien
+    for motif in ("biometriques", "loadBio", "rythme", "Charge cognitive",
+                  "aucun capteur", "pic :"):
+        assert motif in html, motif
+
+def test_cerveau_jauges_performance_cognition():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("Performance cognitive", "cogGauges", "stroke-dasharray",
+                  "curiosite", "creativite"):
+        assert motif in html, motif
+
+def test_astres_vraies_incarnations():
+    """Les planètes ont leur texture propre : la Terre ressemble à la Terre,
+    Jupiter a ses bandes et sa tache, Mars son oxyde… — pas juste des boules."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    assert "planetPainters" in html
+    for astre in ("terre", "mars", "jupiter", "venus", "mercure", "uranus", "neptune", "ceres", "pluton", "lune", "sol"):
+        assert astre + "(c, W, H)" in html, astre
+    # la Terre : continents (vert) + océans (bleu) ; Jupiter : bandes + tache rouge
+    ti, ji = html.find("terre(c, W, H)"), html.find("jupiter(c, W, H)")
+    assert "#1d4ed8" in html[ti:ji] and "#2f8a4e" in html[ti:ji]
+    assert "bands" in html[ji:html.find("venus(c, W, H)")] and "#dc2626" in html[ji:html.find("venus(c, W, H)")]
+    # chaque planète reçoit sa texture via son id ; les lunes aussi
+    assert "body(radius, color, false, id)" in html
+    assert "body(2.3, col, true, 'lune')" in html

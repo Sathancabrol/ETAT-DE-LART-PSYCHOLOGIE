@@ -1824,6 +1824,32 @@ def hades_target(cible: str, type: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.get("/api/godseye")
+def godseye_state():
+    """👁 God's Eye View — l'outil open source de veille mondiale que Sebas manie
+    pour aider Mercure/Hermès ; inclut son agence de l'ombre (astres-espions)."""
+    from cosmos import godseye
+    return godseye.state()
+
+
+class GodEyeSpyRequest(BaseModel):
+    mission: str = ""
+
+
+@app.post("/api/godseye/spy")
+def godseye_spy(req: GodEyeSpyRequest):
+    """Sebas demande un nouvel astre-espion (agence de l'ombre) pour récolter
+    des informations utiles — création validée par le flux nébuleuse ☉ SOL."""
+    from cosmos import godseye
+    try:
+        ag = godseye.request_shadow_astre(req.mission)
+        return {"ok": True, "astre": ag,
+                "statut": f"👁 {ag.get('name')} entre en orbite autour de Sebas — "
+                          f"mission : {ag.get('role', '').split('— ')[-1]}"}
+    except Exception as e:
+        return {"ok": False, "statut": f"l'agence refuse : {e}"}
+
+
 @app.get("/api/olympus")
 def olympus_state():
     """🏛 Le Mont Olympe : les divinités incarnées à leur poste, en mouvement
