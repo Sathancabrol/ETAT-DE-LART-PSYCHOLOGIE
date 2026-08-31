@@ -1,0 +1,303 @@
+{
+  "forge": [
+    {
+      "id": "god-s-eye-view",
+      "outil": "God's Eye View",
+      "nom": "God's Eye View 👁",
+      "url": "https://github.com/bilawalsidhu/gods-eye-view",
+      "stage": 6,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:10:31+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:10:31+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "reconstruire à l'identique",
+          "note": "réplication fonctionnelle — on prouve qu'on comprend"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "améliorer",
+          "note": "nos données/marques propres : réactivité, intégration Cognitorium"
+        },
+        {
+          "ts": "2026-08-31T20:14:09+00:00",
+          "stage": "utiliser",
+          "note": "mise en production interne (Sera Victoria, Sebas, Mercure)"
+        },
+        {
+          "ts": "2026-08-31T20:14:09+00:00",
+          "stage": "améliorer — boucle R&D",
+          "note": "retours du terrain → nouvelle itération d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:14:19+00:00",
+          "stage": "présenter",
+          "note": "démonstration à SOL et à l'utilisateur — documentation et limites"
+        }
+      ],
+      "ts": "2026-08-31T20:10:31+00:00"
+    },
+    {
+      "id": "outil-test-xyz",
+      "outil": "outil-test-xyz",
+      "nom": "Outil Test",
+      "url": "https://example.com",
+      "stage": 6,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "reconstruire à l'identique",
+          "note": "réplication fonctionnelle — on prouve qu'on comprend"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "améliorer",
+          "note": "nos données/marques propres : réactivité, intégration Cognitorium"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "utiliser",
+          "note": "mise en production interne (Sera Victoria, Sebas, Mercure)"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "améliorer — boucle R&D",
+          "note": "retours du terrain → nouvelle itération d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:13:58+00:00",
+          "stage": "présenter",
+          "note": "démonstration à SOL et à l'utilisateur — documentation et limites"
+        }
+      ],
+      "ts": "2026-08-31T20:13:58+00:00"
+    },
+    {
+      "id": "outil-test-571043",
+      "outil": "outil-test-571043",
+      "nom": "Outil Test",
+      "url": "https://example.com",
+      "stage": 6,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "reconstruire à l'identique",
+          "note": "réplication fonctionnelle — on prouve qu'on comprend"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "améliorer",
+          "note": "nos données/marques propres : réactivité, intégration Cognitorium"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "utiliser",
+          "note": "mise en production interne (Sera Victoria, Sebas, Mercure)"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "améliorer — boucle R&D",
+          "note": "retours du terrain → nouvelle itération d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:06+00:00",
+          "stage": "présenter",
+          "note": "démonstration à SOL et à l'utilisateur — documentation et limites"
+        }
+      ],
+      "ts": "2026-08-31T20:15:06+00:00"
+    },
+    {
+      "id": "outil-test-86843b",
+      "outil": "outil-test-86843b",
+      "nom": "Outil Test",
+      "url": "https://example.com",
+      "stage": 6,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "reconstruire à l'identique",
+          "note": "réplication fonctionnelle — on prouve qu'on comprend"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "améliorer",
+          "note": "nos données/marques propres : réactivité, intégration Cognitorium"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "utiliser",
+          "note": "mise en production interne (Sera Victoria, Sebas, Mercure)"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "améliorer — boucle R&D",
+          "note": "retours du terrain → nouvelle itération d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:18+00:00",
+          "stage": "présenter",
+          "note": "démonstration à SOL et à l'utilisateur — documentation et limites"
+        }
+      ],
+      "ts": "2026-08-31T20:15:18+00:00"
+    },
+    {
+      "id": "outil-test-1dd8b3",
+      "outil": "outil-test-1dd8b3",
+      "nom": "Outil Test",
+      "url": "https://example.com",
+      "stage": 6,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "reconstruire à l'identique",
+          "note": "réplication fonctionnelle — on prouve qu'on comprend"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "améliorer",
+          "note": "nos données/marques propres : réactivité, intégration Cognitorium"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "utiliser",
+          "note": "mise en production interne (Sera Victoria, Sebas, Mercure)"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "améliorer — boucle R&D",
+          "note": "retours du terrain → nouvelle itération d'amélioration"
+        },
+        {
+          "ts": "2026-08-31T20:15:30+00:00",
+          "stage": "présenter",
+          "note": "démonstration à SOL et à l'utilisateur — documentation et limites"
+        }
+      ],
+      "ts": "2026-08-31T20:15:30+00:00"
+    },
+    {
+      "id": "monitor-the-situation",
+      "outil": "Monitor the Situation 📡",
+      "nom": "Monitor the Situation 📡",
+      "url": "",
+      "stage": 1,
+      "stages": [
+        "examiner",
+        "analyser",
+        "reconstruire à l'identique",
+        "améliorer",
+        "utiliser",
+        "améliorer — boucle R&D",
+        "présenter"
+      ],
+      "historique": [
+        {
+          "ts": "2026-08-31T20:16:11+00:00",
+          "stage": "examiner",
+          "note": "lecture du code source, de la licence et des dépendances"
+        },
+        {
+          "ts": "2026-08-31T20:16:11+00:00",
+          "stage": "analyser",
+          "note": "architecture, points forts, failles, angle d'amélioration"
+        }
+      ],
+      "ts": "2026-08-31T20:16:11+00:00"
+    }
+  ]
+}

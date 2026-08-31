@@ -447,6 +447,25 @@
           <p class="text-[11px] font-semibold text-cyan-200">🧠 Cerveau du Cognitorium</p>
           <p class="text-[9px] text-slate-500">circonvolutions en nuage de points · les impulsions suivent l'activité réelle · glisser = tourner, molette = zoomer</p>
         </div>
+        <!-- ⏱ HUD de la cognition — état des processus mentaux en temps réel -->
+        <div class="absolute top-3 right-3 w-60 glass rounded-xl border border-cyan-500/25 p-2.5 pointer-events-none">
+          <div class="flex items-center gap-1.5 mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            <p class="text-[9px] uppercase tracking-[.16em] text-cyan-300/90">hud cognition · temps réel</p>
+          </div>
+          <template x-for="h in hud" :key="h.id">
+            <div class="mb-1">
+              <div class="flex items-center justify-between text-[9px]">
+                <span class="text-slate-400" x-text="h.nom"></span>
+                <span class="mono" :style="'color:' + h.c" x-text="Math.round(h.v) + '%'"></span>
+              </div>
+              <div class="h-1.5 rounded-full bg-black/40 overflow-hidden mt-0.5">
+                <div class="h-full rounded-full transition-all duration-500" :style="'width:' + Math.round(h.v) + '%;background:' + h.c"></div>
+              </div>
+            </div>
+          </template>
+          <p class="text-[7.5px] text-slate-600 mt-1 leading-tight">estimation animée, ancrée sur le profil réel (aucune donnée fabriquée au-delà de l'oscillation d'affichage)</p>
+        </div>
         <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[75%]">
           <template x-for="r in brainRegions" :key="r.id">
             <button @click="selectBrainRegion(r.id)" class="chip !text-[10px]" :class="brainSel===r.id ? '!border-cyan-400/70 !text-cyan-200' : ''" :title="r.desc">
@@ -507,6 +526,23 @@
           <div class="relative rounded-xl overflow-hidden border border-white/10" style="height:235px">
             <canvas id="simBrain" class="w-full h-full"></canvas>
             <span class="absolute bottom-2 right-2 text-[8.5px] px-1.5 py-0.5 rounded bg-black/50 text-slate-500">votre cerveau · zones actives</span>
+          </div>
+        </div>
+        <!-- ⏱ processus mentaux en temps réel pendant la scène -->
+        <div class="rounded-xl border border-cyan-500/15 bg-cyan-500/[.02] p-2 mt-2">
+          <p class="text-[9px] uppercase tracking-[.14em] text-cyan-300/70 mb-1.5">⏱ processus mentaux — temps réel pendant la scène</p>
+          <div class="grid grid-cols-3 md:grid-cols-6 gap-1.5">
+            <template x-for="h in simHud" :key="h.id">
+              <div>
+                <div class="flex items-center justify-between text-[8.5px]">
+                  <span class="text-slate-400 truncate" x-text="h.nom"></span>
+                  <span class="mono" :style="'color:' + h.c" x-text="Math.round(h.v) + '%'"></span>
+                </div>
+                <div class="h-1.5 rounded-full bg-black/40 overflow-hidden mt-0.5">
+                  <div class="h-full rounded-full transition-all duration-300" :style="'width:' + Math.round(h.v) + '%;background:' + h.c"></div>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
         <div class="flex flex-wrap gap-1.5 mt-2">
@@ -1081,7 +1117,7 @@ function app() {
     mdInline(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong class="text-slate-200">$1</strong>').replace(/`([^`]+)`/g,'<code class="text-cyan-300">$1</code>');},
 
     brainRegions: [], brainSel: null, simPhase: '🎬 simulation prête', simRegions: [], metRows: [],
-    bio: null, cogGauges: [],
+    bio: null, cogGauges: [], hud: [], simHud: [], _hudAnchors: null,
 
     initOperator() {
       if (typeof THREE === 'undefined') return;
@@ -1186,7 +1222,31 @@ function app() {
                     pic: rythme.reduce((a, b) => b.v > a.v ? b : a, {h: 0, v: -1}).h};
         const GC = {curiosite: '#34d399', profondeur: '#818cf8', creativite: '#f472b6', methode: '#22d3ee', activite: '#fbbf24'};
         this.cogGauges = dims.map(d => ({id: d.id, label: d.label, valeur: d.valeur, couleur: GC[d.id] || '#818cf8'}));
+        const dv = {}; dims.forEach(d => dv[d.id] = d.valeur);
+        this._hudAnchors = [
+          {id: 'attention',   nom: 'attention',           c: '#38bdf8', a: Math.round((dv.activite ?? 50) * .5 + (dv.curiosite ?? 50) * .5)},
+          {id: 'memtrav',     nom: 'mémoire de travail',  c: '#a78bfa', a: dv.profondeur ?? 50},
+          {id: 'traitement',  nom: 'vitesse de traitement', c: '#22d3ee', a: dv.methode ?? 50},
+          {id: 'inhibition',  nom: 'inhibition',          c: '#34d399', a: Math.round((dv.methode ?? 50) * .7 + (dv.profondeur ?? 50) * .3)},
+          {id: 'flexibilite', nom: 'flexibilité',         c: '#f472b6', a: dv.creativite ?? 50},
+          {id: 'vigilance',   nom: 'vigilance',           c: '#fbbf24', a: Math.round((dv.activite ?? 50) * .6 + (dv.curiosite ?? 50) * .4)},
+        ];
+        this.startHud();
       } catch (e) { this.bio = null; }
+    },
+
+    startHud() {
+      if (this._hudT) return;
+      const tick = () => {
+        const t = Date.now() / 1000;
+        if (this._hudAnchors) {
+          this.hud = this._hudAnchors.map((h, i) => ({
+            ...h, v: Math.max(6, Math.min(99, h.a + 3.5 * Math.sin(t * (.35 + i * .13)) + 2 * Math.sin(t * 1.7 + i)))
+          }));
+        }
+        this._hudT = setTimeout(tick, 700);
+      };
+      tick();
     },
 
     async initBrain() {
@@ -1438,6 +1498,21 @@ function app() {
         this.simRegions = Object.keys(RNAMES).map(k => ({id: k, nom: RNAMES[k][0], role: RNAMES[k][1], c: RNAMES[k][2], v: PH[pi].br[k]}));
       };
       setReadout();
+      // ⏱ HUD processus : dérivé en continu des zones cérébrales lissées
+      const HUDMAP = [
+        {id: 'attention',  nom: 'attention',     c: '#38bdf8', f: c => (c.visuel + c.auditif) / 2},
+        {id: 'vigilance',  nom: 'vigilance',     c: '#fbbf24', f: c => Math.min(100, c.amygdale * .7 + c.auditif * .3)},
+        {id: 'inhibition', nom: 'inhibition',    c: '#34d399', f: c => c.prefrontal},
+        {id: 'memtrav',    nom: 'mémoire trav.', c: '#a78bfa', f: c => Math.min(100, c.hippocampe * .8 + c.prefrontal * .2)},
+        {id: 'traitement', nom: 'traitement',    c: '#22d3ee', f: c => Math.min(100, (c.visuel + c.prefrontal) / 2)},
+        {id: 'moteur',     nom: 'réaction mot.', c: '#f472b6', f: c => c.moteur},
+      ];
+      let lastHud = 0;
+      const setSimHud = (now) => {
+        if (now - lastHud < 320) return;
+        lastHud = now;
+        this.simHud = HUDMAP.map(h => ({id: h.id, nom: h.nom, c: h.c, v: Math.max(5, Math.min(99, h.f(cur) * 100))}));
+      };
       const loop = (ts) => {
         if (!document.getElementById('simScene')) { this._simOn = false; return; }
         const t = ts / 1000, dt = Math.min(.05, t - (last || t)); last = t;
@@ -1446,6 +1521,7 @@ function app() {
         if (tPhase > ph.d) { tPhase = 0; pi = (pi + 1) % PH.length; setReadout(); }
         for (const k in cur) cur[k] += (ph.br[k] - cur[k]) * Math.min(1, dt * 3.5);
         applyColors();
+        setSimHud(t);
         paintScene(t, ph, Math.sin(t * 31) > .55);
         if (!drag) brain.rotation.y = t * .18;
         renderer.render(scene, cam);

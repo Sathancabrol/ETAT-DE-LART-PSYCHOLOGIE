@@ -896,3 +896,48 @@ caractéristique (Tombaugh Regio) ; la **Lune** et les lunes cratérisées ; le
 
 **Tests : 138** (133 + godseye module + endpoints/chat + bouton/biometriques +
 jauges + textures planétaires).
+
+## Round Sera Victoria 🕵 · HUD cognition · forge R&D de Mars
+
+**Sera Victoria — le Bureau de l'Ombre (`cosmos/shadow.py`).** Inspirée de Seras
+Victoria (Hellsing) : agent de terrain de Sebas 🛠, satellite `sera` dans le
+registre (pouvoir/devoir), lieu **Bureau de l'Ombre** sur la carte de l'Olympe.
+Elle est **contrainte** — ce n'est pas une option — de chercher des informations
+utiles du monde réel pour la chaîne hiérarchique (Sebas → Mercure/Hermès → SOL →
+utilisateur) : **position d'une entité publique** (ADS-B, AIS, satellites),
+**rapport financier** (marchés publics), **tromperie** (recoupement
+multi-sources). Elle travaille seule ou avec son **équipe personnelle
+d'assistants** (astres en orbite autour d'elle, `parent: sera`, recrutables
+depuis la modale). Ses outils : God's Eye View 👁 (OSS MIT), **Monitor the
+Situation 📡** (monitor-the-situation.com — carte mondiale de crises : conflits,
+vols militaires ADS-B, navires AIS, marchés, séismes, pannes, 50+ flux), les
+autres OSS, et le **fabriqué maison de Mars** (armurerie). Frontière éthique
+affichée partout : **données publiques uniquement (OSINT)** — aucune
+reconnaissance faciale, aucun suivi de personnes privées.
+
+**Bouton 🕵 OMBRE (barre de /sol, à côté d'INFERNO)** → modale Bureau de l'Ombre :
+carte de Sera (contrainte, pouvoir, devoir), **raccourcis d'utilisation des
+outils d'espionnage** (utiliser ↗ / ▶ ouvrir), chantiers de forge, base d'outils
+maison de Mars, recrutement d'assistants, missions types. **Si l'outil existe
+déjà dans la base d'outils (armurerie), le bouton l'ouvre** au lieu du lien
+externe. API : `GET /api/shadow`, `POST /api/shadow/team` ; chat : intent
+`shadow` (Sera Victoria / bureau de l'ombre).
+
+**⚒ Forge R&D de Mars — boucle d'ingénieur sur l'open source.** Quand un outil
+est open source, Mars le **regarde, l'analyse, le reconstruit à l'identique,
+l'améliore, l'utilise, ré-améliore (boucle), puis présente** :
+`FORGE_STAGES` (7 stades, un cran par appel), registre persistant
+`output/cosmos/forge.json`, progression visible en badges dans la modale OMBRE
+(bouton « ⚒ forge R&D » sur chaque outil, « avancer ▸ » par chantier). API :
+`POST /api/forge/oss`. God's Eye View est le premier chantier.
+
+**⏱ HUD de la cognition — temps réel.** Onglet Cerveau : overlay HUD sur le
+grand cerveau (attention, mémoire de travail, vitesse de traitement, inhibition,
+flexibilité, vigilance) — barres et valeurs animées en continu, ancrées sur le
+profil réel (oscillation d'affichage signalée, aucune donnée fabriquée au-delà).
+**Dans la Simulation aussi** : un bandeau « processus mentaux — temps réel »
+derive en continu des zones cérébrales lissées — au jumpscare, attention et
+vigilance grimpent pendant que l'inhibition s'effondre.
+
+**Tests : 143** (138 + Sera/bureau/équipe + lieu Olympe + forge R&D +
+endpoints/UI OMBRE + HUD temps réel).

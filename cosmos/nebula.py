@@ -31,7 +31,12 @@ VALID_KINDS = {"satellite", "analyste", "planet", "agent", "star"}
 def _valid_parents_base() -> set:
     try:
         from cosmos.bodies import BODIES
-        return {k for k in BODIES if k != "user"}
+        ids = {k for k in BODIES if k != "user"}
+        # Sera Victoria (satellite de Sebas) commande sa propre équipe d'assistants
+        sats = {s["id"] for b in BODIES.values() for s in (b.get("satellites") or [])}
+        if "sera" in sats:
+            ids.add("sera")
+        return ids
     except Exception:
         return {"sol", "uranus", "venus", "mars", "laplace", "sebas"}
 

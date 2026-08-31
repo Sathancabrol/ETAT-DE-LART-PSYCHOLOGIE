@@ -1636,3 +1636,94 @@ def test_astres_vraies_incarnations():
     # chaque planète reçoit sa texture via son id ; les lunes aussi
     assert "body(radius, color, false, id)" in html
     assert "body(2.3, col, true, 'lune')" in html
+
+
+# ═══ ROUND Sera Victoria 🕵 · HUD cognition · forge R&D Mars ═══
+
+def test_sera_victoria_bureau_de_l_ombre():
+    """Sera Victoria : satellite de Sebas, contrainte affichée, équipe propre,
+    outils de surveillance, frontière éthique."""
+    from cosmos import shadow
+    from cosmos.bodies import BODIES
+    sera = next(s for s in BODIES["sebas"]["satellites"] if s["id"] == "sera")
+    assert "Sera Victoria" in sera["name"] and sera.get("pouvoir") and sera.get("devoir")
+    st = shadow.state()
+    s = st["sera"]
+    assert s["reporte_a"] == "sebas"
+    assert "oblig" in s["contrainte"].lower()
+    assert any("position" in c["nom"] for c in st["missions"])           # position d'une entité
+    assert any("financier" in c["nom"] for c in st["missions"])          # rapport financier
+    assert any("tromperie" in c["nom"] for c in st["missions"])          # tromperie
+    # tous les outils de surveillance référencés
+    noms = " ".join(o["nom"] for o in st["outils"])
+    assert "God's Eye View" in noms and "Monitor the Situation" in noms
+    assert all(o["url"] for o in st["outils"])                           # raccourcis utilisables
+    assert "publiques" in st["ethique"]                                  # OSINT uniquement
+    # elle recrute son équipe personnelle (parent sera)
+    a = shadow.recruter("test — ronde")
+    assert a.get("parent") == "sera" and a["id"] in [x["id"] for x in shadow.equipe()]
+
+def test_olympus_bureau_ombre_lieu():
+    from cosmos import olympus
+    assert "ombre" in olympus.PLACES
+    sera = next(a for a in olympus.AGENTS if a["id"] == "sera")
+    assert sera["poste"] == "ombre"
+    st = olympus.state()
+    assert next(a for a in st["agents"] if a["id"] == "sera")["pouvoir"]
+
+def test_mars_forge_rd_boucle_ingenieur():
+    """Quand un outil est open source : Mars l'examine, l'analyse, le reconstruit
+    à l'identique, l'améliore, l'utilise, ré-améliore (boucle), présente."""
+    from cosmos import mars
+    import uuid
+    nom_outil = "outil-test-" + uuid.uuid4().hex[:6]
+    r = mars.forge_start(nom_outil, "Outil Test", "https://example.com")
+    assert r["ok"] and not r["deja"]
+    f = r["forge"]
+    assert f["stages"] == mars.FORGE_STAGES and f["stage"] == 0
+    assert "reconstruire à l'identique" in mars.FORGE_STAGES
+    # un cran à la fois, jusqu'à présenter
+    for i in range(len(mars.FORGE_STAGES) - 1):
+        r2 = mars.forge_advance(f["id"])
+        assert r2["ok"], i
+    assert r2["forge"]["stage"] == len(mars.FORGE_STAGES) - 1
+    assert "présenté" in r2["statut"] or "présente" in r2["statut"]
+    # re-premier appel sur le même outil : chantier retrouvé, pas dupliqué
+    r3 = mars.forge_start(nom_outil)
+    assert r3["deja"]
+    n = len([x for x in mars.forge_list() if x["id"] == f["id"]])
+    assert n == 1
+
+def test_shadow_endpoints_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from cosmos import laplace
+    c = TestClient(app)
+    st = c.get("/api/shadow").json()
+    assert st["bureau"].startswith("Bureau de l'Ombre") and st["sera"]["nom"] == "Sera Victoria"
+    assert len(st["outils"]) >= 2 and st["missions"] and st["ethique"]
+    r = c.post("/api/shadow/team", json={"mission": "endpoint — veille de test"}).json()
+    assert r["ok"] and "Sera Victoria" in r["statut"]
+    # forge via API : premier appel ouvre, second avance
+    r2 = c.post("/api/forge/oss", json={"outil": "God's Eye View"}).json()
+    assert r2["ok"]
+    stade1 = r2["forge"]["stage"]
+    r3 = c.post("/api/forge/oss", json={"outil": "God's Eye View"}).json()
+    assert r3["forge"]["stage"] >= stade1
+    # chat
+    for msg in ("parle-moi de Sera Victoria", "qui travaille au bureau de l'ombre"):
+        assert laplace.chat(msg)["intent"] == "shadow", msg
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("🕵 OMBRE", "Bureau de l'Ombre", "loadShadow", "hireAssistant", "advanceForge",
+                  "openTool", "forge R&D", "raccourcis d'utilisation", "Contrainte :"):
+        assert motif in sol, motif
+    # si l'outil existe dans la base d'outils → ouvrir (pas un lien externe)
+    assert "armoryMatch(o.nom) ? '▶ ouvrir" in sol.replace("\\u2019", "'")
+
+def test_hud_cognition_temps_reel():
+    """Cerveau + simulation : HUD live des processus mentaux."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("hud cognition · temps réel", "startHud", "_hudAnchors", "this.hud =",
+                  "processus mentaux — temps réel", "simHud", "setSimHud",
+                  "mémoire de travail", "vitesse de traitement", "inhibition", "vigilance"):
+        assert motif in html, motif

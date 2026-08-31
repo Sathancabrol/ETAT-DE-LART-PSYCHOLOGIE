@@ -34,6 +34,7 @@ PLACES: Dict[str, Dict[str, Any]] = {
     "labo":         {"x": 715, "y": 430, "nom": "Laboratoires d'Uranus",     "icon": "♅", "type": "labo"},
     "galerie":      {"x": 545, "y": 505, "nom": "Galerie de Neptune",        "icon": "🎨", "type": "temple"},
     "porte":        {"x": 165, "y": 555, "nom": "Porte des Enfers",          "icon": "⚰", "type": "porte"},
+    "ombre":        {"x": 350, "y": 300, "nom": "Bureau de l'Ombre",          "icon": "🕵", "type": "temple"},
 }
 
 # ═════════════════════════ LES HABITANTS (poste fixe = leur lieu de travail) ═════════════════════════
@@ -47,6 +48,7 @@ AGENTS: List[Dict[str, Any]] = [
     {"id": "venus",    "nom": "Vénus",        "icon": "💰", "poste": "tresor",       "couleur": "#fcd34d"},
     {"id": "mars",     "nom": "Mars",         "icon": "⚔",  "poste": "forge",        "couleur": "#f87171"},
     {"id": "sebas",    "nom": "Sebas",        "icon": "🛠", "poste": "ateliers",     "couleur": "#34d399"},
+    {"id": "sera",     "nom": "Sera Victoria", "icon": "🕵", "poste": "ombre",        "couleur": "#f43f5e"},
     {"id": "ceres",    "nom": "Cérès",        "icon": "🌾", "poste": "greniers",     "couleur": "#a3e635"},
     {"id": "ananke",   "nom": "Ananké",       "icon": "⛓",  "poste": "destin",       "couleur": "#94a3b8"},
     {"id": "atropos",  "nom": "Atropos",      "icon": "✂",  "poste": "destin",       "couleur": "#cbd5e1"},

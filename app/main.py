@@ -1850,6 +1850,50 @@ def godseye_spy(req: GodEyeSpyRequest):
         return {"ok": False, "statut": f"l'agence refuse : {e}"}
 
 
+@app.get("/api/shadow")
+def shadow_state():
+    """🕵 Bureau de l'Ombre — Sera Victoria (agent de terrain de Sebas), son
+    équipe, ses outils de surveillance (OSS + forge de Mars), sa contrainte."""
+    from cosmos import shadow
+    return shadow.state()
+
+
+class ShadowHireRequest(BaseModel):
+    mission: str = ""
+
+
+@app.post("/api/shadow/team")
+def shadow_hire(req: ShadowHireRequest):
+    """Sera recrute un assistant dans son équipe personnelle (validation ☉ SOL)."""
+    from cosmos import shadow
+    try:
+        a = shadow.recruter(req.mission)
+        return {"ok": True, "assistant": a,
+                "statut": f"🕵 {a.get('name')} rejoint l'équipe de Sera Victoria — {a.get('role', '').split('— ')[-1]}"}
+    except Exception as e:
+        return {"ok": False, "statut": f"le bureau refuse : {e}"}
+
+
+class ForgeOssRequest(BaseModel):
+    outil: str
+    nom: str = ""
+    url: str = ""
+
+
+@app.post("/api/forge/oss")
+def forge_oss(req: ForgeOssRequest):
+    """Mars ouvre (ou retrouve) le chantier R&D d'un outil open source :
+    examiner → analyser → reconstruire à l'identique → améliorer → utiliser →
+    boucle → présenter. Un cran par appel."""
+    from cosmos import mars
+    f = mars.forge_find_by_tool(req.outil)
+    if f:
+        r = mars.forge_advance(f["id"])
+    else:
+        r = mars.forge_start(req.outil, req.nom, req.url)
+    return r
+
+
 @app.get("/api/olympus")
 def olympus_state():
     """🏛 Le Mont Olympe : les divinités incarnées à leur poste, en mouvement

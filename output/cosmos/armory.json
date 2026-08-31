@@ -6046,6 +6046,1068 @@
       "forgeur": null,
       "concepteur": "deimos",
       "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-9_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-70",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:09:19+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-70_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-68",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:09:20+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-68_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-68_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-10",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:09:24+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-10_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-71",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:13:24+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-71_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-69",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:13:24+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-69_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-69_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-11",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:13:28+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-11_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-72",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:13:53+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-72_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-70",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:13:53+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-70_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-70_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-12",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:13:58+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-12_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-73",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:14:04+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-73_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-71",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:04+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-71_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-71_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-13",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:09+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-13_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-74",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:14:14+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-74_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-72",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:14+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-72_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-72_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-14",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:19+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-14_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-75",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:14:31+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-75_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-73",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:31+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-73_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-73_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-15",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:14:36+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-15_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-76",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:15:00+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-76_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-74",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:00+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-74_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-74_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-16",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:06+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-16_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-77",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:15:12+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-77_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-75",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:12+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-75_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-75_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-17",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:18+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-17_maquette.html"
+    },
+    {
+      "id": "un-outil-pour-calculer-et-visualiser-des-78",
+      "agent": "user",
+      "besoin": "un outil pour calculer et visualiser des flux interactifs",
+      "donnees": "",
+      "data_kind": "dashboard",
+      "ts": "2026-08-31T20:15:24+00:00",
+      "opensource": [
+        {
+          "id": "bokeh",
+          "name": "Bokeh",
+          "licence": "BSD-3",
+          "pour": "flux|streaming|temps\\s*r[ée]el|dashboard|interactif",
+          "pourquoi": "visualisation interactive de flux de données en Python",
+          "score": 2
+        },
+        {
+          "id": "plotly",
+          "name": "Plotly",
+          "licence": "MIT",
+          "pour": "interactif|dashboard|interactiv|explorat|hover",
+          "pourquoi": "graphiques interactifs web, zoom/hover, tableaux de bord",
+          "score": 1
+        },
+        {
+          "id": "scipy",
+          "name": "SciPy",
+          "licence": "BSD",
+          "pour": "calcul|optimis|r[ée]gression|int[ée]grale|statistique|mod[èe]lis",
+          "pourquoi": "calcul scientifique : optimisation, régression, statistiques",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : Bokeh couvre le besoin",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à user"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "recommandation": {
+        "outil": "Bokeh",
+        "licence": "BSD-3",
+        "pourquoi": "visualisation interactive de flux de données en Python",
+        "consigne": "reproduire / utiliser Bokeh (libre, BSD-3) plutôt que réinventer — Mars fournit l'intégration"
+      },
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/un-outil-pour-calculer-et-visualiser-des-78_outil.html"
+    },
+    {
+      "id": "outil-pour-explorer-la-coh-sion-des-r-se-76",
+      "agent": "uranus",
+      "besoin": "outil pour explorer la cohésion des réseaux de concepts",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:24+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "outil livré",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos",
+        "Phobos ◂ a forgé l'outil fonctionnel — livré à uranus"
+      ],
+      "forgeur": "phobos",
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-76_maquette.html",
+      "outil": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/outil-pour-explorer-la-coh-sion-des-r-se-76_outil.html"
+    },
+    {
+      "id": "j-ai-besoin-d-un-outil-pour-visualiser-d-18",
+      "agent": "user",
+      "besoin": "j'ai besoin d'un outil pour visualiser des réseaux",
+      "donnees": "",
+      "data_kind": "reseau",
+      "ts": "2026-08-31T20:15:30+00:00",
+      "opensource": [
+        {
+          "id": "d3",
+          "name": "D3.js",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|liens|n[œoe]uds|force|obsidian|relation",
+          "pourquoi": "graphe de forces, visualisation de réseaux et de liens en SVG",
+          "score": 1
+        },
+        {
+          "id": "networkx",
+          "name": "NetworkX",
+          "licence": "BSD-3",
+          "pour": "graphe|réseau|reseau|chemin|centralit|communaut",
+          "pourquoi": "calculs sur graphes : chemins, centralités, communautés",
+          "score": 1
+        }
+      ],
+      "statut": "maquette conçue",
+      "etapes": [
+        "recherche open source : aucun outil libre ne couvre le besoin",
+        "Deimos ◦ a conçu la maquette — prête pour la forge de Phobos"
+      ],
+      "forgeur": null,
+      "concepteur": "deimos",
+      "maquette": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/cosmos/armory/j-ai-besoin-d-un-outil-pour-visualiser-d-18_maquette.html"
     }
   ]
 }

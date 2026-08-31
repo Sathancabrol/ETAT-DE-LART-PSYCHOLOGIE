@@ -55,6 +55,7 @@
         <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition" title="Exécutant des commandes divines — aucune fausse donnée capteur">◉ Sebas</button>
         <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition" title="Console missions de l'agent chercheur">♅ Uranus</a>
         <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition" title="Dashboard principal : profil, fil d'Ariane, base de données">📊 Dashboard</a>
+        <button @click="loadShadow(); openModal('ombre')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 border border-slate-500/40 text-slate-200 transition font-semibold" title="Bureau de l'Ombre — Sera Victoria, agent de terrain de Sebas : outils de surveillance, équipe, raccourcis d'espionnage">🕵 OMBRE</button>
         <button @click="loadUnderworld(); openModal('inferno')" class="text-[11px] px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 transition font-semibold" title="INFERNO — la corbeille du système : le royaume d'Hadès, où rien ne disparaît vraiment">🔥 INFERNO</button>
         <button @click="openModal('aide')" class="text-[11px] w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 transition font-bold" title="Comment utiliser ce système ?">?</button>
       </div>
@@ -433,6 +434,104 @@
           <p class="text-[8.5px] text-slate-500 mt-0.5" x-text="olympus?.drama?.source || ''"></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE 🕵 OMBRE — le Bureau de l'Ombre de Sera Victoria ══════════════ -->
+  <div x-show="modals.ombre" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('ombre')">
+    <div class="glass rounded-2xl w-full max-w-3xl max-h-[88vh] overflow-y-auto p-5 fade-in border-slate-500/25">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">🕵 Bureau de l'Ombre <span class="text-slate-500 font-normal">— l'agence de terrain de Sebas</span></h2>
+          <p class="text-[10px] text-slate-500">Sera Victoria, agent de terrain — obligée de chercher des informations utiles du monde réel pour aider la chaîne hiérarchique</p>
+        </div>
+        <button @click="closeModal('ombre')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+
+      <!-- carte Sera -->
+      <div class="mt-3 rounded-xl border border-rose-500/20 bg-rose-500/[.03] p-3">
+        <div class="flex items-start gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-900/60 to-slate-900 border border-rose-500/30 flex items-center justify-center text-2xl shrink-0">🕵</div>
+          <div class="flex-1">
+            <p class="text-xs font-semibold text-rose-200">Sera Victoria <span class="text-[9.5px] font-normal text-slate-500">· reporte à Sebas 🛠 · <span x-text="shadow?.sera?.style"></span></span></p>
+            <p class="text-[10.5px] text-slate-300 leading-snug mt-1"><span class="text-rose-300 font-semibold">Contrainte :</span> <span x-text="shadow?.sera?.contrainte"></span></p>
+            <p class="text-[10px] text-slate-400 leading-snug mt-0.5"><span class="text-amber-300/90 font-semibold">⚡ Pouvoir —</span> <span x-text="shadow?.sera?.pouvoir"></span></p>
+            <p class="text-[10px] text-slate-400 leading-snug"><span class="text-emerald-300/90 font-semibold">🛡 Devoir —</span> <span x-text="shadow?.sera?.devoir"></span></p>
+          </div>
+          <button @click="openBody('sera')" class="text-[9.5px] px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 shrink-0">fiche ↗</button>
+        </div>
+        <p class="text-[9px] text-slate-600 mt-2 leading-snug">⚠ <span x-text="shadow?.ethique"></span></p>
+      </div>
+
+      <!-- outils + raccourcis -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500 mt-4 mb-2">🧰 Outils de surveillance — raccourcis d'utilisation</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <template x-for="o in (shadow?.outils || [])" :key="o.id">
+          <div class="rounded-xl border border-white/5 bg-white/[.02] p-2.5">
+            <div class="flex items-center gap-1.5">
+              <p class="text-[11px] font-semibold text-slate-200 flex-1" x-text="o.nom"></p>
+              <span class="text-[8px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/25" x-text="o.type"></span>
+            </div>
+            <p class="text-[9.5px] text-slate-500 leading-snug mt-0.5" x-text="o.raccourci"></p>
+            <p class="text-[9px] text-cyan-300/80 leading-snug mt-0.5" x-text="▸ + ' ' + o.usage"></p>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <button @click="openTool(o)" class="text-[9.5px] px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/20"
+                      x-text="armoryMatch(o.nom) ? '▶ ouvrir (base d’outils)' : '↗ utiliser'"></button>
+              <button @click="advanceForge(o.nom.replace(/[^\w' -]/g,'').trim())" :disabled="forgeBusy" class="text-[9.5px] px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 disabled:opacity-40" title="Mars : examiner → analyser → reconstruire à l'identique → améliorer → utiliser → boucle R&D → présenter">⚒ forge R&D</button>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- forge R&D de Mars sur les OSS -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500 mt-4 mb-2">⚒ Forge R&D de Mars — boucle d'ingénieur sur l'open source</h3>
+      <div class="space-y-1.5">
+        <template x-for="f in (shadow?.forge || [])" :key="f.id">
+          <div class="rounded-xl border border-red-500/15 bg-red-500/[.02] p-2.5">
+            <div class="flex items-center gap-2">
+              <p class="text-[11px] font-semibold text-red-200 flex-1" x-text="f.outil"></p>
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300" x-text="'stade : ' + forgeStage(f)"></span>
+              <button @click="advanceForge(f.outil)" :disabled="forgeBusy" class="text-[9.5px] px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 disabled:opacity-40">avancer ▸</button>
+            </div>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <template x-for="(s, i) in f.stages" :key="s">
+                <span class="text-[8.5px] px-1.5 py-0.5 rounded border" :class="i < f.stage ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300' : i === f.stage ? 'bg-amber-500/15 border-amber-500/40 text-amber-200' : 'bg-white/[.02] border-white/5 text-slate-600'" x-text="(i < f.stage ? '✓ ' : '') + s"></span>
+              </template>
+            </div>
+          </div>
+        </template>
+        <p x-show="!(shadow?.forge?.length)" class="text-[10.5px] text-slate-500 italic">aucun chantier — « ⚒ forge R&D » sur un outil ci-dessus ouvre la boucle d'ingénieur</p>
+      </div>
+
+      <!-- outils maison de Mars (base d'outils) -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500 mt-4 mb-2">🛠 Fabriqué maison par Mars <span class="normal-case tracking-normal" x-text="'— ' + (shadow?.outils_mars?.length ?? 0) + ' outil(s) dans la base'"></span></h3>
+      <div class="flex flex-wrap gap-1.5">
+        <template x-for="r in (shadow?.outils_mars || []).slice().reverse()" :key="r.id">
+          <button @click="openModal('mars')" class="chip" :title="r.statut">
+            <span x-text="(r.data_kind || 'outil')"></span> · <span x-text="(r.besoin || '').slice(0, 34)"></span>
+          </button>
+        </template>
+        <p x-show="!(shadow?.outils_mars?.length)" class="text-[10.5px] text-slate-500 italic">l'armurerie est vide — demandez un outil à Mars</p>
+      </div>
+
+      <!-- équipe de Sera -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500 mt-4 mb-2">👥 Équipe personnelle de Sera <span class="normal-case tracking-normal" x-text="'— ' + (shadow?.equipe?.length ?? 0) + ' assistant(s)'"></span></h3>
+      <div class="flex gap-1.5 mb-2">
+        <input x-model="hireMission" placeholder="mission de l'assistant : ex. recouper les flux ADS-B et AIS la nuit" class="flex-1 bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-rose-500/60">
+        <button @click="hireAssistant()" :disabled="hireBusy" class="text-[11px] px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/40 text-rose-200 hover:bg-rose-500/25 disabled:opacity-40" x-text="hireBusy ? '…' : '+ recruter'"></button>
+      </div>
+      <div class="space-y-1">
+        <template x-for="a in (shadow?.equipe || [])" :key="a.id">
+          <p class="text-[10px] text-slate-400">🕵 <span class="text-rose-300" x-text="a.name"></span> — <span x-text="(a.role || '').split('— ').pop()"></span></p>
+        </template>
+      </div>
+      <!-- missions types -->
+      <div class="flex flex-wrap gap-1.5 mt-3 pt-2 border-t border-white/5">
+        <template x-for="c in (shadow?.missions || [])" :key="c.id">
+          <span class="chip !text-[9.5px] !border-rose-500/25" :title="c.exemples.join(' · ')"><span x-text="c.nom"></span></span>
+        </template>
+      </div>
+      <p x-show="shadowMsg" class="text-[10.5px] mt-2 text-rose-300" x-text="shadowMsg"></p>
     </div>
   </div>
 
@@ -1107,7 +1206,7 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false, olympus: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false, olympus: false, ombre: false},
     olympus: null, olympusBeat: null, olyFeed: [], olyChat: [],
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false, targetOpen: null, targetDetail: null,
@@ -1126,6 +1225,7 @@ function solApp() {
       {g:'Divinités au travail', i:'🛠', l:"l'armurerie de Mars", m:'armurerie'},
       {g:'Divinités au travail', i:'👁', l:"God's Eye View (œil de Sebas)", m:"parle-moi de l'outil god's eye view"},
       {g:'Divinités au travail', i:'🕵', l:"commander un astre espion (agence de l'ombre)", m:"Sebas, crée un astre espion de l'agence de l'ombre pour veiller sur le monde"},
+      {g:'Divinités au travail', i:'🕵', l:"Sera Victoria (bureau de l'ombre)", m:"parle-moi de Sera Victoria"},
       {g:'Enfers & justice', i:'♇', l:'scan de Hadès : données, traitement, éligibles', m:'scan de Hadès : données, traitement, éligibles au fauchage'},
       {g:'Enfers & justice', i:'⚰', l:'lancer la fauche', m:'Hadès, lance la fauche'},
       {g:'Enfers & justice', i:'🔥', l:"le royaume d'Hadès (INFERNO)", m:'montre-moi les enfers'},
@@ -1142,6 +1242,7 @@ function solApp() {
       {g:'Mémoire & identité', i:'🔧', l:'aide & gestes du système', m:'aide'},
     ],
     godseye: null, spyMission: '', spyBusy: false, spyMsg: '',
+    shadow: null, hireMission: '', hireBusy: false, shadowMsg: '', forgeBusy: false,
     inferno: null, infernoMsg: '',
     systemOn: true, skyMsg: '',
     split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null, sideThemis: null,
@@ -1502,6 +1603,12 @@ function solApp() {
       if (this._olyRaf) cancelAnimationFrame(this._olyRaf); this._olyRaf = null;
       if (this._olyPoll) clearInterval(this._olyPoll); this._olyPoll = null;
     },
+    async loadArmoryQuiet() {
+      try {
+        const r = await (await fetch('/api/mars/armory')).json();
+        this.armory = r.requests || r || [];
+      } catch (e) {}
+    },
     async loadGodseye() {
       try { this.godseye = await (await fetch('/api/godseye')).json(); } catch (e) { this.godseye = null; }
     },
@@ -1517,6 +1624,44 @@ function solApp() {
         await this.loadGodseye();
       } catch (e) { this.spyMsg = '⚠️ ' + e.message; }
       this.spyBusy = false;
+    },
+    async loadShadow() {
+      if (!this.armory.length) this.loadArmoryQuiet();
+      try { this.shadow = await (await fetch('/api/shadow')).json(); } catch (e) { this.shadow = null; }
+    },
+    async hireAssistant() {
+      if (!this.hireMission.trim()) { this.shadowMsg = '🕵 précisez la mission de l’assistant.'; return; }
+      this.hireBusy = true; this.shadowMsg = '';
+      try {
+        const r = await (await fetch('/api/shadow/team', {method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({mission: this.hireMission})})).json();
+        this.shadowMsg = r.statut; this.hireMission = '';
+        await this.loadShadow();
+      } catch (e) { this.shadowMsg = '⚠️ ' + e.message; }
+      this.hireBusy = false;
+    },
+    async advanceForge(outil) {
+      this.forgeBusy = true;
+      try {
+        const r = await (await fetch('/api/forge/oss', {method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({outil})})).json();
+        this.shadowMsg = r.statut;
+        await this.loadShadow();
+      } catch (e) { this.shadowMsg = '⚠️ ' + e.message; }
+      this.forgeBusy = false;
+    },
+    forgeStage(f) { return f ? (f.stages[f.stage] || 'présenté') : ''; },
+    armoryMatch(nom) {
+      // si l'outil existe déjà dans la base d'outils (armurerie de Mars) → ouvrir
+      const n = (nom || '').toLowerCase();
+      return (this.armory || []).find(r => (r.outil || r.besoin || '').toLowerCase().includes(n.split(' ')[0])) || null;
+    },
+    openTool(o) {
+      const m = this.armoryMatch(o.nom);
+      if (m) { this.openModal('mars'); return; }               // existe dans la base → ouvrir
+      if (o.url) window.open(o.url, '_blank', 'noopener');      // sinon raccourci externe
     },
     async loadUnderworld() {
       try { this.inferno = await (await fetch('/api/underworld')).json(); this.infernoMsg = ''; }

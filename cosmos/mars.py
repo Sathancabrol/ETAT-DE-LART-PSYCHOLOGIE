@@ -380,3 +380,91 @@ bind('amp',refresh);bind('noise',refresh);bind('npts',refresh);
 document.getElementById('metric').onchange=draw;
 addEventListener('resize',draw);refresh();
 </script>""", "OUTIL ⚒", "var(--red)")
+
+
+# ═══ Boucle d'ingénieur / R&D de Mars sur les outils open source ═════════════
+# Quand un outil est open source : Mars le REGARDE, l'ANALYSE, le RECONSTRUIT
+# à l'identique, l'AMÉLIORE, l'UTILISE, ré-améliore (boucle), puis PRÉSENTE.
+FORGE_STAGES = ["examiner", "analyser", "reconstruire à l'identique",
+                "améliorer", "utiliser", "améliorer — boucle R&D", "présenter"]
+
+try:
+    FORGE_PATH = _ledger.COSMOS_DIR / "forge.json"
+except Exception:  # pragma: no cover
+    FORGE_PATH = Path("output/cosmos/forge.json")
+
+FORGE_NOTES = {
+    "examiner": "lecture du code source, de la licence et des dépendances",
+    "analyser": "architecture, points forts, failles, angle d'amélioration",
+    "reconstruire à l'identique": "réplication fonctionnelle — on prouve qu'on comprend",
+    "améliorer": "nos données/marques propres : réactivité, intégration Cognitorium",
+    "utiliser": "mise en production interne (Sera Victoria, Sebas, Mercure)",
+    "améliorer — boucle R&D": "retours du terrain → nouvelle itération d'amélioration",
+    "présenter": "démonstration à SOL et à l'utilisateur — documentation et limites",
+}
+
+
+def _forge_load() -> Dict[str, Any]:
+    if FORGE_PATH.exists():
+        try:
+            return json.loads(FORGE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"forge": []}
+
+
+def _forge_save(data: Dict[str, Any]) -> None:
+    FORGE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    FORGE_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def forge_find(fid: str) -> Dict[str, Any] | None:
+    return next((f for f in _forge_load()["forge"] if f["id"] == fid), None)
+
+
+def forge_find_by_tool(tool: str) -> Dict[str, Any] | None:
+    t = (tool or "").lower().strip()
+    return next((f for f in _forge_load()["forge"]
+                 if t in (f.get("outil") or "").lower() or t in f["id"]), None)
+
+
+def forge_start(outil: str, nom: str = "", url: str = "") -> Dict[str, Any]:
+    """Mars ouvre le chantier R&D d'un outil open source."""
+    outil = (outil or "").strip()[:80] or "outil inconnu"
+    ex = forge_find_by_tool(outil)
+    if ex:
+        return {"ok": True, "deja": True, "forge": ex,
+                "statut": f"⚒ {ex['outil']} est déjà au stade « {ex['stages'][ex['stage']] } »"}
+    f = {"id": _slug(outil) or "forge", "outil": outil,
+         "nom": nom or outil, "url": url,
+         "stage": 0, "stages": FORGE_STAGES,
+         "historique": [{"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                         "stage": FORGE_STAGES[0], "note": FORGE_NOTES[FORGE_STAGES[0]]}],
+         "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    data = _forge_load()
+    data["forge"].append(f)
+    _forge_save(data)
+    return {"ok": True, "deja": False, "forge": f,
+            "statut": f"⚒ Mars examine « {outil} » — code source, licence, dépendances"}
+
+
+def forge_advance(fid: str) -> Dict[str, Any]:
+    """Un cran de la boucle d'ingénieur : examiner → analyser → reconstruire →
+    améliorer → utiliser → améliorer (boucle) → présenter."""
+    data = _forge_load()
+    f = next((x for x in data["forge"] if x["id"] == fid), None)
+    if not f:
+        return {"ok": False, "statut": "chantier inconnu"}
+    if f["stage"] >= len(FORGE_STAGES) - 1:
+        return {"ok": True, "forge": f,
+                "statut": f"🏆 « {f['outil']} » est présenté — la boucle R&D continue au fil du terrain"}
+    f["stage"] += 1
+    st = FORGE_STAGES[f["stage"]]
+    f["historique"].append({"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                            "stage": st, "note": FORGE_NOTES[st]})
+    _forge_save(data)
+    return {"ok": True, "forge": f, "statut": f"⚒ « {f['outil']} » → {st} : {FORGE_NOTES[st]}"}
+
+
+def forge_list() -> List[Dict[str, Any]]:
+    return _forge_load()["forge"]

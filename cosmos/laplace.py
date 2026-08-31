@@ -26,6 +26,9 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
+# bureau de l'ombre / Sera Victoria → l'agent de terrain de Sebas
+SHADOW_RE = re.compile(r"bureau de l'ombre|vera ?victoria|[sS]era ?Victoria|agent de terrain|ombre (de|du)", re.IGNORECASE)
+
 # œil de Dieu / agence de l'ombre → God's Eye View 👁 (Sebas outille Mercure)
 GODEYE_RE = re.compile(r"gods?['’ ]?s? ?eye|œil de dieu|oeil de dieu|agence de l'ombre|espion|shadow agency|satellite", re.IGNORECASE)
 
@@ -59,6 +62,20 @@ def chat(message: str) -> Dict[str, Any]:
         analyse = metatron.analyze_request(m)
     except Exception:
         analyse = None
+
+    # ── Bureau de l'Ombre → Sera Victoria, contrainte d'informer la hiérarchie ──
+    if SHADOW_RE.search(m):
+        from cosmos import shadow
+        st = shadow.state()
+        s = st["sera"]
+        lignes = [f"🕵 {s['nom']} — {s['titre']} (reporte à Sebas 🛠).",
+                  f"Contrainte : {s['contrainte']}.",
+                  f"Équipe : {len(st['equipe'])} assistant(s) · {len(st['agence_sebas'])} astre(s)-espion(s) de l'agence de Sebas.",
+                  "Outils : " + " · ".join(o["nom"] for o in st["outils"]) + " · forge maison de Mars (" + str(len(st["forge"])) + " chantier(s) R&D).",
+                  f"Éthique : {st['ethique']}",
+                  "Ouvre le bouton 🕵 OMBRE dans /sol pour les raccourcis d'outils et recruter dans son équipe."]
+        return {"reply": "\n".join(lignes), "intent": "shadow", "speaker": "laplace",
+                "data": {"equipe": len(st["equipe"])}}
 
     # ── Œil de Dieu → Sebas outille Mercure/Hermès (datas réelles du monde) ──
     if GODEYE_RE.search(m):

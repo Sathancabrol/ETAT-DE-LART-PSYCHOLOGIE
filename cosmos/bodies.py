@@ -153,8 +153,11 @@ BODIES: Dict[str, Dict[str, Any]] = {
                 "(webcam, wifi, téléphone) ; remonte des observations et agit sur site.",
         "color": "#34d399",
         "sensors": ["webcam", "wifi", "telephone"],
+            "satellites": [
+            {"id": "sera", "name": "Sera Victoria 🕵", "distance_km": 0, "role": "Agent de terrain du Bureau de l'Ombre — obligée de chercher des informations utiles du monde réel (position d'une entité publique, rapport financier, tromperie) pour aider la chaîne hiérarchique ; travaille seule ou avec son équipe d'assistants ; manie God's Eye View, Monitor the Situation et la forge de Mars"},
+        ],
     },
-    "sol": {
+"sol": {
         "name": "SOL", "symbol": "☉", "icon": "👑",
         "pouvoir": "approuver, journaliser, prévenir — rien ne circule sans lui",
         "devoir": "orchestrer le système et garantir l'intégrité des interactions", "kind": "star", "orbit_r": 0,
@@ -390,6 +393,8 @@ def celestial_registry() -> List[Dict[str, Any]]:
 # ═══ Identité des entités secondaires : chaque satellite/membre de cour a un
 # pouvoir et un devoir — ils forment un système, une famille, une entreprise ═══
 IDENTITE_SECONDAIRES = {
+    "sera":     ("utiliser tous les outils de surveillance (God's Eye View, Monitor the Situation, OSS, forge de Mars) et commander son équipe d'assistants du Bureau de l'Ombre",
+                 "être contrainte de chercher des informations utiles du monde réel — mais publiques uniquement : jamais de données personnelles privées ni de suivi de personnes"),
     "charon":   ("faucher et transporter les condamnés vers les Enfers, sans escale ni retour",
                  "exécuter chaque fauche ordonnée par Hadès, sans partialité ni pitié"),
     "styx":     ("sceller le seuil — marquer ce qui doit mourir et ce qui doit rester",
