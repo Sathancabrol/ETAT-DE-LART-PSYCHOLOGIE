@@ -1500,3 +1500,69 @@ def test_dashboard_holo_avatar_cerveau():
     # les régions du cerveau sont câblées aux données réelles
     for rid in ("frontal", "parietal", "temporal", "occipital", "cervelet", "tronc"):
         assert f"id: '{rid}'" in html, rid
+
+
+# ═══ ROUND simulation cérébrale · killchain Olympe · Laplace nébuleuse ═══
+
+def test_operateur_3d_lance_au_chargement():
+    """Fix : l'opérateur T-pose doit se lancer au 1ᵉʳ affichage (init), pas
+    seulement au changement d'onglet — et redémarrer après retour d'onglet."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert html.count("this.initOperator()") >= 2       # init() + switchTab()
+    assert "this._opTries < 40" in html and "if (this._op) { this._opLoop(); return; }" in html
+
+def test_cerveau_fenetre_simulation_film_peur():
+    """Fenêtre simulation : scène (télé + vous) et cerveau 3D qui s'illumine
+    par zone (amygdale=peur, visuel, préfrontal…) selon les phases du film."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("simScene", "simBrain", "initSimulation", "simPhase", "simRegions",
+                  "JUMPSCARE", "amygdale", "hippocampe", "jumpscare",
+                  "film d'horreur au salon"):
+        assert motif in html, motif
+    # les 4 phases du scénario existent avec leurs intensités cérébrales
+    for ph in ("'calme'", "'tension'", "'jumpscare'", "'retour'"):
+        assert ph in html, ph
+
+def test_cerveau_graphe_3d_metrics_impact_environnement():
+    """Graphe 3D : performance des fonctions mentales (base réelle) vs impact
+    de l'action/environnement (scénario film de peur)."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("metrics3d", "initMetrics3d", "metRows", "impact film de peur",
+                  "attention*", "base réelle"):
+        assert motif in html, motif
+
+def test_olympus_killchain_killfeed_et_dialogues():
+    """Olympe : killchain affichée en killfeed + chat activé par les dialogues."""
+    from cosmos import underworld, olympus
+    underworld.record_soul({"id": "ame-kc", "type": "run_outdated", "region": "tartare",
+                            "cible": "output/agent_runs/run_kc", "raison": "test killchain",
+                            "octets": 1, "trace": {"tache": "expérience interdite"},
+                            "gardien": "Cerbère 🐾", "ts": "2026-08-31T00:00:00"})
+    d = olympus.drama()
+    assert d["mode"] == "justice"
+    kill = [b for b in d["beats"] if b.get("kill")]
+    assert kill, "aucun beat marqué kill"
+    # chaque beat du procès parle : dialogues nommés et colorés
+    for b in d["beats"]:
+        assert b.get("dialogues"), f"beat sans dialogues : {b['texte'][:30]}"
+    st = olympus.state()
+    for b in st["drama"]["beats"]:
+        for dlg in b["dialogues"]:
+            assert dlg.get("nom") and dlg.get("couleur", "#94a3b8")
+    # UI : killfeed + chat de dialogue façon partie en cours
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("killchain", "olyFeed", "olyChat", "ÉLIMINATION",
+                  "dialogue des divinités", "en direct"):
+        assert motif in html, motif
+
+def test_laplace_cartoon_nebuleuse_non_humaine():
+    """Le mascot redevient cartoon (sprite d'avant) ; dans le chat/nébuleuse,
+    Laplace est une entité supérieure bienveillante SANS forme humaine."""
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    neb = Path(__file__).resolve().parents[1] / "app" / "static" / "laplace_nebula.png"
+    assert neb.exists() and neb.stat().st_size > 10000
+    assert "laplace_nebula.png" in sol
+    assert "sans forme humaine" in sol and "constellations" in sol
+    # le mascot cartoon est en place (sprite 2×2 animé)
+    js = (Path(__file__).resolve().parents[1] / "app" / "static" / "sol_widget.js").read_text(encoding="utf-8")
+    assert "laplace_sprite.png" in js and "solw-frames" in js

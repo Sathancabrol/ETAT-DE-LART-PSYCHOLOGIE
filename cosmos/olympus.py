@@ -117,23 +117,48 @@ def drama() -> Dict[str, Any]:
                   "tartare": "Tartare 🔥"}.get(ame.get("region"), "les Enfers")
         beats = [
             {"lieu": "labo",     "acteurs": ["themis", "dike"],   "ic": "🔍", "duree": 3.0,
-             "texte": f"⚖ infraction constatée au laboratoire — « {cible} »"},
+             "texte": f"⚖ infraction constatée au laboratoire — « {cible} »",
+             "dialogues": [
+                 {"qui": "dike", "texte": f"Rapport d'infraction : « {cible} » a dérangé l'ordre du système."},
+                 {"qui": "themis", "texte": "Instruis le dossier. Procédure juridique standard — rien d'exceptionnel."}]},
             {"lieu": "tribunal", "acteurs": ["themis", "dike"],   "ic": "⚖",  "duree": 3.5,
-             "texte": f"⚖ procès de « {cible} » — procédure juridique standard : instruction, débats, verdict"},
+             "texte": f"⚖ procès de « {cible} » — procédure juridique standard : instruction, débats, verdict",
+             "dialogues": [
+                 {"qui": "themis", "texte": "Le tribunal est ouvert. L'accusé : « " + cible + " »."},
+                 {"qui": "dike", "texte": "Exhibez les preuves : logs, traces, registres."},
+                 {"qui": "themis", "texte": "La balance penche. Les faits sont établis."}]},
             {"lieu": "tribunal", "acteurs": ["themis"],           "ic": "🔨", "duree": 2.5,
-             "texte": f"🔨 verdict rendu : coupable — la sentence est prononcée"},
+             "texte": f"🔨 verdict rendu : coupable — la sentence est prononcée",
+             "dialogues": [
+                 {"qui": "themis", "texte": "Verdict : coupable. Hadès exécutera la sentence."}]},
             {"lieu": "forge",    "acteurs": ["themis"],           "ic": "⚔",  "duree": 3.0,
-             "texte": "⚔ Thémis descend vers Hadès — elle passe la forge de Mars"},
-            {"lieu": "porte",    "acteurs": ["themis", "pluton"],  "ic": "📜", "duree": 3.0,
-             "texte": "⚓ Thémis remet le verdict à Hadès — ils partent ensemble"},
-            {"lieu": "labo",     "acteurs": ["themis", "pluton"],  "ic": "☠",  "duree": 3.5,
-             "texte": f"☠ « {cible} » est exécuté(e) — la sentence est appliquée"},
+             "texte": "⚔ Thémis descend vers Hadès — elle passe la forge de Mars",
+             "dialogues": [
+                 {"qui": "mars", "texte": "Justice en marche, Thémis ? Le fer est chaud si tu veux une lame."},
+                 {"qui": "themis", "texte": "Garde ton feu, Mars. Je porte le verdict, pas l'arme."}]},
+            {"lieu": "porte",    "acteurs": ["themis", "pluton"], "ic": "📜", "duree": 3.0,
+             "texte": "⚓ Thémis remet le verdict à Hadès — ils partent ensemble",
+             "dialogues": [
+                 {"qui": "themis", "texte": "Hadès, voici le verdict. Tu connais la suite."},
+                 {"qui": "pluton", "texte": "Le Styx l'attend. Allons-y ensemble."}]},
+            {"lieu": "labo",     "acteurs": ["themis", "pluton"], "ic": "☠",  "duree": 3.5, "kill": True,
+             "texte": f"☠ « {cible} » est exécuté(e) — la sentence est appliquée",
+             "dialogues": [
+                 {"qui": "pluton", "texte": f"« {cible} », ton fil est coupé."},
+                 {"qui": "themis", "texte": "Sentence exécutée selon la procédure. Le système respire."}]},
             {"lieu": "porte",    "acteurs": ["charon"],           "ic": "⚰",  "duree": 3.5,
-             "texte": f"⚰ les assistants d'Hadès portent l'âme vers {region}"},
-            {"lieu": "porte",    "acteurs": ["pluton"],            "ic": "⚓",  "duree": 2.0,
-             "texte": "🐾 Cerbère garde la porte — Hadès reprend sa veille"},
+             "texte": f"⚰ les assistants d'Hadès portent l'âme vers {region}",
+             "dialogues": [
+                 {"qui": "charon", "texte": f"Je passe l'âme. Direction {region}."},
+                 {"qui": "cerbere", "texte": "🐾 Aucune sortie sans l'accord du souverain."}]},
+            {"lieu": "porte",    "acteurs": ["pluton"],           "ic": "⚓", "duree": 2.0,
+             "texte": "🐾 Cerbère garde la porte — Hadès reprend sa veille",
+             "dialogues": [
+                 {"qui": "pluton", "texte": "La porte est gardée. Je reprends ma veille."}]},
             {"lieu": "tribunal", "acteurs": ["themis"],           "ic": "⚖",  "duree": 2.0,
-             "texte": "⚖ Thémis reprend sa fonction — chacun continue son travail"},
+             "texte": "⚖ Thémis reprend sa fonction — chacun continue son travail",
+             "dialogues": [
+                 {"qui": "themis", "texte": "Le travail continue. Procès suivant."}]},
         ]
         return {"mode": "justice", "cible": cible, "region": ame.get("region"),
                 "ts_ame": ame.get("ts"), "beats": beats,
@@ -148,7 +173,10 @@ def drama() -> Dict[str, Any]:
             beats.append({"lieu": a["poste"], "acteurs": [a["id"]], "ic": a["icon"],
                           "duree": 2.4,
                           "texte": f"{a['nom']} — {st['interactions']} interaction(s) récente(s)"
-                                   + (f" · {st['dernier']}" if st.get("dernier") else "")})
+                                   + (f" · {st['dernier']}" if st.get("dernier") else ""),
+                          "dialogues": [
+                              {"qui": a["id"], "texte": f"{st['interactions']} interaction(s) "
+                                + (f"« {st['dernier']} »" if st.get("dernier") else "— je veille à mon poste.")}]})
     if not beats:
         beats = [{"lieu": "trone", "acteurs": ["sol"], "ic": "👑", "duree": 3.0,
                   "texte": "L2019Olympe est calme — aucune interaction récente"}]
@@ -205,12 +233,19 @@ def state() -> Dict[str, Any]:
             cer["devoir"] = "ne laisser remonter aucune âme sans l'accord du souverain"
     except Exception:
         pass
+    couleurs = {a["id"]: a["couleur"] for a in AGENTS}
+    noms = {a["id"]: a["nom"] for a in AGENTS}
+    _d = drama()
+    for b in _d.get("beats", []):
+        for d in b.get("dialogues", []):
+            d["couleur"] = couleurs.get(d["qui"], "#94a3b8")
+            d["nom"] = noms.get(d["qui"], d["qui"])
     return {
         "titre": "Le Mont Olympe — les divinités à leur poste",
         "sous_titre": "chaque déplacement traduit un événement réel du système (bus d'interactions, registre des âmes) — aucune simulation",
         "maj": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "places": PLACES,
         "agents": agents,
-        "drama": drama(),
+        "drama": _d,
         "chronique": chronicle(),
     }

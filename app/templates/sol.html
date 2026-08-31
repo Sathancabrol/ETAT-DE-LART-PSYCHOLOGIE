@@ -398,13 +398,36 @@
       </div>
       <div class="flex-1 relative overflow-hidden">
         <canvas id="olympusCanvas" class="w-full h-full cursor-pointer"></canvas>
-        <div class="absolute top-3 right-3 w-64 max-h-[62%] overflow-y-auto glass rounded-xl border border-white/10 p-2.5">
-          <p class="text-[9px] uppercase tracking-[.16em] text-slate-500 mb-1.5">📡 chronique réelle</p>
-          <template x-for="(c, i) in (olympus?.chronique || [])" :key="i">
-            <p class="text-[9.5px] text-slate-400 leading-snug mb-1 flex gap-1.5"><span x-text="c.icon"></span><span class="flex-1" x-text="c.texte"></span></p>
-          </template>
+        <div class="absolute top-3 right-3 flex flex-col gap-2 w-[270px] max-h-[78%]">
+          <div class="glass rounded-xl border border-rose-500/25 p-2.5">
+            <p class="text-[9px] uppercase tracking-[.16em] text-rose-300/80 mb-1.5">☠ killchain — suite d'actions en cours</p>
+            <div class="space-y-1">
+              <template x-for="(f, i) in olyFeed" :key="i">
+                <div class="flex items-center gap-1.5 rounded-lg px-1.5 py-1" :class="f.kill ? 'bg-rose-500/15 border border-rose-500/40' : 'bg-white/[.03] border border-white/5'" :style="'opacity:' + (1 - i * 0.13)">
+                  <span class="text-[11px]" x-text="f.ic"></span>
+                  <p class="text-[9.5px] leading-tight flex-1 min-w-0 truncate"><span class="text-slate-200 font-semibold" x-text="f.qui"></span> <span class="text-slate-500" x-text="f.kill ? '— ÉLIMINATION' : '→'"></span> <span class="text-slate-400" x-text="f.texte"></span></p>
+                </div>
+              </template>
+              <p x-show="!olyFeed.length" class="text-[9.5px] text-slate-600 italic">en attente du premier mouvement…</p>
+            </div>
+          </div>
+          <div class="glass rounded-xl border border-white/10 p-2.5 overflow-y-auto">
+            <p class="text-[9px] uppercase tracking-[.16em] text-slate-500 mb-1.5">📡 chronique réelle</p>
+            <template x-for="(c, i) in (olympus?.chronique || [])" :key="i">
+              <p class="text-[9.5px] text-slate-400 leading-snug mb-1 flex gap-1.5"><span x-text="c.icon"></span><span class="flex-1" x-text="c.texte"></span></p>
+            </template>
+          </div>
         </div>
         <p class="absolute top-3 left-3 text-[9px] text-slate-500 max-w-[250px] leading-snug glass rounded-lg px-2 py-1.5 border border-white/10">🖱 cliquez sur un personnage → sa fiche (fonction · pouvoir · devoir)</p>
+        <div class="absolute bottom-3 left-3 w-80 max-w-[42%] glass rounded-xl border border-violet-500/25 p-2.5">
+          <p class="text-[9px] uppercase tracking-[.16em] text-violet-300/70 mb-1.5">💬 dialogue des divinités — en direct</p>
+          <div class="space-y-1 max-h-36 overflow-y-auto">
+            <template x-for="(m, i) in olyChat" :key="i">
+              <p class="text-[10px] leading-snug fade-in"><span class="font-semibold" :style="'color:' + m.couleur" x-text="m.nom + ' :'"></span> <span class="text-slate-300" x-text="m.texte"></span></p>
+            </template>
+            <p x-show="!olyChat.length" class="text-[9.5px] text-slate-600 italic">le silence précède l'action…</p>
+          </div>
+        </div>
         <div class="absolute bottom-3 left-1/2 -translate-x-1/2 glass rounded-xl border border-violet-500/25 px-4 py-2 max-w-[82%] text-center">
           <p class="text-[11.5px] text-violet-100 leading-snug" x-text="olympusBeat?.texte || '…'"></p>
           <p class="text-[8.5px] text-slate-500 mt-0.5" x-text="olympus?.drama?.source || ''"></p>
@@ -875,7 +898,8 @@
       <!-- ▶ COLONNE CHAT -->
       <div class="flex-1 flex flex-col min-w-0 min-h-0">
       <div class="px-4 py-3 border-b border-white/5 flex items-center gap-2.5">
-        <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200">☉</span>
+        <img src="/static/laplace_nebula.png" alt="Laplace — nébuleuse" class="w-9 h-9 rounded-full object-cover border border-violet-400/40 animate-pulse" style="box-shadow:0 0 16px rgba(167,139,250,.35)" title="Laplace ✳ — entité supérieure bienveillante, sans forme humaine : il crée ses constellations et ses systèmes pour interagir avec vous dans le meilleur alignement possible">
+        <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200" title="☉ SOL approuve chaque réponse">☉</span>
         <div class="flex-1"><h2 class="text-sm font-semibold">✳ Laplace — interlocuteur principal <span class="text-[9.5px] text-amber-300/80 font-normal">· ☉ SOL approuve chaque réponse</span></h2>
         <p class="text-[10px] text-slate-600">réponses ancrées sur les données réelles · toute interaction inter-corps est approuvée & journalisée</p></div>
         <button x-show="!split" @click="startSplit('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white" title="afficher la fiche réactive à côté du chat">⬅ fiche</button>
@@ -1058,7 +1082,7 @@ function solApp() {
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
     modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false, olympus: false},
-    olympus: null, olympusBeat: null,
+    olympus: null, olympusBeat: null, olyFeed: [], olyChat: [],
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false, targetOpen: null, targetDetail: null,
     quickOpen: false,
@@ -1294,6 +1318,7 @@ function solApp() {
       try { this.olympus = await (await fetch('/api/olympus')).json(); } catch (e) { this.olympus = null; }
     },
     openOlympus() {
+      this.olyFeed = []; this.olyChat = [];
       this.loadOlympus().then(() => {
         this.openModal('olympus');
         this.$nextTick(() => this.startOlympusEngine());
@@ -1380,7 +1405,18 @@ function solApp() {
           const beat = beats[st.beat % beats.length];
           st.tBeat += dt;
           if (st.tBeat > (beat.duree || 2.5)) { st.tBeat = 0; st.beat++; if (st.beat >= beats.length) { st.beat = 0; st.wraps++; } }
-          if (st._bi !== st.beat) { st._bi = st.beat; this.olympusBeat = beats[st.beat % beats.length]; }
+          if (st._bi !== st.beat) {
+            st._bi = st.beat;
+            const b2 = beats[st.beat % beats.length];
+            this.olympusBeat = b2;
+            // ☠ killchain — killfeed façon partie en cours
+            const noms = id => { const q = st.pos[id]; return q && q.a ? q.a.nom : id; };
+            this.olyFeed.unshift({ic: b2.ic, qui: b2.acteurs.map(noms).join(' + '), texte: b2.texte, kill: !!b2.kill});
+            if (this.olyFeed.length > 6) this.olyFeed.pop();
+            // 💬 le chat s'active selon leurs dialogues
+            for (const d of (b2.dialogues || [])) this.olyChat.push({nom: d.nom || d.qui, couleur: d.couleur || '#94a3b8', texte: d.texte});
+            while (this.olyChat.length > 9) this.olyChat.shift();
+          }
           const pl = d.places[beat.lieu] || {x: 500, y: 300};
           beat.acteurs.forEach((id, i) => {
             const p = st.pos[id]; if (!p) return;

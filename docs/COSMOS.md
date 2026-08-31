@@ -811,3 +811,43 @@ fond normalisé #0b0f1d.
 
 **Tests : 128** (122 + identité de toutes les entités + fiches connectées cliquables +
 menu d'actions rapides + Olympe backend + endpoint/UI Olympe + dashboard holo/avatar/cerveau).
+
+## Round simulation cérébrale 🎬 · killchain Olympe ☠ · Laplace nébuleuse ✳
+
+**Fix opérateur 3D.** L'humain T-pose ne s'affichait pas : `initOperator()` n'était
+appelé qu'au changement d'onglet, jamais au premier chargement. Corrigé — lancé dans
+`init()`, retry tant que le canvas n'a pas de taille, et redémarrable après retour
+d'onglet (scène construite une fois, boucle stop/start).
+
+**Fenêtre Simulation (onglet Cerveau).** Scène exemple : vous regardez un film de
+peur sur la télé — salon dessiné en direct (télé qui flicker, silhouette sur le
+canapé, bras levés au jumpscare, flash blanc) — et à côté **votre cerveau 3D qui
+s'illumine par zone** : amygdale (peur), cortex visuel (vision), préfrontal
+(anticipation/régulation), hippocampe (encodage), auditif (bande-son), moteur
+(sursaut). 4 phases (calme → tension → jumpscare → retour au calme) avec lissage
+continu des intensités et readout en % sous les canvas.
+
+**Graphe 3D des métriques (à côté).** Performance des fonctions et processus
+mentaux en barres 3D rotationnelles : base réelle (mesures du profil cognitif) vs
+**impact de l'action/environnement** (scénario film de peur : attention ↑ 55→95,
+activité ↑, curiosité ↑, mémoire ↓, profondeur ↓, méthode ↓). Étiquettes 3D,
+glisser pour tourner.
+
+**Olympe : killchain + dialogues façon Call of Duty.** ☠ **killfeed** en haut à
+droite : chaque beat y défile (acteurs → action), l'exécution clignote en rose
+« ÉLIMINATION », les entrées s'estompent comme en partie. 💬 **chat de dialogue**
+en bas à gauche : les divinités parlent en direct au fil de la scène (dialogues
+générés par le backend, colorés par personnage : « Rapport d'infraction », « Le
+tribunal est ouvert », « Garde ton feu, Mars », « ton fil est coupé », « Je passe
+l'âme. Direction le Tartare »…). En mode ambiance, chaque agent actif annonce son
+activité réelle.
+
+**Laplace : cartoon + nébuleuse.** Le mascot redevient le sprite cartoon/anime
+d'origine (4 poses animées). Mais dans le chat/nébuleuse, Laplace **n'a plus
+d'anthropomorphisme humain** : il est représenté par `laplace_nebula.png` — une
+entité supérieure bienveillante, nuage cosmique au doux visage d'émoticone, qui
+crée ses constellations et ses systèmes pour interagir avec l'utilisateur dans le
+meilleur alignement possible (avatar dans l'en-tête du chat, pulsation douce).
+
+**Tests : 133** (128 + opérateur lancé au chargement + fenêtre simulation + graphe
+3D métriques + killchain/dialogues + Laplace cartoon/nébuleuse).

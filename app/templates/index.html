@@ -403,8 +403,8 @@
 
   <!-- ══════════ OBSIDIAN GRAPH ══════════ -->
   <!-- ══════════ CERVEAU — visualisation scientifique du système ══════════ -->
-  <section x-show="activeTab==='brain'" class="fade-in" style="height:calc(100vh - 80px)">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-3 h-full">
+  <section x-show="activeTab==='brain'" class="fade-in space-y-3">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-3" style="height:520px">
       <div class="glass-card rounded-2xl relative overflow-hidden holo-frame">
         <canvas id="brainCanvas" class="w-full h-full"></canvas>
         <div class="absolute top-3 left-3 glass rounded-lg px-3 py-2 border border-cyan-500/20 pointer-events-none">
@@ -436,6 +436,60 @@
         <div class="mt-3 rounded-xl border border-white/5 bg-white/[.02] p-3">
           <p class="text-[10px] text-slate-400 leading-relaxed">Le profil cognitif (5 dimensions) et les compteurs réels du système (mémoire, interactions) modulent l'intensité de chaque région et la cadence des impulsions. Cliquez une région pour l'isoler.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- ══ rangée 2 : simulation (scène + cerveau) · métriques 3D ══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <!-- 🎬 FENÊTRE SIMULATION : vous regardez un film de peur · le cerveau s'illumine -->
+      <div class="glass-card rounded-2xl p-4 holo-frame">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🎬</span>Simulation — film d'horreur au salon</h3>
+          <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/25">scène exemple · cerveau en direct</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="relative rounded-xl overflow-hidden border border-white/10" style="height:235px">
+            <canvas id="simScene" class="w-full h-full"></canvas>
+            <span class="absolute top-2 left-2 text-[9.5px] px-2 py-1 rounded-lg bg-black/60 border border-white/10 text-slate-200" x-text="simPhase"></span>
+            <span class="absolute bottom-2 right-2 text-[8.5px] px-1.5 py-0.5 rounded bg-black/50 text-slate-500">la télé · vous sur le canapé</span>
+          </div>
+          <div class="relative rounded-xl overflow-hidden border border-white/10" style="height:235px">
+            <canvas id="simBrain" class="w-full h-full"></canvas>
+            <span class="absolute bottom-2 right-2 text-[8.5px] px-1.5 py-0.5 rounded bg-black/50 text-slate-500">votre cerveau · zones actives</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          <template x-for="r in simRegions" :key="r.id">
+            <span class="chip !text-[9.5px]" :style="'border-color:' + r.c + '55'">
+              <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" :style="'background:' + r.c"></span>
+              <span x-text="r.nom"></span> <span class="mono" :style="'color:' + r.c" x-text="Math.round(r.v * 100) + '%'"></span>
+              <span class="text-slate-600" x-text="'· ' + r.role"></span>
+            </span>
+          </template>
+        </div>
+        <p class="text-[9px] text-slate-600 mt-1.5">amygdale = peur · cortex visuel = vision · préfrontal = anticipation/régulation · hippocampe = encodage · auditif = bande-son · moteur = sursaut — scénario pédagogique, cadences illustratives</p>
+      </div>
+
+      <!-- 📊 GRAPHE 3D : performance des fonctions + impact de l'action/environnement -->
+      <div class="glass-card rounded-2xl p-4 holo-frame">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">📊</span>Performance des fonctions mentales — 3D</h3>
+          <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">réel vs environnement</span>
+        </div>
+        <div class="relative rounded-xl overflow-hidden border border-white/10" style="height:235px">
+          <canvas id="metrics3d" class="w-full h-full"></canvas>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-2 items-center">
+          <span class="chip !text-[9px] !text-slate-500">▦ base réelle</span>
+          <span class="chip !text-[9px] !text-rose-300 !border-rose-500/30">▲ impact film de peur</span>
+          <span class="flex-1"></span>
+          <template x-for="m in metRows" :key="m.k">
+            <span class="chip !text-[9.5px]" :style="'border-color:' + m.c + '55'">
+              <span x-text="m.k"></span> <span class="mono text-slate-500" x-text="m.base + '→' + m.env"></span>
+            </span>
+          </template>
+        </div>
+        <p class="text-[9px] text-slate-600 mt-1.5">barres claires = mesures réelles du profil cognitif · barres colorées = impact de l'action/environment (scénario film de peur : attention ↑, activité ↑, mémoire/profondeur ↓) · glisser pour tourner</p>
       </div>
     </div>
   </section>
@@ -825,7 +879,7 @@ function app() {
 
     async init(){
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
-      this.$nextTick(()=>{lucide.createIcons();this.renderCharts();});
+      this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();});
       // ⬇ arrivée depuis une fiche (« aller vers · Obsidian ») : ?const=<corps>&tab=graph
       try{
         const q = new URLSearchParams(location.search);
@@ -975,27 +1029,35 @@ function app() {
     gaugeColor(m){const p=this.gaugePct(m);const z=(m?.gauge?.zones||[]).find(z=>p>=z[0]/m.gauge.max&&p<z[1]/m.gauge.max);return z?z[3]:'#818cf8';},
     mdInline(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong class="text-slate-200">$1</strong>').replace(/`([^`]+)`/g,'<code class="text-cyan-300">$1</code>');},
 
-    brainRegions: [], brainSel: null,
+    brainRegions: [], brainSel: null, simPhase: '🎬 simulation prête', simRegions: [], metRows: [],
 
     initOperator() {
-      if (this._opInit || typeof THREE === 'undefined') return;
+      if (typeof THREE === 'undefined') return;
       const cv = document.getElementById('operatorCanvas'); if (!cv) return;
-      this._opInit = true;
-      const W = cv.clientWidth || 300, H = cv.clientHeight || 260;
-      const renderer = new THREE.WebGLRenderer({canvas: cv, alpha: true, antialias: true});
-      renderer.setSize(W, H, false);
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-      const scene = new THREE.Scene();
-      const cam = new THREE.PerspectiveCamera(40, W / H, .1, 50);
-      cam.position.set(0, 1.25, 3.5); cam.lookAt(0, 1.0, 0);
-      const fig = new THREE.Group(); scene.add(fig);
+      if (this._opRaf) return;                                   // déjà en marche
+      if (this._op) { this._opLoop(); return; }                  // déjà construit : relance
+      const W = cv.clientWidth, H = cv.clientHeight;
+      if (W < 10 || H < 10) {                                    // pas encore affiché → réessaie
+        this._opTries = (this._opTries || 0) + 1;
+        if (this._opTries < 40) setTimeout(() => this.initOperator(), 250);
+        return;
+      }
+      this._opTries = 0;
+      const op = {cv, drag: false, lx: 0};
+      op.renderer = new THREE.WebGLRenderer({canvas: cv, alpha: true, antialias: true});
+      op.renderer.setSize(W, H, false);
+      op.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      op.scene = new THREE.Scene();
+      op.cam = new THREE.PerspectiveCamera(40, W / H, .1, 50);
+      op.cam.position.set(0, 1.25, 3.5); op.cam.lookAt(0, 1.0, 0);
+      op.fig = new THREE.Group(); op.scene.add(op.fig);
       const cyan = 0x22d3ee;
       const part = (geo, x, y, z, rz = 0) => {
         const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .07, depthWrite: false}));
         m.position.set(x, y, z); m.rotation.z = rz;
         const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 18), new THREE.LineBasicMaterial({color: cyan, transparent: true, opacity: .85}));
         e.position.copy(m.position); e.rotation.copy(m.rotation);
-        fig.add(m); fig.add(e);
+        op.fig.add(m); op.fig.add(e);
       };
       // humain masculin, T-pose : tête, cou, torse large d'épaules, bassin
       part(new THREE.SphereGeometry(.13, 14, 10), 0, 1.80, 0);
@@ -1003,40 +1065,37 @@ function app() {
       part(new THREE.CylinderGeometry(.17, .13, .56, 10), 0, 1.29, 0);
       part(new THREE.BoxGeometry(.50, .09, .15), 0, 1.53, 0);
       part(new THREE.BoxGeometry(.25, .15, .15), 0, .96, 0);
-      // bras tendus en T
       for (const s of [-1, 1]) {
         part(new THREE.CylinderGeometry(.046, .04, .30, 8), s * .33, 1.52, 0, Math.PI / 2);
         part(new THREE.CylinderGeometry(.04, .034, .30, 8), s * .63, 1.52, 0, Math.PI / 2);
         part(new THREE.BoxGeometry(.09, .05, .07), s * .97, 1.52, 0);
       }
-      // jambes
       for (const s of [-1, 1]) {
         part(new THREE.CylinderGeometry(.06, .05, .42, 8), s * .095, .73, 0);
         part(new THREE.CylinderGeometry(.05, .04, .40, 8), s * .095, .32, 0);
         part(new THREE.BoxGeometry(.09, .06, .19), s * .095, .07, .045);
       }
-      // anneaux HUD + sol + plan de scan
-      const ring = (r, op) => { const t = new THREE.Mesh(new THREE.TorusGeometry(r, .008, 8, 64), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: op})); t.rotation.x = Math.PI / 2; t.position.y = 1.0; return t; };
-      const r1 = ring(1.05, .35), r2 = ring(1.28, .2); scene.add(r1); scene.add(r2);
+      const ring = (r, o) => { const t = new THREE.Mesh(new THREE.TorusGeometry(r, .008, 8, 64), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: o})); t.rotation.x = Math.PI / 2; t.position.y = 1.0; return t; };
+      op.r1 = ring(1.05, .35); op.r2 = ring(1.28, .2); op.scene.add(op.r1); op.scene.add(op.r2);
       const gh = new THREE.GridHelper(3.2, 22, cyan, 0x0e2a38);
-      gh.material.transparent = true; gh.material.opacity = .3; scene.add(gh);
-      const scan = new THREE.Mesh(new THREE.BoxGeometry(1.55, .012, .5), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .5, blending: THREE.AdditiveBlending}));
-      scene.add(scan);
-      let drag = false, lx = 0;
-      cv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; });
-      window.addEventListener('pointerup', () => drag = false);
-      window.addEventListener('pointermove', e => { if (drag) { fig.rotation.y += (e.clientX - lx) * .012; lx = e.clientX; } });
-      const clock = new THREE.Clock();
-      const loop = () => {
+      gh.material.transparent = true; gh.material.opacity = .3; op.scene.add(gh);
+      op.scan = new THREE.Mesh(new THREE.BoxGeometry(1.55, .012, .5), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .5, blending: THREE.AdditiveBlending}));
+      op.scene.add(op.scan);
+      cv.addEventListener('pointerdown', e => { op.drag = true; op.lx = e.clientX; });
+      window.addEventListener('pointerup', () => op.drag = false);
+      window.addEventListener('pointermove', e => { if (op.drag) { op.fig.rotation.y += (e.clientX - op.lx) * .012; op.lx = e.clientX; } });
+      op.clock = new THREE.Clock();
+      this._op = op;
+      this._opLoop = () => {
         if (!document.getElementById('operatorCanvas')) { this._opRaf = null; return; }
-        const t = clock.getElapsedTime();
-        if (!drag) fig.rotation.y = t * .35;
-        r1.rotation.z = t * .5; r2.rotation.z = -t * .35;
-        scan.position.y = ((t * .55) % 2.2) - .05;
-        renderer.render(scene, cam);
-        this._opRaf = requestAnimationFrame(loop);
+        const t = op.clock.getElapsedTime();
+        if (!op.drag) op.fig.rotation.y = t * .35;
+        op.r1.rotation.z = t * .5; op.r2.rotation.z = -t * .35;
+        op.scan.position.y = ((t * .55) % 2.2) - .05;
+        op.renderer.render(op.scene, op.cam);
+        this._opRaf = requestAnimationFrame(this._opLoop);
       };
-      loop();
+      this._opLoop();
     },
 
     async loadBrainData() {
@@ -1185,11 +1244,217 @@ function app() {
       if (this._brainApply) this._brainApply();
     },
 
+    initSimulation() {
+      if (typeof THREE === 'undefined') return;
+      const scv = document.getElementById('simScene'), bcv = document.getElementById('simBrain');
+      if (!scv || !bcv || this._simOn) return;
+      this._simOn = true;
+      // ── scénario du film (phases → image TV + intensités cérébrales) ──
+      const PH = [
+        {id: 'calme',     label: '🎬 calme — générique du film',      d: 5,   tv: 'calm',
+         br: {visuel: .45, auditif: .35, prefrontal: .35, amygdale: .10, hippocampe: .30, moteur: .10}},
+        {id: 'tension',   label: '🎬 tension — le couloir sombre…',    d: 6,   tv: 'tense',
+         br: {visuel: .80, auditif: .75, prefrontal: .85, amygdale: .45, hippocampe: .40, moteur: .25}},
+        {id: 'jumpscare', label: '💥 JUMPSCARE — la scène de peur',    d: 2.5, tv: 'scare',
+         br: {visuel: 1, auditif: 1, prefrontal: .30, amygdale: 1, hippocampe: .85, moteur: .95}},
+        {id: 'retour',    label: '🎬 retour au calme — régulation',    d: 5,   tv: 'calm',
+         br: {visuel: .45, auditif: .30, prefrontal: .75, amygdale: .35, hippocampe: .60, moteur: .15}},
+      ];
+      const RNAMES = {visuel: ['cortex visuel', 'vision', '#34d399'], auditif: ['auditif', 'bande-son', '#fbbf24'],
+                      prefrontal: ['préfrontal', 'anticipation · régulation', '#22d3ee'], amygdale: ['amygdale', 'peur', '#fb7185'],
+                      hippocampe: ['hippocampe', 'encodage mémoire', '#a78bfa'], moteur: ['moteur', 'sursaut', '#f472b6']};
+      // ── scène 2D : le salon, la télé, vous ──
+      const sctx = scv.getContext('2d');
+      const SW = scv.clientWidth || 340, SH = scv.clientHeight || 235;
+      scv.width = SW; scv.height = SH;
+      const paintScene = (t, ph, flick) => {
+        const g = sctx.createLinearGradient(0, 0, 0, SH);
+        g.addColorStop(0, '#0a0d18'); g.addColorStop(1, '#11101c');
+        sctx.fillStyle = g; sctx.fillRect(0, 0, SW, SH);
+        // télé à droite
+        const tx = SW * .66, ty = SH * .30, tw = SW * .30, th = SH * .40;
+        const glow = ph.tv === 'scare' ? .9 : (ph.tv === 'tense' ? .30 + .18 * Math.sin(t * 7) : .45);
+        const rg = sctx.createRadialGradient(tx + tw / 2, ty + th / 2, 4, tx + tw / 2, ty + th / 2, SW * .5);
+        rg.addColorStop(0, ph.tv === 'scare' ? `rgba(255,240,230,${glow * .5})` : `rgba(120,180,255,${glow * .30})`);
+        rg.addColorStop(1, 'rgba(0,0,0,0)');
+        sctx.fillStyle = rg; sctx.fillRect(0, 0, SW, SH);
+        sctx.fillStyle = '#05070c'; sctx.fillRect(tx - 6, ty - 6, tw + 12, th + 12);
+        sctx.strokeStyle = 'rgba(148,163,184,.4)'; sctx.strokeRect(tx - 6, ty - 6, tw + 12, th + 12);
+        sctx.save(); sctx.beginPath(); sctx.rect(tx, ty, tw, th); sctx.clip();
+        if (ph.tv === 'calm') {
+          sctx.fillStyle = '#0e1c33'; sctx.fillRect(tx, ty, tw, th);
+          for (let i = 0; i < 5; i++) { sctx.fillStyle = `rgba(90,140,220,${.12 + .1 * Math.sin(t * 2 + i)})`; sctx.fillRect(tx, ty + i * th / 5 + 2, tw, th / 9); }
+          sctx.fillStyle = '#9fc3ff'; sctx.font = '10px Inter'; sctx.textAlign = 'center'; sctx.fillText('▶ film', tx + tw / 2, ty + th / 2 + 3);
+        } else if (ph.tv === 'tense') {
+          sctx.fillStyle = '#070a12'; sctx.fillRect(tx, ty, tw, th);
+          sctx.strokeStyle = 'rgba(160,180,220,.35)';
+          sctx.beginPath(); sctx.moveTo(tx + 4, ty + 4); sctx.lineTo(tx + tw * .42, ty + th * .5); sctx.lineTo(tx + 4, ty + th - 4); sctx.stroke();
+          sctx.beginPath(); sctx.moveTo(tx + tw - 4, ty + 4); sctx.lineTo(tx + tw * .58, ty + th * .5); sctx.lineTo(tx + tw - 4, ty + th - 4); sctx.stroke();
+          const fy = ty + th * .5 + Math.sin(t * 2) * 3;
+          sctx.fillStyle = 'rgba(226,232,240,.75)'; sctx.beginPath(); sctx.arc(tx + tw * .5, fy, 2.6, 0, 6.29); sctx.fill();
+        } else {
+          sctx.fillStyle = flick ? '#f8fafc' : '#1a0f14'; sctx.fillRect(tx, ty, tw, th);
+          sctx.fillStyle = flick ? '#0b0f1d' : '#e7e5e4';
+          sctx.beginPath(); sctx.arc(tx + tw / 2, ty + th * .42, tw * .20, 0, 6.29); sctx.fill();     // tête
+          sctx.fillStyle = flick ? '#0b0f1d' : '#0b0f1d';
+          sctx.beginPath(); sctx.arc(tx + tw / 2 - tw * .075, ty + th * .38, tw * .035, 0, 6.29); sctx.fill();
+          sctx.beginPath(); sctx.arc(tx + tw / 2 + tw * .075, ty + th * .38, tw * .035, 0, 6.29); sctx.fill();
+          sctx.beginPath(); sctx.ellipse(tx + tw / 2, ty + th * .58, tw * .05, tw * .075, 0, 0, 6.29); sctx.fill();
+        }
+        sctx.restore();
+        // vous : silhouette sur le canapé (sursaut au jumpscare)
+        const jolt = ph.tv === 'scare' ? -7 + Math.sin(t * 30) * 1.5 : 0;
+        const hx = SW * .24, hy = SH * .58 + jolt;
+        sctx.fillStyle = 'rgba(10,12,20,.95)';
+        sctx.beginPath(); sctx.arc(hx, hy, SW * .055, 0, 6.29); sctx.fill();                          // tête
+        sctx.beginPath(); sctx.moveTo(hx - SW * .10, SH); sctx.quadraticCurveTo(hx - SW * .09, hy + SW * .05, hx, hy + SW * .055);
+        sctx.quadraticCurveTo(hx + SW * .10, hy + SW * .05, hx + SW * .11, SH); sctx.closePath(); sctx.fill();
+        if (ph.tv === 'scare') {                                                                      // bras levés
+          sctx.strokeStyle = 'rgba(10,12,20,.95)'; sctx.lineWidth = SW * .028; sctx.lineCap = 'round';
+          sctx.beginPath(); sctx.moveTo(hx - SW * .05, hy + SW * .10); sctx.lineTo(hx - SW * .13, hy - SW * .10); sctx.stroke();
+          sctx.beginPath(); sctx.moveTo(hx + SW * .05, hy + SW * .10); sctx.lineTo(hx + SW * .13, hy - SW * .10); sctx.stroke();
+        }
+        sctx.fillStyle = 'rgba(20,24,38,.9)'; sctx.fillRect(0, SH * .92, SW, SH * .08);               // sol
+        if (ph.tv === 'scare' && flick) { sctx.fillStyle = 'rgba(255,255,255,.13)'; sctx.fillRect(0, 0, SW, SH); }
+      };
+      // ── mini-cerveau 3D : régions qui s'illuminent ──
+      const W = bcv.clientWidth || 340, H = bcv.clientHeight || 235;
+      const renderer = new THREE.WebGLRenderer({canvas: bcv, alpha: true, antialias: true});
+      renderer.setSize(W, H, false); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(45, W / H, .1, 50); cam.position.set(0, .1, 3.1);
+      const brain = new THREE.Group(); brain.rotation.x = .12; scene.add(brain);
+      const RC = {visuel: 0x34d399, auditif: 0xfbbf24, prefrontal: 0x22d3ee, amygdale: 0xfb7185, hippocampe: 0xa78bfa, moteur: 0xf472b6};
+      const regOf = (x, y, z) => {
+        if (Math.abs(x) < .34 && y < -.05 && y > -.30) return 'hippocampe';
+        if (Math.abs(x) < .26 && Math.abs(y) < .18 && Math.abs(z) < .22) return 'amygdale';
+        if (z > .42) return 'prefrontal';
+        if (z < -.40) return 'visuel';
+        if (y > .30) return 'moteur';
+        if (y < -.18) return 'auditif';
+        return z > 0 ? 'prefrontal' : 'visuel';
+      };
+      const pos = [], col = [], regs = [];
+      const c = new THREE.Color();
+      for (let h = 0; h < 2; h++) for (let i = 0; i < 800; i++) {
+        const k = i + .5, phi = Math.acos(1 - 2 * k / 800), th = Math.PI * (1 + Math.sqrt(5)) * k;
+        const fold = 1 + .05 * Math.sin(9 * th) * Math.cos(7 * phi);
+        const x = Math.sin(phi) * Math.cos(th) * .68 * fold + (h ? .10 : -.10);
+        const y = Math.cos(phi) * .52 * fold, z = Math.sin(phi) * Math.sin(th) * .88 * fold;
+        pos.push(x, y, z);
+        const r = regOf(x - (h ? .10 : -.10), y, z); regs.push(r);
+        c.setHex(RC[r]); col.push(c.r, c.g, c.b);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      const colAttr = new THREE.Float32BufferAttribute(col, 3);
+      geo.setAttribute('color', colAttr);
+      brain.add(new THREE.Points(geo, new THREE.PointsMaterial({size: .024, vertexColors: true, transparent: true, opacity: .95})));
+      const cur = {visuel: .3, auditif: .3, prefrontal: .3, amygdale: .1, hippocampe: .3, moteur: .1};
+      const applyColors = () => {
+        for (let i = 0; i < regs.length; i++) {
+          c.setHex(RC[regs[i]]);
+          const f = .16 + .9 * cur[regs[i]];
+          colAttr.setXYZ(i, c.r * f, c.g * f, c.b * f);
+        }
+        colAttr.needsUpdate = true;
+      };
+      let drag = false, lx = 0, ly = 0;
+      bcv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; ly = e.clientY; });
+      window.addEventListener('pointerup', () => drag = false);
+      window.addEventListener('pointermove', e => { if (drag) { brain.rotation.y += (e.clientX - lx) * .008; brain.rotation.x += (e.clientY - ly) * .006; lx = e.clientX; ly = e.clientY; } });
+      // ── boucle : phases + lissage des intensités ──
+      let pi = 0, tPhase = 0, last = 0;
+      const setReadout = () => {
+        this.simPhase = PH[pi].label;
+        this.simRegions = Object.keys(RNAMES).map(k => ({id: k, nom: RNAMES[k][0], role: RNAMES[k][1], c: RNAMES[k][2], v: PH[pi].br[k]}));
+      };
+      setReadout();
+      const loop = (ts) => {
+        if (!document.getElementById('simScene')) { this._simOn = false; return; }
+        const t = ts / 1000, dt = Math.min(.05, t - (last || t)); last = t;
+        const ph = PH[pi];
+        tPhase += dt;
+        if (tPhase > ph.d) { tPhase = 0; pi = (pi + 1) % PH.length; setReadout(); }
+        for (const k in cur) cur[k] += (ph.br[k] - cur[k]) * Math.min(1, dt * 3.5);
+        applyColors();
+        paintScene(t, ph, Math.sin(t * 31) > .55);
+        if (!drag) brain.rotation.y = t * .18;
+        renderer.render(scene, cam);
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    },
+
+    async initMetrics3d() {
+      if (typeof THREE === 'undefined') return;
+      const cv = document.getElementById('metrics3d');
+      if (!cv || this._metOn) return;
+      this._metOn = true;
+      await this.loadBrainData();
+      const dim = {}, met = {};
+      (this.brainRegions || []).forEach(r => { if (r.id === 'frontal') dim.methode = r.valeur; if (r.id === 'parietal') dim.profondeur = r.valeur; if (r.id === 'occipital') dim.curiosite = r.valeur; if (r.id === 'cervelet') dim.activite = r.valeur; });
+      try { const dm = await (await fetch('/api/dashboard/metrics')).json(); (dm.metrics || []).forEach(m => met[m.id] = m.value); } catch (e) {}
+      const rows = [
+        {k: 'méthode',    base: +(dim.methode ?? 50),     env: Math.round((dim.methode ?? 50) * .75), c: '#22d3ee'},
+        {k: 'profondeur', base: +(dim.profondeur ?? 50),  env: Math.round((dim.profondeur ?? 50) * .70), c: '#818cf8'},
+        {k: 'curiosité',  base: +(dim.curiosite ?? 50),   env: Math.min(100, Math.round(+(dim.curiosite ?? 50)) + 15), c: '#34d399'},
+        {k: 'activité',   base: +(dim.activite ?? 50),    env: Math.min(100, Math.round(+(dim.activite ?? 50)) + 25), c: '#f472b6'},
+        {k: 'mémoire',    base: Math.min(100, Math.round((met.memoire ?? 1000) / 20)), env: Math.max(20, Math.round(Math.min(100, (met.memoire ?? 1000) / 20) * .55)), c: '#fbbf24'},
+        {k: 'attention*', base: 55,                       env: 95, c: '#38bdf8'},
+      ];
+      this.metRows = rows;
+      const W = cv.clientWidth || 340, H = cv.clientHeight || 235;
+      const renderer = new THREE.WebGLRenderer({canvas: cv, alpha: true, antialias: true});
+      renderer.setSize(W, H, false); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(42, W / H, .1, 60); cam.position.set(0, 2.1, 4.6); cam.lookAt(0, .7, 0);
+      const root = new THREE.Group(); scene.add(root);
+      const gh = new THREE.GridHelper(6.4, 16, 0x22d3ee, 0x11283a);
+      gh.material.transparent = true; gh.material.opacity = .35; root.add(gh);
+      const label = (txt, x, z, col) => {
+        const cnv = document.createElement('canvas'); cnv.width = 256; cnv.height = 64;
+        const c2 = cnv.getContext('2d');
+        c2.font = '600 26px Inter, sans-serif'; c2.textAlign = 'center'; c2.fillStyle = col;
+        c2.fillText(txt, 128, 42);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({map: new THREE.CanvasTexture(cnv), transparent: true}));
+        sp.position.set(x, -.25, z); sp.scale.set(1.15, .29, 1); root.add(sp);
+      };
+      rows.forEach((r, i) => {
+        const x = -2.4 + i * .96;
+        const mk = (v, z, color, op) => {
+          const h = Math.max(.05, v / 100 * 1.9);
+          const g = new THREE.BoxGeometry(.30, h, .30);
+          const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({color, transparent: true, opacity: op}));
+          m.position.set(x, h / 2, z);
+          const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({color, transparent: true, opacity: .9}));
+          e.position.copy(m.position);
+          root.add(m); root.add(e);
+        };
+        mk(r.base, -.21, 0xe2e8f0, .16);                                  // base réelle
+        mk(r.env, .21, new THREE.Color(r.c).getHex(), .8);                // impact environnement
+        label(r.k + ' ' + r.base + '→' + r.env, x, .62, r.c);
+      });
+      let drag = false, lx = 0;
+      cv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; });
+      window.addEventListener('pointerup', () => drag = false);
+      window.addEventListener('pointermove', e => { if (drag) { root.rotation.y += (e.clientX - lx) * .008; lx = e.clientX; } });
+      const clock = new THREE.Clock();
+      const loop = () => {
+        if (!document.getElementById('metrics3d')) { this._metOn = false; return; }
+        const t = clock.getElapsedTime();
+        if (!drag) root.rotation.y = Math.sin(t * .22) * .55;
+        renderer.render(scene, cam);
+        requestAnimationFrame(loop);
+      };
+      loop();
+    },
+
     switchTab(tab){
       this.activeTab=tab;
       this.$nextTick(()=>{lucide.createIcons();
         if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();this.initOperator();}
-        if(tab==='brain'){setTimeout(()=>this.initBrain(),200);}
+        if(tab==='brain'){setTimeout(()=>{this.initBrain();this.initSimulation();this.initMetrics3d();},200);}
         if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
         if(tab==='taxonomy')setTimeout(()=>this.initTaxonomy(),200);
         if(tab==='timeline')setTimeout(()=>this.initTimeline(),200);
