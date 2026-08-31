@@ -26,6 +26,9 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
+# enfers / corbeille → Underworld 🔥 (royaume d'Hadès)
+INFERNO_RE = re.compile(r"enfers?|underworld|inferno|tartare|[ée]lys[ée]es|asphod|cerb|[cç]erbère|pers[ée]phone|corbeille|r[ée]suscit", re.IGNORECASE)
+
 # justice / équilibre → Thémis ⚖ (bras armé de Laplace)
 THEMIS_RE = re.compile(r"th[ée]mis|justice|balance|équilibre|jugement|\bjuge\b|divine justice", re.IGNORECASE)
 
@@ -53,6 +56,19 @@ def chat(message: str) -> Dict[str, Any]:
         analyse = metatron.analyze_request(m)
     except Exception:
         analyse = None
+
+    # ── Enfers → le royaume d'Hadès (rien ne disparaît vraiment) ─────────
+    if INFERNO_RE.search(m):
+        from cosmos import underworld as uw
+        st = uw.state()
+        lignes = [f"🔥 {st['royaume']}", st["loi"]]
+        for rid, r in st["regions"].items():
+            n = st["par_region"].get(rid, 0)
+            lignes.append(f"• {r['icon']} {r['nom']} : {n} âme(s) — {r['desc']}")
+        lignes.append(f"Total : {st['ames_total']} âmes · {st['octets_au_royaume']:,} octets au royaume.".replace(",", " "))
+        lignes.append("Ouvre le bouton 🔥 INFERNO dans /sol pour voir le registre et ressusciter une âme (Cerbère 🐾 exigera ton accord).")
+        return {"reply": "\n".join(lignes), "intent": "inferno", "speaker": "laplace",
+                "data": {"par_region": st["par_region"], "ames": st["ames_total"]}}
 
     # ── Justice → Thémis ⚖ juge, conseille, et tranche le cas échéant ────
     if THEMIS_RE.search(m):

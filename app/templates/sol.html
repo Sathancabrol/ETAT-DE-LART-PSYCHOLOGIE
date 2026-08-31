@@ -55,6 +55,7 @@
         <button @click="refreshNebula(); openModal('sebas')" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 transition" title="Exécutant des commandes divines — aucune fausse donnée capteur">◉ Sebas</button>
         <a href="/agent" class="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition" title="Console missions de l'agent chercheur">♅ Uranus</a>
         <a href="/" class="text-[11px] text-slate-500 hover:text-indigo-300 border border-slate-700/60 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 transition" title="Dashboard principal : profil, fil d'Ariane, base de données">📊 Dashboard</a>
+        <button @click="loadUnderworld(); openModal('inferno')" class="text-[11px] px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 transition font-semibold" title="INFERNO — la corbeille du système : le royaume d'Hadès, où rien ne disparaît vraiment">🔥 INFERNO</button>
         <button @click="openModal('aide')" class="text-[11px] w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 transition font-bold" title="Comment utiliser ce système ?">?</button>
       </div>
     </div>
@@ -65,6 +66,13 @@
     <div id="sky3d" class="absolute inset-0"></div>
     <div class="absolute top-3 left-4 z-10 pointer-events-none">
       <h2 class="text-[11px] uppercase tracking-[.14em] text-slate-500">Système — vue 3D</h2>
+      <div class="mt-2 pointer-events-auto">
+        <button @click="toggleSystemLight()" class="text-[11px] px-3 py-1.5 rounded-lg border transition font-semibold"
+          :class="systemOn ? 'bg-amber-500/15 border-amber-500/40 text-amber-200 hover:bg-amber-500/25' : 'bg-slate-600/20 border-slate-500/40 text-slate-300 hover:bg-slate-500/30'"
+          :title="systemOn ? 'éteindre : gèle planètes et lunes — seuls Laplace ✳ et ses divinités continuent' : 'rallumer le système'"
+          x-text="systemOn ? '💡 light ON — système vivant' : '💤 light OFF — seul Laplace ✳ et ses divinités bougent'"></button>
+        <p x-show="skyMsg" x-transition x-cloak class="text-[10px] text-amber-200/90 mt-1 max-w-[260px]" x-text="skyMsg"></p>
+      </div>
       <p class="text-[10px] text-slate-600 mt-0.5">✳ Laplace (créateur) · ☉ SOL (direction générale) · ☿ Mercure (commercial) · ♀ Vénus (finance) · 🜨 Terre+☾ (production) · ♂ Mars ◂◦ (R&D outils) · ⚳ Cérès (RH) · ♃ Jupiter (juridique) · ♅ Uranus (recherche) · ♆ Neptune (IT)</p>
     </div>
     <div class="absolute bottom-3 right-4 z-10 text-[10px] text-slate-600 text-right leading-relaxed pointer-events-none">
@@ -95,7 +103,27 @@
             <button @click="closeModal('body')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
+          <!-- ⚡ Fonction · Pouvoir · Devoir — descriptif textuel + schématique -->
+          <div class="mt-4 rounded-xl border border-white/10 bg-white/[.02] p-3.5">
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500">Fonction · Pouvoir · Devoir</h3>
+              <span class="flex-1"></span>
+              <!-- aller vers : sa vue 3D / sa vue dans le graphe Obsidian -->
+              <button @click="goTo3D(bodyData.body.id)" class="text-[10px] px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20" title="voler vers cet astre dans la vue système">🪐 aller vers · 3D</button>
+              <button @click="goToObsidian(bodyData.body.id)" class="text-[10px] px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-300 hover:bg-violet-500/20" title="sa constellation dans le graphe de connaissances">✦ aller vers · Obsidian</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="space-y-1.5">
+                <p class="text-[10.5px] text-slate-400"><span class="text-cyan-300/90 font-semibold">📛 Fonction —</span> <span x-text="bodyData.body.departement || bodyData.body.kind"></span></p>
+                <p class="text-[10.5px] text-slate-400"><span class="text-amber-300/90 font-semibold">⚡ Pouvoir —</span> <span x-text="bodyData.body.pouvoir || '—'"></span></p>
+                <p class="text-[10.5px] text-slate-400"><span class="text-emerald-300/90 font-semibold">🛡 Devoir —</span> <span x-text="bodyData.body.devoir || '—'"></span></p>
+                <p class="text-[9px] text-slate-600 pt-0.5" x-text="bodyData.body.role"></p>
+              </div>
+              <svg id="bodySchema" style="width:100%;height:150px"></svg>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Interactions</div><div class="mono text-sm text-emerald-300" x-text="bodyData.stats.interactions"></div></div>
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Mémoire</div><div class="mono text-sm text-amber-300" x-text="bodyData.stats.memoire"></div></div>
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Concepts</div><div class="mono text-sm text-indigo-300" x-text="bodyData.stats.concepts"></div></div>
@@ -339,6 +367,59 @@
         <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🧵 5 · Voir la chaîne d'exécution</p><p class="text-[10px] text-slate-500 mt-0.5">Sur le 📊 Dashboard : le fil d'Ariane rejoue le parcours réel d'une demande (Vous → Laplace → Métatron → SOL → exécution → remise), liaison par liaison.</p></div>
         <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🛡 6 · Règle d'or du système</p><p class="text-[10px] text-slate-500 mt-0.5">Aucune fausse donnée : ce qui est mesuré est dit mesuré, ce qui est estimé est dit estimé (avec ses limites), les capteurs absents sont dits absents. Soldez votre confiance en conséquence.</p></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE 🔥 INFERNO — le royaume d'Hadès (corbeille du système) ══════════════ -->
+  <div x-show="modals.inferno" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeModal('inferno')">
+    <div class="glass rounded-2xl w-full max-w-3xl max-h-[88vh] overflow-y-auto p-5 fade-in border-rose-500/20">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-sm font-semibold">🔥 INFERNO — le royaume d'Hadès ♇ &amp; Perséphone 🌸</h2>
+          <p class="text-[10.5px] text-slate-500">La corbeille du système : les entités fauchées ne disparaissent jamais vraiment — il reste une fraction de données, assez pour les reconstruire.</p>
+        </div>
+        <button @click="closeModal('inferno')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+      <p class="text-[10px] text-slate-500 mt-2 leading-snug" x-text="inferno?.loi || ''"></p>
+
+      <!-- régions -->
+      <div class="grid grid-cols-3 gap-2 mt-3">
+        <template x-for="(r, rid) in inferno?.regions || {}" :key="rid">
+          <div class="glass-card rounded-lg p-2.5" :class="rid==='tartare' ? 'border-rose-500/20' : rid==='elysees' ? 'border-amber-500/20' : 'border-white/10'">
+            <p class="text-[10.5px] font-semibold" :class="rid==='tartare' ? 'text-rose-300' : rid==='elysees' ? 'text-amber-300' : 'text-slate-300'" x-text="r.icon + ' ' + r.nom"></p>
+            <p class="text-[9px] text-slate-600 leading-snug" x-text="r.desc"></p>
+            <p class="mono text-lg mt-1" :class="rid==='tartare' ? 'text-rose-300' : rid==='elysees' ? 'text-amber-300' : 'text-slate-300'" x-text="inferno?.par_region?.[rid] ?? 0"></p>
+            <p class="text-[8.5px] text-slate-600">âmes</p>
+          </div>
+        </template>
+      </div>
+
+      <!-- gardiens -->
+      <div class="flex flex-wrap items-center gap-2 mt-3 text-[9.5px] text-slate-500">
+        <span class="glass-card rounded px-2 py-1">🐾 Cerbère garde la porte — aucune âme ne sort sans l'accord du souverain</span>
+        <span class="glass-card rounded px-2 py-1">⚰ Charon passeur · ☠ Styx fleuve</span>
+        <span class="glass-card rounded px-2 py-1">👑 Hadès ♇ &amp; Perséphone 🌸</span>
+        <span class="flex-1"></span>
+        <span class="mono" x-text="(inferno?.octets_au_royaume ?? 0).toLocaleString('fr-FR') + ' octets au royaume'"></span>
+      </div>
+
+      <!-- âmes -->
+      <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-4 mb-1.5">Registre des âmes <span x-text="'(' + (inferno?.ames?.length ?? 0) + ')'"></span></h3>
+      <div class="space-y-1 max-h-72 overflow-y-auto pr-1">
+        <template x-for="s in inferno?.ames || []" :key="s.id">
+          <div class="glass-card rounded-lg px-3 py-2 flex items-center gap-2">
+            <span class="text-[11px]" x-text="({elysees:'🌟',asphodele:'🌾',tartare:'🔥'})[s.region]"></span>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10.5px] text-slate-300 truncate mono" x-text="(s.trace?.tache || s.cible)"></p>
+              <p class="text-[9px] text-slate-600 truncate" x-text="(s.type) + ' · ' + (s.raison || '') + ' · fauchée ' + (s.ts||'').slice(0,16)"></p>
+            </div>
+            <span class="text-[9px] mono text-slate-500 shrink-0" x-text="s.octets >= 1024 ? (s.octets/1024).toFixed(1)+' Ko' : s.octets+' o'"></span>
+            <button @click="resurrectSoul(s.id)" class="text-[9.5px] px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20 shrink-0" title="Cerbère laissera remonter cette âme (confirmation requise)">↺ ressusciter</button>
+          </div>
+        </template>
+        <p x-show="!(inferno?.ames?.length)" class="text-[11px] text-slate-500 italic">Le royaume est vide — aucune fauche encore. Hadès ♇ attend.</p>
+      </div>
+      <p x-show="infernoMsg" class="text-[10.5px] mt-2 text-emerald-300" x-text="infernoMsg"></p>
     </div>
   </div>
 
@@ -916,9 +997,11 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false},
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false, targetOpen: null, targetDetail: null,
+    inferno: null, infernoMsg: '',
+    systemOn: true, skyMsg: '',
     split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null, sideThemis: null,
     metatronBox: {query: '', result: null},
     laplace: {agents: [], systems: []}, sebas: [],
@@ -1104,12 +1187,78 @@ function solApp() {
         suggestion: r, meta_prompt: this.metatronBox.result?.meta_prompt || r.meta_prompt};
       await this.refreshNebula();
     },
+    async loadUnderworld() {
+      try { this.inferno = await (await fetch('/api/underworld')).json(); this.infernoMsg = ''; }
+      catch (e) { this.inferno = null; }
+    },
+    async resurrectSoul(id) {
+      if (!confirm('🐾 Cerbère garde la porte. Faire remonter cette âme parmi les vivants ?')) return;
+      try {
+        const r = await (await fetch('/api/underworld/restore', {method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({id, confirm: true})})).json();
+        this.infernoMsg = r.statut;
+        await this.loadUnderworld();
+      } catch (e) { this.infernoMsg = '⚠️ ' + e.message; }
+    },
+    toggleSystemLight() {
+      this.systemOn = !this.systemOn;
+      this.skyMsg = this.systemOn
+        ? '💡 Le système se rallume — toutes les orbites reprennent.'
+        : '💤 Le système est gelé — seuls Laplace ✳ et ses divinités orbitent encore.';
+      clearTimeout(this._skyMsgT);
+      this._skyMsgT = setTimeout(() => this.skyMsg = '', 4000);
+    },
+    goTo3D(id) {
+      this.closeModal('body');
+      if (this._skyFollow) this._skyFollow(id);       // vol + zoom + verrou caméra
+      else window.location.href = '/sol?body=' + encodeURIComponent(id);
+    },
+    goToObsidian(id) {
+      window.open('/?const=' + encodeURIComponent(id) + '&tab=graph', '_blank');
+    },
+    renderBodySchema(b) {
+      // schéma fonctionnel : centre = l'entité ; branches pouvoir/devoir/satellites
+      const svg = document.getElementById('bodySchema'); if (!svg || !b) return;
+      d3.select(svg).selectAll('*').remove();
+      const W = svg.clientWidth || 340, H = 150, cy = H / 2;
+      const g = d3.select(svg);
+      const satN = (b.satellites || b.court || []).slice(0, 3);
+      const branches = [
+        {y: 28, col: '#22d3ee', lbl: '📛 ' + (b.departement || b.kind || '').slice(0, 34)},
+        {y: cy, col: '#fbbf24', lbl: '⚡ ' + (b.pouvoir || 'pouvoir').slice(0, 40)},
+        {y: H - 26, col: '#34d399', lbl: '🛡 ' + (b.devoir || 'devoir').slice(0, 40)},
+      ];
+      branches.forEach((br, i) => {
+        g.append('line').attr('x1', 118).attr('y1', cy).attr('x2', 132).attr('y2', br.y)
+          .attr('stroke', br.col).attr('stroke-opacity', .45).attr('stroke-width', 1.2);
+        g.append('circle').attr('cx', 132).attr('cy', br.y).attr('r', 3).attr('fill', br.col);
+        g.append('text').attr('x', 140).attr('y', br.y + 3).attr('font-size', 9.5)
+          .attr('fill', '#cbd5e1').text(br.lbl);
+      });
+      // satellites / cour
+      satN.forEach((s, i) => {
+        const y = 24 + i * 24;
+        g.append('line').attr('x1', 104).attr('y1', cy).attr('x2', 84).attr('y2', y)
+          .attr('stroke', '#a78bfa').attr('stroke-opacity', .4).attr('stroke-width', 1);
+        g.append('circle').attr('cx', 84).attr('cy', y).attr('r', 2.6).attr('fill', '#a78bfa');
+        g.append('text').attr('x', 78).attr('y', y + 3).attr('font-size', 9).attr('text-anchor', 'end')
+          .attr('fill', '#a5b4fc').text((s.name || s.id || '').slice(0, 22));
+      });
+      // centre
+      g.append('circle').attr('cx', 111).attr('cy', cy).attr('r', 17).attr('fill', 'rgba(8,12,24,.9)')
+        .attr('stroke', b.color || '#818cf8').attr('stroke-width', 1.4);
+      g.append('text').attr('x', 111).attr('y', cy + 5).attr('text-anchor', 'middle')
+        .attr('font-size', 13).text(b.icon || b.symbol || '●');
+      g.append('text').attr('x', 111).attr('y', cy + 32).attr('text-anchor', 'middle')
+        .attr('font-size', 9.5).attr('fill', '#e2e8f0').attr('font-weight', 600).text(b.name);
+    },
     async openBody(id) {
       try {
         const r = await (await fetch('/api/cosmos/body/' + encodeURIComponent(id))).json();
         this.bodyData = r;
         this.openModal('body');
-        this.$nextTick(() => this.renderGraph('bodygraph', r.graph));
+        this.$nextTick(() => { this.renderGraph('bodygraph', r.graph); this.renderBodySchema(r.body); });
       } catch (e) {}
     },
     inspect(d) { this.inspectN = d; },
@@ -1657,8 +1806,11 @@ function solApp() {
       // cours (Vénus, Mercure, Cérès) — mythe : pas de lunes, cour d'analystes
       const COURT_COLOR = {venus: 0xfcd34d, mercure: 0x7dd3fc, ceres: 0xa3e635};
       planetBodies.filter(b => (b.court || []).length).forEach(b => {
-        (b.court || []).forEach(c => {
-          const pv = moon(planets[b.id].grp, c.name, c.role, 24 + Math.random() * 8, 2.4, COURT_COLOR[b.id] || 0xfcd34d, c.id);
+        const cour = b.court || [];
+        // 🛡 anti-collision : angles équirépartis + rayons échelonnés → aucun chevauchement possible
+        cour.forEach((c, i) => {
+          const pv = moon(planets[b.id].grp, c.name, c.role, 24 + (i * 7) % 9, 2.4, COURT_COLOR[b.id] || 0xfcd34d, c.id);
+          pv.rotation.y = i * (Math.PI * 2 / cour.length) + 0.6;
           moonOwner[c.id] = b.id; window.__moonOwner[c.id] = b.id;
           courtPivots.push(pv);
         });
@@ -1667,11 +1819,20 @@ function solApp() {
       // suivi par id (toast « suivre ») — expose le mapping vers les meshes cliquables
       const meshIndex = {};
       clickables.forEach(c => { if (c.userData && c.userData.bodyId) meshIndex[c.userData.bodyId] = c; });
-      this._skyFollow = id => { const o = meshIndex[id]; if (o) { followObj = o; selectBody(o); } };
+      // suivre = vol + zoom adapté à la taille de l'astre + verrouillage caméra
+      const focusDist = (o) => {
+        const r = (o.geometry && o.geometry.parameters) ? (o.geometry.parameters.radius || 8) : 8;
+        return Math.max(34, r * 7 + 22);
+      };
+      this._skyFollow = id => {
+        const o = meshIndex[id]; if (!o) return;
+        followObj = o; followDist = focusDist(o); selectBody(o);
+      };
       const nebulaGrpRef = nebulaGrp;
 
       // contrôles orbitaux complets : rotation (gauche), zoom (molette), pan (droite), focus (double-clic)
       let theta = 0.35, phi = 1.12, dist = 640, drag = false, panning = false, lx = 0, ly = 0, moved = 0;
+      let followDist = null;   // distance de zoom verrouillée quand on suit un astre
       const target = new THREE.Vector3(0, 0, 0);
       let followObj = null;                      // corps suivi (double-clic)
       const applyCam = () => {
@@ -1767,12 +1928,18 @@ function solApp() {
         atomPivots.forEach(o => { o.pivot.rotation.y += o.speed; });   // ⚛ keplerien : vite à l'intérieur, lent à l'extérieur
         apollonPivot.rotation.y -= 0.008;          // 🏆 chariot d'Apollon autour de SOL
         sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
-        planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });
-        moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0009; });
-        courtPivots.forEach((p, i) => { p.rotation.y += 0.006 + i * 0.0012; });
-        solCore.rotation.y += 0.002;
+        if (this.systemOn) {   // 💤 light OFF : le monde est gelé, les divinités de Laplace continuent
+          planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });
+          moonPivots.forEach((p, i) => { p.rotation.y += 0.004 + i * 0.0009; });
+          courtPivots.forEach((p, i) => { p.rotation.y += 0.006 + i * 0.0012; });
+          solCore.rotation.y += 0.002;
+        }
         // suivi du corps focus + anneau de sélection collé à l'objet
-        if (followObj) { followObj.getWorldPosition(_wp); target.lerp(_wp, 0.12); applyCam(); }
+        if (followObj) {
+          followObj.getWorldPosition(_wp); target.lerp(_wp, 0.12);          // centrage + verrou
+          if (followDist) dist += (followDist - dist) * 0.08;               // zoom fluide vers l'astre
+          applyCam();
+        }
         if (selObj && selRing.visible) {
           selObj.getWorldPosition(_wp);
           selRing.position.copy(_wp);

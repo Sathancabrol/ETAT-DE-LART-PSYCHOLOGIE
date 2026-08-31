@@ -804,6 +804,10 @@ def test_hades_scan_and_reap(tmp_path, monkeypatch):
     monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
     monkeypatch.setattr(hades, "OUT", tmp_path)
     monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    from cosmos import underworld as _uw
+    monkeypatch.setattr(_uw, "UNDERWORLD", tmp_path / "uw")
+    monkeypatch.setattr(_uw, "SOULS", tmp_path / "uw" / "souls.jsonl")
+    monkeypatch.setattr(_uw, "KEPT", tmp_path / "uw" / "kept")
     hades.RUNS_DIR.mkdir(parents=True)
     for i in range(28):
         d = hades.RUNS_DIR / f"run_{i:03d}"
@@ -972,6 +976,10 @@ def test_laplace_route_scan_sans_faucher(tmp_path, monkeypatch):
     monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
     monkeypatch.setattr(hades, "OUT", tmp_path)
     monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    from cosmos import underworld as _uw
+    monkeypatch.setattr(_uw, "UNDERWORLD", tmp_path / "uw")
+    monkeypatch.setattr(_uw, "SOULS", tmp_path / "uw" / "souls.jsonl")
+    monkeypatch.setattr(_uw, "KEPT", tmp_path / "uw" / "kept")
     hades.RUNS_DIR.mkdir(parents=True)
     for i in range(28):
         d = hades.RUNS_DIR / f"run_{i:03d}"
@@ -1108,6 +1116,10 @@ def test_hades_reap_bilan_et_tokens(tmp_path, monkeypatch):
     monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
     monkeypatch.setattr(hades, "OUT", tmp_path)
     monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    from cosmos import underworld as _uw
+    monkeypatch.setattr(_uw, "UNDERWORLD", tmp_path / "uw")
+    monkeypatch.setattr(_uw, "SOULS", tmp_path / "uw" / "souls.jsonl")
+    monkeypatch.setattr(_uw, "KEPT", tmp_path / "uw" / "kept")
     hades.RUNS_DIR.mkdir(parents=True)
     for i in range(28):
         d = hades.RUNS_DIR / f"run_{i:03d}"
@@ -1303,3 +1315,97 @@ def test_themis_endpoints_et_ui():
     for motif in ("SOLAR_SCALE", "atomPivots", "addAtomOrbiter", "iconSprite", "a: 0.39", "a: 5.2",
                   "T: 11.86", "toggleTarget", "targetDetail", "Dikè", "⚖ Thémis", "b.icon"):
         assert motif in html, motif
+
+
+# ═══ ROUND fiches F/P/D · mascot Clippy · light ON/OFF · suivre zoom · underworld 🔥 ═══
+
+def test_corps_pouvoir_devoir():
+    """Chaque corps décrit sa fonction, son pouvoir et son devoir (fiches)."""
+    from cosmos.bodies import BODIES, celestial_registry
+    for bid, b in BODIES.items():
+        assert b.get("pouvoir"), f"{bid} sans pouvoir"
+        assert b.get("devoir"), f"{bid} sans devoir"
+    reg = celestial_registry()
+    assert all(x.get("pouvoir") and x.get("devoir") for x in reg)
+
+def test_fiche_fpd_schema_et_aller_vers():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("Fonction · Pouvoir · Devoir", "renderBodySchema", "bodySchema",
+                  "⚡ Pouvoir", "🛡 Devoir", "goTo3D", "goToObsidian",
+                  "aller vers · 3D", "aller vers · Obsidian"):
+        assert motif in html, motif
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "?const" not in idx or "q.get('const')" in idx       # la cible Obsidian lit le paramètre
+    assert "q.get('const')" in idx
+
+def test_laplace_mascot_clippy_anime():
+    """Le bouton flottant Laplace est un mascot animé (sprite 4 poses, façon Clippy)."""
+    js = (Path(__file__).resolve().parents[1] / "app" / "static" / "sol_widget.js").read_text(encoding="utf-8")
+    for motif in ("solw-mascot", "laplace_sprite.png", "solw-frames", "solw-hello",
+                  "steps(1,end)", "background-size:200% 200%"):
+        assert motif in js, motif
+    sprite = Path(__file__).resolve().parents[1] / "app" / "static" / "laplace_sprite.png"
+    assert sprite.exists() and sprite.stat().st_size > 10000
+
+def test_vue_3d_light_off_suivre_zoom_anti_collision():
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    # light ON/OFF : gèle planètes/lunes/cours, les divinités de Laplace continuent
+    for motif in ("toggleSystemLight", "systemOn", "light ON", "light OFF",
+                  "if (this.systemOn)"):
+        assert motif in html, motif
+    # suivre = zoom + centrage + verrou
+    for motif in ("followDist", "focusDist", "(followDist - dist) * 0.08"):
+        assert motif in html, motif
+    # anti-collision : cours équiréparties (angle + rayon échelonné)
+    assert "(i * 7) % 9" in html and "i * (Math.PI * 2 / cour.length)" in html
+
+def test_underworld_rien_ne_disparait(tmp_path, monkeypatch):
+    """La fauche enregistre les âmes avec fraction vitale ; résurrection possible."""
+    from cosmos import hades, underworld
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    monkeypatch.setattr(underworld, "UNDERWORLD", tmp_path / "uw")
+    monkeypatch.setattr(underworld, "SOULS", tmp_path / "uw" / "souls.jsonl")
+    monkeypatch.setattr(underworld, "KEPT", tmp_path / "uw" / "kept")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text(
+            '{"run_id":"r%d","tache":"tache %d","statut":"succès","steps":[{"skill":"synthesize","artifacts":["a.md"]}]}' % (i, i),
+            encoding="utf-8")
+    hades.MEM_ITEMS.write_text('{"id":"a","titre":"t","contenu":"c"}\n{"id":"b","titre":"t","contenu":"c"}\n',
+                               encoding="utf-8")
+    r = hades.reap(confirm=True)
+    assert r["supprimes"] >= 4 and r["underworld"]["ames"] >= 4
+    st = underworld.state()
+    # régions : les runs avec artefacts sont vertueux (Élysées), le doublon va au Tartare
+    assert st["par_region"]["elysees"] >= 3 and st["par_region"]["tartare"] >= 1
+    assert any("Cerbère" in s["gardien"] or "🐾" in s["gardien"] for s in st["ames"])
+    # fraction vitale : la trace conservée permet de reconstruire
+    run_soul = next(s for s in st["ames"] if s["type"] == "run_outdated")
+    assert run_soul["trace"]["run_id"] and run_soul["fichiers"]
+    # Cerbère exige la confirmation
+    refus = underworld.resurrect(run_soul["id"], confirm=False)
+    assert not refus["ok"] and "Cerbère" in refus["statut"]
+    # résurrection réelle : le run remonte parmi les vivants
+    res = underworld.resurrect(run_soul["id"], confirm=True)
+    assert res["ok"]
+    assert (tmp_path / "runs" / Path(run_soul["cible"]).name / "trace.json").exists()
+
+def test_inferno_endpoints_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    st = c.get("/api/underworld").json()
+    assert st["royaume"] and set(st["regions"]) == {"elysees", "asphodele", "tartare"}
+    assert st["gardiens"]["chien"].startswith("Cerbère")
+    assert c.post("/api/underworld/restore", json={"id": "inconnu", "confirm": True}).json()["ok"] is False
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("🔥 INFERNO", "loadUnderworld", "resurrectSoul", "elysees",
+                  "asphodele", "tartare", "Cerbère", "Perséphone", "ressusciter"):
+        assert motif in html, motif
+    from cosmos import laplace
+    r = laplace.chat("montre-moi les enfers")
+    assert r["intent"] == "inferno" and "âme" in r["reply"]

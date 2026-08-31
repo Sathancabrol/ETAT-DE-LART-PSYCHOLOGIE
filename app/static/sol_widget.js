@@ -10,16 +10,27 @@
   window.__solWidget = true;
 
   const CSS = `
-  .solw-btn{position:fixed;bottom:22px;right:22px;width:62px;height:62px;border-radius:50%;
+  .solw-btn{position:fixed;bottom:22px;right:22px;width:74px;height:74px;border-radius:26%;
     cursor:pointer;z-index:9998;border:none;background:transparent;padding:0;
     transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
-  .solw-btn:hover{transform:scale(1.12)}
-  .solw-img{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;
-    animation:solw-spin 40s linear infinite, solw-glow 3.6s ease-in-out infinite;
-    box-shadow:0 0 22px 5px rgba(192,132,252,.4), 0 0 55px 14px rgba(147,51,234,.2)}
-  @keyframes solw-spin{to{transform:rotate(360deg)}}
+  .solw-btn:hover{transform:scale(1.1) rotate(-3deg)}
+  /* 🌀 mascot Laplace animé façon Clippy : sprite 2x2, 4 poses (idle, clin d'œil, salut, excité) */
+  .solw-mascot{position:absolute;inset:0;width:100%;height:100%;border-radius:26%;
+    background-image:url('/static/laplace_sprite.png');background-size:200% 200%;
+    background-color:#0b0f1d;overflow:hidden;
+    box-shadow:0 0 20px 4px rgba(192,132,252,.4), 0 0 48px 12px rgba(147,51,234,.2);
+    animation:solw-frames 1.9s steps(1,end) infinite, solw-glow 3.6s ease-in-out infinite, solw-hello 14s ease-in-out infinite}
+  @keyframes solw-frames{
+    0%,24%{background-position:0% 0%}        /* pose 1 : repos */
+    25%,49%{background-position:100% 0%}     /* pose 2 : clin d'œil */
+    50%,74%{background-position:0% 100%}     /* pose 3 : salut */
+    75%,100%{background-position:100% 100%}  /* pose 4 : excité */
+  }
+  @keyframes solw-hello{0%,90%,100%{transform:translateY(0) rotate(0)}
+    92%{transform:translateY(-7px) rotate(-6deg)} 94%{transform:translateY(0) rotate(5deg)}
+    96%{transform:translateY(-4px) rotate(-3deg)} 98%{transform:translateY(0) rotate(0)}}
   @keyframes solw-glow{0%,100%{filter:brightness(1) saturate(1.05)}
-    50%{filter:brightness(1.22) saturate(1.25)}}
+    50%{filter:brightness(1.18) saturate(1.22)}}
   /* repli si l'image ne charge pas : nébuleuse CSS */
   .solw-core{position:absolute;inset:9px;border-radius:50%;
     background:radial-gradient(circle at 36% 34%, #f5d0fe 0%, #c084fc 26%, #7c3aed 58%, #2e1065 100%);
@@ -71,12 +82,9 @@
   btn.className = 'solw-btn';
   btn.title = '✳ Laplace — interlocuteur principal du système';
   btn.innerHTML = `
-    <div class="solw-core"></div>
-    <img class="solw-img" src="/static/nebula.png" alt="nébuleuse Laplace"
-         onerror="this.style.display='none'">
-    <span class="solw-star" style="top:10px;left:16px"></span>
-    <span class="solw-star s2" style="bottom:12px;right:12px"></span>
-    <span class="solw-star s3" style="top:26px;right:5px"></span>`;
+    <div class="solw-mascot" role="img" aria-label="Laplace, l'assistant nébuleuse"></div>
+    <span class="solw-star" style="top:8px;left:14px"></span>
+    <span class="solw-star s2" style="bottom:10px;right:12px"></span>`;
   document.body.appendChild(btn);
 
   // Panneau de chat — Laplace ✳

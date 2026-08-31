@@ -746,6 +746,21 @@ function app() {
     async init(){
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();});
+      // ⬇ arrivée depuis une fiche (« aller vers · Obsidian ») : ?const=<corps>&tab=graph
+      try{
+        const q = new URLSearchParams(location.search);
+        const c = q.get('const'), t = q.get('tab');
+        if(t === 'graph' || c){
+          this.tab = 'graph';
+          await this.loadConstellations();
+          if(c){
+            const v = this.constellations.find(x => x.id === c);
+            if(v) await this.loadConstellation(v);
+            else { await this.loadConstellation({id:'base'}); this.graphSearch = c; setTimeout(()=>this.searchGraph(), 400); }
+            setTimeout(()=>this.initObsidianGraph(), 250);
+          }
+        }
+      }catch(e){}
     },
 
     async loadProfilPerso(){

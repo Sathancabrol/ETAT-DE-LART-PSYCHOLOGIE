@@ -378,6 +378,7 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
                 "bilan": scan["stats"]["par_type"],
                 "tokens_epargnes": scan["prevision_tokens"]["estime"]}
 
+    from cosmos import underworld as uw      # ♱ rien ne disparaît vraiment
     supprimes, liberés = 0, 0
     details = []
     for t in scan["targets"]:
@@ -386,25 +387,55 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
                 p = Path(t["cible"]) if t["cible"].startswith("/") else REPO / t["cible"]
                 if t["type"] == "run_outdated":
                     liberés += t["octets"]
+                    try:
+                        uw.reap_run(p, t["raison"])          # fraction vitale aux Enfers
+                    except Exception:
+                        pass
                     import shutil
                     shutil.rmtree(p, ignore_errors=True)
                 else:
+                    try:
+                        uw.reap_junk(p)
+                    except Exception:
+                        pass
                     p.unlink(missing_ok=True)
                 supprimes += 1
                 details.append("⚰ " + t["cible"])
             elif t["type"] == "doublon_memoire":
                 ids = set(t["cible"].split("#")[1].split(","))
-                lines = [l for l in MEM_ITEMS.read_text(encoding="utf-8").splitlines()
-                         if l.strip() and json.loads(l).get("id") not in ids]
+                toutes = []
+                lines = []
+                for l in MEM_ITEMS.read_text(encoding="utf-8").splitlines():
+                    if not l.strip():
+                        continue
+                    try:
+                        it = json.loads(l)
+                    except Exception:
+                        lines.append(l)
+                        continue
+                    if it.get("id") in ids:
+                        toutes.append(it)                    # âmes emportées au Tartare
+                    else:
+                        lines.append(l)
                 MEM_ITEMS.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+                try:
+                    uw.reap_doublons(sorted(ids), toutes, t["raison"])
+                except Exception:
+                    pass
                 supprimes += 1
                 details.append("⚰ " + t["raison"])
             elif t["type"] == "journal":
                 p = REPO / t["cible"]
                 lines = [l for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
                 keep = lines[-POLITIQUE["interactions_max"]:]
+                coupees = len(lines) - len(keep)
                 liberés += p.stat().st_size - len("\n".join(keep))
                 p.write_text("\n".join(keep) + "\n", encoding="utf-8")
+                try:
+                    uw.reap_journal(t["cible"], coupees,
+                                    p.stat().st_size - len("\n".join(keep).encode("utf-8")))
+                except Exception:
+                    pass
                 supprimes += 1
                 details.append("⚰ " + t["cible"] + " (tronqué)")
         except Exception:
@@ -431,7 +462,14 @@ def reap(confirm: bool = False) -> Dict[str, Any]:
                                  {"contenu": f"{supprimes} condamnés", "octets": liberés})
     except Exception:
         pass
+    try:
+        n_ames = len(uw.souls())
+    except Exception:
+        n_ames = 0
     return {"statut": "fauche exécutée — les condamnés sont aux enfers",
+            "underworld": {"ames": n_ames,
+                           "note": "rien n'a disparu : chaque entité a laissé une fraction "
+                                   "de données suffisante pour la reconstruire (bouton INFERNO)"},
             "bilan": bilan,                      # quoi a été détruit, par catégorie
             "pourquoi": POURQUOI,                # pourquoi chaque catégorie, et ce qui est conservé
             "tokens_epargnes": round(liberés / 4),   # estimation honnête (1 token ≈ 4 octets)

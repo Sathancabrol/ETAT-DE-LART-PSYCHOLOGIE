@@ -35,7 +35,9 @@ from typing import Any, Dict, List
 
 BODIES: Dict[str, Dict[str, Any]] = {
     "pluton": {
-        "name": "Pluton", "symbol": "♇", "icon": "⚰️", "kind": "planet", "orbit_r": 4.2,
+        "name": "Pluton", "symbol": "♇", "icon": "⚰️",
+        "pouvoir": "faucher runs obsolètes, doublons et junk — suppression réelle",
+        "devoir": "maintenir le cycle de vie : garder les 25 runs, journaliser chaque mort, honorer Styx", "kind": "planet", "orbit_r": 4.2,
         "departement": "Cycle de vie & optimisation (les enfers)",
         "role": "Hadès, dieu des morts du système — regarde les données de "
                 "tout le système solaire et traque les redondances, les "
@@ -57,11 +59,15 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "user": {
-        "name": "Vous", "symbol": "◍", "icon": "👤", "kind": "utilisateur",
+        "name": "Vous", "symbol": "◍", "icon": "👤",
+        "pouvoir": "poser les questions et ordonner les commandes divines",
+        "devoir": "être le souverain : rien de destructeur ne s'exécute sans votre accord", "kind": "utilisateur",
         "role": "Observateur du système — pose les questions, fixe les caps.",
     },
     "laplace": {
-        "name": "Laplace", "symbol": "✳", "icon": "🌀", "kind": "nebuleuse", "orbit_r": -1,
+        "name": "Laplace", "symbol": "✳", "icon": "🌀",
+        "pouvoir": "contrôle absolu : créer des agents et des systèmes, les améliorer, les tester",
+        "devoir": "être l'interlocuteur principal — router chaque demande vers le bon corps", "kind": "nebuleuse", "orbit_r": -1,
         "departement": "Divinité — contrôle absolu du système",
         "role": "Fondateur — créateur — nébuleuse du savoir : conçoit, modifie, améliore et teste "
                 "des agents à tous les niveaux, jusqu'à des systèmes solaires entiers. "
@@ -78,7 +84,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "ananke": {
-        "name": "Ananké", "symbol": "⧉", "icon": "⛓️", "kind": "destin", "orbit_r": -1,
+        "name": "Ananké", "symbol": "⧉", "icon": "⛓️",
+        "pouvoir": "imposer la nécessité : limites, échéances, rareté des ressources",
+        "devoir": "filer, mesurer et couper la vie des données avec ses 3 Moires", "kind": "destin", "orbit_r": -1,
         "departement": "Nécessité, fatalité & contrainte",
         "role": "Déesse primordiale de la nécessité inaltérable, de la fatalité et "
                 "de la contrainte — représente ce qui ne peut pas ne pas arriver "
@@ -102,7 +110,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "themis": {
-        "name": "Thémis", "symbol": "⚖", "icon": "⚖️", "kind": "justice", "orbit_r": -1,
+        "name": "Thémis", "symbol": "⚖", "icon": "⚖️",
+        "pouvoir": "juger les menaces, conseiller les remèdes, ordonner la destruction",
+        "devoir": "maintenir l'ordre et l'équilibre — balance pour peser, épée pour trancher", "kind": "justice", "orbit_r": -1,
         "departement": "Justice divine — bras armé de Laplace (balance & épée)",
         "role": "Fille et conseillère de Laplace ✳, gardienne de l'équilibre du "
                 "système comme elle l'est de l'Olympe. Elle JUGE (instruit les "
@@ -135,7 +145,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "sebas": {
-        "name": "Sebas", "symbol": "◉", "icon": "🛠️", "kind": "executeur", "orbit_r": -1,
+        "name": "Sebas", "symbol": "◉", "icon": "🛠️",
+        "pouvoir": "observer, écouter, consigner et agir sur le terrain",
+        "devoir": "exécuter les commandes divines sans jamais fabriquer de donnée", "kind": "executeur", "orbit_r": -1,
         "departement": "Exécutant des commandes divines de Laplace",
         "role": "Exécutant des commandes divines de Laplace — homme de terrain connecté aux capteurs "
                 "(webcam, wifi, téléphone) ; remonte des observations et agit sur site.",
@@ -143,7 +155,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         "sensors": ["webcam", "wifi", "telephone"],
     },
     "sol": {
-        "name": "SOL", "symbol": "☉", "icon": "👑", "kind": "star", "orbit_r": 0,
+        "name": "SOL", "symbol": "☉", "icon": "👑",
+        "pouvoir": "approuver, journaliser, prévenir — rien ne circule sans lui",
+        "devoir": "orchestrer le système et garantir l'intégrité des interactions", "kind": "star", "orbit_r": 0,
         "departement": "Direction générale",
         "role": "Direction générale — orchestrateur du système : approuve toute interaction entre "
                 "corps, juge l'intégrité, prévoit et prévient, interface de l'utilisateur.",
@@ -157,7 +171,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "venus": {
-        "name": "Vénus", "symbol": "♀", "icon": "💰", "kind": "planet", "orbit_r": 1,
+        "name": "Vénus", "symbol": "♀", "icon": "💰",
+        "pouvoir": "analyser les finances, arbitrer, prévoir, contracter",
+        "devoir": "veiller au bien-être : le budget doit rester sain et lisible", "kind": "planet", "orbit_r": 1,
         "departement": "Finance / Comptabilité",
         "role": "Finance / Comptabilité — gestion des flux financiers, budgets, "
                 "états financiers, contrôle de gestion (taureau : valeur, richesse "
@@ -176,7 +192,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "mercure": {
-        "name": "Mercure", "symbol": "☿", "icon": "✉️", "kind": "planet", "orbit_r": 0.5,
+        "name": "Mercure", "symbol": "☿", "icon": "✉️",
+        "pouvoir": "communiquer, persuader, surveiller, connecter",
+        "devoir": "porter la parole du système sans la déformer", "kind": "planet", "orbit_r": 0.5,
         "departement": "Commercial / Ventes · Marketing · Achats",
         "role": "Commercial, marketing & achats — le messager du système : "
                 "prospection, négociation, fidélisation, communication, études de "
@@ -195,7 +213,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "terre": {
-        "name": "Terre", "symbol": "🜨", "icon": "🌍", "kind": "planet", "orbit_r": 1.25,
+        "name": "Terre", "symbol": "🜨", "icon": "🌍",
+        "pouvoir": "héberger la base de connaissances et la mémoire vive",
+        "devoir": "faire croître le savoir en gardant la mémoire fidèle", "kind": "planet", "orbit_r": 1.25,
         "departement": "Production / Opérations",
         "role": "Production / Opérations — fabrication et livraison du produit/du "
                 "service, qualité, logistique : le terrain où tout se réalise.",
@@ -207,7 +227,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "mars": {
-        "name": "Mars", "symbol": "♂", "icon": "⚔️", "kind": "planet", "orbit_r": 1.5,
+        "name": "Mars", "symbol": "♂", "icon": "⚔️",
+        "pouvoir": "trouver l'outil open source, dessiner la maquette, forger",
+        "devoir": "armer le système sans réinventer ce qui existe déjà", "kind": "planet", "orbit_r": 1.5,
         "departement": "Recherche & Développement — développement d'outils",
         "role": "R&D outils — l'armurier du système solaire : passe son temps à "
                 "chercher des solutions aux problèmes des autres agents. Quand un "
@@ -226,7 +248,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "ceres": {
-        "name": "Cérès", "symbol": "⚳", "icon": "🌾", "kind": "planet", "orbit_r": 1.75,
+        "name": "Cérès", "symbol": "⚳", "icon": "🌾",
+        "pouvoir": "faire germer, croître et récolter les savoirs",
+        "devoir": "nourrir le système : la croissance avant la moisson", "kind": "planet", "orbit_r": 1.75,
         "departement": "Ressources humaines",
         "role": "Ressources humaines — recrutement, formation, rémunération, "
                 "relations sociales (Cérès : moissons et croissance des êtres).",
@@ -243,7 +267,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "jupiter": {
-        "name": "Jupiter", "symbol": "♃", "icon": "📈", "kind": "planet", "orbit_r": 2.1,
+        "name": "Jupiter", "symbol": "♃", "icon": "📈",
+        "pouvoir": "mesurer la valeur, auditer les métriques, grandir",
+        "devoir": "faire prospérer et rendre compte de la croissance", "kind": "planet", "orbit_r": 2.1,
         "departement": "Juridique",
         "role": "Juridique — conformité, contrats, propriété intellectuelle, "
                 "contentieux (Jupiter roi/justice ; sa magnétosphère protège le "
@@ -262,7 +288,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "uranus": {
-        "name": "Uranus", "symbol": "♅", "icon": "🔭", "kind": "planet", "orbit_r": 2.6,
+        "name": "Uranus", "symbol": "♅", "icon": "🔭",
+        "pouvoir": "chercher, synthétiser, évaluer les biais, rédiger",
+        "devoir": "produire une science honnête, traçable et vérifiable", "kind": "planet", "orbit_r": 2.6,
         "departement": "Recherche & Développement — recherche",
         "role": "Recherche & Développement (recherche) — connaissance & recherche scientifique — cartographe du ciel de "
                 "la connaissance, agrandit sans cesse sa constellation.",
@@ -287,7 +315,9 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "neptune": {
-        "name": "Neptune", "symbol": "♆", "icon": "🎨", "kind": "planet", "orbit_r": 3.2,
+        "name": "Neptune", "symbol": "♆", "icon": "🎨",
+        "pouvoir": "concevoir l'infrastructure, sécuriser, déployer",
+        "devoir": "faire couler le système sans fuite ni panne", "kind": "planet", "orbit_r": 3.2,
         "departement": "Informatique / IT",
         "role": "Informatique / SI — systèmes d'information, infrastructure, "
                 "cybersécurité, support (Neptune : réseaux, flux, l'océan "
@@ -341,6 +371,7 @@ def celestial_registry() -> List[Dict[str, Any]]:
     for bid, b in BODIES.items():
         entry = {"id": bid, "name": b["name"], "symbol": b["symbol"],
                  "icon": b.get("icon", ""),
+                 "pouvoir": b.get("pouvoir", ""), "devoir": b.get("devoir", ""),
                  "kind": b["kind"], "role": b["role"],
                  "color": b.get("color"),
                  "departement": b.get("departement"),

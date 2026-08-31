@@ -694,3 +694,60 @@ liste des fichiers avec tailles ; doublon : les lignes mémoire identiques et
 leur contenu ; journal : lignes anciennes qui seront coupées) et la phrase
 exacte « 🗑 sera supprimé : … ». `hades.describe_target(cible, type)` +
 `GET /api/hades/target` (chemins contrôlés, refus hors système).
+
+## Round fiches F/P/D · mascot Clippy · light ON/OFF · suivre-zoom · anti-collision · INFERNO 🔥
+
+**Fiches entités — descriptif ET schématique, toujours.** Chaque corps de `bodies.py`
+porte désormais `pouvoir` (ce qu'il peut imposer au système) et `devoir` (ce que le
+système attend de lui), exposés par `celestial_registry()`. La fiche 3D affiche le bloc
+**Fonction · Pouvoir · Devoir** : texte narratif **et** schéma SVG (`renderBodySchema`,
+`#bodySchema`) reliant le corps à ses principaux satellites. Deux boutons « aller vers » :
+**· 3D** (focus caméra `_skyFollow`) et **· Obsidian** (`/?const=<corps>&tab=graph`,
+interprété par `index.html`).
+
+**Laplace-Clippy.** Le bouton flottant bas-droite est un mascot animé (sprite
+`laplace_sprite.png`, 4 poses : idle / clin d'œil / salut / excité — animation
+`solw-frames` 1.9 s steps(1) + cycle de salut toutes les 14 s). Le daimon reste
+l'interlocuteur principal du chat flottant.
+
+**Light ON/OFF.** Bouton sous le titre de /sol : OFF gèle tout le système (rotations
+planétaires, lunes, cours, noyau), **seuls Laplace ✳ et ses divinités (Sebas, Métatron,
+Thémis, Ananké-Moires) continuent d'orbiter** — le daimon survit à l'obscurité qu'il a
+éteinte. ON relance tout.
+
+**Suivre = zoom + centrage + verrou.** Le dbl-clic « suivre » calcule désormais une
+distance de focalisation (`followDist = max(34, r·7+22)`), zoome (lerp continu de la
+distance caméra) et verrouille la cible au centre jusqu'au clic dans le vide.
+
+**Anti-collision stricte.** Les cours des planètes ne peuvent plus se chevaucher :
+rayons échelonnés `24+(i·7)%9` et angles équirépartis `i·2π/len` — deux astres ne
+partagent jamais la même orbite au même moment.
+
+**INFERNO — le royaume d'Hadès (`cosmos/underworld.py`).** La corbeille du système :
+*rien n'est jamais vraiment supprimé*. Quand Hadès fauche, chaque entité laisse une
+**fraction de données, assez pour la reconstruire**, et descend aux Enfers grecs — le
+royaume d'Hadès ♇ et Perséphone 🌸 — divisé selon le destin des âmes :
+
+| Région | Âmes | Fraction conservée |
+|---|---|---|
+| 🌟 Champs Élysées | runs vertueux (qui ont produit des artefacts) | trace complète + manifeste des fichiers |
+| 🌾 Plaines d'Asphodèle | runs ordinaires, journaux tronqués | trace + manifeste / lignes coupées |
+| 🔥 Tartare | junk vide, doublons mémoire (les criminels : néant & redondance) | contenu des doublons, entier (léger) |
+
+L'accès se fait par le **Styx ☠**, **Charon ⚑** passe les âmes, et **Cerbère 🐾**
+tricéphale garde la porte : il empêche les morts de sortir et interdit les vivants à
+entrer — concrètement, `resurrect(id, confirm)` refuse toute remontée sans l'accord
+explicite du souverain (l'utilisateur). Une résurrection de run restitue la trace dans
+`output/runs/` (le run redevient listable et auditable) ; une résurrection de doublon
+ré-append les lignes mémoire (tag `résurrection`, corps `pluton`).
+
+- UI : bouton **🔥 INFERNO** dans la barre de /sol → registre des âmes (région, motif,
+  octets, date) + bouton ↺ ressusciter avec confirmation Cerbère.
+- API : `GET /api/underworld` (état + stats par région), `POST /api/underworld/restore`.
+- Chat : intents `inferno` (enfers/underworld/tartare/élisées/cerbère/corbeille/
+  résusciter…) → Laplace récite l'état du royaume.
+- `hades.reap()` retourne désormais `underworld.ames` et la note « rien n'a disparu ».
+
+**Tests : 122** (116 + 1 F/P/D corps + 1 fiche schéma/aller-vers + 1 mascot Clippy +
+1 light/suivre/anti-collision + 1 underworld fauche→âmes→résurrection + 1 endpoints/UI
+INFERNO — ce dernier couvre aussi l'intent chat).

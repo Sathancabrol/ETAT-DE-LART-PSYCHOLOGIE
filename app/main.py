@@ -1824,6 +1824,25 @@ def hades_target(cible: str, type: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.get("/api/underworld")
+def underworld_state():
+    """🔥 INFERNO — le royaume d'Hadès : les âmes des entités fauchées."""
+    from cosmos import underworld
+    return underworld.state()
+
+
+class UnderworldRestoreRequest(BaseModel):
+    id: str
+    confirm: bool = False
+
+
+@app.post("/api/underworld/restore")
+def underworld_restore(req: UnderworldRestoreRequest):
+    """Cerbère 🐾 laisse remonter une âme (résurrection, accord du souverain requis)."""
+    from cosmos import underworld
+    return underworld.resurrect(req.id, confirm=req.confirm)
+
+
 class HadesReapRequest(BaseModel):
     confirm: bool = False
 
