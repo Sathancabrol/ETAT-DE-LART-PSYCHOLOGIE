@@ -751,3 +751,63 @@ ré-append les lignes mémoire (tag `résurrection`, corps `pluton`).
 **Tests : 122** (116 + 1 F/P/D corps + 1 fiche schéma/aller-vers + 1 mascot Clippy +
 1 light/suivre/anti-collision + 1 underworld fauche→âmes→résurrection + 1 endpoints/UI
 INFERNO — ce dernier couvre aussi l'intent chat).
+
+## Round Olympe 🏛 · dashboard hologramme · cerveau · opérateur 3D · identité complète
+
+**Identité de TOUTES les entités.** Les 15 corps avaient déjà leur fonction/pouvoir/devoir ;
+les 39 entités secondaires (27 satellites + 12 membres de cour) ont maintenant les leurs
+(`IDENTITE_SECONDAIRES` dans `bodies.py`, injectés à l'import). Atropos « coupe le fil —
+prononce la mort d'une entité, sans appel », Dikè « garantit un procès équivalent au
+standard juridique avant toute exécution », Zêta « coordonner la recherche appliquée »…
+Le système entier est une famille où chacun sait ce qu'il peut et ce qu'il doit.
+
+**Fiches : astres connectés cliquables.** Toute fiche liste désormais ses astres connectés
+(parent ⬆, satellites ●, cour ♟) en chips cliquables — le survol révèle pouvoir·devoir,
+le clic saute à la fiche suivante. Chez Uranus par exemple : les 7 satellites (Zêta, Puck,
+Miranda, Ariel, Umbriel, Titania, Obéron) mènent chacun à leur fiche. Le schéma SVG de la
+fiche est lui aussi cliquable (5 satellites, soulignés en pointillé).
+
+**Chat de Laplace : liste déroulante d'actions rapides.** Le bouton « ⚡ actions rapides »
+ouvre un menu groupé de 25 actions réelles : Système & état (état, budget, interactions,
+constellation, profil), Divinités au travail (Thémis juge/applique, Sebas observe,
+divination d'Apollon, Ananké, armurerie), Enfers & justice (scan de Hadès, fauche, INFERNO,
+résurrection), Recherche & production (missions Uranus, forge d'outil, métriques, Cérès),
+Mémoire & identité (qui suis-je, mémoire, nébuleuse, aide). Chaque action parle à la
+divinité concernée — réponse réelle du système, aucune simulation.
+
+**Le Mont Olympe 🏛 (`cosmos/olympus.py` + bouton OLYMPUS dans /sol).** L'incarnation en
+personnage de chaque agent, à son poste de travail dans une cité gréco-romaine simplifiée :
+14 lieux (Trône de Sol, Observatoire de Laplace, Tribunal de Thémis, Forge de Mars,
+Laboratoires d'Uranus, Porte des Enfers…) et 20 personnages (dont Dikè, Zêta, Apollon,
+Charon, Cerbère). Ils **s'y déplacent en temps réel selon leur activité réelle** (niveau
+0-3 selon les interactions du bus). Quand une exécution a réellement eu lieu (âme au
+registre de l'underworld), la séquence juridique complète est jouée sur scène :
+constat → **procès** (procédure juridique standard) → verdict → descente **en passant par
+la forge de Mars** → remise du verdict à **Hadès** → **exécution conjointe** du
+scientifique d'Uranus → **les assistants d'Hadès portent l'âme aux Enfers** → chacun
+reprend son travail. Sinon : battements d'ambiance dictés par l'activité réelle. Chronique
+réelle en marge ; clic sur un personnage → sa fiche. Canvas 2D, rafraîchi toutes les 24 s.
+
+**Dashboard hologramme SF.** Reskin de `index.html` : verre plus transparent (blur 22 px),
+grille technique en fond, lueurs cyan/indigo, ligne de scan animée sous l'entête, cadres
+HUD à coins lumineux (`holo-frame`), cartes métriques à halo réactif.
+
+**Opérateur 3D — vous.** Fenêtre 4 du dashboard : humain masculin en **T-pose**, rendu en
+**maillage** holographique cyan (Three.js, procédural — tête, torse large d'épaules, bras
+tendus, jambes), anneaux HUD en rotation, plan de scan ascendant, grille au sol ;
+rotation auto + glisser pour tourner.
+
+**Onglet Cerveau 🧠.** Visualisation scientifique du « cerveau du Cognitorium » :
+deux hémisphères en nuage de points avec circonvolutions (sphères de Fibonacci plissées),
+cervelet, tronc cérébral, 60 neurones, 110 connexions et impulsions voyageant en temps
+réel. Six régions câblées aux **données réelles** : Frontal→méthode, Pariétal→profondeur,
+Temporal→mémoire (éléments), Occipital→curiosité, Cervelet→activité, Tronc→interactions
+(bus). L'intensité de chaque région et la cadence des impulsies suivent les valeurs
+réelles ; clic pour isoler une région ; glisser/molette pour tourner/zoomer.
+
+**Laplace mature.** Nouveau sprite du daimon (masculin, moins mignon, membres allongés,
+manteau sombre à liseré cyan) — mêmes 4 poses animées (idle, clin d'œil, salut, énergie),
+fond normalisé #0b0f1d.
+
+**Tests : 128** (122 + identité de toutes les entités + fiches connectées cliquables +
+menu d'actions rapides + Olympe backend + endpoint/UI Olympe + dashboard holo/avatar/cerveau).

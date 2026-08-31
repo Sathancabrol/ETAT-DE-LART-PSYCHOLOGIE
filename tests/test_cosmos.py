@@ -1409,3 +1409,94 @@ def test_inferno_endpoints_et_ui():
     from cosmos import laplace
     r = laplace.chat("montre-moi les enfers")
     assert r["intent"] == "inferno" and "âme" in r["reply"]
+
+
+# ═══ ROUND Olympe 🏛 · dashboard hologramme · cerveau · avatar · identité complète ═══
+
+def test_identite_toutes_entites():
+    """Chaque entité du système — corps, satellites, cour — a un pouvoir et un devoir."""
+    from cosmos.bodies import BODIES
+    for bid, b in BODIES.items():
+        assert b.get("pouvoir") and b.get("devoir"), f"{bid} (corps) sans identité"
+        for s in (b.get("satellites") or []) + (b.get("court") or []):
+            assert s.get("pouvoir"), f"{bid}/{s['id']} sans pouvoir"
+            assert s.get("devoir"), f"{bid}/{s['id']} sans devoir"
+    n = sum(len((b.get("satellites") or []) + (b.get("court") or [])) for b in BODIES.values())
+    assert n >= 39          # 27 satellites + 12 membres de cour
+
+def test_fiche_astres_connectes_cliquables():
+    """La fiche liste les astres connectés (parent/satellites/cour), cliquables."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("Astres connectés", "connectedBodies(bodyData.body)", "openBody(c.id)",
+                  "un système, une famille", "_skyOpenBody"):
+        assert motif in html, motif
+    # le schéma SVG est cliquable et montre les identités au survol
+    assert "slice(0, 5)" in html and "'⚡ ' + s.pouvoir" in html
+
+def test_chat_actions_rapides_liste_deroulante():
+    """Le chat de Laplace propose une liste déroulante d'actions rapides élargie."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("actions rapides", "quickActions", "quickGroups", "quickRun", "quickOpen"):
+        assert motif in html, motif
+    import re
+    n = len(re.findall(r"\{g:'", html))
+    assert n >= 20, f"{n} actions rapides seulement"
+    # les groupes couvrent système, divinités, enfers, recherche, mémoire
+    for grp in ("Système & état", "Divinités au travail", "Enfers & justice",
+                "Recherche & production", "Mémoire & identité"):
+        assert grp in html, grp
+
+def test_olympus_backend():
+    """Le Mont Olympe : places, habitants avec identité, théâtre dérivé d'événements réels."""
+    from cosmos import olympus, underworld
+    # une âme réelle (dans le royaume isolé par conftest) déclenche le théâtre juridique
+    underworld.record_soul({"id": "ame-test", "type": "run_outdated", "region": "tartare",
+                            "cible": "output/agent_runs/run_test", "raison": "run obsolète",
+                            "octets": 10, "trace": {"tache": "étude de test", "run_id": "r1"},
+                            "gardien": "Cerbère 🐾", "ts": "2026-08-31T00:00:00"})
+    st = olympus.state()
+    assert len(st["places"]) >= 14 and len(st["agents"]) >= 18
+    ids = {a["id"] for a in st["agents"]}
+    assert {"sol", "themis", "mars", "pluton", "uranus", "laplace", "zeta", "charon", "cerbere"} <= ids
+    # chaque habitant porte son identité (pouvoir/devoir) et son poste existe
+    for a in st["agents"]:
+        assert a["poste"] in st["places"], a["id"]
+        assert a.get("pouvoir") is not None, a["id"]
+    # le théâtre juridique complet quand une âme existe (registre réel)
+    d = st["drama"]
+    assert d["beats"] and d["source"]
+    txt = " ".join(b["texte"] for b in d["beats"])
+    for etape in ("procès", "forge", "Hadès", "exécuté", "assistants"):
+        assert etape in txt, etape
+    # l'activité est réelle : niveaux + interactions dénombrées
+    for a in st["agents"]:
+        assert 0 <= a["niveau"] <= 3 and a["interactions"] >= 0
+
+def test_olympus_endpoint_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    st = c.get("/api/olympus").json()
+    assert st["places"] and st["agents"] and st["drama"]["beats"] and st["chronique"] is not None
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("🏛 OLYMPUS", "olympusCanvas", "startOlympusEngine", "stopOlympusEngine",
+                  "chronique réelle", "openOlympus"):
+        assert motif in html, motif
+
+def test_dashboard_holo_avatar_cerveau():
+    """Dashboard hologramme SF : opérateur 3D T-pose maillage + onglet Cerveau."""
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # onglet cerveau + scène
+    for motif in ("'Cerveau'", "brainCanvas", "initBrain", "brainRegions",
+                  "selectBrainRegion", "Cerveau du Cognitorium"):
+        assert motif in html, motif
+    # opérateur : humain masculin T-pose en maillage
+    for motif in ("operatorCanvas", "initOperator", "humain · masculin · maillage",
+                  "T-pose", "SphereGeometry", "Math.PI / 2"):
+        assert motif in html, motif
+    # reskin holographique
+    for motif in ("holo-frame", "holoSweep", "backdrop-filter: blur(22px)", "three@0.158.0"):
+        assert motif in html, motif
+    # les régions du cerveau sont câblées aux données réelles
+    for rid in ("frontal", "parietal", "temporal", "occipital", "cervelet", "tronc"):
+        assert f"id: '{rid}'" in html, rid

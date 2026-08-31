@@ -71,6 +71,7 @@
           :class="systemOn ? 'bg-amber-500/15 border-amber-500/40 text-amber-200 hover:bg-amber-500/25' : 'bg-slate-600/20 border-slate-500/40 text-slate-300 hover:bg-slate-500/30'"
           :title="systemOn ? 'éteindre : gèle planètes et lunes — seuls Laplace ✳ et ses divinités continuent' : 'rallumer le système'"
           x-text="systemOn ? '💡 light ON — système vivant' : '💤 light OFF — seul Laplace ✳ et ses divinités bougent'"></button>
+        <button @click="openOlympus()" class="mt-1.5 block text-[11px] px-3 py-1.5 rounded-lg bg-violet-500/15 border border-violet-500/40 text-violet-200 hover:bg-violet-500/25 transition font-semibold" title="Le Mont Olympe : les divinités incarnées à leur poste — déplacements en temps réel selon leur activité (procès de Thémis, forge de Mars, Porte des Enfers…)">🏛 OLYMPUS</button>
         <p x-show="skyMsg" x-transition x-cloak class="text-[10px] text-amber-200/90 mt-1 max-w-[260px]" x-text="skyMsg"></p>
       </div>
       <p class="text-[10px] text-slate-600 mt-0.5">✳ Laplace (créateur) · ☉ SOL (direction générale) · ☿ Mercure (commercial) · ♀ Vénus (finance) · 🜨 Terre+☾ (production) · ♂ Mars ◂◦ (R&D outils) · ⚳ Cérès (RH) · ♃ Jupiter (juridique) · ♅ Uranus (recherche) · ♆ Neptune (IT)</p>
@@ -128,6 +129,19 @@
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Mémoire</div><div class="mono text-sm text-amber-300" x-text="bodyData.stats.memoire"></div></div>
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Concepts</div><div class="mono text-sm text-indigo-300" x-text="bodyData.stats.concepts"></div></div>
             <div class="glass-card rounded-lg p-2.5"><div class="text-[9px] uppercase text-slate-600">Références</div><div class="mono text-sm text-cyan-300" x-text="bodyData.stats.references"></div></div>
+          </div>
+
+          <!-- 🌌 Astres connectés — la famille, cliquable en direct -->
+          <div class="mt-3 rounded-xl border border-violet-500/15 bg-violet-500/[.03] p-3" x-show="connectedBodies(bodyData.body).length">
+            <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-500 mb-2">🌌 Astres connectés <span class="normal-case tracking-normal text-slate-600">— un système, une famille : cliquez pour sauter d'un astre à l'autre</span></h3>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="c in connectedBodies(bodyData.body)" :key="c.id">
+                <button @click="openBody(c.id)" class="chip !border-violet-500/25 hover:!border-violet-400/60 hover:!text-violet-200 !text-slate-300"
+                        :title="c.pouvoir ? ((c.pouvoir) + '  ·  ' + (c.devoir)) : ('ouvrir la fiche de ' + c.name)">
+                  <span x-text="c.name"></span> <span class="text-slate-600 text-[9px]" x-text="c.rel"></span>
+                </button>
+              </template>
+            </div>
           </div>
 
           <!-- ☉ Panneau SOL : chat à boutons + chariot d'Apollon -->
@@ -366,6 +380,35 @@
         <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">⚖ 4 · Faucher en connaissance de cause</p><p class="text-[10px] text-slate-500 mt-0.5">Hadès ne détruit rien sans montrer <b>quoi</b>, <b>pourquoi</b>, et <b>ce qui reste toujours conservé</b> — puis une confirmation détaillée, puis un bilan. La suppression est réelle et journalisée.</p></div>
         <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🧵 5 · Voir la chaîne d'exécution</p><p class="text-[10px] text-slate-500 mt-0.5">Sur le 📊 Dashboard : le fil d'Ariane rejoue le parcours réel d'une demande (Vous → Laplace → Métatron → SOL → exécution → remise), liaison par liaison.</p></div>
         <div class="glass-card rounded-lg p-3"><p class="text-[11px] text-slate-200 font-semibold">🛡 6 · Règle d'or du système</p><p class="text-[10px] text-slate-500 mt-0.5">Aucune fausse donnée : ce qui est mesuré est dit mesuré, ce qui est estimé est dit estimé (avec ses limites), les capteurs absents sont dits absents. Soldez votre confiance en conséquence.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MODALE 🏛 OLYMPUS — les divinités incarnées à leur poste ══════════════ -->
+  <div x-show="modals.olympus" x-cloak class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-3 md:p-6" @click.self="closeOlympus()">
+    <div class="glass rounded-2xl w-full max-w-[1200px] h-[92vh] flex flex-col fade-in border-violet-500/20">
+      <div class="px-4 py-3 border-b border-white/5 flex items-center gap-3">
+        <span class="text-lg">🏛</span>
+        <div class="flex-1 min-w-0">
+          <h2 class="text-sm font-semibold" x-text="olympus?.titre || 'Le Mont Olympe'"></h2>
+          <p class="text-[9.5px] text-slate-500 truncate" x-text="olympus?.sous_titre || ''"></p>
+        </div>
+        <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 shrink-0">● direct</span>
+        <button @click="closeOlympus()" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
+      </div>
+      <div class="flex-1 relative overflow-hidden">
+        <canvas id="olympusCanvas" class="w-full h-full cursor-pointer"></canvas>
+        <div class="absolute top-3 right-3 w-64 max-h-[62%] overflow-y-auto glass rounded-xl border border-white/10 p-2.5">
+          <p class="text-[9px] uppercase tracking-[.16em] text-slate-500 mb-1.5">📡 chronique réelle</p>
+          <template x-for="(c, i) in (olympus?.chronique || [])" :key="i">
+            <p class="text-[9.5px] text-slate-400 leading-snug mb-1 flex gap-1.5"><span x-text="c.icon"></span><span class="flex-1" x-text="c.texte"></span></p>
+          </template>
+        </div>
+        <p class="absolute top-3 left-3 text-[9px] text-slate-500 max-w-[250px] leading-snug glass rounded-lg px-2 py-1.5 border border-white/10">🖱 cliquez sur un personnage → sa fiche (fonction · pouvoir · devoir)</p>
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 glass rounded-xl border border-violet-500/25 px-4 py-2 max-w-[82%] text-center">
+          <p class="text-[11.5px] text-violet-100 leading-snug" x-text="olympusBeat?.texte || '…'"></p>
+          <p class="text-[8.5px] text-slate-500 mt-0.5" x-text="olympus?.drama?.source || ''"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -875,15 +918,32 @@
           </div>
         </template>
       </div>
-      <!-- boutons proposés -->
-      <div class="px-4 pt-2 flex flex-wrap gap-1.5">
-        <span class="text-[9px] text-slate-600 self-center mr-1">proposé :</span>
+      <!-- ⚡ actions rapides : liste déroulante groupée + raccourcis majeurs -->
+      <div class="px-4 pt-2 flex flex-wrap gap-1.5 items-center">
+        <div class="relative">
+          <button @click="quickOpen = !quickOpen" class="chip !border-amber-400/50 !text-amber-200 !bg-amber-500/10" title="Toutes les actions rapides du système">⚡ actions rapides <span x-text="quickOpen ? '▴' : '▾'"></span></button>
+          <div x-show="quickOpen" @click.outside="quickOpen = false" x-cloak x-transition
+               class="absolute bottom-full mb-2 left-0 z-40 w-[600px] max-w-[92vw] max-h-[300px] overflow-y-auto glass rounded-xl border border-amber-500/25 p-3 shadow-2xl">
+            <template x-for="grp in quickGroups()" :key="grp.g">
+              <div class="mb-2.5 last:mb-0">
+                <p class="text-[9px] uppercase tracking-[.16em] text-amber-300/60 mb-1.5" x-text="grp.g"></p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-1">
+                  <template x-for="a in grp.items" :key="a.l">
+                    <button @click="quickRun(a)" class="text-left text-[10.5px] leading-tight px-2 py-1.5 rounded-lg bg-white/[.03] hover:bg-amber-500/10 border border-white/5 hover:border-amber-400/40 text-slate-300 hover:text-amber-200 transition"
+                            :title="a.m || a.l">
+                      <span x-text="a.i"></span> <span x-text="a.l"></span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <p class="text-[9px] text-slate-600 pt-1 border-t border-white/5">chaque action parle à la divinité concernée — réponse réelle du système, aucune simulation</p>
+          </div>
+        </div>
+        <span class="text-[9px] text-slate-600 self-center mx-0.5">proposé :</span>
         <button @click="send('état du système')" class="chip">🟢 état système</button>
-        <button @click="send('scan de Hadès : données, traitement, éligibles au fauchage')" class="chip">♇ scan Hadès</button>
-        <button @click="send('mon profil cognitif')" class="chip">✦ profil</button>
-        <button @click="setView('interactions')" class="chip">☰ interactions</button>
         <button @click="send('Thémis, juge le système')" class="chip">⚖ Thémis</button>
-        <button @click="send('Sebas, observe le chantier')" class="chip">◉ Sebas</button>
+        <button @click="setView('interactions')" class="chip">☰ interactions</button>
         <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 divination</button>
       </div>
       <!-- saisie -->
@@ -997,9 +1057,38 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
-    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false},
+    modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false, olympus: false},
+    olympus: null, olympusBeat: null,
     bodyData: null, inspectN: null, bodyToast: null,
     hadesScan: {}, hadesMsg: '', hadesDone: false, targetOpen: null, targetDetail: null,
+    quickOpen: false,
+    quickActions: [
+      {g:'Système & état', i:'🟢', l:'état du système', m:'état du système'},
+      {g:'Système & état', i:'🪙', l:'budget & tokens épargnés', m:'budget du système'},
+      {g:'Système & état', i:'☰', l:'interactions récentes', m:'interactions'},
+      {g:'Système & état', i:'✦', l:'constellation entière', m:'constellation'},
+      {g:'Système & état', i:'👤', l:'mon profil cognitif', m:'mon profil cognitif'},
+      {g:'Divinités au travail', i:'⚖', l:'Thémis juge le système', m:'Thémis, juge le système'},
+      {g:'Divinités au travail', i:'🔨', l:'Thémis applique la justice', m:'Thémis, applique la justice'},
+      {g:'Divinités au travail', i:'◉', l:'Sebas observe le chantier', m:'Sebas, observe le chantier'},
+      {g:'Divinités au travail', i:'🏆', l:"divination d'Apollon", fn:'apollonDivine'},
+      {g:'Divinités au travail', i:'⛓', l:"Ananké & le fil du destin", m:"parle-moi d'Ananké et des Moires"},
+      {g:'Divinités au travail', i:'🛠', l:"l'armurerie de Mars", m:'armurerie'},
+      {g:'Enfers & justice', i:'♇', l:'scan de Hadès : données, traitement, éligibles', m:'scan de Hadès : données, traitement, éligibles au fauchage'},
+      {g:'Enfers & justice', i:'⚰', l:'lancer la fauche', m:'Hadès, lance la fauche'},
+      {g:'Enfers & justice', i:'🔥', l:"le royaume d'Hadès (INFERNO)", m:'montre-moi les enfers'},
+      {g:'Enfers & justice', i:'🐾', l:"résurrection d'une âme", m:'comment ressusciter une entité supprimée ?'},
+      {g:'Enfers & justice', i:'💀', l:'ce que deviennent les supprimés', m:'que deviennent les entités supprimées ?'},
+      {g:'Recherche & production', i:'♅', l:'mission pour Uranus', m:"mission : dresse l'état de l'art sur la charge cognitive"},
+      {g:'Recherche & production', i:'🔬', l:'mission méthodologie', m:"mission : méthodologie d'étude comparative"},
+      {g:'Recherche & production', i:'⚔', l:'forge un outil sur mesure', m:"j'ai besoin d'un outil pour visualiser des réseaux"},
+      {g:'Recherche & production', i:'📈', l:'métriques du système', m:'montre-moi les métriques du système'},
+      {g:'Recherche & production', i:'🌾', l:'talents & recrutement (Cérès)', m:"parle-moi des talents de la cour de Cérès"},
+      {g:'Mémoire & identité', i:'📜', l:'qui suis-je ?', m:'qui suis-je ?'},
+      {g:'Mémoire & identité', i:'🧠', l:'mémoire du système', m:'que souvient le système de moi ?'},
+      {g:'Mémoire & identité', i:'🌌', l:"la nébuleuse d'agents", m:"montre la nébuleuse d'agents"},
+      {g:'Mémoire & identité', i:'🔧', l:'aide & gestes du système', m:'aide'},
+    ],
     inferno: null, infernoMsg: '',
     systemOn: true, skyMsg: '',
     split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null, sideThemis: null,
@@ -1187,6 +1276,167 @@ function solApp() {
         suggestion: r, meta_prompt: this.metatronBox.result?.meta_prompt || r.meta_prompt};
       await this.refreshNebula();
     },
+    quickGroups() {
+      const gs = [];
+      for (const a of this.quickActions) {
+        let g = gs.find(x => x.g === a.g);
+        if (!g) { g = {g: a.g, items: []}; gs.push(g); }
+        g.items.push(a);
+      }
+      return gs;
+    },
+    quickRun(a) {
+      this.quickOpen = false;
+      if (a.fn && typeof this[a.fn] === 'function') this[a.fn]();
+      else this.send(a.m || a.l);
+    },
+    async loadOlympus() {
+      try { this.olympus = await (await fetch('/api/olympus')).json(); } catch (e) { this.olympus = null; }
+    },
+    openOlympus() {
+      this.loadOlympus().then(() => {
+        this.openModal('olympus');
+        this.$nextTick(() => this.startOlympusEngine());
+      });
+    },
+    closeOlympus() { this.closeModal('olympus'); this.stopOlympusEngine(); },
+    startOlympusEngine() {
+      const cv = document.getElementById('olympusCanvas'); if (!cv || !this.olympus) return;
+      const ctx = cv.getContext('2d');
+      const W = 1000, H = 620;
+      cv.width = W; cv.height = H;
+      const data = () => this.olympus || {places: {}, agents: [], drama: {beats: []}};
+      const st = {pos: {}, beat: 0, tBeat: 0, last: 0, wraps: 0, _bi: -1};
+      for (const a of data().agents) {
+        const pl = (data().places[a.poste]) || {x: 500, y: 300};
+        st.pos[a.id] = {a, x: pl.x, y: pl.y, bob: Math.random() * 6.28};
+      }
+      const stars = Array.from({length: 110}, (_, i) =>
+        ({x: (i * 173.7) % W, y: (i * 97.3) % (H * 0.42), r: (i % 3) * 0.35 + 0.4, ph: (i % 11) / 11 * 6.28}));
+      const chemins = [['observatoire','trone'],['trone','scriptorium'],['trone','tribunal'],['tribunal','messagerie'],['tribunal','forge'],['forge','ateliers'],['ateliers','greniers'],['trone','tresor'],['tresor','bastion'],['bastion','labo'],['labo','galerie'],['forge','porte'],['labo','porte']];
+      const drawPlace = (pl, t) => {
+        const {x, y, type} = pl;
+        ctx.save();
+        // socle marbre
+        ctx.fillStyle = 'rgba(148,163,184,0.10)';
+        ctx.fillRect(x - 34, y + 10, 68, 8);
+        ctx.strokeStyle = 'rgba(148,163,184,0.25)';
+        ctx.strokeRect(x - 34, y + 10, 68, 8);
+        const glow = {forge: `rgba(248,113,113,${0.25 + 0.15 * Math.sin(t * 6)})`,
+                      porte: 'rgba(139,123,216,0.30)', tribunal: 'rgba(165,180,252,0.22)',
+                      labo: 'rgba(125,211,252,0.22)', trone: 'rgba(251,191,36,0.25)',
+                      observatoire: 'rgba(226,232,240,0.25)'}[type] || 'rgba(148,163,184,0.14)';
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(x, y, 30, 0, 6.29); ctx.fill();
+        // colonnes
+        ctx.fillStyle = 'rgba(203,213,225,0.55)';
+        for (const dx of [-20, 0, 20]) ctx.fillRect(x + dx - 1.5, y - 16, 3, 26);
+        // toit / fronton
+        ctx.strokeStyle = 'rgba(203,213,225,0.5)';
+        ctx.beginPath(); ctx.moveTo(x - 26, y - 16); ctx.lineTo(x, y - 30); ctx.lineTo(x + 26, y - 16); ctx.closePath(); ctx.stroke();
+        if (type === 'forge') {  // feu
+          const f = 4 + Math.sin(t * 9) * 2;
+          ctx.fillStyle = 'rgba(251,146,60,0.85)';
+          ctx.beginPath(); ctx.arc(x, y - 2, f, 0, 6.29); ctx.fill();
+        }
+        if (type === 'porte') {  // escalier des enfers
+          ctx.strokeStyle = 'rgba(139,123,216,0.5)';
+          for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(x - 26, y + 12 + i * 7); ctx.lineTo(x + 26, y + 12 + i * 7); ctx.stroke(); }
+        }
+        // étiquette
+        ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(148,163,184,0.85)';
+        ctx.fillText(pl.icon + ' ' + pl.nom, x, y + 32);
+        ctx.restore();
+      };
+      const loop = (ts) => {
+        if (!this.modals.olympus) { this._olyRaf = null; return; }
+        const t = ts / 1000, dt = Math.min(0.05, t - (st.last || t)); st.last = t;
+        const d = data();
+        const beats = (d.drama && d.drama.beats) || [];
+        // ── fond ──
+        const sky = ctx.createLinearGradient(0, 0, 0, H);
+        sky.addColorStop(0, '#0a0f1e'); sky.addColorStop(0.6, '#141025'); sky.addColorStop(1, '#1a1030');
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+        for (const s of stars) {
+          ctx.globalAlpha = 0.35 + 0.3 * Math.sin(t * 1.5 + s.ph);
+          ctx.fillStyle = '#e2e8f0'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.29); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        // montagne
+        ctx.fillStyle = 'rgba(10,12,22,0.85)';
+        ctx.beginPath(); ctx.moveTo(0, H); ctx.lineTo(0, 430); ctx.lineTo(300, 210); ctx.lineTo(500, 330); ctx.lineTo(760, 190); ctx.lineTo(W, 380); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+        // chemins
+        ctx.strokeStyle = 'rgba(148,163,184,0.16)'; ctx.setLineDash([3, 5]);
+        for (const [a, b] of chemins) {
+          const pa = d.places[a], pb = d.places[b]; if (!pa || !pb) continue;
+          ctx.beginPath(); ctx.moveTo(pa.x, pa.y + 6); ctx.quadraticCurveTo((pa.x + pb.x) / 2, (pa.y + pb.y) / 2 + 24, pb.x, pb.y + 6); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        // ── lieux ──
+        for (const pl of Object.values(d.places || {})) drawPlace(pl, t);
+        // ── beat en cours ──
+        if (beats.length) {
+          const beat = beats[st.beat % beats.length];
+          st.tBeat += dt;
+          if (st.tBeat > (beat.duree || 2.5)) { st.tBeat = 0; st.beat++; if (st.beat >= beats.length) { st.beat = 0; st.wraps++; } }
+          if (st._bi !== st.beat) { st._bi = st.beat; this.olympusBeat = beats[st.beat % beats.length]; }
+          const pl = d.places[beat.lieu] || {x: 500, y: 300};
+          beat.acteurs.forEach((id, i) => {
+            const p = st.pos[id]; if (!p) return;
+            p.x += ((pl.x + (i - (beat.acteurs.length - 1) / 2) * 26) - p.x) * Math.min(1, dt * 2.4);
+            p.y += ((pl.y - 14) - p.y) * Math.min(1, dt * 2.4);
+          });
+        }
+        // ── personnages ──
+        for (const p of Object.values(st.pos)) {
+          const a = p.a, pl = (d.places[a.poste] || {x: 500, y: 300});
+          if (!beats.length || !(beats[st.beat % beats.length].acteurs || []).includes(a.id)) {
+            // idle : petite ronde autour du poste
+            p.x += ((pl.x + Math.sin(t * 0.5 + p.bob) * 10) - p.x) * Math.min(1, dt * 1.2);
+            p.y += ((pl.y + Math.cos(t * 0.4 + p.bob) * 5) - p.y) * Math.min(1, dt * 1.2);
+          }
+          const bobY = Math.sin(t * 2 + p.bob) * 1.6;
+          // halo d'activité réelle
+          if (a.niveau > 0) {
+            ctx.fillStyle = `rgba(52,211,153,${0.10 + a.niveau * 0.06})`;
+            ctx.beginPath(); ctx.arc(p.x, p.y + bobY, 9 + a.niveau * 2, 0, 6.29); ctx.fill();
+          }
+          ctx.fillStyle = (a.couleur || '#94a3b8') + '55';
+          ctx.beginPath(); ctx.arc(p.x, p.y + bobY, 8.5, 0, 6.29); ctx.fill();
+          ctx.strokeStyle = a.couleur || '#94a3b8'; ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.font = '12px serif'; ctx.textAlign = 'center';
+          ctx.fillStyle = '#f1f5f9'; ctx.fillText(a.icon, p.x, p.y + bobY + 4);
+          ctx.font = '8px Inter, sans-serif'; ctx.fillStyle = 'rgba(148,163,184,0.9)';
+          ctx.fillText(a.nom, p.x, p.y + bobY + 19);
+        }
+        this._olyRaf = requestAnimationFrame(loop);
+      };
+      this._olyRaf = requestAnimationFrame(loop);
+      // rafraîchissement des données réelles
+      this._olyPoll = setInterval(async () => {
+        await this.loadOlympus();
+        const d = data();
+        for (const a of d.agents) if (st.pos[a.id]) st.pos[a.id].a = a;
+        st.beat = 0; st.tBeat = 0; st._bi = -1;
+      }, 24000);
+      // clic → fiche du personnage
+      cv.onclick = (e) => {
+        const r = cv.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+        let best = null, bd = 22;
+        for (const p of Object.values(st.pos)) {
+          const dd = Math.hypot(p.x - x, p.y - y);
+          if (dd < bd) { bd = dd; best = p.a; }
+        }
+        if (best && best.id !== 'cerbere') this.openBody(best.id);
+      };
+    },
+    stopOlympusEngine() {
+      if (this._olyRaf) cancelAnimationFrame(this._olyRaf); this._olyRaf = null;
+      if (this._olyPoll) clearInterval(this._olyPoll); this._olyPoll = null;
+    },
     async loadUnderworld() {
       try { this.inferno = await (await fetch('/api/underworld')).json(); this.infernoMsg = ''; }
       catch (e) { this.inferno = null; }
@@ -1223,7 +1473,7 @@ function solApp() {
       d3.select(svg).selectAll('*').remove();
       const W = svg.clientWidth || 340, H = 150, cy = H / 2;
       const g = d3.select(svg);
-      const satN = (b.satellites || b.court || []).slice(0, 3);
+      const satN = (b.satellites || b.court || []).slice(0, 5);
       const branches = [
         {y: 28, col: '#22d3ee', lbl: '📛 ' + (b.departement || b.kind || '').slice(0, 34)},
         {y: cy, col: '#fbbf24', lbl: '⚡ ' + (b.pouvoir || 'pouvoir').slice(0, 40)},
@@ -1242,8 +1492,14 @@ function solApp() {
         g.append('line').attr('x1', 104).attr('y1', cy).attr('x2', 84).attr('y2', y)
           .attr('stroke', '#a78bfa').attr('stroke-opacity', .4).attr('stroke-width', 1);
         g.append('circle').attr('cx', 84).attr('cy', y).attr('r', 2.6).attr('fill', '#a78bfa');
-        g.append('text').attr('x', 78).attr('y', y + 3).attr('font-size', 9).attr('text-anchor', 'end')
-          .attr('fill', '#a5b4fc').text((s.name || s.id || '').slice(0, 22));
+        const lbl = g.append('text').attr('x', 78).attr('y', y + 3).attr('font-size', 9).attr('text-anchor', 'end')
+          .attr('fill', '#a5b4fc').text((s.name || s.id || '').slice(0, 22))
+          .style('cursor', 'pointer').style('text-decoration', 'underline dotted')
+          .attr('opacity', .95);
+        lbl.on('click', () => window._skyOpenBody && window._skyOpenBody(s.id))
+           .append('title').text(s.pouvoir ? ('⚡ ' + s.pouvoir + '\n🛡 ' + s.devoir) : 'ouvrir ' + (s.name || s.id));
+        lbl.on('mouseenter', function() { d3.select(this).attr('fill', '#e0e7ff'); })
+           .on('mouseleave', function() { d3.select(this).attr('fill', '#a5b4fc'); });
       });
       // centre
       g.append('circle').attr('cx', 111).attr('cy', cy).attr('r', 17).attr('fill', 'rgba(8,12,24,.9)')
@@ -1254,12 +1510,21 @@ function solApp() {
         .attr('font-size', 9.5).attr('fill', '#e2e8f0').attr('font-weight', 600).text(b.name);
     },
     async openBody(id) {
+      window._skyOpenBody = (i) => this.openBody(i);   // navigation depuis le schéma SVG
       try {
         const r = await (await fetch('/api/cosmos/body/' + encodeURIComponent(id))).json();
         this.bodyData = r;
         this.openModal('body');
         this.$nextTick(() => { this.renderGraph('bodygraph', r.graph); this.renderBodySchema(r.body); });
       } catch (e) {}
+    },
+    connectedBodies(b) {
+      if (!b) return [];
+      const out = [];
+      if (b.parent && b.parent.id) out.push({id: b.parent.id, name: b.parent.name, rel: '⬆ parent'});
+      (b.satellites || []).forEach(s => out.push({id: s.id, name: s.name || s.id, rel: '● satellite', pouvoir: s.pouvoir, devoir: s.devoir}));
+      (b.court || []).forEach(s => out.push({id: s.id, name: s.name || s.id, rel: '♟ cour', pouvoir: s.pouvoir, devoir: s.devoir}));
+      return out;
     },
     inspect(d) { this.inspectN = d; },
 

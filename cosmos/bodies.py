@@ -387,6 +387,96 @@ def celestial_registry() -> List[Dict[str, Any]]:
     return out
 
 
+# ═══ Identité des entités secondaires : chaque satellite/membre de cour a un
+# pouvoir et un devoir — ils forment un système, une famille, une entreprise ═══
+IDENTITE_SECONDAIRES = {
+    "charon":   ("faucher et transporter les condamnés vers les Enfers, sans escale ni retour",
+                 "exécuter chaque fauche ordonnée par Hadès, sans partialité ni pitié"),
+    "styx":     ("sceller le seuil — marquer ce qui doit mourir et ce qui doit rester",
+                 "tenir la politique de rétention à jour et la rendre lisible"),
+    "metatron": ("lire l'intention cachée de chaque requête et forger le méta-prompt parfait",
+                 "analyser chaque demande avant qu'aucune divinité n'agisse"),
+    "clotho":   ("filer la vie des entités — créer mémoires, runs et concepts à la naissance",
+                 "ne jamais filer un fil qui ne naît pas d'une vraie donnée"),
+    "lachesis": ("mesurer et dérouler le fil — attribuer durées, budgets et quotas",
+                 "répartir équitablement les ressources entre tous les corps"),
+    "atropos":  ("couper le fil — prononcer la mort d'une entité, sans appel",
+                 "ne couper que sur condamnation légalement prononcée (Hadès/Thémis)"),
+    "eunomia":  ("écrire les lois du système — politiques, seuils, constitution",
+                 "soumettre chaque loi au vote et la garder lisible"),
+    "eirene":   ("appliquer les décisions de justice et rétablir l'ordre",
+                 "désamorcer les conflits avant la punition"),
+    "dike":     ("instruire les dossiers des condamnés — peser preuves et circonstances",
+                 "garantir un procès équivalent au standard juridique avant toute exécution"),
+    "censeur":  ("auditer et publier ce que le système fait vraiment",
+                 "rendre compte publiquement, y compris contre les puissants"),
+    "apollon":  ("voir clair — divination, clairvoyance, prédiction des cycles",
+                 "éclairer l'utilisateur avant chaque grande décision"),
+    "thalie":   ("compter chaque token et chaque coût, au centime près",
+                 "tenir le grand livre exact et public"),
+    "euphrosyne": ("arbitrer les allocations pour le meilleur rendement par ressource",
+                   "démontrer chaque optimisation, chiffres à l'appui"),
+    "aglae":    ("prévoir budgets, saisonnalités et alertes de trésorerie",
+                 "alerter avant le dépassement, jamais après"),
+    "eros":     ("négocier et conclure les accords entre planètes",
+                 "défendre les termes sans jamais trahir une partie"),
+    "peitho":   ("persuader — prospection et fidélisation",
+                 "vendre sans jamais promettre ce que le système ne fait pas"),
+    "pheme":    ("faire entendre l'écho du système — positionnement, promotion",
+                 "ne propager que des faits vérifiés"),
+    "argus":    ("voir tout — cent yeux sur le marché et la concurrence",
+                 "remonter chaque signal faible à la bonne planète"),
+    "enodios":  ("sourcer les fournisseurs et négocier les achats",
+                 "garantir traçabilité et provenance de chaque ressource"),
+    "lune":     ("stabiliser la production — qualité, logistique, intégration continue",
+                 "garder la Terre habitable : aucun déploiement instable"),
+    "phobos":   ("forge les outils fonctionnels — code, calculateurs, armurerie",
+                 "livrer des armes qui marchent, testées"),
+    "deimos":   ("imaginer les solutions originales et dessiner les maquettes",
+                 "prototyper vite, mais jamais en production sans validation"),
+    "thallo":   ("attirer et faire éclore les talents (recrutement)",
+                 "évaluer chaque candidat sur preuves, pas sur éclat"),
+    "auxo":     ("développer les compétences de la cour (formation & croissance)",
+                 "faire croître sans laisser personne au bord du chemin"),
+    "karpo":    ("récompenser et retenir — rémunération, récolte",
+                 "payer juste et à temps"),
+    "io":       ("traverser les radiations — auditer chaque flux de données",
+                 "bloquer tout flux non conforme, même urgent"),
+    "europe":   ("rédiger, relire et exécuter les contrats",
+                 "verrouiller chaque accord avant tout engagement"),
+    "ganymede": ("protéger le patrimoine intellectuel du système",
+                 "défendre ce que le système a créé"),
+    "callisto": ("mener les contentieux et absorber les chocs",
+                 "garder la trace de chaque cicatrice — les précédents"),
+    "zeta":     ("coordonner la recherche appliquée (premier lieutenant)",
+                 "tenir l'anneau intérieur : rien ne se perd"),
+    "puck":     ("détecter les signaux faibles avant tout le monde",
+                 "vérifier avant de crier à la nouveauté"),
+    "miranda":  ("explorer les frontières — sujets émergents, risques",
+                 "assumer les terrains dangereux sans y entraîner les autres"),
+    "ariel":    ("instruire cognition, éducation et apprentissage",
+                 "rester rigoureusement fidèle à la littérature"),
+    "umbriel":  ("instruire clinique et santé mentale",
+                 "précaution d'abord : ne jamais extrapoler au-delà des preuves"),
+    "titania":  ("conduire les grandes synthèses systématiques",
+                 "montrer la méthode, les sources et les exclusions"),
+    "oberon":   ("garantir méthodologie, open science et réplication",
+                 "refuser ce qui n'est pas reproductible"),
+    "proteus":  ("changer de forme — défense en profondeur contre les intrusions",
+                 "protéger sans jamais verrouiller l'utilisateur dehors"),
+    "triton":   ("faire tourner l'infrastructure — serveurs, réseau, déploiement",
+                 "garder le système debout, à rebours du courant s'il le faut"),
+    "nereide":  ("aider et répondre aux utilisateurs (support)",
+                 "ne jamais laisser un ticket sans réponse"),
+}
+
+for _b in BODIES.values():
+    for _s in (_b.get("satellites") or []) + (_b.get("court") or []):
+        _id = _s.get("id")
+        if _id in IDENTITE_SECONDAIRES:
+            _s["pouvoir"], _s["devoir"] = IDENTITE_SECONDAIRES[_id]
+
+
 def known_body_ids() -> set:
     """IDs de corps connus : corps, satellites et cours, y compris ceux
     créés dynamiquement par Laplace (nébuleuse)."""

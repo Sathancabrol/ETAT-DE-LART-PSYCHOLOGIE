@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
     [x-cloak] { display: none !important; }
@@ -60,6 +61,37 @@
     .tax-node:hover circle { filter:brightness(1.4) drop-shadow(0 0 6px currentColor); }
     .tax-node text { fill:#e2e8f0; font-size:11px; text-shadow:0 1px 4px rgba(0,0,0,.8); pointer-events:none; }
     .tax-link { fill:none; stroke:#1e293b; stroke-width:1.5; stroke-opacity:0.6; }
+    /* ─── HOLO SF — interface scientifique holographique ─── */
+    body {
+      background:
+        radial-gradient(1100px 500px at 12% -8%, rgba(34,211,238,.075), transparent 60%),
+        radial-gradient(900px 480px at 88% -12%, rgba(129,140,248,.07), transparent 60%),
+        radial-gradient(1200px 700px at 50% 115%, rgba(14,42,56,.55), transparent 60%),
+        linear-gradient(rgba(56,189,248,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,.028) 1px, transparent 1px),
+        var(--bg0);
+      background-size: auto, auto, auto, 44px 44px, 44px 44px, auto;
+    }
+    .glass { background: rgba(10,16,28,.62); backdrop-filter: blur(22px); border: 1px solid rgba(56,189,248,.10); }
+    .glass-card { background: rgba(13,20,34,.42); backdrop-filter: blur(14px); border: 1px solid rgba(56,189,248,.085); }
+    .glass-card:hover { border-color: rgba(34,211,238,.22); }
+    .stat-card { box-shadow: inset 0 1px 0 rgba(148,197,255,.05); }
+    .stat-card:hover { box-shadow: 0 8px 30px rgba(34,211,238,.10), inset 0 0 24px rgba(34,211,238,.04); }
+    header.glass::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,.6), transparent);
+      background-size: 240px 100%; animation: holoSweep 6s linear infinite;
+    }
+    @keyframes holoSweep { 0% { background-position: -260px 0; } 100% { background-position: calc(100% + 260px) 0; } }
+    .holo-frame { position: relative; }
+    .holo-frame::before, .holo-frame::after {
+      content: ''; position: absolute; width: 14px; height: 14px; pointer-events: none;
+      border-color: rgba(34,211,238,.5); border-style: solid;
+    }
+    .holo-frame::before { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
+    .holo-frame::after { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
+    #operatorCanvas, #brainCanvas { background: radial-gradient(ellipse at 50% 45%, rgba(34,211,238,.05), transparent 65%); cursor: grab; }
+    #operatorCanvas:active, #brainCanvas:active { cursor: grabbing; }
   </style>
 </head>
 <body class="h-full antialiased" x-data="app()" x-init="init()" x-cloak>
@@ -95,8 +127,8 @@
 
   <!-- ══════════ DASHBOARD ══════════ -->
   <section x-show="activeTab==='dashboard'" class="space-y-5 fade-in">
-    <!-- ══ MINI-DASHBOARD 3 FENÊTRES : métriques · profil cognitif · constellation personnelle ══ -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <!-- ══ MINI-DASHBOARD 4 FENÊTRES : métriques · profil cognitif · constellation · opérateur (hologramme) ══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
       <!-- ◀ FENÊTRE GAUCHE : mes métriques en graphiques -->
       <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
         <div class="flex items-center justify-between mb-2">
@@ -193,6 +225,16 @@
       <div class="flex items-center gap-2 mt-1.5 rounded-lg bg-black/25 border border-amber-500/10 px-3 py-1.5" style="min-height:38px">
         <span id="arianeStepNum" class="text-[9px] mono text-amber-400/80 shrink-0">—</span>
         <span id="arianeCaption" class="text-[11px] text-slate-300">Choisissez un parcours dans la liste puis « ▶ Rejouer » — chaque liaison active apparaît au fil du trajet.</span>
+      </div>
+
+      <!-- ◀ FENÊTRE 4 : l'opérateur — hologramme maillage, humain masculin T-pose -->
+      <div class="glass-card rounded-2xl p-4 flex flex-col holo-frame">
+        <div class="flex items-center justify-between mb-1">
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🕺</span>Opérateur</h3>
+          <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">humain · masculin · maillage</span>
+        </div>
+        <canvas id="operatorCanvas" class="flex-1 w-full" style="min-height:230px"></canvas>
+        <p class="text-[9px] text-slate-600 mt-1">vous, en T-pose — maillage holographique · glissez pour tourner</p>
       </div>
     </div>
 
@@ -360,6 +402,44 @@
   </section>
 
   <!-- ══════════ OBSIDIAN GRAPH ══════════ -->
+  <!-- ══════════ CERVEAU — visualisation scientifique du système ══════════ -->
+  <section x-show="activeTab==='brain'" class="fade-in" style="height:calc(100vh - 80px)">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-3 h-full">
+      <div class="glass-card rounded-2xl relative overflow-hidden holo-frame">
+        <canvas id="brainCanvas" class="w-full h-full"></canvas>
+        <div class="absolute top-3 left-3 glass rounded-lg px-3 py-2 border border-cyan-500/20 pointer-events-none">
+          <p class="text-[11px] font-semibold text-cyan-200">🧠 Cerveau du Cognitorium</p>
+          <p class="text-[9px] text-slate-500">circonvolutions en nuage de points · les impulsions suivent l'activité réelle · glisser = tourner, molette = zoomer</p>
+        </div>
+        <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[75%]">
+          <template x-for="r in brainRegions" :key="r.id">
+            <button @click="selectBrainRegion(r.id)" class="chip !text-[10px]" :class="brainSel===r.id ? '!border-cyan-400/70 !text-cyan-200' : ''" :title="r.desc">
+              <span class="inline-block w-2 h-2 rounded-full mr-1 align-middle" :style="'background:'+r.color"></span><span x-text="r.nom.split(' — ')[0]"></span> <span class="mono text-slate-500" x-text="r.valeur ?? '…'"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+      <div class="glass-card rounded-2xl p-4 overflow-y-auto">
+        <h3 class="text-xs font-semibold mb-1">Régions &amp; données réelles</h3>
+        <p class="text-[9.5px] text-slate-600 mb-3">chaque région s'active sur une mesure réelle du système — aucune simulation</p>
+        <template x-for="r in brainRegions" :key="r.id">
+          <div @click="selectBrainRegion(r.id)" class="mb-2 rounded-xl border p-2.5 cursor-pointer transition" :class="brainSel===r.id ? 'border-cyan-400/50 bg-cyan-500/5' : 'border-white/5 bg-white/[.02] hover:border-cyan-500/25'">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="'background:'+r.color"></span>
+              <p class="text-[11px] font-semibold flex-1" x-text="r.nom"></p>
+              <span class="mono text-sm" :style="'color:'+r.color" x-text="r.valeur ?? '—'"></span>
+            </div>
+            <p class="text-[9.5px] text-slate-500 leading-snug mt-1" x-text="r.desc"></p>
+            <p class="text-[8.5px] text-slate-600 mt-1" x-text="▸ + ' ' + r.donnee"></p>
+          </div>
+        </template>
+        <div class="mt-3 rounded-xl border border-white/5 bg-white/[.02] p-3">
+          <p class="text-[10px] text-slate-400 leading-relaxed">Le profil cognitif (5 dimensions) et les compteurs réels du système (mémoire, interactions) modulent l'intensité de chaque région et la cadence des impulsions. Cliquez une région pour l'isoler.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section x-show="activeTab==='graph'" class="fade-in" style="height:calc(100vh - 80px)">
     <div class="flex flex-col h-full">
       <!-- Toolbar -->
@@ -703,7 +783,7 @@
 function app() {
   return {
     activeTab:'dashboard',
-    tabs:[{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
+    tabs:[{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'brain',label:'Cerveau',icon:'brain-circuit'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
 
     stats:{}, nodes:[], filteredNodes:[], concepts4e:[],
     searchQuery:'', filterDomain:'all', uniqueDomains:[], compareList:[], showCompare:false,
@@ -895,10 +975,221 @@ function app() {
     gaugeColor(m){const p=this.gaugePct(m);const z=(m?.gauge?.zones||[]).find(z=>p>=z[0]/m.gauge.max&&p<z[1]/m.gauge.max);return z?z[3]:'#818cf8';},
     mdInline(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<strong class="text-slate-200">$1</strong>').replace(/`([^`]+)`/g,'<code class="text-cyan-300">$1</code>');},
 
+    brainRegions: [], brainSel: null,
+
+    initOperator() {
+      if (this._opInit || typeof THREE === 'undefined') return;
+      const cv = document.getElementById('operatorCanvas'); if (!cv) return;
+      this._opInit = true;
+      const W = cv.clientWidth || 300, H = cv.clientHeight || 260;
+      const renderer = new THREE.WebGLRenderer({canvas: cv, alpha: true, antialias: true});
+      renderer.setSize(W, H, false);
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(40, W / H, .1, 50);
+      cam.position.set(0, 1.25, 3.5); cam.lookAt(0, 1.0, 0);
+      const fig = new THREE.Group(); scene.add(fig);
+      const cyan = 0x22d3ee;
+      const part = (geo, x, y, z, rz = 0) => {
+        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .07, depthWrite: false}));
+        m.position.set(x, y, z); m.rotation.z = rz;
+        const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 18), new THREE.LineBasicMaterial({color: cyan, transparent: true, opacity: .85}));
+        e.position.copy(m.position); e.rotation.copy(m.rotation);
+        fig.add(m); fig.add(e);
+      };
+      // humain masculin, T-pose : tête, cou, torse large d'épaules, bassin
+      part(new THREE.SphereGeometry(.13, 14, 10), 0, 1.80, 0);
+      part(new THREE.CylinderGeometry(.05, .065, .14, 8), 0, 1.63, 0);
+      part(new THREE.CylinderGeometry(.17, .13, .56, 10), 0, 1.29, 0);
+      part(new THREE.BoxGeometry(.50, .09, .15), 0, 1.53, 0);
+      part(new THREE.BoxGeometry(.25, .15, .15), 0, .96, 0);
+      // bras tendus en T
+      for (const s of [-1, 1]) {
+        part(new THREE.CylinderGeometry(.046, .04, .30, 8), s * .33, 1.52, 0, Math.PI / 2);
+        part(new THREE.CylinderGeometry(.04, .034, .30, 8), s * .63, 1.52, 0, Math.PI / 2);
+        part(new THREE.BoxGeometry(.09, .05, .07), s * .97, 1.52, 0);
+      }
+      // jambes
+      for (const s of [-1, 1]) {
+        part(new THREE.CylinderGeometry(.06, .05, .42, 8), s * .095, .73, 0);
+        part(new THREE.CylinderGeometry(.05, .04, .40, 8), s * .095, .32, 0);
+        part(new THREE.BoxGeometry(.09, .06, .19), s * .095, .07, .045);
+      }
+      // anneaux HUD + sol + plan de scan
+      const ring = (r, op) => { const t = new THREE.Mesh(new THREE.TorusGeometry(r, .008, 8, 64), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: op})); t.rotation.x = Math.PI / 2; t.position.y = 1.0; return t; };
+      const r1 = ring(1.05, .35), r2 = ring(1.28, .2); scene.add(r1); scene.add(r2);
+      const gh = new THREE.GridHelper(3.2, 22, cyan, 0x0e2a38);
+      gh.material.transparent = true; gh.material.opacity = .3; scene.add(gh);
+      const scan = new THREE.Mesh(new THREE.BoxGeometry(1.55, .012, .5), new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .5, blending: THREE.AdditiveBlending}));
+      scene.add(scan);
+      let drag = false, lx = 0;
+      cv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; });
+      window.addEventListener('pointerup', () => drag = false);
+      window.addEventListener('pointermove', e => { if (drag) { fig.rotation.y += (e.clientX - lx) * .012; lx = e.clientX; } });
+      const clock = new THREE.Clock();
+      const loop = () => {
+        if (!document.getElementById('operatorCanvas')) { this._opRaf = null; return; }
+        const t = clock.getElapsedTime();
+        if (!drag) fig.rotation.y = t * .35;
+        r1.rotation.z = t * .5; r2.rotation.z = -t * .35;
+        scan.position.y = ((t * .55) % 2.2) - .05;
+        renderer.render(scene, cam);
+        this._opRaf = requestAnimationFrame(loop);
+      };
+      loop();
+    },
+
+    async loadBrainData() {
+      try {
+        const pr = await (await fetch('/api/profile/cognitive')).json();
+        const dm = await (await fetch('/api/dashboard/metrics')).json();
+        const dim = {}; (pr.dimensions || []).forEach(d => dim[d.id] = d.valeur);
+        const met = {}; (dm.metrics || []).forEach(m => met[m.id] = m.value);
+        this.brainRegions = [
+          {id: 'frontal',  nom: 'Frontal — méthode',            color: '#22d3ee', valeur: dim.methode ?? '—',      desc: 'le contrôle exécutif : planifier, contrôler, corriger', donnee: 'dimension « méthode » du profil cognitif (sur 100)'},
+          {id: 'parietal', nom: 'Pariétal — profondeur',        color: '#818cf8', valeur: dim.profondeur ?? '—',   desc: 'l’intégration : mesurer, relier, spatialiser',      donnee: 'dimension « profondeur » du profil cognitif (sur 100)'},
+          {id: 'temporal', nom: 'Temporal — mémoire',           color: '#fbbf24', valeur: met.memoire ?? '—',      desc: 'mémoire et langage : tout ce que le système retient',   donnee: 'éléments en mémoire (output/cosmos/memory)'},
+          {id: 'occipital',nom: 'Occipital — curiosité',        color: '#34d399', valeur: dim.curiosite ?? '—',    desc: 'la vision : explorer, repérer, s’émerveiller',      donnee: 'dimension « curiosité » du profil cognitif (sur 100)'},
+          {id: 'cervelet', nom: 'Cervelet — activité',          color: '#f472b6', valeur: dim.activite ?? '—',     desc: 'la coordination : le tempo, l’exécution fluide',    donnee: 'dimension « activité » du profil cognitif (sur 100)'},
+          {id: 'tronc',    nom: 'Tronc cérébral — interactions',color: '#fb7185', valeur: met.interactions ?? '—', desc: 'la vie autonome du système : le bus qui bat sans arrêt', donnee: 'interactions journalisées (bus du système)'},
+        ];
+        this._brainVals = {
+          frontal: (dim.methode ?? 50) / 100, parietal: (dim.profondeur ?? 50) / 100,
+          temporal: Math.min(1, (met.memoire ?? 500) / 2000), occipital: (dim.curiosite ?? 50) / 100,
+          cervelet: (dim.activite ?? 50) / 100, tronc: Math.min(1, (met.interactions ?? 200) / 500),
+          assoc: .45,
+        };
+      } catch (e) { this.brainRegions = []; this._brainVals = null; }
+    },
+
+    async initBrain() {
+      if (this._brainInit || typeof THREE === 'undefined') return;
+      const cv = document.getElementById('brainCanvas'); if (!cv) return;
+      this._brainInit = true;
+      await this.loadBrainData();
+      const W = cv.clientWidth || 800, H = cv.clientHeight || 500;
+      const renderer = new THREE.WebGLRenderer({canvas: cv, alpha: true, antialias: true});
+      renderer.setSize(W, H, false);
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(45, W / H, .1, 50);
+      cam.position.set(0, .05, 3.2);
+      const brain = new THREE.Group(); brain.rotation.x = .1; scene.add(brain);
+      const RC = {frontal: 0x22d3ee, parietal: 0x818cf8, temporal: 0xfbbf24, occipital: 0x34d399, assoc: 0x64748b, cervelet: 0xf472b6, tronc: 0xfb7185};
+      const regionOf = (x, y, z) => { if (z > .42) return 'frontal'; if (z < -.40) return 'occipital'; if (y > .30) return 'parietal'; if (y < -.18) return 'temporal'; return 'assoc'; };
+      const pos = [], col = [], reg = [];
+      const c = new THREE.Color();
+      const fib = (n, ox) => {
+        for (let i = 0; i < n; i++) {
+          const k = i + .5, phi = Math.acos(1 - 2 * k / n), th = Math.PI * (1 + Math.sqrt(5)) * k;
+          let x = Math.sin(phi) * Math.cos(th), y = Math.cos(phi), z = Math.sin(phi) * Math.sin(th);
+          const fold = 1 + .055 * Math.sin(9 * th) * Math.cos(7 * phi);   // circonvolutions
+          x = x * .72 * fold + ox; y = y * .55 * fold; z = z * .92 * fold;
+          pos.push(x, y, z);
+          const r = regionOf(x - ox, y, z); reg.push(r);
+          c.setHex(RC[r]); col.push(c.r, c.g, c.b);
+        }
+      };
+      fib(1500, -.10); fib(1500, .10);
+      // cervelet
+      for (let i = 0; i < 260; i++) {
+        const u = Math.random() * 6.283, v = Math.acos(2 * Math.random() - 1);
+        const x = Math.sin(v) * Math.cos(u) * .34, y = Math.cos(v) * .22 - .44, z = Math.sin(v) * Math.sin(u) * .28 - .58;
+        pos.push(x, y, z); reg.push('cervelet');
+        c.setHex(RC.cervelet); col.push(c.r, c.g, c.b);
+      }
+      // tronc cérébral
+      const stem = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.CylinderGeometry(.07, .09, .38, 8)),
+        new THREE.LineBasicMaterial({color: RC.tronc, transparent: true, opacity: .85}));
+      stem.position.set(0, -.62, -.38); stem.rotation.x = .45; brain.add(stem);
+      for (let i = 0; i < 90; i++) {
+        const a = Math.random() * 6.283, yy = Math.random() * .38 - .19;
+        const x = Math.cos(a) * .075, z = Math.sin(a) * .075;
+        const p = new THREE.Vector3(x, yy, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), .45).add(stem.position);
+        pos.push(p.x, p.y, p.z); reg.push('tronc');
+        c.setHex(RC.tronc); col.push(c.r, c.g, c.b);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      const colAttr = new THREE.Float32BufferAttribute(col, 3);
+      geo.setAttribute('color', colAttr);
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({size: .022, vertexColors: true, transparent: true, opacity: .95}));
+      brain.add(pts);
+      // neurones + connexions
+      const neurons = [];
+      for (let i = 0; i < 60; i++) {
+        const v = new THREE.Vector3((Math.random() - .5) * 1.15, (Math.random() - .5) * .8, (Math.random() - .5) * 1.35);
+        if (v.length() < 1) neurons.push(v);
+      }
+      const nGeo = new THREE.BufferGeometry().setFromPoints(neurons);
+      brain.add(new THREE.Points(nGeo, new THREE.PointsMaterial({size: .04, color: 0xe0f2fe, transparent: true, opacity: .9})));
+      const segs = [];
+      for (let i = 0; i < neurons.length && segs.length < 110; i++)
+        for (let j = i + 1; j < neurons.length; j++)
+          if (neurons[i].distanceTo(neurons[j]) < .8) segs.push([neurons[i], neurons[j]]);
+      const lGeo = new THREE.BufferGeometry().setFromPoints(segs.flat());
+      brain.add(new THREE.LineSegments(lGeo, new THREE.LineBasicMaterial({color: 0x38bdf8, transparent: true, opacity: .13})));
+      // impulsions (cadence ∝ activité réelle)
+      const pulses = [];
+      for (let i = 0; i < 20; i++) {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(.014, 6, 6), new THREE.MeshBasicMaterial({color: 0x67e8f9, transparent: true, opacity: .95, blending: THREE.AdditiveBlending}));
+        brain.add(m);
+        pulses.push({m, s: segs[Math.floor(Math.random() * segs.length)] || null, t: Math.random(), sp: .3 + Math.random() * .5});
+      }
+      // intensité par région (données réelles) + isolation à la sélection
+      const applyColors = () => {
+        const vals = this._brainVals || {};
+        const sel = this.brainSel;
+        for (let i = 0; i < reg.length; i++) {
+          c.setHex(RC[reg[i]]);
+          let f = .45 + .55 * (vals[reg[i]] ?? .5);
+          if (sel) f = reg[i] === sel ? Math.min(1.2, f * 1.35) : .10;
+          colAttr.setXYZ(i, c.r * f, c.g * f, c.b * f);
+        }
+        colAttr.needsUpdate = true;
+      };
+      this._brainApply = applyColors;
+      applyColors();
+      // interactions
+      let drag = false, lx = 0, ly = 0;
+      cv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; ly = e.clientY; });
+      window.addEventListener('pointerup', () => drag = false);
+      window.addEventListener('pointermove', e => {
+        if (!drag) return;
+        brain.rotation.y += (e.clientX - lx) * .008; brain.rotation.x += (e.clientY - ly) * .006;
+        lx = e.clientX; ly = e.clientY;
+      });
+      cv.addEventListener('wheel', e => { e.preventDefault(); cam.position.z = Math.max(1.6, Math.min(6, cam.position.z + e.deltaY * .002)); }, {passive: false});
+      const clock = new THREE.Clock();
+      const vals = this._brainVals || {};
+      const tempo = .5 + (vals.tronc ?? .5) * 1.5;
+      const loop = () => {
+        if (!document.getElementById('brainCanvas')) { this._brainRaf = null; return; }
+        const t = clock.getElapsedTime();
+        if (!drag) brain.rotation.y = t * .12;
+        for (const p of pulses) {
+          if (!p.s) continue;
+          p.t += p.sp * .016 * tempo;
+          if (p.t > 1) { p.t = 0; p.s = segs[Math.floor(Math.random() * segs.length)] || p.s; }
+          p.m.position.lerpVectors(p.s[0], p.s[1], p.t);
+        }
+        renderer.render(scene, cam);
+        this._brainRaf = requestAnimationFrame(loop);
+      };
+      loop();
+    },
+
+    selectBrainRegion(id) {
+      this.brainSel = this.brainSel === id ? null : id;
+      if (this._brainApply) this._brainApply();
+    },
+
     switchTab(tab){
       this.activeTab=tab;
       this.$nextTick(()=>{lucide.createIcons();
-        if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();}
+        if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();this.initOperator();}
+        if(tab==='brain'){setTimeout(()=>this.initBrain(),200);}
         if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
         if(tab==='taxonomy')setTimeout(()=>this.initTaxonomy(),200);
         if(tab==='timeline')setTimeout(()=>this.initTimeline(),200);

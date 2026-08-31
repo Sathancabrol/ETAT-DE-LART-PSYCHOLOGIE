@@ -1824,6 +1824,15 @@ def hades_target(cible: str, type: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.get("/api/olympus")
+def olympus_state():
+    """🏛 Le Mont Olympe : les divinités incarnées à leur poste, en mouvement
+    selon leur activité réelle (procès de Thémis, forge de Mars, Porte des
+    Enfers d'Hadès…)."""
+    from cosmos import olympus
+    return olympus.state()
+
+
 @app.get("/api/underworld")
 def underworld_state():
     """🔥 INFERNO — le royaume d'Hadès : les âmes des entités fauchées."""
