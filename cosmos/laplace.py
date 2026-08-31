@@ -26,6 +26,9 @@ NEED_WORDS = re.compile(r"calcul|visualis|besoin|pour\s|donne|cr[ée]{1,2}|forge
                         re.IGNORECASE)
 
 
+# justice / équilibre → Thémis ⚖ (bras armé de Laplace)
+THEMIS_RE = re.compile(r"th[ée]mis|justice|balance|équilibre|jugement|\bjuge\b|divine justice", re.IGNORECASE)
+
 # commandes divines → Sebas ◉ ; chariot → Apollon
 SEBAS_RE = re.compile(r"\bsebas\b|commande\s+divine|ord(on|re)\s+(à|a|de)", re.IGNORECASE)
 CHARIOT_RE = re.compile(r"chariot|divination|pr[ée]sage|oracle|apollon|pr[ée]vi(s|tion)", re.IGNORECASE)
@@ -50,6 +53,24 @@ def chat(message: str) -> Dict[str, Any]:
         analyse = metatron.analyze_request(m)
     except Exception:
         analyse = None
+
+    # ── Justice → Thémis ⚖ juge, conseille, et tranche le cas échéant ────
+    if THEMIS_RE.search(m):
+        from cosmos import themis
+        if re.search(r"applique|tranche|ex[ée]cute|d[ée]truis|fauche", m, re.IGNORECASE):
+            r = themis.appliquer(confirm=True)
+            return {"reply": r["statut"], "intent": "justice_appliquee",
+                    "speaker": "laplace", "data": {"fauche": r.get("fauche")}}
+        a = themis.audit()
+        lignes = [a["verdict"]]
+        for mn in a["menaces"]:
+            lignes.append(f"• [{mn['gravite']}] {mn['quoi']} — remède : {mn['remede']} ({mn['par']})")
+        lignes += ["⚖ Constitution de Thémis (comme la démocratie) :"]
+        lignes += [f"  {c['organe']} ({c['pouvoir']}) — {c['loi_vivante']}" for c in a["constitution"]]
+        lignes.append("Dis « Thémis, applique la justice » pour qu'elle ordonne la fauche "
+                      "(rien n'est détruit sans votre accord).")
+        return {"reply": "\n".join(lignes), "intent": "justice", "speaker": "laplace",
+                "data": {"menaces": a["menaces"], "gravite": a["gravite"]}}
 
     # ── Commande divine → Sebas ◉ exécute ─────────────────────────────────
     if SEBAS_RE.search(m):

@@ -1796,6 +1796,34 @@ def hades_scan():
     from cosmos import hades
     return hades.scan_system()
 
+@app.get("/api/themis/audit")
+def themis_audit():
+    """Thémis ⚖ juge le système : menaces, conseils, constitution démocratique."""
+    from cosmos import themis
+    return themis.audit()
+
+
+class ThemisApplyRequest(BaseModel):
+    confirm: bool = False
+
+
+@app.post("/api/themis/apply")
+def themis_apply(req: ThemisApplyRequest):
+    """Thémis applique la justice : ordonne la fauche à Hadès (accord requis)."""
+    from cosmos import themis
+    return themis.appliquer(confirm=req.confirm)
+
+
+@app.get("/api/hades/target")
+def hades_target(cible: str, type: str):
+    """Dikè instruit le dossier d'un condamné : l'entité réelle qui sera supprimée."""
+    from cosmos import hades
+    try:
+        return hades.describe_target(cible, type)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 class HadesReapRequest(BaseModel):
     confirm: bool = False
 

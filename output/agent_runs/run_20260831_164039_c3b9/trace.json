@@ -1,0 +1,34 @@
+{
+  "run_id": "run_20260831_164039_c3b9",
+  "date": "2026-08-31T16:40:39.734566+00:00",
+  "tache": "recherche attention | sujets : Neurosciences",
+  "cerveau": "regles",
+  "rationale": "plan imposé : 2 compétence(s) choisies via la console, sujets : Neurosciences",
+  "llm": {
+    "available": false,
+    "provider": "aucun",
+    "model": null,
+    "hint": "Définissez OPENAI_API_KEY ou ANTHROPIC_API_KEY pour activer le cerveau LLM (le planificateur à règles reste utilisé par défaut et en secours)."
+  },
+  "gouvernement": null,
+  "statut": "planifié",
+  "duree_s": 0.0,
+  "mode_degrade": false,
+  "plan": {
+    "brain": "regles",
+    "rationale": "plan imposé : 2 compétence(s) choisies via la console, sujets : Neurosciences",
+    "steps": [
+      {
+        "skill": "validate_entries",
+        "params": {},
+        "reason": "compétence choisie dans la console"
+      },
+      {
+        "skill": "trust_scoring",
+        "params": {},
+        "reason": "compétence choisie dans la console"
+      }
+    ]
+  },
+  "steps": []
+}

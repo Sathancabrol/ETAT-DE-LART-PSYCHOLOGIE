@@ -275,15 +275,45 @@
       <p x-show="hadesMsg" class="text-[11px] mt-2" :class="hadesDone ? 'text-emerald-300' : 'text-slate-400'" x-text="hadesMsg"></p>
 
       <h3 class="text-[10px] uppercase tracking-[.14em] text-slate-600 mt-5 mb-2">Condamnés par Atropos <span x-text="'(' + (hadesScan.targets?.length || 0) + ')'"></span></h3>
-      <div class="space-y-1 max-h-64 overflow-y-auto pr-1">
+      <p class="text-[9.5px] text-slate-600 mb-1.5">👇 cliquez un condamné pour <b>suivre jusqu'à l'entité réelle</b> qui sera supprimée (dossier instruit par Dikè 🧑‍⚖️)</p>
+      <div class="space-y-1 max-h-72 overflow-y-auto pr-1">
         <template x-for="(t, i) in hadesScan.targets || []" :key="i">
-          <div class="glass-card rounded-lg px-3 py-2 flex items-center gap-2">
-            <span class="text-[11px]" x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[t.type] || '⚰'"></span>
-            <div class="flex-1 min-w-0">
-              <p class="text-[10.5px] text-slate-300 truncate mono" x-text="t.cible"></p>
-              <p class="text-[9px] text-slate-600 truncate" x-text="t.raison"></p>
+          <div>
+            <button @click="toggleTarget(t)" class="w-full glass-card rounded-lg px-3 py-2 flex items-center gap-2 text-left hover:border-rose-400/30 transition" :class="targetOpen===t.cible && 'border-rose-400/40 bg-rose-500/[.04]'">
+              <span class="text-[11px]" x-text="{'run_outdated':'📦','junk_vide':'🕳️','doublon_memoire':'👯','journal':'📜'}[t.type] || '⚰'"></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-[10.5px] text-slate-300 truncate mono" x-text="t.cible"></p>
+                <p class="text-[9px] text-slate-600 truncate" x-text="t.raison"></p>
+              </div>
+              <span class="text-[9px] mono text-slate-500 shrink-0" x-text="t.octets ? (t.octets/1024).toFixed(1) + ' Ko' : '—'"></span>
+              <span class="text-[9px] text-slate-600 shrink-0" x-text="targetOpen===t.cible ? '▾' : '▸'"></span>
+            </button>
+            <!-- dossier instruit : l'entité réelle, son contenu, ce qui sera supprimé -->
+            <div x-show="targetOpen===t.cible" x-cloak x-transition.duration.200 class="ml-4 mt-1 mb-2 rounded-lg border border-rose-500/20 bg-rose-500/[.03] p-2.5">
+              <template x-if="targetDetail">
+                <div class="space-y-1.5">
+                  <p class="text-[9px] uppercase tracking-[.12em] text-rose-400/80">Dossier instruit par Dikè — l'entité qui sera supprimée</p>
+                  <template x-if="targetDetail.entite">
+                    <div class="glass-card rounded px-2.5 py-1.5">
+                      <p class="text-[10px] text-slate-300"><b x-text="targetDetail.entite.tache || targetDetail.entite.id || '—'"></b></p>
+                      <p class="text-[9px] text-slate-600" x-text="(targetDetail.entite.run_id ? 'run ' + targetDetail.entite.run_id + ' · ' : '') + (targetDetail.entite.statut || '') + (targetDetail.entite.date ? ' · ' + targetDetail.entite.date.slice(0,16) : '')"></p>
+                      <p class="text-[9px] text-slate-500" x-show="targetDetail.entite.etapes" x-text="'compétences exécutées : ' + (targetDetail.entite.etapes||[]).join(', ')"></p>
+                      <p class="text-[9px] text-slate-400 mt-0.5" x-show="targetDetail.entite.contenu" x-text="'contenu : ' + (targetDetail.entite.contenu||'').slice(0,120)"></p>
+                    </div>
+                  </template>
+                  <template x-if="targetDetail.apercu && !targetDetail.entite">
+                    <p class="text-[9.5px] text-slate-500 italic" x-text="'aperçu : ' + (targetDetail.apercu[0]?.titre || targetDetail.apercu[0] || '')"></p>
+                  </template>
+                  <div class="max-h-32 overflow-y-auto space-y-0.5" x-show="targetDetail.contenu?.length">
+                    <template x-for="(f, j) in targetDetail.contenu || []" :key="j">
+                      <p class="text-[9.5px] text-slate-400 mono truncate"><span class="text-slate-600" x-text="f.octets >= 1024 ? (f.octets/1024).toFixed(1)+' Ko' : f.octets+' o'"></span> — <span x-text="f.nom || f.chemin"></span></p>
+                    </template>
+                  </div>
+                  <p class="text-[10px] text-rose-300/90">🗑 sera supprimé : <span x-text="targetDetail.supprime"></span></p>
+                </div>
+              </template>
+              <p x-show="!targetDetail" class="text-[10px] text-slate-500">⚖ instruction du dossier…</p>
             </div>
-            <span class="text-[9px] mono text-slate-500 shrink-0" x-text="t.octets ? (t.octets/1024).toFixed(1) + ' Ko' : '—'"></span>
           </div>
         </template>
         <p x-show="!(hadesScan.targets?.length)" class="text-[11px] text-emerald-300/80 italic">Le système est propre — rien à faucher. ☠ Styx approuve.</p>
@@ -554,7 +584,7 @@
       <div x-show="split" x-cloak class="w-[400px] shrink-0 border-r border-white/5 flex flex-col min-h-0">
         <div class="px-4 py-2.5 border-b border-white/5 flex items-center gap-2">
           <span class="text-[10px] uppercase tracking-[.12em] text-slate-500">Fiche</span>
-          <span class="text-[11px] font-semibold text-amber-200" x-text="({sol:'☉ SOL', hades:'♇ Hadès & Moires', profil:'✦ Profil cognitif', etat:'🟢 État du système', divination:'🏆 Apollon', sebas:'◉ Sebas', mars:'♂ Mars'})[sideView] || '—'"></span>
+          <span class="text-[11px] font-semibold text-amber-200" x-text="({sol:'☉ SOL', hades:'♇ Hadès & Moires', profil:'✦ Profil cognitif', etat:'🟢 État du système', divination:'🏆 Apollon', sebas:'◉ Sebas', mars:'♂ Mars', themis:'⚖ Thémis — justice divine'})[sideView] || '—'"></span>
           <span class="flex-1"></span>
           <button @click="closeSplit()" class="text-[9.5px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400 hover:text-white">replier ✕</button>
         </div>
@@ -679,6 +709,27 @@
             </div>
           </template>
 
+          <!-- vue : Thémis (justice divine) -->
+          <template x-if="sideView==='themis' && sideThemis">
+            <div class="space-y-2">
+              <p class="text-[11px] text-amber-200 font-semibold" x-text="sideThemis.verdict"></p>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Menaces instruites</p>
+                <template x-for="(m, i) in sideThemis.menaces || []" :key="i">
+                  <p class="text-[10px] text-slate-400">• <span class="text-rose-300/80" x-text="'['+m.gravite+']'"></span> <span x-text="m.quoi"></span> — <span class="text-slate-500" x-text="m.remede"></span></p>
+                </template>
+                <p x-show="!(sideThemis.menaces||[]).length" class="text-[10px] text-emerald-300/80 italic">aucune menace</p>
+              </div>
+              <div class="glass-card rounded-lg p-2.5">
+                <p class="text-[9px] uppercase text-slate-600 mb-1">Constitution (comme la démocratie)</p>
+                <template x-for="(c, i) in sideThemis.constitution || []" :key="i">
+                  <p class="text-[10px] text-slate-400"><b class="text-slate-300" x-text="c.organe"></b> <span class="text-slate-600" x-text="'('+c.pouvoir+')'"></span> — <span x-text="c.loi_vivante"></span></p>
+                </template>
+              </div>
+              <button @click="send('Thémis, applique la justice')" class="w-full text-[10.5px] px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 hover:bg-amber-500/25">🗡 appliquer la justice (fauche réelle)</button>
+            </div>
+          </template>
+
           <!-- vue : Sebas / Mars (identités) -->
           <template x-if="sideView==='sebas' || sideView==='mars'">
             <div class="space-y-2">
@@ -750,6 +801,7 @@
         <button @click="send('scan de Hadès : données, traitement, éligibles au fauchage')" class="chip">♇ scan Hadès</button>
         <button @click="send('mon profil cognitif')" class="chip">✦ profil</button>
         <button @click="setView('interactions')" class="chip">☰ interactions</button>
+        <button @click="send('Thémis, juge le système')" class="chip">⚖ Thémis</button>
         <button @click="send('Sebas, observe le chantier')" class="chip">◉ Sebas</button>
         <button @click="apollonDivine()" class="chip !border-amber-400/50 !text-amber-200">🏆 divination</button>
       </div>
@@ -866,8 +918,8 @@ function solApp() {
     messages: [], input: '', busy: false, view: null, viewPanel: '',
     modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false},
     bodyData: null, inspectN: null, bodyToast: null,
-    hadesScan: {}, hadesMsg: '', hadesDone: false,
-    split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null,
+    hadesScan: {}, hadesMsg: '', hadesDone: false, targetOpen: null, targetDetail: null,
+    split: false, sideView: null, sideSol: null, sideProfil: {}, sideEtat: null, sideDivination: null, sideThemis: null,
     metatronBox: {query: '', result: null},
     laplace: {agents: [], systems: []}, sebas: [],
     armory: [], ossCatalogue: [],
@@ -964,7 +1016,8 @@ function solApp() {
       // la fiche visible à côté du chat change selon la demande réelle
       if (!this.split) return;
       const map = {fauche: 'hades', etat: 'etat', profil: 'profil', divination: 'divination',
-                   commande_divine: 'sebas', budget: 'etat', armurerie: 'mars'};
+                   commande_divine: 'sebas', budget: 'etat', armurerie: 'mars',
+                   justice: 'themis', justice_appliquee: 'themis'};
       const v = map[intent];
       if (v) this.setSide(v);
     },
@@ -977,6 +1030,7 @@ function solApp() {
       if (view === 'profil') { try { this.sideProfil = await (await fetch('/api/profile/cognitive')).json(); } catch (e) {} }
       if (view === 'etat') { try { this.sideEtat = await (await fetch('/api/cosmos/state')).json(); } catch (e) {} }
       if (view === 'divination') await this.apollonDivine();
+      if (view === 'themis') { try { this.sideThemis = await (await fetch('/api/themis/audit')).json(); } catch (e) {} }
     },
     async apollonDivine() {
       let d;
@@ -1001,6 +1055,14 @@ function solApp() {
       if (panel && this.modals.body) panel.innerHTML = html;
       if (this.split) { this.sideDivination = d; this.sideView = 'divination'; }
       else if (this.modals.sol) { this.view = 'divination'; this.viewPanel = html; }
+    },
+    async toggleTarget(t) {
+      if (this.targetOpen === t.cible) { this.targetOpen = null; this.targetDetail = null; return; }
+      this.targetOpen = t.cible; this.targetDetail = null;
+      try {
+        this.targetDetail = await (await fetch('/api/hades/target?type=' + encodeURIComponent(t.type)
+          + '&cible=' + encodeURIComponent(t.cible))).json();
+      } catch (e) { this.targetDetail = {type: t.type, cible: t.cible, contenu: [], supprime: 'dossier introuvable'}; }
     },
     openTokensDetail() { if (!this.hadesScan.prevision_tokens) this.loadHades().then(() => this.openModal('tokens')); else this.openModal('tokens'); },
     async loadHades() {
@@ -1339,6 +1401,20 @@ function solApp() {
         return mesh;
       };
 
+      // 🎯 icônes fonctionnelles dans les astres (depthTest:false → toujours lisibles)
+      const iconSprite = (emoji, size = 26) => {
+        const cv = document.createElement('canvas'); cv.width = 64; cv.height = 64;
+        const ctx = cv.getContext('2d');
+        ctx.font = '48px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,.65)'; ctx.shadowBlur = 5;
+        ctx.fillText(emoji, 32, 36);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false}));
+        sp.scale.set(size, size, 1);
+        return sp;
+      };
+
       // ☉ SOL
       const sol = new THREE.Group();
       const solGlow = new THREE.Mesh(new THREE.SphereGeometry(34, 32, 32),
@@ -1346,6 +1422,7 @@ function solApp() {
       const solCore = body(19, 0xf59e0b, true);
       const solLbl = label('☉ SOL', '#fcd34d'); solLbl.position.y = 34;
       sol.add(solGlow, solCore, solLbl);
+      sol.add(iconSprite('👑', 40));   // SOL = le souverain qui approuve
       solCore.userData = {bodyId: 'sol', name: 'SOL', role: 'Orchestrateur — approuve, journalise, prévient'};
       solGlow.userData = solCore.userData;
       clickables.push(solCore, solGlow);
@@ -1367,6 +1444,7 @@ function solApp() {
       const lapLbl = label('✳ Laplace', '#d8b4fe'); lapLbl.position.y = 22;
       lapCore.userData = {bodyId: 'laplace', name: '✳ Laplace', role: 'Créateur de nébuleuse du savoir — crée agents & systèmes, les améliore et les teste'};
       nebulaGrp.add(lapCore, lapLbl);
+      nebulaGrp.add(iconSprite('🌀', 22));   // Laplace = la nébuleuse divine
       const lapGlow = new THREE.Mesh(new THREE.SphereGeometry(17, 20, 20),
         new THREE.MeshBasicMaterial({color: 0xc084fc, transparent: true, opacity: .12}));
       lapGlow.userData = lapCore.userData;
@@ -1387,74 +1465,89 @@ function solApp() {
           nebulaGrp.add(sp);
         });
       };
-      // ◉ SEBAS — exécutant, orbite autour de la nébuleuse
-      const sebasPivot = new THREE.Group();
-      const sebasGrp = new THREE.Group();
-      sebasGrp.position.x = 118;
-      const sebasMesh = body(5.5, 0x34d399, true);
-      sebasMesh.userData = {bodyId: 'sebas', name: '◉ Sebas', role: 'Exécutant de Laplace — capteurs webcam, wifi, téléphone · l\'homme de terrain'};
-      const sebasLbl = label('◉ Sebas', '#6ee7b7'); sebasLbl.position.y = 14;
-      sebasGrp.add(sebasMesh, sebasLbl);
-      const sebasOrbit = new THREE.Mesh(new THREE.RingGeometry(117.6, 118.4, 90),
-        new THREE.MeshBasicMaterial({color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: .18}));
-      sebasOrbit.rotation.x = Math.PI / 2;
-      nebulaGrp.add(sebasOrbit);
-      sebasPivot.add(sebasGrp);
-      nebulaGrp.add(sebasPivot);
-      clickables.push(sebasMesh);
+      // ⚛ ORBITES ATOMIQUES DE LAPLACE — réplique exacte du système solaire à l'échelle.
+      // Chaque divinité = une planète réelle : distance ∝ √demi-grand-axe (UA),
+      // vitesse angulaire ∝ 1/période (Kepler) — plans orbitaux inclinés (atome).
+      const SOLAR_SCALE = 92, SOLAR_K = 44, OMEGA_K = 0.004;   // Terre = référence
+      const atomPivots = [];   // {pivot, speed} — animés dans la boucle
+      const addAtomOrbiter = (cfg) => {
+        const dist = SOLAR_SCALE + SOLAR_K * Math.sqrt(cfg.a);   // distance à l'échelle
+        const speed = OMEGA_K / cfg.T * (cfg.retro ? -1 : 1);    // vitesse keplerienne
+        const tiltG = new THREE.Group();                          // plan orbital incliné (atome)
+        tiltG.rotation.x = cfg.tilt[0]; tiltG.rotation.z = cfg.tilt[1];
+        const pivot = new THREE.Group();
+        const grp = new THREE.Group(); grp.position.x = dist;
+        const mesh = body(cfg.radius, cfg.color, true);
+        mesh.userData = {bodyId: cfg.id, name: cfg.name, role: cfg.role};
+        grp.add(mesh);
+        const ic = iconSprite(cfg.icon, cfg.radius * 2.6);        // icône fonctionnelle DANS l'astre
+        grp.add(ic);
+        const lbl = label(cfg.name.replace(/[^ -~⌀-⌇─-⯿✀-➿]/gu, '').trim() || cfg.name, cfg.lblColor, 38);
+        lbl.scale.set(34, 8.5, 1); lbl.position.y = cfg.radius + 8;
+        grp.add(lbl);
+        if (cfg.build) cfg.build(grp);                            // satellites éventuels
+        pivot.add(grp);
+        const ring = new THREE.Mesh(new THREE.RingGeometry(dist - 0.5, dist + 0.3, 96),
+          new THREE.MeshBasicMaterial({color: cfg.color, side: THREE.DoubleSide, transparent: true, opacity: .16}));
+        ring.rotation.x = Math.PI / 2;
+        tiltG.add(ring, pivot);
+        nebulaGrp.add(tiltG);
+        clickables.push(mesh);
+        atomPivots.push({pivot, speed});
+        return {grp, mesh};
+      };
 
-      // ✦ MÉTATRON — archange du méta-prompting, en orbite autour de Laplace
-      const metatronPivot = new THREE.Group();
-      const metatronGrp = new THREE.Group();
-      metatronGrp.position.set(-138, 26, 0);
-      const metatronMesh = body(4.5, 0xe9d5ff, true);
-      metatronMesh.userData = {bodyId: 'metatron', name: '✦ Métatron',
-        role: 'Archange du méta-prompting — analyse vos requêtes (intention, domaines), les reformule en prompts enrichis et guide Laplace dans la création d\'agents.'};
-      const metatronLbl = label('✦ Métatron', '#e9d5ff'); metatronLbl.position.y = 12;
-      metatronGrp.add(metatronMesh, metatronLbl);
-      metatronPivot.add(metatronGrp);
-      nebulaGrp.add(metatronPivot);
-      clickables.push(metatronMesh);
-
-      // ⧉ ANANKÉ — nécessité inaltérable, orbite Laplace ; ses 3 Moires l'accompagnent
-      const anankePivot = new THREE.Group();
-      const anankeGrp = new THREE.Group();
-      anankeGrp.position.set(150, -30, 0);
-      const anankeMesh = body(6.5, 0xf472b6, true);
-      anankeMesh.userData = {bodyId: 'ananke', name: '⧉ Ananké',
-        role: 'Déesse primordiale de la nécessité inaltérable — la fatalité qui contraint tout le système ; ses 3 Moires secondent Hadès.'};
-      const anankeLbl = label('⧉ Ananké', '#f9a8d4'); anankeLbl.position.y = 16;
-      anankeGrp.add(anankeMesh, anankeLbl);
-      const anankeRing = new THREE.Mesh(new THREE.RingGeometry(9.2, 10.4, 48),
-        new THREE.MeshBasicMaterial({color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: .35}));
-      anankeRing.rotation.x = Math.PI / 2.4;
-      anankeGrp.add(anankeRing);
-      // les 3 Moires autour d'Ananké
-      const moirePivots = [];
-      const MOIRES = [
-        {id: 'clotho', sym: '🧵', name: 'Clotho', role: 'la Fileuse — file le fil de chaque donnée à sa naissance', col: 0xf9a8d4},
-        {id: 'lachesis', sym: '📏', name: 'Lachésis', role: 'la Répartitrice — mesure la durée de vie des données', col: 0xc4b5fd},
-        {id: 'atropos', sym: '✂️', name: 'Atropos', role: 'l\'Inflexible — coupe le fil, prononce la mort des données', col: 0xfda4af},
-      ];
-      MOIRES.forEach((m, i) => {
-        const pv = new THREE.Group();
-        const g = new THREE.Group();
-        const ang = i * (Math.PI * 2 / 3);
-        g.position.set(Math.cos(ang) * 13.5, Math.sin(ang * 2) * 2.5, Math.sin(ang) * 13.5);
-        const mm = body(2.3, m.col, true);
-        mm.userData = {bodyId: m.id, name: m.sym + ' ' + m.name, role: m.role};
-        const ml = label(m.name, '#e9d5ff', 34); ml.scale.set(30, 7.5, 1); ml.position.y = 7;
-        g.add(mm, ml);
-        pv.add(g); anankeGrp.add(pv); moirePivots.push(pv);
-        clickables.push(mm);
-      });
-      const anankeOrbitLine = new THREE.Mesh(new THREE.RingGeometry(152.4, 153.2, 90),
-        new THREE.MeshBasicMaterial({color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: .16}));
-      anankeOrbitLine.rotation.x = Math.PI / 2;
-      nebulaGrp.add(anankeOrbitLine);
-      anankePivot.add(anankeGrp);
-      nebulaGrp.add(anankePivot);
-      clickables.push(anankeMesh);
+      // Mercure (a=0.39 UA, T=0.24 an) — le plus rapide, le plus proche
+      addAtomOrbiter({id: 'sebas', name: '◉ Sebas 🛠️', icon: '🛠️', role: 'Exécutant des commandes divines de Laplace — capteurs webcam, wifi, téléphone · l\'homme de terrain',
+        a: 0.39, T: 0.24, radius: 5.5, color: 0x34d399, lblColor: '#6ee7b7', tilt: [0.55, 0.2]});
+      // Vénus (a=0.72, T=0.62)
+      addAtomOrbiter({id: 'metatron', name: 'Métatron', icon: '📝', role: 'Archange du méta-prompting — analyse vos requêtes (intention, domaines), les reformule en prompts enrichis et guide Laplace dans la création d\'agents.',
+        a: 0.72, T: 0.62, radius: 4.5, color: 0xe9d5ff, lblColor: '#e9d5ff', tilt: [-0.38, 0.14]});
+      // Terre (a=1.0, T=1.0) — la justice divine
+      const themisRef = addAtomOrbiter({id: 'themis', name: 'Thémis ⚖', icon: '⚖️', role: 'Justice divine, fille et bras armé de Laplace — balance ⚖ pour peser, épée 🗡 pour trancher. Juge, conseille et détruit les menaces à l\'ordre avec Ananké ⧉ et Hadès ♇. Constituée comme la démocratie : Eunomie 📜 (loi), Éirène 🕊️ (exécution), Dikè 🧑‍⚖️ (jugement), Censeur 🔎 (contre-pouvoir).',
+        a: 1.0, T: 1.0, radius: 7, color: 0xfbbf24, lblColor: '#fde68a', tilt: [0.14, -0.42],
+        build: (grp) => {
+          const P4 = [['eunomia', 'Eunomie 📜', 0xd9a066, 'Pouvoir législatif — écrit les lois du système (politique Styx, seuils) et propose les amendements.'],
+                      ['eirene', 'Éirène 🕊️', 0x93c5fd, 'Pouvoir exécutif — applique les décisions, rétablit l\'ordre, alertes préventives.'],
+                      ['dike', 'Dikè ⚖', 0xf9a8d4, 'Pouvoir judiciaire — instruit les dossiers des condamnés, vérifie les preuves.'],
+                      ['censeur', 'Censeur 🔎', 0xa3e635, 'Contre-pouvoir — audit, transparence, rend compte au souverain (vous).']];
+          P4.forEach(([id, nm, col, rl], i) => {
+            const pv = new THREE.Group();
+            const g2 = new THREE.Group();
+            const ang = i * (Math.PI / 2);
+            g2.position.set(Math.cos(ang) * 14.5, Math.sin(ang * 2) * 2.5, Math.sin(ang) * 14.5);
+            const mm = body(2.3, col, true);
+            mm.userData = {bodyId: id, name: nm, role: rl};
+            g2.add(mm, iconSprite({eunomia: '📜', eirene: '🕊️', dike: '🧑\u200d⚖️', censeur: '🔎'}[id], 9));
+            pv.add(g2); grp.add(pv); atomPivots.push({pivot: pv, speed: 0.011 + i * 0.004});
+            clickables.push(mm);
+          });
+        }});
+      // Jupiter (a=5.2 UA, T=11.86 an) — la nécessité, lente et lointaine
+      addAtomOrbiter({id: 'ananke', name: 'Ananké ⧉', icon: '⛓️', role: 'Déesse primordiale de la nécessité inaltérable — la fatalité qui contraint tout le système ; ses 3 Moires secondent Hadès.',
+        a: 5.2, T: 11.86, radius: 6.5, color: 0xf472b6, lblColor: '#f9a8d4', tilt: [-0.1, 0.08],
+        build: (grp) => {
+          const ring = new THREE.Mesh(new THREE.RingGeometry(9.2, 10.4, 48),
+            new THREE.MeshBasicMaterial({color: 0xf472b6, side: THREE.DoubleSide, transparent: true, opacity: .35}));
+          ring.rotation.x = Math.PI / 2.4;
+          grp.add(ring);
+          const MOIRES = [
+            {id: 'clotho', nm: 'Clotho', ic: '🧵', role: 'la Fileuse — file le fil de chaque donnée à sa naissance', col: 0xf9a8d4},
+            {id: 'lachesis', nm: 'Lachésis', ic: '📏', role: 'la Répartitrice — mesure la durée de vie des données', col: 0xc4b5fd},
+            {id: 'atropos', nm: 'Atropos', ic: '✂️', role: 'l\'Inflexible — coupe le fil, prononce la mort des données', col: 0xfda4af}];
+          MOIRES.forEach((m, i) => {
+            const pv = new THREE.Group();
+            const g2 = new THREE.Group();
+            const ang = i * (Math.PI * 2 / 3);
+            g2.position.set(Math.cos(ang) * 13.5, Math.sin(ang * 2) * 2.5, Math.sin(ang) * 13.5);
+            const mm = body(2.3, m.col, true);
+            mm.userData = {bodyId: m.id, name: m.ic + ' ' + m.nm, role: m.role};
+            const ml = label(m.nm, '#e9d5ff', 34); ml.scale.set(30, 7.5, 1); ml.position.y = 7;
+            g2.add(mm, ml, iconSprite(m.ic, 8));
+            pv.add(g2); grp.add(pv); atomPivots.push({pivot: pv, speed: 0.011 + i * 0.004});
+            clickables.push(mm);
+          });
+        }});
 
       // 🏆 APOLLON — cour de SOL, devin du chariot
       const apollonPivot = new THREE.Group();
@@ -1503,7 +1596,7 @@ function solApp() {
       planetBodies.forEach((b, i) => {
         const color = COLOR_FIX[b.id] !== undefined ? COLOR_FIX[b.id]
           : parseInt((b.color || '#818cf8').replace('#', ''), 16);
-        makePlanet(b.id, b.symbol, b.name, b.role, RADIUS[b.id] || 9, color, -1.3 + i * 0.9, b.id === 'uranus');
+        makePlanet(b.id, b.symbol, b.name, b.role, RADIUS[b.id] || 9, color, -1.3 + i * 0.9, b.id === 'uranus', b.icon);
       });
       const uraGrp = planets.uranus.grp;
 
@@ -1671,10 +1764,7 @@ function solApp() {
         const t = clock.getElapsedTime();
         planetBodies.forEach((b, i) => { planets[b.id].pivot.rotation.y += 0.0013 - i * 0.00008; });
         nebulaGrp.rotation.y += 0.0007;
-        sebasPivot.rotation.y += 0.004;
-        metatronPivot.rotation.y -= 0.0022;
-        anankePivot.rotation.y += 0.0016;          // ⧉ Ananké orbite lentement Laplace
-        moirePivots.forEach((pv, i) => { pv.rotation.y += 0.011 + i * 0.004; });  // Moires virevoltent
+        atomPivots.forEach(o => { o.pivot.rotation.y += o.speed; });   // ⚛ keplerien : vite à l'intérieur, lent à l'extérieur
         apollonPivot.rotation.y -= 0.008;          // 🏆 chariot d'Apollon autour de SOL
         sparks.forEach(s => { s.ang += s.sp; s.mesh.position.set(Math.cos(s.ang) * s.rr, s.y, Math.sin(s.ang) * s.rr); });
         planetBodies.forEach(b => { planets[b.id].mesh.rotation.y += 0.004; });

@@ -35,7 +35,7 @@ from typing import Any, Dict, List
 
 BODIES: Dict[str, Dict[str, Any]] = {
     "pluton": {
-        "name": "Pluton", "symbol": "♇", "kind": "planet", "orbit_r": 4.2,
+        "name": "Pluton", "symbol": "♇", "icon": "⚰️", "kind": "planet", "orbit_r": 4.2,
         "departement": "Cycle de vie & optimisation (les enfers)",
         "role": "Hadès, dieu des morts du système — regarde les données de "
                 "tout le système solaire et traque les redondances, les "
@@ -57,11 +57,11 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "user": {
-        "name": "Vous", "symbol": "◍", "kind": "utilisateur",
+        "name": "Vous", "symbol": "◍", "icon": "👤", "kind": "utilisateur",
         "role": "Observateur du système — pose les questions, fixe les caps.",
     },
     "laplace": {
-        "name": "Laplace", "symbol": "✳", "kind": "nebuleuse", "orbit_r": -1,
+        "name": "Laplace", "symbol": "✳", "icon": "🌀", "kind": "nebuleuse", "orbit_r": -1,
         "departement": "Divinité — contrôle absolu du système",
         "role": "Fondateur — créateur — nébuleuse du savoir : conçoit, modifie, améliore et teste "
                 "des agents à tous les niveaux, jusqu'à des systèmes solaires entiers. "
@@ -78,7 +78,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "ananke": {
-        "name": "Ananké", "symbol": "⧉", "kind": "destin", "orbit_r": -1,
+        "name": "Ananké", "symbol": "⧉", "icon": "⛓️", "kind": "destin", "orbit_r": -1,
         "departement": "Nécessité, fatalité & contrainte",
         "role": "Déesse primordiale de la nécessité inaltérable, de la fatalité et "
                 "de la contrainte — représente ce qui ne peut pas ne pas arriver "
@@ -101,8 +101,41 @@ BODIES: Dict[str, Dict[str, Any]] = {
                      "doublons, junk) — la coupe est sans appel."},
         ],
     },
+    "themis": {
+        "name": "Thémis", "symbol": "⚖", "icon": "⚖️", "kind": "justice", "orbit_r": -1,
+        "departement": "Justice divine — bras armé de Laplace (balance & épée)",
+        "role": "Fille et conseillère de Laplace ✳, gardienne de l'équilibre du "
+                "système comme elle l'est de l'Olympe. Elle JUGE (instruit les "
+                "menaces à l'ordre), CONSEILLE (recommande les corrections) et "
+                "DÉTRUIT le cas échéant (ordonne la fauche à Hadès ♇, exécution "
+                "par Charon ⚰). Elle travaille principalement avec Ananké ⧉ (ce "
+                "qui est nécessaire) et Hadès ♇ (ce qui doit mourir). Elle est "
+                "constituée comme la démocratie : séparation des pouvoirs et "
+                "contrepoids — Eunomie fait la loi, Éirène l'applique, Dikè juge, "
+                "le Censeur vérifie et rend compte au souverain (vous). Balance "
+                "⚖ pour peser, épée 🗡 pour trancher : la divine justice.",
+        "color": "#fbbf24",
+        "satellites": [
+            {"id": "eunomia", "name": "Eunomie", "distance_km": 15000,
+             "role": "Pouvoir législatif — « la Loi » : écrit et maintient les lois "
+                     "du système (politique de rétention Styx, seuils, quotas), "
+                     "propose les amendements à Thémis."},
+            {"id": "eirene", "name": "Éirène", "distance_km": 18000,
+             "role": "Pouvoir exécutif — « la Paix » : applique les décisions de "
+                     "Thémis, rétablit l'ordre (alertes préventives, délégations "
+                     "SOL) et désamorce les tensions avant la lame."},
+            {"id": "dike", "name": "Dikè", "distance_km": 21000,
+             "role": "Pouvoir judiciaire — « le Jugement » : instruit les dossiers "
+                     "des condamnés d'Hadès (outdated, doublons, junk), vérifie les "
+                     "preuves octet par octet avant que la balance ne penche."},
+            {"id": "censeur", "name": "Censeur", "distance_km": 24000,
+             "role": "Contre-pouvoir démocratique — audit et transparence : "
+                     "recense ce qui est fait, le rend public au souverain "
+                     "(l'utilisateur) et peut saisir Thémis d'un abus."},
+        ],
+    },
     "sebas": {
-        "name": "Sebas", "symbol": "◉", "kind": "executeur", "orbit_r": -1,
+        "name": "Sebas", "symbol": "◉", "icon": "🛠️", "kind": "executeur", "orbit_r": -1,
         "departement": "Exécutant des commandes divines de Laplace",
         "role": "Exécutant des commandes divines de Laplace — homme de terrain connecté aux capteurs "
                 "(webcam, wifi, téléphone) ; remonte des observations et agit sur site.",
@@ -110,7 +143,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         "sensors": ["webcam", "wifi", "telephone"],
     },
     "sol": {
-        "name": "SOL", "symbol": "☉", "kind": "star", "orbit_r": 0,
+        "name": "SOL", "symbol": "☉", "icon": "👑", "kind": "star", "orbit_r": 0,
         "departement": "Direction générale",
         "role": "Direction générale — orchestrateur du système : approuve toute interaction entre "
                 "corps, juge l'intégrité, prévoit et prévient, interface de l'utilisateur.",
@@ -124,7 +157,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "venus": {
-        "name": "Vénus", "symbol": "♀", "kind": "planet", "orbit_r": 1,
+        "name": "Vénus", "symbol": "♀", "icon": "💰", "kind": "planet", "orbit_r": 1,
         "departement": "Finance / Comptabilité",
         "role": "Finance / Comptabilité — gestion des flux financiers, budgets, "
                 "états financiers, contrôle de gestion (taureau : valeur, richesse "
@@ -143,7 +176,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "mercure": {
-        "name": "Mercure", "symbol": "☿", "kind": "planet", "orbit_r": 0.5,
+        "name": "Mercure", "symbol": "☿", "icon": "✉️", "kind": "planet", "orbit_r": 0.5,
         "departement": "Commercial / Ventes · Marketing · Achats",
         "role": "Commercial, marketing & achats — le messager du système : "
                 "prospection, négociation, fidélisation, communication, études de "
@@ -162,7 +195,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "terre": {
-        "name": "Terre", "symbol": "🜨", "kind": "planet", "orbit_r": 1.25,
+        "name": "Terre", "symbol": "🜨", "icon": "🌍", "kind": "planet", "orbit_r": 1.25,
         "departement": "Production / Opérations",
         "role": "Production / Opérations — fabrication et livraison du produit/du "
                 "service, qualité, logistique : le terrain où tout se réalise.",
@@ -174,7 +207,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "mars": {
-        "name": "Mars", "symbol": "♂", "kind": "planet", "orbit_r": 1.5,
+        "name": "Mars", "symbol": "♂", "icon": "⚔️", "kind": "planet", "orbit_r": 1.5,
         "departement": "Recherche & Développement — développement d'outils",
         "role": "R&D outils — l'armurier du système solaire : passe son temps à "
                 "chercher des solutions aux problèmes des autres agents. Quand un "
@@ -193,7 +226,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "ceres": {
-        "name": "Cérès", "symbol": "⚳", "kind": "planet", "orbit_r": 1.75,
+        "name": "Cérès", "symbol": "⚳", "icon": "🌾", "kind": "planet", "orbit_r": 1.75,
         "departement": "Ressources humaines",
         "role": "Ressources humaines — recrutement, formation, rémunération, "
                 "relations sociales (Cérès : moissons et croissance des êtres).",
@@ -210,7 +243,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "jupiter": {
-        "name": "Jupiter", "symbol": "♃", "kind": "planet", "orbit_r": 2.1,
+        "name": "Jupiter", "symbol": "♃", "icon": "📈", "kind": "planet", "orbit_r": 2.1,
         "departement": "Juridique",
         "role": "Juridique — conformité, contrats, propriété intellectuelle, "
                 "contentieux (Jupiter roi/justice ; sa magnétosphère protège le "
@@ -229,7 +262,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "uranus": {
-        "name": "Uranus", "symbol": "♅", "kind": "planet", "orbit_r": 2.6,
+        "name": "Uranus", "symbol": "♅", "icon": "🔭", "kind": "planet", "orbit_r": 2.6,
         "departement": "Recherche & Développement — recherche",
         "role": "Recherche & Développement (recherche) — connaissance & recherche scientifique — cartographe du ciel de "
                 "la connaissance, agrandit sans cesse sa constellation.",
@@ -254,7 +287,7 @@ BODIES: Dict[str, Dict[str, Any]] = {
         ],
     },
     "neptune": {
-        "name": "Neptune", "symbol": "♆", "kind": "planet", "orbit_r": 3.2,
+        "name": "Neptune", "symbol": "♆", "icon": "🎨", "kind": "planet", "orbit_r": 3.2,
         "departement": "Informatique / IT",
         "role": "Informatique / SI — systèmes d'information, infrastructure, "
                 "cybersécurité, support (Neptune : réseaux, flux, l'océan "
@@ -307,6 +340,7 @@ def celestial_registry() -> List[Dict[str, Any]]:
     out = []
     for bid, b in BODIES.items():
         entry = {"id": bid, "name": b["name"], "symbol": b["symbol"],
+                 "icon": b.get("icon", ""),
                  "kind": b["kind"], "role": b["role"],
                  "color": b.get("color"),
                  "departement": b.get("departement"),

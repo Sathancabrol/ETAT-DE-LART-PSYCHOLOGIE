@@ -1016,8 +1016,8 @@ def test_index_mini_dashboard_fils_et_chips():
 
 def test_sol_page_fiche_chat_chariot_et_3d():
     html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
-    for motif in ("apollonDivine", "solQuick", "Chariot d'Apollon", "anankePivot",
-                  "moirePivots", "apollonPivot", "Traitement des données",
+    for motif in ("apollonDivine", "solQuick", "Chariot d'Apollon", "addAtomOrbiter",
+                  "apollonPivot", "Traitement des données",
                   "Les 3 Moires", "éligible au fauchage", "naissance_24h"):
         assert motif.lower() in html.lower(), motif
 
@@ -1204,3 +1204,102 @@ def test_sol_guide_et_affordance():
         assert motif in html, motif
     # tooltips Moires = le rôle de chacune en une phrase
     assert "file le fil" in html and "mesure le fil" in html and "coupe le fil" in html
+
+
+# ═══ ROUND Thémis ⚖ · icônes · orbites atomiques · suivi jusqu'à l'entité ═══
+
+def test_themis_corps_et_constitution_democratique():
+    """Thémis orbite Laplace, bras armé, constituée comme la démocratie (4 pouvoirs)."""
+    from cosmos.bodies import BODIES, find_body
+    th = BODIES["themis"]
+    assert th["kind"] == "justice" and th["orbit_r"] == -1
+    assert "bras armé" in th["departement"].lower() and "démocratie" in th["role"].lower()
+    sats = {s["id"] for s in th["satellites"]}
+    assert {"eunomia", "eirene", "dike", "censeur"} <= sats
+    roles = " ".join(s["role"] for s in th["satellites"]).lower()
+    assert "législatif" in roles and "exécutif" in roles and "judiciaire" in roles and "contre-pouvoir" in roles
+    for ident in ("themis", "eunomia", "eirene", "dike", "censeur"):
+        b, parent = find_body(ident)
+        assert b, ident
+        if ident != "themis":
+            assert parent is BODIES["themis"]
+
+def test_icones_fonctionnelles_sur_tous_les_corps():
+    """Chaque corps de premier niveau porte une icône = sa fonction (ex. Thémis ⚖️)."""
+    from cosmos.bodies import BODIES, celestial_registry
+    assert BODIES["themis"]["icon"] == "⚖️"
+    assert BODIES["laplace"]["icon"] and BODIES["sol"]["icon"]
+    reg = celestial_registry()
+    sans_icone = [b["id"] for b in reg if not b.get("icon")]
+    assert not sans_icone, f"corps sans icône : {sans_icone}"
+
+def test_themis_audit_et_application(tmp_path, monkeypatch):
+    from cosmos import hades, themis
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    for i in range(28):
+        d = hades.RUNS_DIR / f"run_{i:03d}"
+        d.mkdir()
+        (d / "trace.json").write_text('{"x":1}', encoding="utf-8")
+    a = themis.audit()
+    assert a["deesse"].startswith("Thémis") and a["menaces"] and a["conseils"]
+    assert any("Hadès" in m["quoi"] for m in a["menaces"])
+    assert {c["pouvoir"] for c in a["constitution"]} >= {"législatif", "exécutif", "judiciaire", "contre-pouvoir"}
+    # sans accord : aucune destruction
+    r = themis.appliquer(confirm=False)
+    assert r["fauche"] is None and len(list(hades.RUNS_DIR.iterdir())) == 28
+    # avec accord : la justice tranche réellement
+    r2 = themis.appliquer(confirm=True)
+    assert r2["fauche"]["supprimes"] >= 3
+    assert len([d for d in hades.RUNS_DIR.iterdir() if d.is_dir()]) == 25
+
+def test_laplace_route_justice():
+    from cosmos import laplace
+    r = laplace.chat("Thémis, juge le système")
+    assert r["intent"] == "justice" and "Thémis" in r["reply"]
+    assert "Eunomie" in r["reply"]          # constitution démocratique affichée
+
+def test_hades_suit_le_condamne_jusqu_a_l_entite(tmp_path, monkeypatch):
+    """Dikè instruit le dossier : l'utilisateur voit l'entité réelle qui sera supprimée."""
+    from cosmos import hades
+    monkeypatch.setattr(hades, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(hades, "OUT", tmp_path)
+    monkeypatch.setattr(hades, "MEM_ITEMS", tmp_path / "mem.jsonl")
+    hades.RUNS_DIR.mkdir(parents=True)
+    d = hades.RUNS_DIR / "run_old"
+    d.mkdir()
+    (d / "trace.json").write_text('{"run_id":"run_old","tache":"analyser","statut":"succès",'
+                                  '"date":"2026-08-30T10:00:00","steps":[{"skill":"synthesize"}]}',
+                                  encoding="utf-8")
+    (d / "report.md").write_text("# rapport", encoding="utf-8")
+    dossier = hades.describe_target(str(d), "run_outdated")
+    assert dossier["entite"]["tache"] == "analyser" and dossier["entite"]["run_id"] == "run_old"
+    noms = {f["nom"] for f in dossier["contenu"]}
+    assert "trace.json" in noms and "report.md" in noms
+    assert "2 fichiers" in dossier["supprime"]
+    # hors-système → refus
+    import pytest
+    with pytest.raises(ValueError):
+        hades.describe_target("/etc/passwd", "run_outdated")
+
+def test_themis_endpoints_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    a = c.get("/api/themis/audit").json()
+    assert a["deesse"].startswith("Thémis") and a["constitution"]
+    ap = c.post("/api/themis/apply", json={"confirm": False}).json()
+    assert ap["fauche"] is None
+    sc = c.get("/api/hades/scan").json()
+    t = next((x for x in sc["targets"] if x["type"] == "run_outdated"), None)
+    if t:
+        d = c.get("/api/hades/target", params={"cible": t["cible"], "type": t["type"]}).json()
+        assert d["supprime"]
+    assert c.get("/api/hades/target", params={"cible": "/etc", "type": "run_outdated"}).status_code == 400
+    # UI : orbites atomiques à l'échelle + icônes + drill-down
+    html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("SOLAR_SCALE", "atomPivots", "addAtomOrbiter", "iconSprite", "a: 0.39", "a: 5.2",
+                  "T: 11.86", "toggleTarget", "targetDetail", "Dikè", "⚖ Thémis", "b.icon"):
+        assert motif in html, motif

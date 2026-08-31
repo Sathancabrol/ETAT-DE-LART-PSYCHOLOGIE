@@ -223,6 +223,91 @@ def scan_system() -> Dict[str, Any]:
             "ts": datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
 
+def describe_target(cible: str, type_: str) -> Dict[str, Any]:
+    """Suit un condamné jusqu'à l'entité réelle qui sera supprimée.
+
+    Dikè 🧑‍⚖️ (pouvoir judiciaire de Thémis) instruit le dossier : fichiers
+    réels et leur taille, contenu de l'item mémoire, lignes du journal qui
+    seront coupées — l'utilisateur voit EXACTEMENT ce qui va disparaître.
+    """
+    import os
+
+    def _safe(p: Path) -> Path:
+        rp = p.resolve()
+        if not (str(rp).startswith(str(REPO.resolve())) or str(rp).startswith(str(OUT.resolve()))):
+            raise ValueError("chemin hors système")
+        return rp
+
+    dossier: Dict[str, Any] = {"type": type_, "cible": cible, "contenu": [], "supprime": ""}
+
+    if type_ in ("run_outdated", "junk_vide"):
+        p = _safe(Path(cible) if cible.startswith("/") else REPO / cible)
+        if type_ == "run_outdated" and p.is_dir():
+            fichiers = []
+            total = 0
+            for f in sorted(p.rglob("*")):
+                if f.is_file():
+                    s = f.stat().st_size
+                    total += s
+                    fichiers.append({"nom": f.name, "octets": s,
+                                     "chemin": str(f.relative_to(p))})
+            dossier["contenu"] = fichiers
+            dossier["supprime"] = f"le dossier complet ({len(fichiers)} fichiers, {total:,} octets)".replace(",", " ")
+            tj = p / "trace.json"
+            if tj.exists():
+                try:
+                    t = json.loads(tj.read_text(encoding="utf-8"))
+                    dossier["entite"] = {"run_id": t.get("run_id"), "tache": t.get("tache"),
+                                         "statut": t.get("statut"), "date": t.get("date"),
+                                         "cerveau": t.get("cerveau"),
+                                         "etapes": [s2.get("skill") for s2 in t.get("steps", [])]}
+                except Exception:
+                    pass
+        elif type_ == "junk_vide" and p.exists():
+            dossier["contenu"] = [{"nom": p.name, "octets": 0, "chemin": str(p)}]
+            dossier["supprime"] = "le fichier vide (0 octet — aucun contenu à perdre)"
+        else:
+            dossier["supprime"] = "introuvable (déjà fauché ?)"
+    elif type_ == "doublon_memoire":
+        ids = [i for i in str(cible).split("#")[-1].split(",") if i]
+        dossier["ids"] = ids
+        if MEM_ITEMS.exists():
+            trouves = 0
+            for line in MEM_ITEMS.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    it = json.loads(line)
+                except Exception:
+                    continue
+                if it.get("id") in ids:
+                    trouves += 1
+                    if trouves == 1:
+                        dossier["entite"] = it
+                        dossier["apercu"] = [{"titre": it.get("titre", "")[:80],
+                                              "contenu": str(it.get("contenu", ""))[:140]}]
+                    if trouves <= 25:
+                        dossier["contenu"].append({
+                            "nom": f"item {it.get('id')} — {str(it.get('titre', ''))[:60]}",
+                            "octets": len(line.encode("utf-8")),
+                            "chemin": "output/cosmos/memory/items.jsonl"})
+            dossier["supprime"] = (f"{trouves} lignes mémoire strictement identiques entre "
+                                   f"elles (1 original conservé, {max(0, trouves - 1)} copies supprimées)")
+    elif type_ == "journal":
+        p = _safe(REPO / cible)
+        if p.exists():
+            lines = [l for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
+            seuil = POLITIQUE["interactions_max"]
+            coupees = lines[:-seuil] if len(lines) > seuil else []
+            dossier["contenu"] = [{"nom": f"{len(coupees)} lignes les plus anciennes",
+                                   "octets": len("\n".join(coupees).encode("utf-8")),
+                                   "chemin": str(cible)}]
+            dossier["apercu"] = [l[:120] for l in coupees[:3]]
+            dossier["supprime"] = (f"{len(coupees)} lignes anciennes — les {seuil} plus "
+                                   f"récentes restent")
+    return dossier
+
+
 def _naissance_24h() -> int:
     """Clotho : éléments de mémoire nés dans les dernières 24 h."""
     if not MEM_ITEMS.exists():

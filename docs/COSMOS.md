@@ -656,3 +656,41 @@ Sebas…), sur les cartes condamnés et les 3 Moires (rôle en une phrase) ;
 affordance visible (« comment ? ↗ » au survol de la carte tokens) ; « Base »
 renommé « 📊 Dashboard » ; tests blindés contre la croissance du runtime
 (limites de comptage explicites — 110 tests stables).
+
+## Round Thémis ⚖ · icônes fonctionnelles · orbites atomiques · traçabilité
+
+### ⚖ Thémis — justice divine, fille et bras armé de Laplace
+Nouveau corps (kind `justice`, orbite Laplace) : **balance ⚖ pour peser, épée 🗡
+pour trancher**. Elle JUGE (instruit les menaces), CONSEILLE (remèdes) et
+DÉTRUIT le cas échéant (ordonne la fauche à Hadès — accord du souverain requis).
+**Constituée comme la démocratie**, ses 4 satellites = séparation des pouvoirs :
+📜 Eunomie (législatif — écrit les lois/Styx) · 🕊️ Éirène (exécutif — applique,
+rétablit l'ordre) · 🧑‍⚖️ Dikè (judiciaire — instruit les dossiers des condamnés) ·
+🔎 Censeur (contre-pouvoir — audit, transparence, rend compte à l'utilisateur).
+`cosmos/themis.py` : `audit()` (verdict + menaces gravées + conseils +
+constitution vivante, sur données réelles) et `appliquer(confirm)` (lame jamais
+aveugle : dry-run par défaut). Chat : « Thémis, juge le système » / « Thémis,
+applique la justice ». API : `GET /api/themis/audit` · `POST /api/themis/apply`.
+
+### 🎯 Icônes fonctionnelles dans les astres
+Chaque corps de premier niveau porte une **icône = sa fonction** (champ `icon`
+du registre) : SOL 👑 · Laplace 🌀 · Ananké ⛓️ · Thémis ⚖️ · Sebas 🛠️ ·
+Mercure ✉️ · Vénus 💰 · Terre 🌍 · Mars ⚔️ · Cérès 🌾 · Jupiter 📈 ·
+Uranus 🔭 · Neptune 🎨 · Pluton ⚰️ · Vous 👤. En 3D, l'icône est rendue DANS
+l'astre (sprite depthTest:false — lisible d'un coup d'œil, qui fait quoi).
+
+### ⚛ Orbites atomiques de Laplace — système solaire exact à l'échelle
+Les divinités autour de Laplace orbitent désormais comme un **atome** (plans
+orbitaux inclinés différents) dont les **rapports sont exactement ceux du
+système solaire** : Sebas = Mercure (0.39 UA, T 0.24 an → rapide, proche) ·
+Métatron = Vénus (0.72, 0.62) · **Thémis = Terre** (1.0, 1.0) · Ananké =
+Jupiter (5.2, 11.86 → lente, lointaine, Moires virevoltantes). Distances ∝
+√(demi-grand axe), vitesses angulaires ∝ 1/période (Kepler réel).
+
+### 🔍 Hadès : suivre le condamné jusqu'à l'entité
+Dans la modale ♇, chaque condamné est **cliquable** : Dikè 🧑‍⚖️ instruit le
+dossier — l'entité réelle (run : identité, tâche, compétences exécutées,
+liste des fichiers avec tailles ; doublon : les lignes mémoire identiques et
+leur contenu ; journal : lignes anciennes qui seront coupées) et la phrase
+exacte « 🗑 sera supprimé : … ». `hades.describe_target(cible, type)` +
+`GET /api/hades/target` (chemins contrôlés, refus hors système).
