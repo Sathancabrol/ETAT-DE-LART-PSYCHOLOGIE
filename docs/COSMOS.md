@@ -987,3 +987,30 @@ impulsions animées) et inversement (🕺 corps).
 
 **Tests : 147** (143 + catégories + process d'élagage complet + endpoints/UI +
 même cerveau/cas multiples + opérateur première fenêtre/toggle).
+
+## Round MobiGlas 🥽 — l'instrument cognitif projeté (brief d'inspiration)
+
+Première incarnation du HUD **MobiGlas / HCSM** : l'interface n'est pas un
+tableau de bord mais un **instrument cognitif** — on y voit *comment une
+conclusion émerge* d'observations et de modèles, avec des inférences toujours
+traçables. Onglet **🥽 MobiGlas** (`/`, entre Dashboard et Cerveau) + bouton
+dans la barre de /sol.
+
+**Le pipeline central (animé, réel)** : `monde réel → capteurs → features →
+modèles → inférences → action humaine/IA` — 6 nœuds avec valeurs réelles
+(heure UTC, canaux Sebas déclarés, mémoires, 15 corps, interactions), particules
+le long du flux, point vert « donnée réelle » sur chaque nœud
+(`cosmos/mobiglas.py`, `GET /api/mobiglas`).
+
+**Panneaux flottants projetés** (flottement doux, coins HUD, scanlines) :
+- **⚗ inférences traçables** — chaque conclusion se déplie en chaîne complète :
+  🌍 observation (source) → 🧬 feature → 🪐 modèle (corps) → ⚗ inférence → 🖐 action ;
+- **📡 observations** — le bus réel source → cible, + capteurs déclarés de Sebas
+  (avec l'honnêteté sandbox : aucun flux actif, aucune donnée fabriquée) ;
+- **🖐 espace partagé humain ⇄ IA** — opérateur 🕴, Laplace ✳ (nébuleuse),
+  SOL ☉, et mini-chat réel vers Laplace (l'étape « action ») ;
+- **🪐 modèles actifs** — les 15 corps, survol = leur ⚡ pouvoir ;
+- bandeau **métacognition** temps réel (les 6 processus du HUD cognition) et
+  bannière **conclusion émergente** avec sa provenance.
+
+**Tests : 149** (147 + pipeline/chaînes mobiglas + endpoint/UI).

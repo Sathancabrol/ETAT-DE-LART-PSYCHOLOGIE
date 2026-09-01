@@ -1817,3 +1817,38 @@ def test_simulation_meme_cerveau_et_cas_multiples():
     # peintres de scène distincts
     for painter in ("paintSalon", "paintBureau", "paintChambre"):
         assert painter in html, painter
+
+
+# ═══ ROUND MobiGlas 🥽 — l'instrument cognitif ═══
+
+def test_mobiglas_instrument_cognitif():
+    """Pipeline réel monde→capteurs→features→modèles→inférences→action,
+    inférences traçables (chaîne complète de provenance)."""
+    from cosmos import mobiglas
+    st = mobiglas.state()
+    ids = [s["id"] for s in st["stages"]]
+    assert ids == ["monde", "capteurs", "features", "modeles", "inferences", "action"]
+    assert all(s["valeur"] and s["reel"] for s in st["stages"])   # valeurs réelles
+    assert st["principe"].startswith("monde réel → capteurs")
+    # inférences traçables : chaque conclusion expose sa chaîne
+    assert st["inferences"]
+    for t in st["inferences"]:
+        for maillon in ("observation", "feature", "modele", "inference", "action"):
+            assert t.get(maillon), maillon
+    assert st["observations"] and all(o.get("source") for o in st["observations"])
+    assert len(st["modeles"]) == 15 and st["conclusion"]["texte"]
+
+def test_mobiglas_endpoint_et_ui():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    st = c.get("/api/mobiglas").json()
+    assert len(st["stages"]) == 6 and st["inferences"] and st["capteurs"] is not None
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("'MobiGlas'", "mgPipe", "initMobiglas", "loadMobiglas", "mg-panel",
+                  "instrument cognitif", "conclusion émergente", "inférences traçables",
+                  "espace partagé", "mg-scan", "getPointAtLength"):
+        assert motif in idx, motif
+    # depuis /sol, le bouton ouvre l'onglet
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    assert "/?tab=mobiglas" in sol

@@ -1877,6 +1877,14 @@ def godseye_spy(req: GodEyeSpyRequest):
         return {"ok": False, "statut": f"l'agence refuse : {e}"}
 
 
+@app.get("/api/mobiglas")
+def mobiglas_state():
+    """🥽 MobiGlas — l'instrument cognitif : pipeline réel (monde → capteurs →
+    features → modèles → inférences → action) + inférences traçables."""
+    from cosmos import mobiglas
+    return mobiglas.state()
+
+
 @app.get("/api/shadow")
 def shadow_state():
     """🕵 Bureau de l'Ombre — Sera Victoria (agent de terrain de Sebas), son
