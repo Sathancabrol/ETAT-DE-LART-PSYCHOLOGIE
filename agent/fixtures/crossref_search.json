@@ -1,0 +1,96 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "demo_fixture": true,
+  "message": {
+    "items": [
+      {
+        "DOI": "10.1002/wps.21203",
+        "title": [
+          "Relative effects of psychotherapies for mental disorders: an umbrella and network meta-analysis"
+        ],
+        "author": [
+          {
+            "family": "Emmer",
+            "given": "Natalie"
+          },
+          {
+            "family": "Horn",
+            "given": "Susanne"
+          }
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2024,
+              3
+            ]
+          ]
+        },
+        "container-title": [
+          "Psychological Bulletin"
+        ],
+        "type": "journal-article",
+        "is-referenced-by-count": 156
+      },
+      {
+        "DOI": "10.1016/j.lmot.2024.102015",
+        "title": [
+          "A meta-analysis of self-determination theory interventions in education"
+        ],
+        "author": [
+          {
+            "family": "Wang",
+            "given": "Hai"
+          },
+          {
+            "family": "Li",
+            "given": "Ping"
+          }
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2024,
+              9
+            ]
+          ]
+        },
+        "container-title": [
+          "Learning and Motivation"
+        ],
+        "type": "journal-article",
+        "is-referenced-by-count": 44
+      },
+      {
+        "DOI": "10.1038/s41562-025-02159-9",
+        "title": [
+          "Technology engagement and cognitive aging: a longitudinal analysis"
+        ],
+        "author": [
+          {
+            "family": "Benge",
+            "given": "Jarrod"
+          },
+          {
+            "family": "Scullin",
+            "given": "Michael"
+          }
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2025,
+              2
+            ]
+          ]
+        },
+        "container-title": [
+          "Nature Human Behaviour"
+        ],
+        "type": "journal-article",
+        "is-referenced-by-count": 61
+      }
+    ]
+  }
+}

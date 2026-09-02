@@ -39,6 +39,21 @@ ETAT-DE-LART-PSYCHOLOGIE/
 └── scripts/
     ├── validate_entry.py                               # Validation 28 mandatory, DOI regex, triangulation >=3, tags >=3, trust 0-100, dates ISO, duplicates
     └── add_entry.py                                    # DOI -> auto row via Crossref API
+
+agent/                                                   # 🤖 URANUS (♅) - agent chercheur scientifique hybride (règles + LLM optionnel)
+├── core/                                               # registry @skill, contexte, planner règles, llm optionnel, orchestrateur
+├── skills/                                             # 11 compétences: recherche multi-bases, enrich DOI, citations, dédup,
+│                                                       # validation 42 champs, trust M+R+O+C+T-P, biais RoB2/AMSTAR2-lite,
+│                                                       # PRISMA, synthèse domaines, visualisation SVG, veille OpenAlex
+├── fixtures/                                           # payloads démo hors-ligne (mode dégradé explicite)
+├── cli.py                                              # python -m agent run|skills|runs|status
+└── docs/AGENT_CHERCHEUR.md                             # Documentation complète de l'agent
+
+cosmos/                                                  # ☉ SYSTÈME SOLAIRE - SOL (orchestrateur/approbation), Vénus (finances/budget),
+│                                                        # bus d'interactions approuvées, grand livre des coûts, intégrité + alertes
+tests/test_cosmos.py                                     # 23 tests système (100 % hors-ligne)
+
+tests/test_agent.py                                      # 23 tests agent (100 % hors-ligne)
 ```
 
 ## 🔬 Méthode scientifique

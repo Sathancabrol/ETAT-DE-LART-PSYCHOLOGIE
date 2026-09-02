@@ -1,0 +1,7 @@
+{
+  "currency": "USD",
+  "daily_cap_usd": 1.0,
+  "per_mission_cap_usd": 0.25,
+  "monthly_cap_usd": 20.0,
+  "income_monthly_usd": 0.0
+}

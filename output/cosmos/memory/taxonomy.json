@@ -1,0 +1,442 @@
+{
+  "name": "Cognitorium",
+  "children": [
+    {
+      "name": "Psychologie scientifique",
+      "children": [
+        {
+          "name": "Cognition & attention",
+          "children": [
+            {
+              "name": "Fonctions exécutives",
+              "children": []
+            },
+            {
+              "name": "Métacognition",
+              "children": []
+            },
+            {
+              "name": "Cognition incarnée (4E)",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Clinique & santé",
+          "children": [
+            {
+              "name": "Psychothérapies",
+              "children": []
+            },
+            {
+              "name": "Santé mentale",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Éducation & apprentissage",
+          "children": []
+        },
+        {
+          "name": "Méthodologie & open science",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Construction",
+      "children": [
+        {
+          "name": "BTP / TP",
+          "children": [
+            {
+              "name": "Sécurité",
+              "children": [
+                {
+                  "name": "Équipement",
+                  "children": [
+                    {
+                      "name": "EPI",
+                      "children": []
+                    },
+                    {
+                      "name": "Visière",
+                      "children": [
+                        {
+                          "name": "Modèle de vision connecté IA",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Administratif augmenté",
+              "children": [
+                {
+                  "name": "Automatisation documentaire",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Chantiers augmentés",
+              "children": [
+                {
+                  "name": "Visière HUD terrain",
+                  "children": []
+                },
+                {
+                  "name": "Robotique de chantier",
+                  "children": []
+                },
+                {
+                  "name": "Drones & suivi",
+                  "children": []
+                },
+                {
+                  "name": "Jumeaux numériques",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "chantier",
+              "children": []
+            },
+            {
+              "name": "btp",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Génie civil & infrastructures",
+          "children": [
+            {
+              "name": "Routes & terrassements",
+              "children": []
+            },
+            {
+              "name": "Ouvrages d'art",
+              "children": []
+            },
+            {
+              "name": "Réhabilitation & entretien",
+              "children": []
+            },
+            {
+              "name": "Management de projet (conducteur de travaux)",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Robotique",
+      "children": [
+        {
+          "name": "Robotique de chantier",
+          "children": [
+            {
+              "name": "Terrassement automatisé",
+              "children": []
+            },
+            {
+              "name": "Cobots de montage",
+              "children": []
+            },
+            {
+              "name": "Ferraillage & préfabrication",
+              "children": []
+            },
+            {
+              "name": "Impression 3D structurelle",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Drones",
+          "children": [
+            {
+              "name": "Photogrammétrie",
+              "children": []
+            },
+            {
+              "name": "Suivi d'avancement",
+              "children": []
+            },
+            {
+              "name": "Inspection d'ouvrages",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Exosquelettes",
+          "children": [
+            {
+              "name": "Prévention TMS",
+              "children": []
+            },
+            {
+              "name": "Assistance au port de charges",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Perception & navigation",
+          "children": [
+            {
+              "name": "SLAM & localisation",
+              "children": []
+            },
+            {
+              "name": "Vision par ordinateur embarquée",
+              "children": []
+            },
+            {
+              "name": "Capteurs & IoT chantier",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Téléopération & autonomie",
+          "children": [
+            {
+              "name": "Niveaux d'autonomie",
+              "children": []
+            },
+            {
+              "name": "Sécurité fonctionnelle",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Éthique & réglementation robotique",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Intelligence artificielle",
+      "children": [
+        {
+          "name": "IA génératives",
+          "children": [
+            {
+              "name": "LLM",
+              "children": []
+            },
+            {
+              "name": "Agents autonomes",
+              "children": []
+            },
+            {
+              "name": "RAG & bases documentaires",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Vision par ordinateur",
+          "children": [
+            {
+              "name": "Détection de défauts",
+              "children": []
+            },
+            {
+              "name": "Segmentation de scènes",
+              "children": []
+            },
+            {
+              "name": "Suivi d'avancement par image",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Apprentissage automatique",
+          "children": [
+            {
+              "name": "Séries temporelles & prévision",
+              "children": []
+            },
+            {
+              "name": "Optimisation & planification",
+              "children": []
+            },
+            {
+              "name": "Transfer learning",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "IA embarquée & edge",
+          "children": [
+            {
+              "name": "Temps réel",
+              "children": []
+            },
+            {
+              "name": "Sobriété énergétique",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Humain dans la boucle",
+          "children": [
+            {
+              "name": "Interaction homme-machine (IHM)",
+              "children": []
+            },
+            {
+              "name": "HUD & réalité augmentée",
+              "children": []
+            },
+            {
+              "name": "Explicabilité (XAI) & confiance",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Gouvernance des données",
+          "children": [
+            {
+              "name": "RGPD & données chantier",
+              "children": []
+            },
+            {
+              "name": "Cybersécurité",
+              "children": []
+            },
+            {
+              "name": "Jumeaux numériques & BIM",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Émergents (auto-enrichis)",
+      "children": [
+        {
+          "name": "webcam",
+          "children": []
+        },
+        {
+          "name": "terrain",
+          "children": []
+        },
+        {
+          "name": "validate_entries",
+          "children": []
+        },
+        {
+          "name": "synchro",
+          "children": []
+        },
+        {
+          "name": "wifi",
+          "children": []
+        },
+        {
+          "name": "armurerie",
+          "children": []
+        },
+        {
+          "name": "mars",
+          "children": []
+        },
+        {
+          "name": "dashboard",
+          "children": []
+        },
+        {
+          "name": "openalex",
+          "children": []
+        },
+        {
+          "name": "2024",
+          "children": []
+        },
+        {
+          "name": "2025",
+          "children": []
+        },
+        {
+          "name": "crossref",
+          "children": []
+        },
+        {
+          "name": "search_literature",
+          "children": []
+        },
+        {
+          "name": "synthesize",
+          "children": []
+        },
+        {
+          "name": "reseau",
+          "children": []
+        },
+        {
+          "name": "hades",
+          "children": []
+        },
+        {
+          "name": "cycle",
+          "children": []
+        },
+        {
+          "name": "commande",
+          "children": []
+        },
+        {
+          "name": "observer",
+          "children": []
+        },
+        {
+          "name": "etat",
+          "children": []
+        },
+        {
+          "name": "faucher",
+          "children": []
+        },
+        {
+          "name": "ecouter",
+          "children": []
+        },
+        {
+          "name": "profil",
+          "children": []
+        },
+        {
+          "name": "déclaratif",
+          "children": []
+        },
+        {
+          "name": "themis",
+          "children": []
+        },
+        {
+          "name": "justice",
+          "children": []
+        }
+      ]
+    }
+  ]
+}

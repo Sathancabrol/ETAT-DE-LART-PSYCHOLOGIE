@@ -1,0 +1,27 @@
+{
+  "stats": {
+    "lignes": 14,
+    "colonnes": 42,
+    "erreurs": 0,
+    "avertissements": 0,
+    "trust_moyen": 73.2,
+    "par_niveau_preuve": {
+      "tres_eleve": 3,
+      "modere_eleve": 3,
+      "modere": 2,
+      "theorique": 2,
+      "eleve": 3,
+      "faible_modere": 1
+    },
+    "par_type": {
+      "revue_systematique": 6,
+      "perspective": 2,
+      "theorique": 2,
+      "meta_analyse": 1,
+      "article_empirique": 2,
+      "preprint": 1
+    }
+  },
+  "erreurs": [],
+  "avertissements": []
+}

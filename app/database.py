@@ -87,6 +87,15 @@ def init_db():
     )
     """)
 
+    # 4. Memory items (synchro mémoire des agents ↔ base de données)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS memory_items (
+        id TEXT PRIMARY KEY,
+        ts TEXT, type TEXT, titre TEXT, contenu TEXT,
+        tags TEXT, source TEXT, corps TEXT, meta TEXT
+    )""")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_memory_type ON memory_items(type)")
+
     conn.commit()
     conn.close()
 
@@ -135,3 +144,78 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def sync_memory_items() -> int:
+    """Synchronise la mémoire des agents (items.jsonl) dans la base de données.
+
+    Idempotent : chaque élément est inséré ou mis à jour par id.
+    Retourne le nombre d'éléments synchronisés.
+    """
+    import json as _json
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS memory_items (
+        id TEXT PRIMARY KEY, ts TEXT, type TEXT, titre TEXT, contenu TEXT,
+        tags TEXT, source TEXT, corps TEXT, meta TEXT)""")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_memory_type ON memory_items(type)")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS references_table (
+        id TEXT PRIMARY KEY, reference_courte TEXT, reference_complete TEXT,
+        doi TEXT, annee INTEGER, theme TEXT, notes_internes TEXT)""")
+    n = 0
+    mem_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "output", "cosmos", "memory", "items.jsonl")
+    if os.path.exists(mem_path):
+        with open(mem_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    it = _json.loads(line)
+                except Exception:
+                    continue
+                cursor.execute("""INSERT INTO memory_items
+                    (id, ts, type, titre, contenu, tags, source, corps, meta)
+                    VALUES (?,?,?,?,?,?,?,?,?)
+                    ON CONFLICT(id) DO UPDATE SET ts=excluded.ts, type=excluded.type,
+                        titre=excluded.titre, contenu=excluded.contenu, tags=excluded.tags,
+                        source=excluded.source, corps=excluded.corps, meta=excluded.meta""",
+                    (it.get("id"), it.get("ts"), it.get("type"), it.get("titre"),
+                     it.get("contenu", "")[:2000], ", ".join(it.get("tags", [])),
+                     it.get("source"), it.get("corps"),
+                     _json.dumps(it.get("meta", {}), ensure_ascii=False)))
+                n += 1
+                # Les références versées en mémoire par les recherches alimentent aussi
+                # la table scientifique references_table (synchro complète mémoire → DB)
+                if it.get("type") == "reference":
+                    meta = it.get("meta", {}) or {}
+                    doi = (meta.get("doi") or it.get("doi") or "").strip() or None
+                    ref_courte = (meta.get("reference_courte")
+                                  or f"{it.get('titre', '')[:80]} ({(it.get('ts') or '')[:4]})")
+                    try:
+                        cursor.execute("""INSERT OR REPLACE INTO references_table
+                            (id, reference_courte, reference_complete, doi, annee, theme, notes_internes)
+                            VALUES (?,?,?,?,?,?,?)""",
+                            ("mem_" + it.get("id", ""), ref_courte[:200],
+                             (it.get("contenu", "") or "")[:600], doi,
+                             int(meta["annee"]) if str(meta.get("annee", "")).isdigit() else None,
+                             (meta.get("theme") or it.get("titre", ""))[:200],
+                             "versé en mémoire par " + (it.get("source") or "agent")
+                             + " le " + (it.get("ts") or "")[:10]))
+                    except Exception:
+                        pass  # une référence malformée ne bloque pas la synchro
+        conn.commit()
+    conn.close()
+    return n
+
+
+def get_memory_items(type_filter=None, limit=500):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    if type_filter:
+        cursor.execute("SELECT * FROM memory_items WHERE type=? ORDER BY ts DESC LIMIT ?",
+                       (type_filter, limit))
+    else:
+        cursor.execute("SELECT * FROM memory_items ORDER BY ts DESC LIMIT ?", (limit,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
