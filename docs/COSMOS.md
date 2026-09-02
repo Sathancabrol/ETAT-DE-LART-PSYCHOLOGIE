@@ -1100,3 +1100,14 @@ Onglet « MobiGlas » renommé **« Instrument »** (MobiGlas = le dock désorma
 l'id `mobiglas` reste pour les liens `?tab=`).
 
 **Tests : 155** (153 + physique/affichage + dock complet/fenêtres/renommages).
+
+### Fix R2.1 — la vue principale ne se chargeait plus
+
+`starsPts` (champ d'étoiles) était déclaré dans un bloc `{…}` : la boucle
+d'animation, hors du bloc, levait `ReferenceError` à la première frame → la
+vue Univers restait noire. Déclaré en portée de scène (`let starsPts` avant le
+bloc). Au passage : le layer **🪐 planètes** du panneau AFFICHAGE est
+maintenant réellement appliqué (`planetGrps`/`planetKind` — lunes, cours et
+anneaux suivent, enfants des pivots), et un smoke-test Node (initUnivers +
+première frame + layers + méthodes dock sur mocks) valide désormais le
+chargement de la vue.

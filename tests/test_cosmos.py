@@ -1943,6 +1943,9 @@ def test_r2_physique_identique_et_affichage():
                   "Math.max(55, Math.min(1600, dist))", "target.lerp(followV, 0.12)",
                   "dist += (followDist - dist) * 0.08", "contextmenu", "panning"):
         assert motif in idx, motif
+    # régression starsPts : portée de scène (la boucle doit le voir) + layer planètes appliqué
+    assert "let starsPts = null;" in idx and "const starsPts" not in idx
+    assert "planetGrps.forEach" in idx and "planetKind[id] ? self.uLayer.planetes : true" in idx
     # 👁 AFFICHAGE : types de vue + layers + astres
     for motif in ("👁 AFFICHAGE", "setView('libre')", "setView('dessus')", "setView('profil')",
                   "setView('cinema')", "uLayer.planetes", "uLayer.lunes", "uLayer.cours",
