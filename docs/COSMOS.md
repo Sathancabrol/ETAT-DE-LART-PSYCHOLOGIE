@@ -1111,3 +1111,52 @@ maintenant réellement appliqué (`planetGrps`/`planetKind` — lunes, cours et
 anneaux suivent, enfants des pivots), et un smoke-test Node (initUnivers +
 première frame + layers + méthodes dock sur mocks) valide désormais le
 chargement de la vue.
+
+## Round R2.2 — les 10 retours utilisateur
+
+1. **Fil d'Ariane dans le chat** : l'en-tête du chat Laplace affiche en
+   permanence 📂 où vous êtes depuis l'accueil (`whereAmI()` :
+   « Univers 🪐 — accueil » / « Univers 🪐 › Graphe Obsidian »…).
+2. **Corps de l'opérateur en style cerveau** : plus de maillage — un T-pose en
+   **nuage de particules** (tête, torse, bras, jambes) avec synapses et
+   impulsions voyageuses, la même esthétique que `buildBrainShape`.
+3. **Chat à la largeur du dock** (412 px ≈ ACCUEIL+FONTION+PARAMÈTRES).
+4. **MobiGlas fantôme** : le chat qui nous suit est quasi transparent
+   (opacité 16 %) et **devient opaque progressivement après 1,5 s de survol**
+   (CSS pur, `focus` dans le champ = opaque aussi).
+5-6. **Dashboard fusionné** : « Mes métriques » et « Profil cognitif » sont
+   désormais **dans la fenêtre opérateur** (colonne droite intégrée, onglets
+   📊/🧬) avec explications « En clair » grand public — plus de fenêtres
+   séparées incompréhensibles.
+7. **Timeline multimodale** : filtres par catégorie (études, concepts,
+   mémoires, runs), filtres compétences (**hard / soft / cognitives**), modes
+   **frise / densité / cumul**, données réelles multi-sources (références,
+   concepts, 3 800 mémoires, runs agent), survol = détail, résumé chiffré.
+8. **Cerveau zoomable + imagerie + calibration** : le titre de chaque
+   sous-fenêtre s'agrandit (🔍) — HUD détaillé (jauges + historiques 60
+   mesures + ressources open source OpenNeuro/OSF/PMC) et Enaction
+   détaillée : **perspectives ego / exo / allocentrique**, et **imagerie
+   cérébrale calculée depuis les vrais points du cerveau de simulation** :
+   coupes axiale/coronale/sagittale, **IRM** (gris), **PET-scan** (gauss
+   chaud, pondéré par l'activation réelle des zones), projection 2D —
+   rafraîchie toutes les 500 ms, synchrone avec la scène. **Bouton
+   calibration** : tests cognitifs **réels** dans l'app (Posner, Stroop,
+   rotation mentale, perspective allocentrée — temps mesurés), import de
+   données extérieures (PDF/vidéo/son conservés en mémoire), détection de
+   capteurs (gamepad/batterie, aucune donnée simulée), comparaison aux bornes
+   publiées (Posner 250–400 ms…), résultat **modulant réellement le HUD** et
+   les intensités, persisté (localStorage + trait de profil).
+9. **Univers plus réel** : textures procédurales par astre (Terre
+   océans/continents/nuages, géantes à bandes, telluriques bruités) ;
+   **🕴 vous = indicateur verrouillé AU-DESSUS de la Terre** (beacon pulsant +
+   tige, ne orbite plus) ; **Laplace n'orbite plus le soleil** : sa nébuleuse
+   **enveloppe tout le système**, noyau veillant au-dessus de l'écliptique,
+   Métatron & satellites orbitent le noyau.
+10. **Fusion vue home / système sol IA** (sans perte) : 💡 **light ON/OFF**
+    (le monde se gèle, les divinités — Apollon 🏆 chariot excentrique,
+    nébuleuse — continuent), **anneau de sélection** collé à l'astre cliqué,
+    **⚛ atomes kepleriens autour de Sebas** ; /sol garde TOUTES ses
+    fonctions + bouton « 🪐 vue fusionnée » vers l'accueil.
+
+**Tests : 160** (155 + fil d'Ariane/ghost/width + fusion opérateur + timeline
++ zoom/imagerie/calibration + univers réel/pin/laplace/lumière).

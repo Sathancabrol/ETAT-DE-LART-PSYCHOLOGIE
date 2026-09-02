@@ -1610,7 +1610,8 @@ def test_godseye_endpoints_et_chat():
 def test_operateur_bouton_cerveau_et_biometriques():
     html = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
     # l'opérateur est la PREMIÈRE fenêtre du dashboard
-    assert html.find("FENÊTRE 1 : l'opérateur") < html.find("FENÊTRE GAUCHE : mes métriques")
+    # métriques + profil cognitif désormais DANS la fenêtre opérateur (colonne droite intégrée)
+    assert html.find("FENÊTRE 1 : l'opérateur") < html.find("COLONNE DROITE INTÉGRÉE")
     # le bouton 🧠 bascule l'animation visuelle : corps maillé ⇄ son cerveau
     assert "toggleOperatorMode()" in html and "opMode==='corps' ? '🧠 cerveau' : '🕺 corps'" in html
     assert "op.brain.visible = cerveau" in html and "buildBrainShape" in html
@@ -1962,7 +1963,7 @@ def test_r2_dock_mobiglas_complet():
     sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
     # chat global au-dessus du dock, partout
     for motif in ("bottom-[76px]", "sendChat()", "chatMsgs", "chatOpen",
-                  "Laplace — partout, en contexte", "✳ Laplace</button>"):
+                  "whereAmI()", "✳ Laplace</button>"):
         assert motif in idx, motif
     # FONCTION contextuel : présélection + options + outils iconés
     for motif in ("présélectionnée", "ctxOpts()", "ctxAct(o)", "options ·",
@@ -1981,3 +1982,70 @@ def test_r2_dock_mobiglas_complet():
     assert "get('modal')" in sol and "openModal(qm)" in sol
     # colonnes MobiGlas empilées sans collision avec le chat/dock
     assert "top-[268px] bottom-[84px]" in idx and "flex flex-col gap-2 z-10 min-h-0" in idx
+
+
+# ═══ ROUND R2.2 — retours utilisateur : fil d'Ariane, opérateur fusion, timeline, zoom cerveau, calibration, univers ═══
+
+def test_r22_chat_fil_dariane_largeur_et_fantome():
+    """Le chat Laplace : indique TOUJOURS où on est (depuis l'accueil), largeur
+    dock (412px), quasi transparent → opaque progressivement après 1,5 s."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "whereAmI()" in idx and "Univers 🪐 — accueil" in idx and "Univers 🪐 › " in idx
+    assert "📂 <span x-text=\"whereAmI()\">" in idx or "whereAmI()\" " in idx or "x-text=\"whereAmI()\"" in idx
+    assert "w-[min(412px,88vw)]" in idx                     # ≈ largeur ACCUEIL+FONTION+PARAMÈTRES
+    assert ".mg-ghost { opacity: .16" in idx and "transition: opacity .6s ease 1.5s" in idx
+    assert idx.count("mg-ghost") >= 3                        # chat + pastille + css
+
+def test_r22_dashboard_fusionne_operateur():
+    """Métriques + profil cognitif intégrés DANS la fenêtre opérateur, en
+    français clair ; le corps de l'opérateur est en style cerveau
+    (particules + synapses + impulsions)."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "COLONNE DROITE INTÉGRÉE" in idx and "opTab='metrics'" in idx and "opTab='profil'" in idx
+    assert "En clair :" in idx                                # explication grand public
+    assert "FENÊTRE GAUCHE : mes métriques" not in idx        # plus de fenêtre séparée
+    for motif in ("corps STYLE CERVEAU", "bodyPts", "bodySegs", "bodyPulses",
+                  "addLimb(s * .06, 1.52, 0, s * .58, 1.52, 0, 12)"):
+        assert motif in idx, motif
+
+def test_r22_timeline_multimodale():
+    """Frise multimodale : filtres par catégorie + compétences (hard/soft/
+    cognitives) + modes frise/densité/cumul, données réelles multi-sources."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("Frise multimodale", "tlCats", "tlMode", "tlSkill", "loadTimelineMulti",
+                  "renderTimelineMulti", "skillOf", "'densite'", "'cumul'",
+                  "hard skills", "soft skills", "cognitives", "/api/timeline", "/api/agent/runs"):
+        assert motif in idx, motif
+
+def test_r22_cerveau_zoom_imagerie_et_calibration():
+    """Clic sur une sous-fenêtre du Cerveau = zoom détaillé : perspectives
+    ego/exo/allocentrique, imagerie (coupes, IRM, PET gauss, 2D) calculée
+    depuis les vrais points, calibration par tests réels (Posner, Stroop,
+    rotation mentale, allocentré) + import + capteurs + bornes littérature."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "brainZoom='hud'" in idx and "brainZoom='sim'" in idx
+    for motif in ("setSimView(v.id)", "'ego'", "'exo'", "'allo'", "imgMode", "renderBrainImaging",
+                  "'axial'", "'coronal'", "'sagittal'", "'irm'", "'pet'", "createImageData",
+                  "openCalib()", "calibNextTest", "calibAnswer", "calibImport", "calibFinish",
+                  "calibDetectSensors", "Posner", "Stroop", "rotation mentale", "allocentr",
+                  "250–400 ms", "getGamepads", "sparkHist", "_hudHist", "_simRaw", "raw.reg"):
+        assert motif in idx, motif
+    # la calibration module réellement le HUD et est persistée
+    assert "cognitorium.calib" in idx and ".88 + .0024" in idx
+
+def test_r22_univers_realisme_pin_laplace_lumiere():
+    """Astres aux textures procédurales proches du réel ; l'utilisateur est un
+    INDICATEUR verrouillé au-dessus de la Terre ; Laplace N'orbite plus le
+    soleil (nébuleuse enveloppante, satellites autour du noyau) ; lumière
+    ON/OFF ; anneau de sélection ; chariot d'Apollon ; atomes de Sebas ;
+    /sol garde toutes ses fonctions + lien vue fusionnée."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    for motif in ("makeTex", "océans, continents, nuages", "bandes horizontales", "map: makeTex(b.id, b.color)"):
+        assert motif in idx, motif
+    assert "INDICATEUR verrouillé au-dessus de la Terre" in idx and "uGrpUser.position.set(tp.r, 14.2, 0)" in idx
+    assert "ENVELOPPE tout le système" in idx and "orbitent LE noyau" in idx
+    assert "tours.push({ pivot, r, w: (30 / r) * .3 })" not in idx   # laplace hors des orbites solaires
+    assert "uLightOn" in idx and "le monde se gèle" in idx
+    assert "selRing" in idx and "chariot d'Apollon" in idx and "atomes kepleriens autour de Sebas" in idx
+    assert "🪐 vue fusionnée" in sol and "toggleSystemLight" in sol   # /sol intact + pont

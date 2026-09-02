@@ -108,6 +108,9 @@
     .dock-btn.active { background: rgba(99,102,241,.18); color: #a5b4fc; border-color: rgba(99,102,241,.45); box-shadow: 0 0 18px rgba(99,102,241,.25); }
     .uni-orbit { pointer-events: none; }
     .win { will-change: left, top; }
+    /* ✳ MobiGlas fantôme : quasi transparent, opaque progressivement après 1,5 s de survol */
+    .mg-ghost { opacity: .16; transition: opacity .9s ease; }
+    .mg-ghost:hover, .mg-ghost:focus-within { opacity: 1; transition: opacity .6s ease 1.5s; }
     .aff-btn { transition: all .15s; }
     #operatorCanvas:active, #brainCanvas:active { cursor: grabbing; }
   </style>
@@ -160,7 +163,10 @@
 
     <!-- 👁 AFFICHAGE — type de vue, layers, astres -->
     <div class="absolute top-16 left-4 z-20">
-      <button @click="uShowAff=!uShowAff" class="glass rounded-xl border border-white/10 px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 hover:text-white transition">👁 AFFICHAGE</button>
+      <div class="flex gap-1.5">
+        <button @click="uShowAff=!uShowAff" class="glass rounded-xl border border-white/10 px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 hover:text-white transition">👁 AFFICHAGE</button>
+        <button @click="uLightOn=!uLightOn" class="glass rounded-xl border px-2.5 py-1.5 text-[10px] font-semibold transition" :class="uLightOn ? 'border-amber-500/40 text-amber-300' : 'border-slate-600/40 text-slate-500'" :title="uLightOn ? 'éteindre : le monde se gèle, seules les divinités continuent' : 'rallumer le système'">💡 <span x-text="uLightOn ? 'ON' : 'OFF'"></span></button>
+      </div>
       <div x-show="uShowAff" x-transition.duration.200ms @click.outside="uShowAff=false" class="mt-2 w-[252px] glass rounded-2xl border border-white/10 p-3 space-y-3 win max-h-[74vh] overflow-y-auto shadow-2xl shadow-black/50">
         <div @pointerdown="winDrag($event)" class="cursor-move">
           <p class="text-[9px] uppercase tracking-[.16em] text-slate-400">👁 affichage — options de l'univers</p>
@@ -250,12 +256,12 @@
 
   <!-- ══════════ DASHBOARD ══════════ -->
   <section x-show="activeTab==='dashboard'" class="space-y-5 fade-in">
-    <!-- ══ MINI-DASHBOARD 4 FENÊTRES : métriques · profil cognitif · constellation · opérateur (hologramme) ══ -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+    <!-- ══ MINI-DASHBOARD : opérateur élargi (métriques + profil cognitif intégrés, expliqués) + constellation ══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <!-- ◀ FENÊTRE 1 : l'opérateur — hologramme maillage, humain masculin T-pose (première fenêtre) -->
-      <div class="glass-card rounded-2xl p-4 flex flex-col holo-frame">
+      <div class="glass-card rounded-2xl p-4 flex flex-col holo-frame lg:col-span-2">
         <div class="flex items-center justify-between mb-1">
-          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🕺</span>Opérateur</h3>
+          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🕺</span>Opérateur — vous, en entier</h3>
           <div class="flex items-center gap-1.5">
             <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">humain · masculin · maillage</span>
             <button @click="toggleOperatorMode()" class="text-[9px] px-2 py-1 rounded-lg bg-violet-500/15 border border-violet-500/40 text-violet-200 hover:bg-violet-500/25 transition"
@@ -263,8 +269,9 @@
                     x-text="opMode==='corps' ? '🧠 cerveau' : '🕺 corps'"></button>
           </div>
         </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-3 flex-1 min-h-0">
         <canvas id="operatorCanvas" class="w-full" style="min-height:175px"></canvas>
-        <p class="text-[9px] text-slate-600 mt-0.5" x-text="opMode==='corps' ? 'vous, en T-pose — maillage holographique · glissez pour tourner' : 'votre cerveau — les mêmes régions et circonvolutions que la vue de l\'onglet Cerveau · glissez pour tourner'"></p>
+        <p class="text-[9px] text-slate-600 mt-0.5" x-text="opMode==='corps' ? 'vous, en T-pose — corps de particules, style cerveau · glissez pour tourner' : 'votre cerveau — les mêmes régions et circonvolutions que la vue de l\'onglet Cerveau · glissez pour tourner'"></p>
         <!-- 📟 biometriques de l'opérateur (données comportementales réelles du système) -->
         <div class="mt-2 rounded-xl border border-cyan-500/20 bg-cyan-500/[.03] p-2.5">
           <div class="flex items-center gap-1.5 mb-1.5">
@@ -298,69 +305,68 @@
             </svg>
           </div>
         </div>
-      </div>
+        <!-- fin colonne gauche -->
 
-      <!-- ◀ FENÊTRE GAUCHE : mes métriques en graphiques -->
-      <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">📊</span>Mes métriques</h3>
-          <a href="/agent?agent=uranus" class="text-[9px] text-slate-600 hover:text-indigo-300">tout voir ↗</a>
-        </div>
-        <div class="flex flex-wrap gap-1 mb-1.5">
-          <template x-for="ind in profilIndicateurs" :key="ind.id">
-            <button @click="profilInd=ind.id" class="chip" :class="profilInd===ind.id && '!border-indigo-500/60 !text-indigo-300'" x-text="ind.label"></button>
-          </template>
-        </div>
-        <div class="flex flex-wrap gap-1 mb-2">
-          <template x-for="ct in ['jauge','barres','radar']" :key="ct">
-            <button @click="profilChart=ct" class="chip" :class="profilChart===ct && '!border-cyan-500/60 !text-cyan-300'" x-text="ct"></button>
-          </template>
-        </div>
-        <svg id="profilMetricsSvg" class="flex-1 w-full" style="min-height:190px"></svg>
-        <p class="text-[9px] text-slate-600 mt-1.5" x-text="profilExplication"></p>
-      </div>
+        <!-- ⟿ COLONNE DROITE INTÉGRÉE : métriques & profil cognitif expliqués, À CÔTÉ de l'opérateur -->
+        <div class="flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-white/5 lg:pl-3 lg:pt-0 pt-3">
+          <div class="flex items-center gap-1.5 mb-2">
+            <button @click="opTab='metrics'" :class="opTab==='metrics' ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-200' : 'bg-white/[.02] border-white/10 text-slate-500'" class="text-[10px] px-2.5 py-1 rounded-lg border transition">📊 mes métriques</button>
+            <button @click="opTab='profil'" :class="opTab==='profil' ? 'bg-violet-500/15 border-violet-500/40 text-violet-200' : 'bg-white/[.02] border-white/10 text-slate-500'" class="text-[10px] px-2.5 py-1 rounded-lg border transition">🧬 profil cognitif</button>
+            <span class="flex-1"></span>
+            <span class="text-[8px] text-slate-600">chiffre cliquable = détail</span>
+          </div>
 
-      <!-- ◀ FENÊTRE MILIEU : profil cognitif (jauges biais & effets) -->
-      <div class="glass-card rounded-2xl p-4 flex flex-col" style="min-height:330px">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5">🧠</span>Profil cognitif</h3>
-          <a href="/agent" class="text-[9px] text-slate-600 hover:text-indigo-300">profil complet ↗</a>
-        </div>
-        <p class="text-[9px] uppercase tracking-[.12em] text-slate-600 mb-1.5">Biais & effets induits (jauges %)</p>
-        <div class="flex items-center gap-1.5 mb-2 rounded-lg bg-black/25 border border-white/5 px-2 py-1">
-          <span class="text-[9px] text-slate-500">incertitude :</span>
-          <span class="text-[9.5px] font-semibold" :class="{'bonne':'text-emerald-300','moyenne':'text-amber-300','faible':'text-rose-300'}[(profilPerso.confiance||{}).niveau||'faible']" x-text="(profilPerso.confiance||{}).niveau || '—'"></span>
-          <span class="text-[9px] text-slate-600" x-text="(profilPerso.confiance||{}).lecture || ''"></span>
-        </div>
-        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
-          <template x-for="b in profilPerso.biais || []" :key="b.id">
-            <div>
-              <div class="flex items-center justify-between text-[10.5px]">
-                <span class="text-slate-300" x-text="b.label"></span>
-                <span class="mono" :class="b.valeur>=70?'text-rose-300':b.valeur>=40?'text-amber-300':'text-emerald-300'" x-text="b.valeur + '%'"></span>
-              </div>
-              <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
-                <div class="h-full rounded-full transition-all duration-700" :class="b.valeur>=70?'bg-rose-500/70':b.valeur>=40?'bg-amber-500/70':'bg-emerald-500/70'" :style="'width:'+b.valeur+'%'"></div>
-              </div>
-              <p class="text-[8.5px] text-slate-600 leading-snug mt-0.5" x-text="b.explication"></p>
+          <!-- 📊 métriques (intégrées à l'opérateur, en français simple) -->
+          <div x-show="opTab==='metrics'" class="flex flex-col flex-1 min-h-0">
+            <div class="flex flex-wrap gap-1 mb-1.5">
+              <template x-for="ind in profilIndicateurs" :key="ind.id">
+                <button @click="profilInd=ind.id" class="chip" :class="profilInd===ind.id && '!border-indigo-500/60 !text-indigo-300'" x-text="ind.label"></button>
+              </template>
             </div>
-          </template>
-          <template x-for="e in profilPerso.effets || []" :key="e.id">
-            <div>
-              <div class="flex items-center justify-between text-[10.5px]">
-                <span class="text-indigo-200/80" x-text="e.label"></span>
-                <span class="mono text-indigo-300" x-text="e.valeur + '%'"></span>
-              </div>
-              <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
-                <div class="h-full rounded-full bg-indigo-500/60 transition-all duration-700" :style="'width:'+e.valeur+'%'"></div>
-              </div>
+            <div class="flex flex-wrap gap-1 mb-2">
+              <template x-for="ct in ['jauge','barres','radar']" :key="ct">
+                <button @click="profilChart=ct" class="chip" :class="profilChart===ct && '!border-cyan-500/60 !text-cyan-300'" x-text="ct"></button>
+              </template>
             </div>
-          </template>
+            <svg id="profilMetricsSvg" class="flex-1 w-full" style="min-height:130px"></svg>
+            <p class="text-[9px] text-slate-500 leading-snug mt-1.5 rounded-lg bg-black/25 border border-white/5 px-2 py-1.5">💡 <b class="text-slate-400">En clair :</b> <span x-text="profilExplication"></span></p>
+          </div>
+
+          <!-- 🧬 profil cognitif (intégré à l'opérateur) -->
+          <div x-show="opTab==='profil'" class="flex flex-col flex-1 min-h-0 overflow-y-auto pr-1">
+            <div class="flex items-center gap-1.5 mb-2 rounded-lg bg-black/25 border border-white/5 px-2 py-1">
+              <span class="text-[9px] text-slate-500">incertitude :</span>
+              <span class="text-[9.5px] font-semibold" :class="{'bonne':'text-emerald-300','moyenne':'text-amber-300','faible':'text-rose-300'}[(profilPerso.confiance||{}).niveau||'faible']" x-text="(profilPerso.confiance||{}).niveau || '—'"></span>
+              <span class="text-[9px] text-slate-600" x-text="(profilPerso.confiance||{}).lecture || ''"></span>
+            </div>
+            <p class="text-[9px] text-slate-600 mb-1">⚖️ vos biais mesurés (plus c'est bas, mieux c'est) · 🌀 effets induits</p>
+            <div class="space-y-2">
+              <template x-for="b in profilPerso.biais || []" :key="b.id">
+                <div>
+                  <div class="flex items-center justify-between text-[10.5px]">
+                    <span class="text-slate-300" x-text="b.label"></span>
+                    <span class="mono" :class="b.valeur>=70?'text-rose-300':b.valeur>=40?'text-amber-300':'text-emerald-300'" x-text="b.valeur + '%'"></span>
+                  </div>
+                  <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
+                    <div class="h-full rounded-full transition-all duration-700" :class="b.valeur>=70?'bg-rose-500/70':b.valeur>=40?'bg-amber-500/70':'bg-emerald-500/70'" :style="'width:'+b.valeur+'%'"></div>
+                  </div>
+                  <p class="text-[8.5px] text-slate-600 leading-snug mt-0.5" x-text="b.explication"></p>
+                </div>
+              </template>
+              <template x-for="e in profilPerso.effets || []" :key="e.id">
+                <div>
+                  <div class="flex items-center justify-between text-[10.5px]">
+                    <span class="text-indigo-200/80" x-text="e.label"></span>
+                    <span class="mono text-indigo-300" x-text="e.valeur + '%'"></span>
+                  </div>
+                  <div class="h-2 bg-black/30 rounded-full overflow-hidden mt-0.5">
+                    <div class="h-full rounded-full bg-indigo-500/60 transition-all duration-700" :style="'width:'+e.valeur+'%'"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
         </div>
-        <div class="flex flex-wrap gap-1 mt-1.5" x-show="(profilPerso.rythme||{}).length">
-          <template x-for="(n, h) in profilPerso.rythme || {}" :key="h">
-            <span class="text-[8px] mono px-1 py-0.5 rounded bg-cyan-500/10 text-cyan-300/70" x-text="h+'h'"></span>
-          </template>
         </div>
       </div>
 
@@ -682,7 +688,7 @@
         <div class="absolute top-3 right-3 w-60 glass rounded-xl border border-cyan-500/25 p-2.5 pointer-events-none">
           <div class="flex items-center gap-1.5 mb-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-            <p class="text-[9px] uppercase tracking-[.16em] text-cyan-300/90">hud cognition · temps réel</p>
+            <p @click="brainZoom='hud'" class="text-[9px] uppercase tracking-[.16em] text-cyan-300/90 cursor-pointer hover:text-cyan-200" title="cliquer : vue détaillée + calibration">hud cognition · temps réel 🔍</p>
           </div>
           <template x-for="h in hud" :key="h.id">
             <div class="mb-1">
@@ -742,10 +748,177 @@
 
     <!-- ══ rangée 2 : simulation (scène + cerveau) · métriques 3D ══ -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <!-- 🔍 ZOOM : chaque sous-fenêtre du Cerveau s'agrandit (clic sur son titre) -->
+      <div x-show="brainZoom" x-transition.duration.200ms class="fixed inset-0 z-[70] flex items-center justify-center p-4" style="background:rgba(2,6,16,.72)">
+        <div class="glass rounded-2xl border border-cyan-500/25 w-[min(1020px,96vw)] max-h-[92vh] overflow-y-auto p-5 shadow-2xl win" @pointerdown="winDrag($event)">
+          <div class="flex items-center gap-2 mb-3 cursor-move">
+            <span class="text-lg">🧠</span>
+            <p class="text-[11px] uppercase tracking-[.16em] text-cyan-300/90 flex-1" x-text="brainZoom === 'hud' ? 'HUD cognition — vue détaillée' : 'Enaction — scène & cerveau, vue détaillée'"></p>
+            <span x-show="calib" class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">⚡ calibré</span>
+            <button @click="brainZoom=null" class="text-slate-500 hover:text-white text-sm">✕</button>
+          </div>
+
+          <!-- ZOOM HUD : processus détaillés + calibration -->
+          <div x-show="brainZoom==='hud'" class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-2.5">
+              <template x-for="h in hud" :key="h.id">
+                <div>
+                  <div class="flex items-center justify-between text-[11px]"><span class="text-slate-300" x-text="h.nom"></span><span class="mono" :style="'color:' + h.c" x-text="Math.round(h.v) + '%'"></span></div>
+                  <div class="h-2.5 bg-black/30 rounded-full overflow-hidden mt-1"><div class="h-full rounded-full transition-all" :style="'width:' + h.v + '%;background:' + h.c"></div></div>
+                  <svg class="w-full mt-1" style="height:26px" :viewBox="'0 0 200 26'" preserveAspectRatio="none"><polyline :points="sparkHist(h.id)" fill="none" :stroke="h.c" stroke-width="1.6" opacity=".85"></polyline></svg>
+                </div>
+              </template>
+              <p class="text-[9px] text-slate-600 border-t border-white/5 pt-2">chaque courbe = l'historique réel du processus (60 dernières mesures) · valeurs dérivées des zones cérébrales de la simulation, lissées</p>
+            </div>
+            <div class="space-y-3">
+              <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/[.04] p-3">
+                <p class="text-[10px] font-semibold text-emerald-300 mb-1">⚡ synchronisation neurale — calibration</p>
+                <p class="text-[9.5px] text-slate-400 leading-snug">les activations doivent venir de <b>vous</b>. Calibrez via : (1) des tests cognitifs réels (Posner, Stroop, rotation mentale, allocentré), (2) l'import de données extérieures (PDF de résultats, vidéo, son, musique), (3) des capteurs (BCI/gamepad/batterie détectés).</p>
+                <div class="flex gap-1.5 mt-2">
+                  <button @click="openCalib()" class="text-[10px] px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/25">⚡ calibrer maintenant</button>
+                  <span x-show="calib" class="text-[9px] text-slate-500 self-center mono" x-text="calib ? 'stroop ' + calib.stroop.ms + 'ms · ' + calib.stroop.acc + '% · posner ' + calib.posner.ms + 'ms' : ''"></span>
+                </div>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-white/[.02] p-3">
+                <p class="text-[9px] uppercase tracking-[.14em] text-slate-500 mb-1.5">ressources open source de comparaison</p>
+                <div class="flex flex-wrap gap-1">
+                  <a href="https://openneuro.org" target="_blank" rel="noopener" class="chip !text-[9px]">OpenNeuro (IRM/EEG ouverts)</a>
+                  <a href="https://osf.io" target="_blank" rel="noopener" class="chip !text-[9px]">OSF (préregistrations)</a>
+                  <a href="https://www.ncbi.nlm.nih.gov/pmc/" target="_blank" rel="noopener" class="chip !text-[9px]">PMC (littérature)</a>
+                </div>
+                <p class="text-[8.5px] text-slate-600 mt-1.5">comparaison aux bornes publiées : Posner ~250–400 ms · Stroop interférence ~+50–200 ms · rotation mentale ~1–3 s selon l'angle — vos temps réels sont mesurés ici, jamais inventés.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ZOOM SIM : perspectives + imagerie cérébrale -->
+          <div x-show="brainZoom==='sim'" class="space-y-4">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="text-[9px] uppercase tracking-[.14em] text-slate-600">perspective de la scène :</span>
+              <template x-for="v in [{id:'ego',l:'👁 ego (1ʳᵉ personne)'},{id:'exo',l:'🎥 exo (3ᵉ personne)'},{id:'allo',l:'🧭 allocentrique (carte)'}]" :key="v.id">
+                <button @click="setSimView(v.id)" class="chip" :class="simView===v.id && '!border-cyan-500/60 !text-cyan-300'" x-text="v.l"></button>
+              </template>
+              <span class="flex-1"></span>
+              <span class="text-[9px] uppercase tracking-[.14em] text-slate-600">imagerie du cerveau :</span>
+              <template x-for="m in [{id:'3d',l:'🧠 3D'},{id:'axial',l:'🍞 coupe axiale'},{id:'coronal',l:'🎽 coronale'},{id:'sagittal',l:'🗡 sagittale'},{id:'irm',l:'⚫ IRM (gris)'},{id:'pet',l:'🔥 PET-scan (gauss)'},{id:'2d',l:'🖼 projection 2D'}]" :key="m.id">
+                <button @click="imgMode=m.id; renderBrainImaging()" class="chip" :class="imgMode===m.id && '!border-violet-500/60 !text-violet-300'" x-text="m.l"></button>
+              </template>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="rounded-xl border border-white/10 bg-black/40 p-2 flex items-center justify-center">
+                <canvas id="brainImagingCanvas" width="440" height="440" class="max-w-full rounded-lg" style="background:#020617;image-rendering:pixelated"></canvas>
+              </div>
+              <div class="space-y-2">
+                <p class="text-[10px] text-slate-300 leading-snug" x-text="imgLegend()"></p>
+                <div class="rounded-xl border border-white/10 bg-white/[.02] p-3 space-y-1.5">
+                  <p class="text-[9px] uppercase tracking-[.14em] text-slate-500">zones actives (synchrones avec la scène)</p>
+                  <template x-for="r in simRegions" :key="r.id">
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] text-slate-300 w-24" x-text="r.nom"></span>
+                      <div class="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden"><div class="h-full rounded-full" :style="'width:' + r.v + '%;background:' + r.c"></div></div>
+                      <span class="mono text-[9px]" :style="'color:' + r.c" x-text="Math.round(r.v)"></span>
+                    </div>
+                  </template>
+                </div>
+                <button @click="openCalib()" class="w-full text-[10px] px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/25">⚡ calibrer les activations sur moi (tests réels / import / capteurs)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🧪 MODALE CALIBRATION (tests réels) -->
+      <div x-show="calibOpen" x-transition.duration.200ms class="fixed inset-0 z-[80] flex items-center justify-center p-4" style="background:rgba(2,6,16,.8)">
+        <div class="glass rounded-2xl border border-emerald-500/30 w-[min(640px,94vw)] max-h-[92vh] overflow-y-auto p-5 shadow-2xl">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-lg">🧪</span>
+            <p class="text-[11px] uppercase tracking-[.16em] text-emerald-300/90 flex-1">calibration — synchronisation neurale</p>
+            <span class="text-[9px] text-slate-500" x-text="'étape ' + (calibStep + 1) + ' / 6'"></span>
+            <button @click="calibOpen=false" class="text-slate-500 hover:text-white text-sm">✕</button>
+          </div>
+
+          <div x-show="calibStep===0" class="space-y-3">
+            <p class="text-[11px] text-slate-300 leading-relaxed">Pour que les activations du cerveau soient <b>les vôtres</b>, trois voies honnêtes — rien n'est inventé :</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button @click="calibStep=1" class="rounded-xl border border-cyan-500/25 bg-cyan-500/[.05] hover:bg-cyan-500/10 p-3 text-left"><span class="text-xl">🧪</span><p class="text-[10px] font-semibold text-cyan-200 mt-1">tests cognitifs réels</p><p class="text-[9px] text-slate-500">Posner · Stroop · rotation mentale · allocentré — vos temps mesurés</p></button>
+              <button @click="calibStep=4" class="rounded-xl border border-violet-500/25 bg-violet-500/[.05] hover:bg-violet-500/10 p-3 text-left"><span class="text-xl">📥</span><p class="text-[10px] font-semibold text-violet-200 mt-1">données extérieures</p><p class="text-[9px] text-slate-500">PDF de résultats, vidéo, son, musique — importés et conservés</p></button>
+              <button @click="calibStep=5" class="rounded-xl border border-amber-500/25 bg-amber-500/[.05] hover:bg-amber-500/10 p-3 text-left"><span class="text-xl">📡</span><p class="text-[10px] font-semibold text-amber-200 mt-1">capteurs</p><p class="text-[9px] text-slate-500">BCI · gamepad · batterie — détection réelle du navigateur</p></button>
+            </div>
+            <p class="text-[9px] text-slate-600">comparaison aux bornes publiées de la littérature (Posner 250–400 ms, Stroop +50–200 ms, rotation 1–3 s) — jamais de données fabriquées.</p>
+          </div>
+
+          <!-- tests -->
+          <div x-show="calibStep>=1 && calibStep<=3" class="space-y-3">
+            <p class="text-[10px] text-slate-400" x-text="calibIntro()"></p>
+            <div class="rounded-xl bg-black/50 border border-white/10 min-h-[190px] flex flex-col items-center justify-center gap-3 p-4">
+              <div x-show="calibTest && calibTest.kind==='stroop'" class="text-center space-y-3">
+                <p class="text-4xl font-bold" :style="'color:' + calibTest.ink" x-text="calibTest.word"></p>
+                <p class="text-[10px] text-slate-500">couleur de l'ENCRE (pas le mot)</p>
+                <div class="flex gap-1.5 justify-center flex-wrap">
+                  <template x-for="c in [{n:'rouge',h:'#f87171'},{n:'bleu',h:'#60a5fa'},{n:'vert',h:'#4ade80'},{n:'jaune',h:'#facc15'}]" :key="c.n">
+                    <button @click="calibAnswer(c.n)" class="text-[11px] px-3 py-1.5 rounded-lg border" :style="'border-color:' + c.h + ';color:' + c.h" x-text="c.n"></button>
+                  </template>
+                </div>
+              </div>
+              <div x-show="calibTest && calibTest.kind==='posner'" class="text-center space-y-3 w-full">
+                <p class="text-3xl mono" x-text="calibTest.display"></p>
+                <div class="flex justify-between w-full max-w-sm mx-auto text-4xl">
+                  <span x-show="calibTest.display.includes('✷') && calibTest.side==='L'" class="text-amber-300">✷</span>
+                  <span x-show="calibTest.display.includes('✷') && calibTest.side==='R'" class="text-amber-300">✷</span>
+                </div>
+                <p class="text-[10px] text-slate-500" x-text="calibTest.display.includes('✷') ? 'de quel côté ?' : 'fixez le ✚'"></p>
+                <div class="flex gap-2 justify-center"><button @click="calibAnswer('L')" class="text-xl px-5 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-200">←</button><button @click="calibAnswer('R')" class="text-xl px-5 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-200">→</button></div>
+              </div>
+              <div x-show="calibTest && calibTest.kind==='rotation'" class="text-center space-y-3">
+                <p class="text-6xl font-serif" :style="'transform:rotate(' + calibTest.angle + 'deg) scaleX(' + calibTest.mirror + ')'" x-text="'R'"></p>
+                <p class="text-[10px] text-slate-500">cette lettre est-elle normale ou en miroir ?</p>
+                <div class="flex gap-2 justify-center"><button @click="calibAnswer('normal')" class="text-[11px] px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-200">normal</button><button @click="calibAnswer('miroir')" class="text-[11px] px-3 py-1.5 rounded-lg border border-cyan-500/40 text-cyan-200">miroir</button></div>
+              </div>
+              <div x-show="calibTest && calibTest.kind==='allo'" class="text-center space-y-2">
+                <svg viewBox="0 0 200 160" class="w-56 mx-auto rounded-lg" style="background:rgba(255,255,255,.02)">
+                  <g :transform="'translate(100,80) rotate(' + calibTest.avatar + ')'"><polygon points="0,-16 10,10 -10,10" fill="#67e8f9"></polygon></g>
+                  <circle :cx="100 + calibTest.dx" :cy="80 + calibTest.dy" r="8" fill="#fbbf24"></circle>
+                </svg>
+                <p class="text-[10px] text-slate-500">le triangle regarde vers le haut de sa flèche — où est le point <b>par rapport à lui</b> ?</p>
+                <div class="flex gap-1.5 justify-center flex-wrap">
+                  <template x-for="d in [{id:'N',l:'devant ↑'},{id:'E',l:'droite →'},{id:'S',l:'derrière ↓'},{id:'W',l:'gauche ←'}]" :key="d.id">
+                    <button @click="calibAnswer(d.id)" class="text-[11px] px-3 py-1.5 rounded-lg border border-violet-500/40 text-violet-200" x-text="d.l"></button>
+                  </template>
+                </div>
+              </div>
+              <p class="text-[9px] text-slate-600 mono" x-text="calibTest ? ('essai ' + (calibTest.i + 1) + ' / ' + calibTest.n) : ''"></p>
+            </div>
+            <p x-show="calibMsg" class="text-[10px] text-emerald-300" x-text="calibMsg"></p>
+          </div>
+
+          <!-- import -->
+          <div x-show="calibStep===4" class="space-y-3">
+            <p class="text-[11px] text-slate-300">Importez toute donnée extérieure qui vous représente : PDF de résultats de tests, vidéo, son, musique, image. Elle est conservée dans la mémoire du système (source : vous) — l'analyse approfondie est faite par Uranus ♅.</p>
+            <input type="file" @change="calibImport($event)" class="text-[11px] text-slate-300 w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2">
+            <p x-show="calibMsg" class="text-[10px] text-emerald-300" x-text="calibMsg"></p>
+            <button @click="calibStep=5" class="text-[10px] px-2.5 py-1.5 rounded-lg bg-white/[.04] border border-white/10 text-slate-300">continuer →</button>
+          </div>
+
+          <!-- capteurs -->
+          <div x-show="calibStep===5" class="space-y-3">
+            <p class="text-[11px] text-slate-300">Capteurs détectés par le navigateur (détection réelle, aucun simulé) :</p>
+            <div id="calibSensors" class="rounded-xl bg-black/40 border border-white/10 p-3 text-[10px] text-slate-400 mono space-y-1">détection…</div>
+            <button @click="calibFinish()" class="w-full text-[11px] px-3 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 hover:bg-emerald-500/25">✓ terminer la calibration</button>
+          </div>
+
+          <!-- résultats -->
+          <div x-show="calibStep===6" class="space-y-3">
+            <p class="text-[11px] text-emerald-300 font-semibold">⚡ calibration enregistrée — les activations sont synchronisées sur vous.</p>
+            <div class="rounded-xl bg-black/40 border border-white/10 p-3 text-[10px] text-slate-300 mono space-y-1" x-html="calibRes"></div>
+            <button @click="calibOpen=false; brainZoom='hud'" class="text-[10px] px-2.5 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-200">voir le HUD synchronisé →</button>
+          </div>
+        </div>
+      </div>
+
       <!-- 🎬 FENÊTRE SIMULATION : vous regardez un film de peur · le cerveau s'illumine -->
       <div class="glass-card rounded-2xl p-4 holo-frame">
         <div class="flex items-center justify-between mb-2">
-          <h3 class="text-xs font-semibold flex items-center"><span class="mr-1.5" x-text="(simCases.find(c=>c.id===simCaseId)||{}).icon || '🎬'"></span>Simulation — <span x-text="(simCases.find(c=>c.id===simCaseId)||{}).nom || 'film d\'horreur'"></span></h3>
+          <h3 @click="brainZoom='sim'" class="text-xs font-semibold flex items-center cursor-pointer hover:text-cyan-200" title="cliquer : perspectives ego/exo/allocentrique + imagerie (IRM, PET, coupes)"><span class="mr-1.5" x-text="(simCases.find(c=>c.id===simCaseId)||{}).icon || '🎬'"></span>Simulation — <span x-text="(simCases.find(c=>c.id===simCaseId)||{}).nom || 'film d\'horreur'"></span> 🔍</h3>
           <span class="text-[8.5px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/25">cas de simulation · cerveau en direct</span>
         </div>
         <div class="flex flex-wrap gap-1 mb-2">
@@ -1101,8 +1274,31 @@
 
   <!-- ══════════ TIMELINE ══════════ -->
   <section x-show="activeTab==='timeline'" class="space-y-4 fade-in">
-    <h2 class="text-lg font-bold">Frise Chronologique</h2>
-    <div class="glass-card rounded-xl p-4 overflow-x-auto"><div id="timelineSvg" style="min-height:380px"></div></div>
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div>
+        <h2 class="text-lg font-bold">Frise multimodale</h2>
+        <p class="text-[10px] text-slate-600">l'évolution de <b>vous</b> dans le système : études lues, concepts, mémoires, runs de recherche — filtrez, changez de mode</p>
+      </div>
+      <div class="flex flex-wrap gap-1">
+        <template x-for="m in [{id:'frise',l:' chronological frise'},{id:'densite',l:'📊 densité'},{id:'cumul',l:'📈 cumul'}]" :key="m.id">
+          <button @click="tlMode=m.id; renderTimelineMulti()" class="chip" :class="tlMode===m.id && '!border-cyan-500/60 !text-cyan-300'" x-text="m.l"></button>
+        </template>
+      </div>
+    </div>
+    <div class="glass-card rounded-xl p-3 flex flex-wrap items-center gap-1.5">
+      <span class="text-[9px] uppercase tracking-[.12em] text-slate-600 mr-1">filtres :</span>
+      <template x-for="f in tlCats" :key="f.id">
+        <button @click="f.on=!f.on; renderTimelineMulti()" class="chip" :style="'border-color:' + (f.on ? f.c : '#334155') + ';color:' + (f.on ? f.c : '#64748b')" x-text="f.ic + ' ' + f.l + ' (' + (tlData.filter(d => d.cat === f.id).length) + ')'"></button>
+      </template>
+      <span class="flex-1"></span>
+      <span class="text-[9px] text-slate-600">compétences :</span>
+      <template x-for="s in [{id:'hard',l:'⚙ hard skills',c:'#38bdf8'},{id:'soft',l:'🤝 soft skills',c:'#f472b6'},{id:'cogn',l:'🧠 cognitives',c:'#a78bfa'}]" :key="s.id">
+        <button @click="tlSkill=s.id; renderTimelineMulti()" class="chip" :style="'border-color:' + (tlSkill===s.id ? s.c : '#334155') + ';color:' + (tlSkill===s.id ? s.c : '#64748b')" x-text="s.l"></button>
+      </template>
+      <button @click="tlSkill='all'; renderTimelineMulti()" class="chip" :style="tlSkill==='all' ? 'border-color:#94a3b8;color:#e2e8f0' : ''">toutes</button>
+    </div>
+    <div class="glass-card rounded-xl p-4 overflow-x-auto"><div id="timelineMulti" style="min-height:360px"></div></div>
+    <p class="text-[9px] text-slate-600" x-text="tlResume"></p>
   </section>
 
   <!-- ══════════ MODULE SRL ══════════ -->
@@ -1132,10 +1328,11 @@
 </main>
 
 <!-- ══════════ ✳ CHAT GLOBAL — Laplace partout, au-dessus du dock ══════════ -->
-<div x-show="chatOpen && !dockFx && !dockOpt" class="fixed bottom-[76px] left-1/2 -translate-x-1/2 z-40 w-[min(660px,88vw)] glass rounded-2xl border border-violet-500/25 shadow-2xl shadow-black/50 overflow-hidden win">
+<div x-show="chatOpen && !dockFx && !dockOpt" class="mg-ghost fixed bottom-[76px] left-1/2 -translate-x-1/2 z-40 w-[min(412px,88vw)] glass rounded-2xl border border-violet-500/25 shadow-2xl shadow-black/50 overflow-hidden win">
   <div @pointerdown="winDrag($event)" class="flex items-center gap-2 px-3 py-1.5 border-b border-white/5 cursor-move select-none">
     <span class="text-sm leading-none">✳</span>
-    <span class="text-[10px] font-semibold text-violet-200 flex-1">Laplace — partout, en contexte</span>
+    <span class="text-[10px] font-semibold text-violet-200 flex-1">Laplace</span>
+    <span class="text-[8.5px] text-slate-500 truncate max-w-[190px]" title="où vous êtes, depuis l'accueil">📂 <span x-text="whereAmI()"></span></span>
     <button @click="chatMsgs=[]" class="text-[9px] text-slate-500 hover:text-slate-300">effacer</button>
     <button @click="chatOpen=false" class="text-slate-500 hover:text-white text-xs">✕</button>
   </div>
@@ -1149,7 +1346,7 @@
     <button @click="sendChat()" :disabled="chatBusy || !chatInput.trim()" class="text-[10px] px-3 py-1.5 rounded-lg bg-violet-500/15 border border-violet-500/40 text-violet-200 hover:bg-violet-500/25 disabled:opacity-40" x-text="chatBusy ? '…' : '➤'"></button>
   </div>
 </div>
-<button x-show="!chatOpen && !dockFx && !dockOpt" @click="chatOpen=true" class="fixed bottom-[76px] left-1/2 -translate-x-1/2 z-40 glass rounded-full border border-violet-500/30 px-4 py-1.5 text-[10.5px] text-violet-200 shadow-lg hover:bg-violet-500/10 transition">✳ Laplace</button>
+<button x-show="!chatOpen && !dockFx && !dockOpt" @click="chatOpen=true" class="mg-ghost fixed bottom-[76px] left-1/2 -translate-x-1/2 z-40 glass rounded-full border border-violet-500/30 px-4 py-1.5 text-[10.5px] text-violet-200 shadow-lg hover:bg-violet-500/10 transition">✳ Laplace</button>
 
 <!-- ══════════ 🧭 DOCK MOBIGLAS — ACCUEIL · FONCTION · PARAMÈTRES ══════════ -->
 <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 glass rounded-2xl border border-white/10 px-2 py-1.5 shadow-2xl shadow-black/60">
@@ -1306,6 +1503,9 @@ function app() {
     srlData:{session_id:'s-'+Math.random().toString(36).slice(2,8),objective:'',criteria:'',constraints:'',ai_query:'',ai_response:'',evaluation:'',confidence:75,action_plan:''},
 
     async init(){
+      try { this.calib = JSON.parse(localStorage.getItem('cognitorium.calib') || 'null'); } catch (e) {}
+      setInterval(() => { if (this.brainZoom === 'sim' && this.imgMode !== '3d') this.renderBrainImaging(); }, 500);
+      this.$watch('calibStep', v => { if (v >= 1 && v <= 3 && !this.calibTest) this.calibNextTest(); if (v === 5) this.calibDetectSensors(); });
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();this.loadBio();});
       this.loadUnivers().then(()=>setTimeout(()=>this.initUnivers(),300));
@@ -1399,8 +1599,30 @@ function app() {
 
       const bodies = this.univers, by = Object.fromEntries(bodies.map(b => [b.id, b]));
       const moonPivots = [], hoverables = [], uMoons = [], uCourts = [], uRings = [], uNebSats = [];
-      let uNeb = null; const uGrp = {}, uMesh = {};
+      let uNeb = null, uLaplaceGrp = null, uLaplaceShell = null; const uGrp = {}, uMesh = {};
       const clickable = [], orbitLines = [], labels = [], spinners = [];
+
+      // 🎨 textures procédurales — les astres au plus proche du réel (sans image externe)
+      const makeTex = (id, colHex) => {
+        const c = document.createElement('canvas'); c.width = 128; c.height = 64;
+        const x = c.getContext('2d');
+        const col = new THREE.Color(colHex || '#94a3b8'); const hsl = {}; col.getHSL(hsl);
+        const hslFill = l => 'hsl(' + Math.round(hsl.h * 360) + ',' + Math.round(hsl.s * 100) + '%,' + Math.round(Math.max(8, Math.min(92, l))) + '%)';
+        if (id === 'terre') {                                    // océans, continents, nuages
+          x.fillStyle = '#1d4ed8'; x.fillRect(0, 0, 128, 64);
+          for (let i = 0; i < 26; i++) { x.fillStyle = Math.random() < .75 ? '#15803d' : '#c8b07a'; x.beginPath(); x.ellipse(Math.random() * 128, Math.random() * 64, 2 + Math.random() * 7, 1.5 + Math.random() * 4, 0, 0, 7); x.fill(); }
+          x.fillStyle = 'rgba(255,255,255,.45)'; for (let i = 0; i < 9; i++) { x.beginPath(); x.ellipse(Math.random() * 128, Math.random() * 64, 5 + Math.random() * 6, 2, 0, 0, 7); x.fill(); }
+        } else if (['jupiter', 'uranus', 'neptune'].includes(id)) {   // géantes : bandes horizontales
+          for (let i = 0; i < 64; i++) {
+            const l = hsl.l * 100 * (.62 + .38 * Math.abs(Math.sin(i * (id === 'jupiter' ? .55 : .22) + 1))) + (Math.random() - .5) * 9;
+            x.fillStyle = hslFill(l); x.fillRect(0, i, 128, 1);
+          }
+        } else {                                                 // telluriques : manteaux bruités
+          x.fillStyle = hslFill(hsl.l * 100); x.fillRect(0, 0, 128, 64);
+          for (let i = 0; i < 850; i++) { x.fillStyle = hslFill(hsl.l * 100 * (.72 + Math.random() * .56)); x.fillRect(Math.random() * 128, Math.random() * 64, 2, 2); }
+        }
+        return new THREE.CanvasTexture(c);
+      };
 
       // ☉ SOL au centre
       const sunGrp = new THREE.Group(); root.add(sunGrp);
@@ -1436,7 +1658,7 @@ function app() {
         const pivot = addOrbite(r, tilt, new THREE.Color(b.color || '#94a3b8').getHex());
         const col = new THREE.Color(b.color || '#94a3b8');
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 28, 28),
-          new THREE.MeshStandardMaterial({ color: col, roughness: .55, metalness: .25, emissive: col, emissiveIntensity: .18 }));
+          new THREE.MeshStandardMaterial({ color: 0xffffff, map: makeTex(b.id, b.color), roughness: .62, metalness: .18, emissive: col, emissiveIntensity: .1 }));
         mesh.position.x = r; pivot.add(mesh); spinners.push(mesh);
         if (b.id === 'terre') { const glow = mkGlow('rgba(56,189,248,1)', 34); glow.position.x = r; pivot.add(glow); }
         const lbl = mkLabel(b.symbol + ' ' + b.name, b.color || '#cbd5e1');
@@ -1465,6 +1687,14 @@ function app() {
           cm.userData.tip = m.name; hoverables.push(cm); uCourts.push(cm);
           moonPivots.push({ p: cp, w: .55 / Math.sqrt(cr) });
         });
+        // ⚛ atomes kepleriens autour de Sebas (l'exécuteur outille en permanence)
+        if (b.id === 'sebas') for (let ai = 0; ai < 3; ai++) {
+          const ap = new THREE.Group(); ap.position.x = r; ap.rotation.x = .5 + ai * .4; pivot.add(ap);
+          const at = new THREE.Mesh(new THREE.OctahedronGeometry(1.1),
+            new THREE.MeshStandardMaterial({ color: 0x67e8f9, emissive: 0x22d3ee, emissiveIntensity: .8, wireframe: true }));
+          at.position.x = size + 2.5 + ai * 1.8; ap.add(at);
+          moonPivots.push({ p: ap, w: 1.9 - ai * .5 });
+        }
         // 💍 anneaux des géantes
         if (['jupiter', 'uranus', 'neptune'].includes(b.id)) {
           const ring = new THREE.Mesh(new THREE.RingGeometry(size + 2.4, size + 4.8, 72),
@@ -1483,33 +1713,57 @@ function app() {
       if (by.themis) tours.push(addCorps(by.themis, 62 + planets.length * 27, -.14, 5)); // la justice, dernière orbite
       if (by.ananke) tours.push(addCorps(by.ananke, 62 + (planets.length + 1) * 27, .42, 4.4)); // le destin, incliné
       if (by.laplace) {
-        // ✳ Laplace : nébuleuse violette enveloppant le système — l'interlocuteur
-        const r = 62 + (planets.length + 2) * 27, pivot = addOrbite(r, .3, 0x8b5cf6);
-        const n = 420, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
-        for (let i = 0; i < n; i++) {
-          pos[i*3] = r + (Math.random() - .5) * 46; pos[i*3+1] = (Math.random() - .5) * 34; pos[i*3+2] = (Math.random() - .5) * 46;
-          const v = Math.random(); col[i*3] = .55 + v * .3; col[i*3+1] = .35 + v * .25; col[i*3+2] = .95;
+        // ✳ Laplace n'orbite PAS le soleil : sa nébuleuse ENVELOPPE tout le système,
+        // son noyau veille au-dessus de l'écliptique, ses satellites orbitent LE noyau.
+        const lgrp = new THREE.Group(); root.add(lgrp); uGrp.laplace = lgrp;
+        const n = 900, pos = new Float32Array(n * 3), col2 = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++) {                       // coque enveloppante
+          const r = 330 + Math.random() * 110, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+          pos[i*3] = r * Math.sin(ph) * Math.cos(th); pos[i*3+1] = r * Math.cos(ph) * .72; pos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+          const v = Math.random(); col2[i*3] = .5 + v * .32; col2[i*3+1] = .32 + v * .26; col2[i*3+2] = .95;
         }
-        const g = new THREE.BufferGeometry();
-        g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-        const neb = new THREE.Points(g, new THREE.PointsMaterial({ size: 2.6, vertexColors: true, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false }));
-        uNeb = neb; pivot.add(neb);
-        const lbl = mkLabel('✳ Laplace — votre interlocuteur', '#c4b5fd'); lbl.position.set(r, 21, 0); pivot.add(lbl); labels.push(lbl);
-        const hit = new THREE.Mesh(new THREE.SphereGeometry(20, 10, 10), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
-        hit.position.x = r; hit.userData.id = 'laplace'; pivot.add(hit); clickable.push(hit);
-        uGrp.laplace = pivot; uMesh.laplace = hit;
-        // ✦ Métatron et les satellites de la nébuleuse
-        (by.laplace.satellites || []).forEach((s, si) => {
-          const mp = new THREE.Group(); pivot.add(mp);
-          const mm = new THREE.Mesh(new THREE.OctahedronGeometry(1.7),
+        const shellGeo = new THREE.BufferGeometry();
+        shellGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        shellGeo.setAttribute('color', new THREE.BufferAttribute(col2, 3));
+        const shell = new THREE.Points(shellGeo, new THREE.PointsMaterial({ size: 2.1, vertexColors: true, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
+        lgrp.add(shell); uNeb = shell;
+        const CORE = new THREE.Vector3(0, 172, 0);          // noyau de la nébuleuse
+        const nc = 260, np2 = new Float32Array(nc * 3), cc2 = new Float32Array(nc * 3);
+        for (let i = 0; i < nc; i++) {
+          const r = 8 + Math.random() * 26, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+          np2[i*3] = CORE.x + r * Math.sin(ph) * Math.cos(th); np2[i*3+1] = CORE.y + r * Math.cos(ph); np2[i*3+2] = CORE.z + r * Math.sin(ph) * Math.sin(th);
+          const v = Math.random(); cc2[i*3] = .6 + v * .3; cc2[i*3+1] = .4 + v * .25; cc2[i*3+2] = 1;
+        }
+        const coreGeo = new THREE.BufferGeometry();
+        coreGeo.setAttribute('position', new THREE.BufferAttribute(np2, 3));
+        coreGeo.setAttribute('color', new THREE.BufferAttribute(cc2, 3));
+        lgrp.add(new THREE.Points(coreGeo, new THREE.PointsMaterial({ size: 2.8, vertexColors: true, transparent: true, opacity: .85, blending: THREE.AdditiveBlending, depthWrite: false })));
+        const lbl = mkLabel('✳ Laplace — votre interlocuteur', '#c4b5fd'); lbl.position.copy(CORE).add(new THREE.Vector3(0, 30, 0)); lgrp.add(lbl); labels.push(lbl);
+        const hit = new THREE.Mesh(new THREE.SphereGeometry(26, 12, 12), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+        hit.position.copy(CORE); hit.userData.id = 'laplace'; lgrp.add(hit); clickable.push(hit);
+        uMesh.laplace = hit;
+        uLaplaceGrp = lgrp; uLaplaceShell = shell; uLaplaceSats = [];
+        (by.laplace.satellites || []).forEach((s, si) => {   // Métatron ✦ & co : orbitent le NOYAU
+          const mp = new THREE.Group(); mp.position.copy(CORE); mp.rotation.x = .3 + si * .5; lgrp.add(mp);
+          const mm = new THREE.Mesh(new THREE.OctahedronGeometry(2.4),
             new THREE.MeshStandardMaterial({ color: 0x67e8f9, emissive: 0x22d3ee, emissiveIntensity: .95, wireframe: true }));
-          mm.position.x = r + 15 + si * 7; mp.add(mm);
+          mm.position.x = 36 + si * 12; mp.add(mm);
           mm.userData.tip = s.name; hoverables.push(mm); uNebSats.push(mm);
-          moonPivots.push({ p: mp, w: .38 });
+          moonPivots.push({ p: mp, w: .32 - si * .04 });
         });
-        tours.push({ pivot, r, w: (30 / r) * .3 });
       }
+      // 🏆 chariot d'Apollon — orbite excentrique inclinée autour de SOL (divination)
+      const apollonPivot = new THREE.Group(); apollonPivot.rotation.x = .38; root.add(apollonPivot);
+      const apollon = new THREE.Mesh(new THREE.OctahedronGeometry(1.9),
+        new THREE.MeshStandardMaterial({ color: 0xfcd34d, emissive: 0xf59e0b, emissiveIntensity: 1, wireframe: true }));
+      apollon.position.set(47, 0, 0); apollonPivot.add(apollon);
+      apollon.userData.tip = 'Apollon 🏆 — chariot des divinations'; hoverables.push(apollon);
+      // 💍 anneau de sélection (comme /sol)
+      const selRing = new THREE.Mesh(new THREE.RingGeometry(1, 1.14, 48),
+        new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: .9 }));
+      selRing.visible = false; root.add(selRing);
+      let selUni = null;
+
       const planetKind = {}; planets.forEach(b => planetKind[b.id] = true);
       const planetGrps = planets.map(b => { const g = uGrp[b.id]; if (g) g.userData.bid = b.id; return g; });
 
@@ -1517,14 +1771,22 @@ function app() {
       if (by.terre) {
         const ti = planets.findIndex(p => p.id === 'terre'), tp = tours[ti];
         if (tp) {
+          // 🕴 vous : INDICATEUR verrouillé au-dessus de la Terre (plus d'orbite lunaire)
           const uGrpUser = new THREE.Group(); tp.pivot.add(uGrpUser);
-          const you = new THREE.Mesh(new THREE.OctahedronGeometry(2.3),
+          const you = new THREE.Mesh(new THREE.OctahedronGeometry(1.8),
             new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 1.1, wireframe: true }));
           uGrpUser.add(you); spinners.push(you);
-          const yGlow = mkGlow('rgba(34,211,238,1)', 14); uGrpUser.add(yGlow);
-          const lbl = mkLabel('🕴 vous', '#67e8f9'); uGrpUser.add(lbl); labels.push(lbl);
+          const yGlow = mkGlow('rgba(34,211,238,1)', 11); uGrpUser.add(yGlow);
+          const beacon = new THREE.Mesh(new THREE.RingGeometry(3.1, 3.5, 40),
+            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: .7, side: THREE.DoubleSide }));
+          uGrpUser.add(beacon);
+          const tige = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, 4.4, 6),
+            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: .5 }));
+          tige.position.y = -4.4; uGrpUser.add(tige);
+          const lbl = mkLabel('🕴 vous', '#67e8f9'); lbl.position.y = 6.5; uGrpUser.add(lbl); labels.push(lbl);
+          uGrpUser.position.set(tp.r, 14.2, 0);            // scellé AU-DESSUS de la Terre
           uGrp.user = uGrpUser; uMesh.user = you;
-          self._uniYou = { mesh: you, glow: yGlow, lbl, r: tp.r, a: 0 };
+          self._uniYou = { grp: uGrpUser, beacon, baseY: 14.2 };
         }
       }
 
@@ -1597,8 +1859,8 @@ function app() {
           ptr.x = (e.clientX / innerWidth) * 2 - 1; ptr.y = -(e.clientY / innerHeight) * 2 + 1;
           ray.setFromCamera(ptr, cam);
           const hit = ray.intersectObjects(clickable, false)[0];
-          if (hit) self.uniFiche(hit.object.userData.id);
-          else followObj = null;
+          if (hit) { selUni = hit.object; selRing.visible = true; self.uniFiche(hit.object.userData.id); }
+          else { followObj = null; selUni = null; selRing.visible = false; }
         }
         panning = false;
       });
@@ -1619,16 +1881,26 @@ function app() {
       const loop = () => {
         if (!document.getElementById('universCanvas')) { self._uniOn = false; return; }
         const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
-        const v = self.uSpeed;
-        for (const t of tours) t.pivot.rotation.y += t.w * dt * v;
-        for (const m of moonPivots) m.p.rotation.y += m.w * dt * Math.max(v, .15);
+        const v = self.uSpeed, awake = self.uLightOn !== false;
+        if (awake) {                                            // 💡 light OFF : le monde est gelé
+          for (const t of tours) t.pivot.rotation.y += t.w * dt * v;
+          for (const m of moonPivots) m.p.rotation.y += m.w * dt * Math.max(v, .15);
+        }
         for (const m of spinners) m.rotation.y += .35 * dt * Math.max(v, .15);
-        if (self._uniYou) {
-          const y = self._uniYou; y.a += dt * v * 1.4;
-          const R = 11;
-          y.mesh.position.set(y.r + Math.cos(y.a) * R, Math.sin(y.a * .6) * 3.4, Math.sin(y.a) * R);
-          y.glow.position.copy(y.mesh.position);
-          y.lbl.position.set(y.mesh.position.x, 7.5, y.mesh.position.z);
+        apollonPivot.rotation.y -= .28 * dt * Math.max(v, .15);   // 🏆 le chariot continue (divinité)
+        if (uLaplaceShell) uLaplaceShell.rotation.y += .012 * dt;  // ✳ la nébuleuse respire toujours
+        if (self._uniYou) {                                       // 🕴 pin indicateur : légère respiration
+          const y = self._uniYou;
+          y.grp.position.y = y.baseY + Math.sin(now / 900) * .7;
+          y.beacon.scale.setScalar(1 + .18 * Math.sin(now / 500));
+          y.beacon.material.opacity = .45 + .35 * Math.abs(Math.sin(now / 650));
+        }
+        if (selUni && selRing.visible) {                          // 💍 anneau collé à l'astre sélectionné
+          selUni.getWorldPosition(followV);
+          selRing.position.copy(followV);
+          selRing.quaternion.copy(cam.quaternion);
+          const rr = Math.max(7, ((selUni.geometry && selUni.geometry.parameters && selUni.geometry.parameters.radius) || 8) * 2.1);
+          selRing.scale.setScalar(rr);
         }
         // 👁 AFFICHAGE : layers + astres
         starsPts.visible = self.uLayer.etoiles;
@@ -1656,6 +1928,248 @@ function app() {
         requestAnimationFrame(loop);
       };
       loop();
+    },
+
+    async loadTimelineMulti() {
+      if (this.tlData.length) { this.renderTimelineMulti(); return; }
+      const out = [];
+      const j = async u => { try { return await (await fetch(u)).json(); } catch (e) { return null; } };
+      for (const r of (await j('/api/timeline')) || []) out.push({t: (r.annee || 2020) + '-06-01', cat: 'etudes', label: r.reference_courte || r.theme || 'étude', trust: r.trust_factor});
+      for (const c of (await j('/api/concepts')) || []) if (c.created_at) out.push({t: String(c.created_at).slice(0, 10), cat: 'concepts', label: c.nom || c.label || 'concept'});
+      for (const m of ((await j('/api/cosmos/memory?limit=500')) || {}).items || []) out.push({t: (m.ts || '').slice(0, 10), cat: 'memoires', label: m.titre || m.type, tags: m.tags});
+      for (const r of (await j('/api/agent/runs')) || []) if (r.created_at) out.push({t: String(r.created_at).slice(0, 10), cat: 'runs', label: r.task || r.objective || 'run'});
+      this.tlData = out.filter(d => d.t && d.t >= '0');
+      this.renderTimelineMulti();
+    },
+
+    skillOf(d) {
+      const s = ((d.label || '') + ' ' + (d.tags || '')).toLowerCase();
+      if (/commun|équipe|equipe|présentation|collabor|écoute|leadership|organi/.test(s)) return 'soft';
+      if (/attention|mémoire|raison|cognit|biais|métacogn|inhibition|charge/.test(s)) return 'cogn';
+      return 'hard';
+    },
+
+    renderTimelineMulti() {
+      const el = document.getElementById('timelineMulti'); if (!el) return;
+      const cats = Object.fromEntries(this.tlCats.map(c => [c.id, c]));
+      let data = this.tlData.filter(d => cats[d.cat] && cats[d.cat].on);
+      if (this.tlSkill !== 'all') data = data.filter(d => this.skillOf(d) === this.tlSkill);
+      data.sort((a, b) => a.t < b.t ? -1 : 1);
+      if (!data.length) { el.innerHTML = '<p class="text-[10px] text-slate-600 p-6 text-center">aucun élément — activez des filtres</p>'; this.tlResume = ''; return; }
+      const t0 = new Date(data[0].t), t1 = new Date(data[data.length - 1].t);
+      const span = Math.max(1, t1 - t0);
+      const W = 980, H = 340, L = 40, R = 20, T = 26, B = 40;
+      const x = ts => L + (new Date(ts) - t0) / span * (W - L - R);
+      let g = `<svg viewBox="0 0 ${W} ${H}" class="w-full" style="min-height:340px">`;
+      const years = new Set(data.map(d => d.t.slice(0, 4)));
+      for (const y of years) { const xx = x(y + '-06-01'); g += `<line x1="${xx}" y1="${T}" x2="${xx}" y2="${H - B}" stroke="rgba(255,255,255,.06)"/><text x="${xx}" y="${H - B + 14}" font-size="9" fill="#64748b" text-anchor="middle">${y}</text>`; }
+      if (this.tlMode === 'frise') {
+        const lanes = this.tlCats.filter(c => c.on);
+        lanes.forEach((c, li) => {
+          const y = T + 14 + li * ((H - T - B - 20) / Math.max(1, lanes.length - 1 || 1));
+          g += `<line x1="${L}" y1="${y}" x2="${W - R}" y2="${y}" stroke="${c.c}" stroke-opacity=".18"/>`;
+          g += `<text x="${L - 6}" y="${y + 3}" font-size="9" fill="${c.c}" text-anchor="end">${c.ic}</text>`;
+          data.filter(d => d.cat === c.id).forEach(d => {
+            g += `<circle cx="${x(d.t)}" cy="${y}" r="4" fill="${c.c}" fill-opacity=".8"><title>${d.t} · ${String(d.label).slice(0, 70)}</title></circle>`;
+          });
+        });
+      } else {
+        const byMonth = {};
+        data.forEach(d => { const k = d.t.slice(0, 7); byMonth[k] = (byMonth[k] || 0) + 1; });
+        const keys = Object.keys(byMonth).sort();
+        const max = Math.max(...Object.values(byMonth), 1);
+        let cum = 0;
+        const bw = Math.max(2, (W - L - R) / Math.max(keys.length, 1) - 1);
+        keys.forEach((k, i) => {
+          cum += byMonth[k];
+          const xx = L + i * ((W - L - R) / keys.length);
+          if (this.tlMode === 'densite') {
+            const hh = byMonth[k] / max * (H - T - B);
+            g += `<rect x="${xx}" y="${H - B - hh}" width="${bw}" height="${hh}" fill="#22d3ee" fill-opacity=".55"><title>${k} : ${byMonth[k]}</title></rect>`;
+          } else {
+            const hh = cum / data.length * (H - T - B);
+            g += `<rect x="${xx}" y="${H - B - hh}" width="${bw}" height="${hh}" fill="#818cf8" fill-opacity=".45"><title>${k} · cumul ${cum}</title></rect>`;
+          }
+        });
+      }
+      g += '</svg>';
+      el.innerHTML = g;
+      const bySkill = {hard: 0, soft: 0, cogn: 0};
+      data.forEach(d => bySkill[this.skillOf(d)]++);
+      this.tlResume = `${data.length} éléments affichés · du ${data[0].t} au ${data[data.length - 1].t} · compétences : ⚙ ${bySkill.hard} hard · 🤝 ${bySkill.soft} soft · 🧠 ${bySkill.cogn} cognitives — survolez les points pour les lire, cliquez les filtres pour recadrer.`;
+    },
+
+    sparkHist(id) {
+      const h = (this._hudHist || {})[id] || [];
+      if (h.length < 2) return '0,13 200,13';
+      return h.map((v, i) => (i / (h.length - 1)) * 200 + ',' + (26 - v / 100 * 24)).join(' ');
+    },
+
+    imgLegend() {
+      return {
+        axial: '🍞 coupe axiale (vue de dessus) — projection réelle des ~3 000 points du cerveau de simulation sur le plan horizontal, pondérée par l\'activation de chaque zone.',
+        coronal: '🎽 coupe coronale (face) — projection frontale des points, activations en surbrillance.',
+        sagittal: '🗡 coupe sagittale (profil) — projection latérale des points.',
+        irm: '⚫ IRM (structure) — même projection en échelle de gris : la densité tissulaire simulée, sans activation.',
+        pet: '🔥 PET-scan — activation métabolique : chaque point pondéré par la valeur réelle de sa zone (gaussien lissé), comme une carte de consommation.',
+        '2d': '🖼 projection 2D brute — la densité de points elle-même, sans habillage.',
+        '3d': '🧠 la vue 3D interactive (fermez ce zoom pour la manipuler).'
+      }[this.imgMode] || '';
+    },
+
+    renderBrainImaging() {
+      const cv = document.getElementById('brainImagingCanvas'); if (!cv) return;
+      const ctx = cv.getContext('2d');
+      const raw = this._simRaw;
+      const N = 110, grid = new Float32Array(N * N);
+      let ma = 1;
+      if (raw && raw.pos && raw.pos.length) {
+        const acts = {}; (this.simRegions || []).forEach(r => acts[r.id] = (r.v || 0) / 100);
+        const project = {axial: (x, y, z) => [x, z], coronal: (x, y, z) => [x, y], sagittal: (x, y, z) => [z, y]}[this.imgMode] || ((x, y, z) => [x, z]);
+        const pet = this.imgMode === 'pet', irm = this.imgMode === 'irm';
+        for (let i = 0; i < raw.pos.length; i += 3) {
+          const [a, b] = project(raw.pos[i], raw.pos[i + 1], raw.pos[i + 2]);
+          const gx = Math.floor((a / 1.3 + .5) * (N - 1)), gy = Math.floor(((-b / 1.3) + .5) * (N - 1));
+          if (gx >= 0 && gx < N && gy >= 0 && gy < N) {
+            const w = pet ? (.25 + (acts[raw.reg[i / 3]] || 0) * 1.6) : 1;
+            grid[gy * N + gx] += w;
+            if (grid[gy * N + gx] > ma) ma = grid[gy * N + gx];
+          }
+        }
+        void irm; void pet;
+      }
+      const img = ctx.createImageData(N, N);
+      for (let i = 0; i < N * N; i++) {
+        const v = Math.min(1, grid[i] / ma);
+        let r = 0, g = 0, b = 0;
+        if (this.imgMode === 'irm') { r = g = b = Math.floor(18 + v * 220); }
+        else if (this.imgMode === 'pet') { r = Math.floor(10 + 245 * Math.pow(v, 1.4)); g = Math.floor(8 + 180 * Math.pow(v, 2.6)); b = Math.floor(30 + 120 * Math.pow(v, 5)); }
+        else { r = Math.floor(8 + 40 * v); g = Math.floor(12 + 190 * v); b = Math.floor(25 + 200 * v); }
+        img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      if (this.imgMode === 'pet') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = 'blur(6px)'; ctx.drawImage(cv, 0, 0); ctx.restore(); ctx.filter = 'none'; }
+    },
+
+    setSimView(v) {
+      this.simView = v;
+      const cam = this._simCam; if (!cam) return;
+      if (v === 'ego') { cam.position.set(0, 1.15, 1.15); cam.lookAt(0, 1.05, -2); }
+      else if (v === 'allo') { cam.position.set(0, 3.4, 2.4); cam.lookAt(0, .6, 0); }
+      else if (this._simCamHome) { cam.position.copy(this._simCamHome); cam.lookAt(0, .6, 0); }
+    },
+
+    openCalib() { this.brainZoom = null; this.calibOpen = true; this.calibStep = 0; this.calibMsg = ''; this.calibRes = null; this._calibScores = {stroop: [], posner: [], rotation: [], allo: []}; },
+
+    calibIntro() {
+      return ['','🧪 Stroop : nommez la COULEUR de l\'encre (pas le mot) — mesure l\'inhibition.',
+              '🎯 Posner : une astuce ✷ apparaît après l\'indice — répondez du bon côté (attention spatiale).',
+              '🔄 Rotation mentale : la lettre R est tournée — normale ou en miroir ? (imagerie mentale)'][this.calibStep] || '';
+    },
+
+    calibNextTest() {
+      const step = this.calibStep;
+      if (step === 1) {
+        const words = ['ROUGE', 'BLEU', 'VERT', 'JAUNE'], inks = ['#f87171', '#60a5fa', '#4ade80', '#facc15'];
+        this.calibTest = {kind: 'stroop', n: 12, i: this._calibScores.stroop.length,
+          word: words[Math.floor(Math.random() * 4)], ink: inks[Math.floor(Math.random() * 4)], t0: performance.now()};
+      } else if (step === 2) {
+        const side = Math.random() < .5 ? 'L' : 'R';
+        this.calibTest = {kind: 'posner', n: 10, i: this._calibScores.posner.length, side, display: Math.random() < .5 ? '← ✚ →' : '✚', t0: performance.now(), waiting: true};
+        setTimeout(() => { if (this.calibTest && this.calibTest.kind === 'posner') { this.calibTest.display = (side === 'L' ? '✷' : '') + ' ✚ ' + (side === 'R' ? '✷' : ''); this.calibTest.t0 = performance.now(); } }, 400 + Math.random() * 500);
+      } else if (step === 3) {
+        this._calibAlloIdx = (this._calibAlloIdx || 0);
+        if (this._calibAlloIdx < 6) {
+          const dirs = [0, 90, 180, 270], av = dirs[Math.floor(Math.random() * 4)];
+          const cells = [{dx: -50, dy: 0, w: 'W'}, {dx: 50, dy: 0, w: 'E'}, {dx: 0, dy: -50, w: 'N'}, {dx: 0, dy: 50, w: 'S'}];
+          const target = cells[Math.floor(Math.random() * 4)];
+          const rel = ((['N', 'E', 'S', 'W'].indexOf(target.w) - (av / 90) + 4) % 4);
+          this.calibTest = {kind: 'allo', n: 6, i: this._calibAlloIdx, avatar: av, dx: target.dx, dy: target.dy, ok: ['N', 'E', 'S', 'W'][rel], t0: performance.now()};
+          this._calibAlloIdx++;
+        } else {
+          const angle = Math.floor(Math.random() * 12) * 30, mirror = Math.random() < .5 ? -1 : 1;
+          this.calibTest = {kind: 'rotation', n: 10, i: this._calibScores.rotation.length, angle, mirror, ok: mirror === 1 ? 'normal' : 'miroir', t0: performance.now()};
+        }
+      }
+    },
+
+    calibAnswer(a) {
+      const t = this.calibTest; if (!t) return;
+      const rt = Math.round(performance.now() - t.t0);
+      if (t.kind === 'stroop') {
+        const ok = (a === 'rouge' && t.ink === '#f87171') || (a === 'bleu' && t.ink === '#60a5fa') || (a === 'vert' && t.ink === '#4ade80') || (a === 'jaune' && t.ink === '#facc15');
+        this._calibScores.stroop.push({ok, rt}); this.calibMsg = ok ? '✓ ' + rt + ' ms' : '✗ ' + rt + ' ms';
+        if (this._calibScores.stroop.length >= t.n) { this.calibStep = 2; this.calibTest = null; setTimeout(() => this.calibNextTest(), 250); return; }
+      } else if (t.kind === 'posner') {
+        if (!t.display.includes('✷')) return;
+        const ok = (a === 'L' && t.side === 'L') || (a === 'R' && t.side === 'R');
+        this._calibScores.posner.push({ok, rt}); this.calibMsg = ok ? '✓ ' + rt + ' ms' : '✗ ' + rt + ' ms';
+        if (this._calibScores.posner.length >= t.n) { this.calibStep = 3; this.calibTest = null; this._calibAlloIdx = 0; setTimeout(() => this.calibNextTest(), 250); return; }
+      } else if (t.kind === 'rotation') {
+        const ok = a === t.ok;
+        this._calibScores.rotation.push({ok, rt}); this.calibMsg = ok ? '✓ ' + rt + ' ms' : '✗ ' + rt + ' ms';
+        if (this._calibScores.rotation.length >= t.n) { this.calibStep = 4; this.calibTest = null; this.calibMsg = '✓ rotation mentale terminée'; return; }
+      } else if (t.kind === 'allo') {
+        const ok = a === t.ok;
+        this._calibScores.allo.push({ok, rt}); this.calibMsg = ok ? '✓ ' + rt + ' ms' : '✗ ' + rt + ' ms';
+        if (this._calibScores.allo.length >= t.n) { this.calibMsg = '✓ perspective allocentrée terminée'; setTimeout(() => this.calibNextTest(), 250); return; }
+      }
+      this.calibNextTest();
+    },
+
+    async calibImport(ev) {
+      const f = ev.target.files[0]; if (!f) return;
+      try {
+        await fetch('/api/cosmos/memory', {method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({type: 'calibration', titre: 'import calibration : ' + f.name,
+            contenu: 'donnée extérieure importée (' + f.type + ', ' + f.size + ' octets) — analyse par Uranus ♅',
+            tags: ['calibration', 'import'], source: 'user', corps: 'user'})});
+        this.calibMsg = '✓ ' + f.name + ' conservé dans la mémoire (source : vous)';
+      } catch (e) { this.calibMsg = '⚠️ ' + e.message; }
+    },
+
+    calibDetectSensors() {
+      const el = document.getElementById('calibSensors'); if (!el) return;
+      const lines = [];
+      try {
+        const pads = (navigator.getGamepads ? navigator.getGamepads() : []) || [];
+        const gp = [...pads].filter(Boolean);
+        lines.push(gp.length ? '🎮 gamepad détecté : ' + gp.map(g => g.id.slice(0, 30)).join(', ') : '🎮 gamepad : aucun détecté');
+      } catch (e) { lines.push('🎮 gamepad : non disponible'); }
+      if (navigator.getBattery) navigator.getBattery().then(b => lines.push('🔋 batterie : ' + Math.round(b.level * 100) + '%')).catch(() => {});
+      else if (navigator.getBattery === undefined && navigator.battery) lines.push('🔋 batterie : ' + Math.round((navigator.battery.level || 0) * 100) + '%');
+      else lines.push('🔋 batterie : non exposée par ce navigateur');
+      lines.push('🧠 BCI : aucune API navigateur standard — branchement prévu via WebXR/Gamepad dès qu\'un périphérique existera (aucune donnée simulée)');
+      el.innerHTML = lines.join('<br>');
+    },
+
+    async calibFinish() {
+      const S = this._calibScores || {stroop: [], posner: [], rotation: [], allo: []};
+      const med = arr => { const v = arr.map(x => x.rt).sort((a, b) => a - b); return v.length ? Math.round(v[Math.floor(v.length / 2)]) : null; };
+      const acc = arr => arr.length ? Math.round(arr.filter(x => x.ok).length / arr.length * 100) : null;
+      const cal = {
+        ts: new Date().toISOString(),
+        stroop: {ms: med(S.stroop), acc: acc(S.stroop)}, posner: {ms: med(S.posner), acc: acc(S.posner)},
+        rotation: {ms: med(S.rotation), acc: acc(S.rotation)}, allo: {ms: med(S.allo), acc: acc(S.allo)},
+        q: Math.round(((acc(S.stroop) ?? 60) + (acc(S.posner) ?? 60) + (acc(S.rotation) ?? 60) + (acc(S.allo) ?? 60)) / 4)
+      };
+      this.calib = cal;
+      try { localStorage.setItem('cognitorium.calib', JSON.stringify(cal)); } catch (e) {}
+      try {
+        await fetch('/api/profile/traits', {method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({trait: `calibration ⚡ : stroop ${cal.stroop.ms}ms/${cal.stroop.acc}% · posner ${cal.posner.ms}ms/${cal.posner.acc}% · rotation ${cal.rotation.ms}ms/${cal.rotation.acc}% · allocentré ${cal.allo.acc}%`})});
+      } catch (e) {}
+      this.calibStep = 6;
+      this.calibRes = ['stroop (inhibition) : <b class="text-cyan-300">' + cal.stroop.ms + ' ms · ' + cal.stroop.acc + '%</b> <span class="text-slate-600">(réf. interférence +50–200 ms)</span>',
+                       'posner (attention spatiale) : <b class="text-cyan-300">' + cal.posner.ms + ' ms · ' + cal.posner.acc + '%</b> <span class="text-slate-600">(réf. 250–400 ms)</span>',
+                       'rotation mentale : <b class="text-cyan-300">' + cal.rotation.ms + ' ms · ' + cal.rotation.acc + '%</b>',
+                       'allocentré (perspective) : <b class="text-cyan-300">' + (cal.allo.acc ?? '—') + '%</b>',
+                       'qualité de synchronisation : <b class="text-emerald-300">' + cal.q + '%</b> → le HUD et les activations sont désormais modulés par vos mesures.'].join('<br>');
+    },
+
+    whereAmI() {
+      const t = (this.tabs || []).find(x => x.id === this.activeTab);
+      return this.activeTab === 'univers' ? 'Univers 🪐 — accueil' : 'Univers 🪐 › ' + (t ? t.label : this.activeTab);
     },
 
     setView(v) {
@@ -1865,10 +2379,19 @@ function app() {
 
     brainRegions: [], brainSel: null, simPhase: '🎬 simulation prête', simRegions: [], metRows: [],
     bio: null, cogGauges: [], hud: [], simHud: [], _hudAnchors: null,
-    opMode: 'corps', simCases: [], simCaseId: 'horreur',
+    opMode: 'corps', opTab: 'metrics', simCases: [], simCaseId: 'horreur',
+    calib: null, calibOpen: false, calibStep: 0, calibTest: null, calibRes: null, calibMsg: '',
+    brainZoom: null, simView: 'exo', imgMode: 'axial', tlMode: 'frise', tlSkill: 'all',
+    tlCats: [
+      {id:'etudes', l:'études', ic:'📑', c:'#38bdf8', on:true},
+      {id:'concepts', l:'concepts', ic:'💡', c:'#34d399', on:true},
+      {id:'memoires', l:'mémoires', ic:'🧬', c:'#a78bfa', on:true},
+      {id:'runs', l:'runs de recherche', ic:'⚗️', c:'#fbbf24', on:true}
+    ],
+    tlData: [], tlResume: '',
     mg: null, mgSel: null,
     univers: null, uSel: null, uFiche: null, uLabels: true, uOrbits: true, uSpeed: 1,
-    uShowAff: false, uView: 'libre',
+    uShowAff: false, uView: 'libre', uLightOn: true,
     uLayer: { planetes: true, lunes: true, cours: true, anneaux: true, nebulose: true, etoiles: true, user: true },
     uHide: {},
     chatOpen: true, chatMsgs: [{ role: 'laplace', text: "✳ Laplace — votre interlocuteur, partout et en contexte. Demandez « aide », « outils », « profil », ou parlez-moi de votre projet." }],
@@ -1936,8 +2459,16 @@ function app() {
         brain.add(m);
         pulses.push({m, s: segs[Math.floor(Math.random() * segs.length)] || null, t: Math.random(), sp: .3 + Math.random() * .5});
       }
+      let raw = {pos: [], reg: []};
+      brain.traverse(o => {
+        if (o.isPoints && !raw.pos.length && o.geometry && o.geometry.attributes.position) {
+          const a = o.geometry.attributes.position;
+          for (let i = 0; i < a.count * 3; i++) raw.pos.push(a.array[i]);
+          for (let i = 0; i < a.count; i++) raw.reg.push(regOf(a.getX(i), a.getY(i), a.getZ(i)));
+        }
+      });
       scene.add(brain);
-      return {brain, colAttr, regs, segs, pulses};
+      return {brain, colAttr, regs, segs, pulses, raw};
     },
 
     async loadMobiglas() {
@@ -2038,28 +2569,47 @@ function app() {
       op.cam.position.set(0, 1.25, 3.5); op.cam.lookAt(0, 1.0, 0);
       op.fig = new THREE.Group(); op.scene.add(op.fig);
       const cyan = 0x22d3ee;
-      const part = (geo, x, y, z, rz = 0) => {
-        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: cyan, transparent: true, opacity: .07, depthWrite: false}));
-        m.position.set(x, y, z); m.rotation.z = rz;
-        const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 18), new THREE.LineBasicMaterial({color: cyan, transparent: true, opacity: .85}));
-        e.position.copy(m.position); e.rotation.copy(m.rotation);
-        op.fig.add(m); op.fig.add(e);
+      // 🕺 corps STYLE CERVEAU : nuage de particules T-pose + synapses + impulsions (même esthétique que buildBrainShape)
+      const bodyPts = [];
+      const addLimb = (x1, y1, z1, x2, y2, z2, n) => {
+        for (let i = 0; i <= n; i++) {
+          const t = i / n;
+          bodyPts.push(new THREE.Vector3(x1 + (x2 - x1) * t + (Math.random() - .5) * .025,
+                                         y1 + (y2 - y1) * t + (Math.random() - .5) * .025,
+                                         z1 + (z2 - z1) * t + (Math.random() - .5) * .025));
+        }
       };
-      // humain masculin, T-pose : tête, cou, torse large d'épaules, bassin
-      part(new THREE.SphereGeometry(.13, 14, 10), 0, 1.80, 0);
-      part(new THREE.CylinderGeometry(.05, .065, .14, 8), 0, 1.63, 0);
-      part(new THREE.CylinderGeometry(.17, .13, .56, 10), 0, 1.29, 0);
-      part(new THREE.BoxGeometry(.50, .09, .15), 0, 1.53, 0);
-      part(new THREE.BoxGeometry(.25, .15, .15), 0, .96, 0);
-      for (const s of [-1, 1]) {
-        part(new THREE.CylinderGeometry(.046, .04, .30, 8), s * .33, 1.52, 0, Math.PI / 2);
-        part(new THREE.CylinderGeometry(.04, .034, .30, 8), s * .63, 1.52, 0, Math.PI / 2);
-        part(new THREE.BoxGeometry(.09, .05, .07), s * .97, 1.52, 0);
+      for (let i = 0; i < 110; i++) {           // tête (coque de points)
+        const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+        bodyPts.push(new THREE.Vector3(Math.sin(ph) * Math.cos(th) * .12, 1.80 + Math.cos(ph) * .15, Math.sin(ph) * Math.sin(th) * .12));
+      }
+      addLimb(0, 1.66, 0, 0, 1.58, 0, 4);        // cou
+      addLimb(0, 1.56, 0, 0, .98, 0, 18);        // colonne/torse
+      for (let i = 0; i < 80; i++) {             // volume du torse (large d'épaules)
+        const a = Math.random() * Math.PI * 2, r = .10 + Math.random() * .09;
+        bodyPts.push(new THREE.Vector3(Math.cos(a) * r * 1.7, 1.02 + Math.random() * .5, Math.sin(a) * r * .7));
       }
       for (const s of [-1, 1]) {
-        part(new THREE.CylinderGeometry(.06, .05, .42, 8), s * .095, .73, 0);
-        part(new THREE.CylinderGeometry(.05, .04, .40, 8), s * .095, .32, 0);
-        part(new THREE.BoxGeometry(.09, .06, .19), s * .095, .07, .045);
+        addLimb(s * .06, 1.52, 0, s * .58, 1.52, 0, 12);   // bras tendus (T-pose)
+        addLimb(s * .58, 1.52, 0, s * .99, 1.52, 0, 10);
+        addLimb(s * .04, 1.00, 0, s * .10, .72, 0, 12);    // jambes
+        addLimb(s * .10, .72, 0, s * .10, .33, 0, 12);
+        addLimb(s * .10, .33, 0, s * .10, .08, .04, 8);
+      }
+      const bodySegs = [];
+      for (let i = 0; i < bodyPts.length && bodySegs.length < 170; i++)
+        for (let j = i + 1; j < bodyPts.length; j++)
+          if (bodyPts[i].distanceTo(bodyPts[j]) < .15) bodySegs.push([bodyPts[i], bodyPts[j]]);
+      op.fig.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(bodyPts),
+        new THREE.PointsMaterial({size: .02, color: 0x67e8f9, transparent: true, opacity: .95})));
+      op.fig.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(bodySegs.flat()),
+        new THREE.LineBasicMaterial({color: cyan, transparent: true, opacity: .13})));
+      op.bodyPulses = [];
+      for (let i = 0; i < 16; i++) {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(.013, 6, 6),
+          new THREE.MeshBasicMaterial({color: 0x22d3ee, transparent: true, opacity: .95, blending: THREE.AdditiveBlending}));
+        op.fig.add(m);
+        op.bodyPulses.push({m, s: bodySegs[Math.floor(Math.random() * bodySegs.length)] || null, t: Math.random(), sp: .3 + Math.random() * .55});
       }
       // 🧠 son cerveau : exactement la même forme que la vue de l'onglet Cerveau
       const sh = this.buildBrainShape(op.scene,
@@ -2155,8 +2705,11 @@ function app() {
         const t = Date.now() / 1000;
         if (this._hudAnchors) {
           this.hud = this._hudAnchors.map((h, i) => ({
-            ...h, v: Math.max(6, Math.min(99, h.a + 3.5 * Math.sin(t * (.35 + i * .13)) + 2 * Math.sin(t * 1.7 + i)))
+            ...h, v: Math.max(6, Math.min(99, (h.a + 3.5 * Math.sin(t * (.35 + i * .13)) + 2 * Math.sin(t * 1.7 + i)) * (this.calib ? (.88 + .0024 * (this.calib.q || 0)) : 1)))
           }));
+          this._hudHist = this._hudHist || {};
+          if (!this._hudTick) this._hudTick = 0; this._hudTick++;
+          if (this._hudTick % 3 === 0) for (const h of this.hud) { (this._hudHist[h.id] = this._hudHist[h.id] || []).push(h.v); if (this._hudHist[h.id].length > 60) this._hudHist[h.id].shift(); }
         }
         this._hudT = setTimeout(tick, 700);
       };
@@ -2195,8 +2748,11 @@ function app() {
         const t = Date.now() / 1000;
         if (this._hudAnchors) {
           this.hud = this._hudAnchors.map((h, i) => ({
-            ...h, v: Math.max(6, Math.min(99, h.a + 3.5 * Math.sin(t * (.35 + i * .13)) + 2 * Math.sin(t * 1.7 + i)))
+            ...h, v: Math.max(6, Math.min(99, (h.a + 3.5 * Math.sin(t * (.35 + i * .13)) + 2 * Math.sin(t * 1.7 + i)) * (this.calib ? (.88 + .0024 * (this.calib.q || 0)) : 1)))
           }));
+          this._hudHist = this._hudHist || {};
+          if (!this._hudTick) this._hudTick = 0; this._hudTick++;
+          if (this._hudTick % 3 === 0) for (const h of this.hud) { (this._hudHist[h.id] = this._hudHist[h.id] || []).push(h.v); if (this._hudHist[h.id].length > 60) this._hudHist[h.id].shift(); }
         }
         this._hudT = setTimeout(tick, 700);
       };
@@ -2507,6 +3063,7 @@ function app() {
       renderer.setSize(W, H, false); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       const scene = new THREE.Scene();
       const cam = new THREE.PerspectiveCamera(45, W / H, .1, 50); cam.position.set(0, .1, 3.1);
+      this._simCam = cam; this._simCamHome = cam.position.clone();
       const RC = {visuel: 0x34d399, auditif: 0xfbbf24, prefrontal: 0x22d3ee, amygdale: 0xfb7185,
                   hippocampe: 0xa78bfa, moteur: 0xf472b6, cervelet: 0xf472b6, tronc: 0xfb7185};
       const regOf = (x, y, z) => {
@@ -2519,6 +3076,7 @@ function app() {
         return z > 0 ? 'prefrontal' : 'visuel';
       };
       const shape = this.buildBrainShape(scene, RC, regOf);
+      this._simRaw = shape.raw;
       const brain = shape.brain; brain.rotation.x = .12;
       const colAttr = shape.colAttr, regs = shape.regs, pulses2 = shape.pulses, segs2 = shape.segs;
       const cur = {visuel: .3, auditif: .3, prefrontal: .3, amygdale: .1, hippocampe: .3, moteur: .1, cervelet: .1, tronc: .1};
@@ -2652,6 +3210,7 @@ function app() {
       this.$nextTick(()=>{lucide.createIcons();
         if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();this.initOperator();}
         if(tab==='univers'){this.loadUnivers().then(()=>setTimeout(()=>this.initUnivers(),250));}
+        if(tab==='timeline'){this.loadTimelineMulti();}
         if(tab==='mobiglas'){this.loadMobiglas().then(()=>this.initMobiglas());}
         if(tab==='brain'){this.loadBio();setTimeout(()=>{this.initBrain();this.initSimulation();this.initMetrics3d();},200);}
         if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
