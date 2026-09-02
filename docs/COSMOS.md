@@ -1194,3 +1194,19 @@ fonction, métriques par type ; tout pensé tactile.
 
 **Tests : 164** (160 + dashboard relié + pipeline expliqué + vues cerveau +
 orbites/réelles/interactions/tactile).
+
+### Fix R2.3.1 — homepage noire + vues cassées (2 causes réelles)
+
+1. **TDZ JS** : `ovals/omin/omax` (échelle réelle des orbites) étaient
+   déclarés AVANT `const planets0` → ReferenceError à la première frame →
+   la vue Univers restait noire et l'erreur se propageait. Déclarés au bon
+   endroit + test de régression d'ordre + **le smoke-test Node runtime est
+   désormais joué après CHAQUE édition** (la validation de syntaxe ne
+   suffisait pas).
+2. **Race condition serveur** : `/api/dashboard/metrics` (pollé en continu)
+   déclenchait `init_db()` → `to_sql(replace)` **en parallèle** dans
+   plusieurs threads → « table already exists » / deadlock d'import → 500 en
+   rafale = « les autres vues ne marchent plus ». Doubles correctifs :
+   `init_db()` verrouillé (double-checked, flag lié à DB_PATH pour les tests)
+   + pré-import d'`agent.core.registry` au startup. Validé : 14 requêtes
+   concurrentes = 14 × 200.

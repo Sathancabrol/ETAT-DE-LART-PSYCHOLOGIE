@@ -1223,15 +1223,7 @@
                   </div>
                 </div>
                 <svg viewBox="0 0 320 210" class="w-full max-w-md mx-auto rounded-lg" style="background:rgba(255,255,255,.02)">
-                  <g template bindings>
-                  <template x-for="r in BRAIN_REGIONS" :key="r.id">
-                    <circle :cx="r.x" :cy="r.y" :r="r.r" :fill="((FUNCS.find(f=>f.id===funcSel)||{regions:[]}).regions.includes(r.id)) ? r.c : 'rgba(30,41,59,.5)'" :fill-opacity="((FUNCS.find(f=>f.id===funcSel)||{regions:[]}).regions.includes(r.id)) ? .8 : .35">
-                  </circle>
-                  </template>
-                  <template x-for="r in BRAIN_REGIONS" :key="'l'+r.id">
-                    <text :x="r.x" :y="r.y + r.r + 10" text-anchor="middle" font-size="8.5" :fill="((FUNCS.find(f=>f.id===funcSel)||{regions:[]}).regions.includes(r.id)) ? r.c : '#475569'" x-text="r.nom"></text>
-                  </template>
-                  </g>
+                  <g x-html="funcRegionsSvg()"></g>
                 </svg>
                 <div class="flex flex-wrap gap-1">
                   <template x-for="rg in ((FUNCS.find(f=>f.id===funcSel)||{regions:[]}).regions)" :key="rg">
@@ -1643,7 +1635,7 @@ function app() {
     async init(){
       try { this.calib = JSON.parse(localStorage.getItem('cognitorium.calib') || 'null'); } catch (e) {}
       setInterval(() => { if (this.brainZoom === 'sim' && this.imgMode !== '3d') this.renderBrainImaging(); }, 500);
-      this.$watch('calibStep', v => { if (v >= 1 && v <= 3 && !this.calibTest) this.calibNextTest(); if (v === 5) this.calibDetectSensors(); });
+      if (this.$watch) this.$watch('calibStep', v => { if (v >= 1 && v <= 3 && !this.calibTest) this.calibNextTest(); if (v === 5) this.calibDetectSensors(); });
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();this.loadBio();});
       this.loadUnivers().then(()=>setTimeout(()=>this.initUnivers(),300));
@@ -1792,9 +1784,6 @@ function app() {
       };
 
       const SIZES = { jupiter: 11.5, uranus: 8, neptune: 7.8, terre: 6.2, venus: 6, mars: 5.2, pluton: 4, mercure: 4.4 };
-      // orbites à l'échelle réelle des orbit_r du registre (0.5 → 4.2) sur 62→312
-      const ovals = planets0.map(b => b.orbit_r ?? 1);
-      const omin = Math.min(...ovals), omax = Math.max(...ovals);
       const addCorps = (b, r, tilt, size) => {
         const pivot = addOrbite(r, tilt, new THREE.Color(b.color || '#94a3b8').getHex());
         const col = new THREE.Color(b.color || '#94a3b8');
@@ -1851,6 +1840,9 @@ function app() {
       // planètes par orbit_r réel + corps spéciaux
       const planets0 = bodies.filter(b => b.kind === 'planet').sort((a, b) => (a.orbit_r ?? 0) - (b.orbit_r ?? 0));
       const planets = planets0;
+      // orbites à l'échelle réelle des orbit_r du registre (0.5 → 4.2) sur 62→312
+      const ovals = planets0.map(b => b.orbit_r ?? 1);
+      const omin = Math.min(...ovals), omax = Math.max(...ovals);
       const tours = [];
       const maxR = 312;
       planets.forEach((b, i) => {
@@ -2422,6 +2414,15 @@ function app() {
           if (hit) { this.graphSearch = hit.n.label; this.switchTab('graph'); setTimeout(() => this.searchGraph(), 400); }
         });
       }
+    },
+
+    funcRegionsSvg() {
+      const f = (this.FUNCS || []).find(x => x.id === this.funcSel) || {regions: []};
+      return (this.BRAIN_REGIONS || []).map(r => {
+        const on = f.regions.includes(r.id);
+        return `<circle cx="${r.x}" cy="${r.y}" r="${r.r}" fill="${on ? r.c : 'rgba(30,41,59,.5)'}" fill-opacity="${on ? .8 : .35}"></circle>` +
+               `<text x="${r.x}" y="${r.y + r.r + 10}" text-anchor="middle" font-size="8.5" fill="${on ? r.c : '#475569'}">${r.nom}</text>`;
+      }).join('');
     },
 
     metricCards() {

@@ -1,11 +1,29 @@
 import sqlite3
 import pandas as pd
 import os
+import threading
 
 DB_PATH = "cognitorium.db"
 CSV_PATH = "data/nodes_etat_art_psychologie.csv"
 
+_INIT_LOCK = threading.Lock()
+_INIT_DB = None
+
+
 def init_db():
+    """Verrou d'initialisation : les requêtes concurrentes ne doivent jamais
+    exécuter le to_sql(replace) en parallèle (erreur vue en prod : « table
+    already exists »). Flag lié au chemin de DB (les tests changent DB_PATH)."""
+    global _INIT_DB
+    if _INIT_DB == DB_PATH:
+        return
+    with _INIT_LOCK:
+        if _INIT_DB != DB_PATH:
+            _init_db_body()
+            _INIT_DB = DB_PATH
+
+
+def _init_db_body():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 

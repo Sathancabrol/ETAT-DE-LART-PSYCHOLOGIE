@@ -2087,11 +2087,18 @@ def test_r23_cerveau_nouvelles_vues():
     # les fenêtres 3D existantes sont regroupées sous la vue 3d
     assert idx.count("x-show=\"brainView==='3d'\"") >= 3
 
+def src_idx_order(idx, a, b):
+    ia, ib = idx.find(a), idx.find(b)
+    return ia > 0 and ib > 0 and ia < ib
+
+
 def test_r23_univers_orbites_reelles_interactions_tactile():
     """Orbites à l'échelle réelle des orbit_r, inclinaisons variées, survol des
     planètes (curseur pointer + tooltip département), pinch tactile 2 doigts,
     gestes 3D natifs + cibles élargies en mode pointeur grossier."""
     idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # régression TDZ : ovals/omin/omax déclarés APRÈS planets0 (sinon homepage noire)
+    assert src_idx_order(idx, "const planets0 =", "const ovals = planets0.map")
     for motif in ("omin", "omax", "maxR + 34", "maxR + 64", "((i * 37) % 11 - 5) * .038"):
         assert motif in idx, motif
     assert "mesh.userData.tip = b.symbol + ' ' + b.name" in idx

@@ -30,6 +30,18 @@ class MetacognitiveTraceCreate(BaseModel):
     confidence: Optional[int] = None
     action_plan: Optional[str] = None
 
+@app.on_event("startup")
+def _warm_imports():
+    """Pré-importe les modules chargés paresseusement par les endpoints dans
+    le thread principal — évite les deadlocks _ModuleLock quand plusieurs
+    requêtes concurrentes déclenchent le même import (vu en prod sur
+    /api/dashboard/metrics)."""
+    try:
+        import agent.core.registry  # noqa: F401
+    except Exception:
+        pass
+
+
 @app.get("/", response_class=HTMLResponse)
 def read_index(request: Request):
     return templates.TemplateResponse(request, "index.html", {"request": request})
