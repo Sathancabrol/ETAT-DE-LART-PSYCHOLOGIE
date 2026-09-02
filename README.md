@@ -33,50 +33,7 @@ scripts/
 ├── validate_entry.py                                   # Validation 28 mandatory, DOI regex, triangulation >=3, tags >=3, trust 0-100, dates ISO, duplicates
 ├── add_entry.py                                        # DOI → auto row via Crossref API
 └── (à venir) deduplicate.py, generate_visuals.py
-
-agent/                                                   # 🤖 AGENT CHERCHEUR (nouveau)
-├── core/ (registry, planner, llm optionnel, agent)     # cerveau hybride règles/LLM + orchestrateur traçable
-├── skills/ 11 compétences                               # recherche multi-bases, enrich DOI, citations, dédup,
-│                                                        # validation 42 champs, trust, biais (RoB2/AMSTAR2-lite),
-│                                                        # PRISMA, synthèse, visualisation, veille
-├── fixtures/                                            # fixtures démo hors-ligne (mode dégradé explicite)
-└── cli.py                                               # python -m agent run "…" | skills | runs | status
-tests/test_agent.py                                      # 23 tests, 100 % hors-ligne
 ```
-
-## 🤖 Uranus ♅ — Agent Chercheur (nouveau)
-
-**Uranus** (nommé d'après la divinité du ciel), agent scientifique hybride qui exécute des tâches de recherche en **11 compétences** :
-**recherche multi-bases** (Crossref/OpenAlex/PubMed) → **enrichissement DOI** → **métriques citations** → **déduplication** → **validation 42 champs** → **Trust Factor** → **dépistage biais** → **PRISMA** → **synthèse par domaine** → **visualisation** → **veille scientifique**.
-
-- **Cerveau hybride** : planificateur à règles déterministes par défaut ; LLM optionnel si `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` (repli automatique sur les règles)
-- **Traçabilité intégrale** : chaque run produit `trace.json` + `report.md` dans `output/agent_runs/<run_id>/`
-- **Mode dégradé explicite** : sans réseau, fixtures de démonstration clairement signalées
-- **Double interface** : CLI (`python -m agent`) et page web `/agent` (« ♅ Uranus » dans l'en-tête du Cognitorium)
-
-```bash
-source .venv/bin/activate
-python -m agent run "recherche systématique des méta-analyses attention 2024-2026"
-python -m agent run "valider la base et auditer le trust factor"
-uvicorn app.main:app   # → http://localhost:8000/agent
-```
-
-Documentation complète : `docs/AGENT_CHERCHEUR.md`
-
-## ☉ Système solaire — SOL · Uranus · Vénus (nouveau)
-
-Architecture multi-agents gouvernée : **SOL ☉** orchestre et approuve toute interaction entre corps, juge l'intégrité, prévoit et prévient ; **Uranus ♅** produit la connaissance (7 satellites, Zêta en premier lieutenant) ; **Vénus ♀** gère les finances (coûts tokens par requête, caps budgétaires, prévisions, arbitrage — cour des Charites).
-
-- **Page `/sol`** : vue du système solaire (SOL au centre, orbites, satellites animés) + **chat SOL** avec boutons de vues (état système, interactions, budget, constellation) ; « mission : \<tâche\> » transmet à Uranus
-- **Gouvernement** : toute mission passe par SOL (approbation, débit) et Vénus (garde-fous budgétaires — refus LLM → bascule moteur à règles à coût nul)
-- **Traçabilité totale** : `output/cosmos/interactions.jsonl` (bus) + `ledger.jsonl` (grand livre des coûts) + intégrité scorée 0-100 avec alertes préventives
-- Sans clé API : système complet à coût nul (moteur à règles) ; avec clé : coûts réels comptés par requête
-
-```bash
-uvicorn app.main:app   # → http://localhost:8000/sol
-```
-
-Documentation complète : `docs/COSMOS.md`
 
 ## 🎯 12 Domaines couverts (analyse critique)
 

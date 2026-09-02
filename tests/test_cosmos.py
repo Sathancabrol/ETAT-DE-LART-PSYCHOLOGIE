@@ -1845,7 +1845,7 @@ def test_mobiglas_endpoint_et_ui():
     st = c.get("/api/mobiglas").json()
     assert len(st["stages"]) == 6 and st["inferences"] and st["capteurs"] is not None
     idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
-    for motif in ("'MobiGlas'", "mgPipe", "initMobiglas", "loadMobiglas", "mg-panel",
+    for motif in ("'Instrument'", "mgPipe", "initMobiglas", "loadMobiglas", "mg-panel",
                   "instrument cognitif", "conclusion émergente", "inférences traçables",
                   "espace partagé", "mg-scan", "getPointAtLength"):
         assert motif in idx, motif
@@ -1867,10 +1867,10 @@ def test_home_est_le_systeme_solaire_epure():
     assert 'x-show="activeTab!==\'univers\'"' in idx
     assert 'id="universCanvas"' in idx and "initUnivers" in idx and "loadUnivers" in idx
     # le dock : 3 boutons en bas d'écran, présents partout (navigation congruente)
-    for motif in ("◎</span> ACCUEIL", "⚡</span> FONCTION", "⚙</span> OPTION", "goHome()", "dock-btn"):
+    for motif in ("◎</span> ACCUEIL", "⚡</span> FONCTION", "⚙</span> PARAMÈTRES", "goHome()", "dock-btn"):
         assert motif in idx, motif
     # tiroirs : toutes les fonctions au même endroit + options de l'univers
-    assert "fonctions — tout est ici, toujours au même endroit" in idx
+    assert "fonctions — tout au même endroit, partout" in idx
     assert "options de l'univers" in idx and "vitesse du temps" in idx
     assert "uLabels" in idx and "uOrbits" in idx and "uSpeed" in idx and "toggleFullscreen" in idx
     # astres cliquables → fiche réelle (pouvoir/devoir + mémoires/interactions)
@@ -1929,3 +1929,52 @@ def test_r1bis_registre_satellites_et_cour():
     bodies = c.get("/api/cosmos/bodies").json()
     assert any(len(b.get("satellites", [])) >= 7 for b in bodies)   # Uranus livrée par l'API
     assert any(b.get("court") for b in bodies)
+
+
+# ═══ ROUND R2 — physique /sol + AFFICHAGE + dock MobiGlas complet + fenêtres ═══
+
+def test_r2_physique_identique_et_affichage():
+    """La vue Univers a la MÊME physique caméra que /sol (theta/phi/dist, pan
+    clic droit, zoom, suivi verrouillé) + bouton AFFICHAGE (type de vue,
+    layers, astres)."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # physique /sol : caméra sphérique, pan, clamp, lerp identiques
+    for motif in ("theta -= dx * 0.005", "dist * 0.0016", "Math.sign(e.deltaY) * 0.11",
+                  "Math.max(55, Math.min(1600, dist))", "target.lerp(followV, 0.12)",
+                  "dist += (followDist - dist) * 0.08", "contextmenu", "panning"):
+        assert motif in idx, motif
+    # 👁 AFFICHAGE : types de vue + layers + astres
+    for motif in ("👁 AFFICHAGE", "setView('libre')", "setView('dessus')", "setView('profil')",
+                  "setView('cinema')", "uLayer.planetes", "uLayer.lunes", "uLayer.cours",
+                  "uLayer.anneaux", "uLayer.nebulose", "uLayer.etoiles", "uLayer.user",
+                  "uHide[b.id]=!uHide[b.id]", "followBid(b.id)", "uShowAff"):
+        assert motif in idx, motif
+
+def test_r2_dock_mobiglas_complet():
+    """Dock MobiGlas : chat Laplace permanent au-dessus du dock, FONCTION
+    contextuel (vue présélectionnée + panneau options + outils iconés),
+    PARAMÈTRES (renommé, note R3), fenêtres déplaçables, onglet renommé
+    Instrument, /sol?modal=."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
+    # chat global au-dessus du dock, partout
+    for motif in ("bottom-[76px]", "sendChat()", "chatMsgs", "chatOpen",
+                  "Laplace — partout, en contexte", "✳ Laplace</button>"):
+        assert motif in idx, motif
+    # FONCTION contextuel : présélection + options + outils iconés
+    for motif in ("présélectionnée", "ctxOpts()", "ctxAct(o)", "options ·",
+                  "/sol?modal=sebas", "/sol?modal=ombre", "/sol?modal=mars",
+                  "Watchtower", "🧰 outils du système"):
+        assert motif in idx, motif
+    # PARAMÈTRES renommé + note R3 + pas de doublon OPTION
+    assert "⚙</span> PARAMÈTRES" in idx and "⚙</span> OPTION" not in idx
+    assert "round Connexion (R3)" in idx
+    # fenêtres déplaçables (fiche astre, chat, tiroirs)
+    assert idx.count("winDrag($event)") >= 4 and ".win" in idx
+    # onglet renommé Instrument (l'id mobiglas reste pour les liens ?tab=)
+    assert "{id:'mobiglas',label:'Instrument',icon:'glasses'}" in idx
+    assert "🥽 Instrument" in sol
+    # /sol ouvre la modale d'outil demandée
+    assert "get('modal')" in sol and "openModal(qm)" in sol
+    # colonnes MobiGlas empilées sans collision avec le chat/dock
+    assert "top-[268px] bottom-[84px]" in idx and "flex flex-col gap-2 z-10 min-h-0" in idx

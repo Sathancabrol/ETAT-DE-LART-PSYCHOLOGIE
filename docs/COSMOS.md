@@ -1062,3 +1062,41 @@ La vue solaire de l'accueil reprend les features des vues solaires des IA —
 
 **Tests : 153** (151 + rendu lunes/cours/anneaux/suivi/tooltip + registre
 satellites/cour via API).
+
+## Round R2 — physique /sol + 👁 AFFICHAGE + dock MobiGlas complet + fenêtres
+
+**Physique identique à la vue /sol.** La caméra de la vue Univers utilise
+exactement le même modèle sphérique (theta/phi/dist + cible) : rotation clic
+gauche (0.005 rad/px, phi borné), **pan clic droit** (plan caméra, échelle
+dist×0.0016, lâche le suivi), zoom molette (±11 %, borné 55–1600),
+**double-clic = suivre** avec centrage lerp 0.12 et zoom verrouillé lerp 0.08,
+clic simple = fiche, Échap libère.
+
+**👁 AFFICHAGE** (bouton en haut à gauche de la vue Univers) :
+- **type de vue** : ◎ libre · ⬒ dessus · ⬓ profil · 🎬 cinéma (dérive auto) ;
+- **layers** : planètes, lunes, cours & maison, anneaux, orbites, étiquettes,
+  nébuleuse Laplace, étoiles, 🕴 vous ;
+- **astres** : puce par corps — masquer/afficher (◌/●) + ◎ suivre.
+
+**Dock MobiGlas complet** (le style de menus du bas d'écran) :
+- **✳ chat Laplace permanent au-dessus du dock**, partout et en contexte
+  (réduit en pastille, effaçable, fenêtre déplaçable) — le mini-chat de
+  l'onglet Instrument est retiré (plus de doublon) et les colonnes de cet
+  onglet sont empilées sans collision avec le chat ni le dock ;
+- **⚡ FONCTION contextuel** : la vue courante est **présélectionnée** (●) et
+  un panneau droit liste les **options contextuelles cliquables** (AFFICHAGE &
+  layers sur l'Univers, opérateur/cas de simulation sur Cerveau, filtres
+  concepts/études/sources/méthodes/théoriciens sur le Graphe…) + une rangée
+  **🧰 outils iconés** : 👁 Watchtower, 🕵 Ombre, ♂ Forge, ♇ Hadès, 🏛 Olympe,
+  🔥 Inferno — via `/sol?modal=<outil>` (nouveau paramètre d'ouverture directe
+  des modales) ;
+- **⚙ PARAMÈTRES** (ex-OPTION) : vitesse du temps, étiquettes, orbites, profil
+  cognitif, plein écran + note honnête (compte/export/déconnexion au round
+  Connexion R3) ;
+- **fenêtres déplaçables** : fiche d'astre, chat, tiroirs — prise par l'en-tête,
+  seuil de 5 px pour ne pas gêner les clics.
+
+Onglet « MobiGlas » renommé **« Instrument »** (MobiGlas = le dock désormais ;
+l'id `mobiglas` reste pour les liens `?tab=`).
+
+**Tests : 155** (153 + physique/affichage + dock complet/fenêtres/renommages).
