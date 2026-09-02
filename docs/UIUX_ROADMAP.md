@@ -254,3 +254,22 @@ instabilité).
 
 **Séquence recommandée inchangée** : R1bis → R2 → R3 (le lien Discord de
 l'ami a besoin des trois) puis M1-M4 en parallèle de R4+.
+
+---
+
+## 15. Réflexion du 02/09 (soir) — la vue principale de navigation libre
+
+Le but : **une vue principale par fonction primordiale**, en navigation libre
+(comme la home système solaire ou le graphe) :
+- **ACCUEIL** = home page : système solaire, nébuleuse, astres — libre ;
+- **CERVEAU** = naviguer dans le cerveau en 3D **avec le graphe Obsidian à
+  l'intérieur** (les voies neuronales des connaissances), un bouton par
+  fonction ou catégorie de fonctions (exécutives, cognitives), puis la
+  métrique → le **type** de métrique (bpm, ondes électromagnétiques EEG,
+  sudation, eye-tracking, wifi, ondes sonores…) ;
+- **tout penser mode tactile** (gestes natifs, cibles larges, pinch).
+
+Avancé ce round (R2.3) : vues Cerveau (voies/fonctions/métriques par type),
+orbites réelles + survol + pinch, dashboard relié aux onglets, Pipeline
+expliqué. Reste pour les prochains rounds : navigation continue accueil →
+cerveau (zoom fluide), plus de types de métriques branchés à l'import.

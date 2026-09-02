@@ -1160,3 +1160,37 @@ chargement de la vue.
 
 **Tests : 160** (155 + fil d'Ariane/ghost/width + fusion opérateur + timeline
 + zoom/imagerie/calibration + univers réel/pin/laplace/lumière).
+
+## Round R2.3 — dashboard relié, Pipeline expliqué, vues Cerveau, orbites réelles, tactile
+
+1. **Dashboard relié aux onglets** : le mode 🧠 de l'opérateur affiche la
+   **cognition en direct comme dans l'onglet Cerveau** (HUD vivant partout,
+   seed au démarrage) ; boutons « 🧠 ouvrir Cerveau », « 📟 voir mes métriques
+   par type », « 📅 ma frise », « 🕸 ouvrir le graphe » sur les fenêtres
+   correspondantes.
+2. **Pipeline (ex-Instrument) expliqué** : renommé + bouton « ❓ c'est quoi ? »
+   (comprendre / agir / voir les modèles, en français clair) + « à quoi ça
+   sert » sur chaque panneau flottant.
+3. **Cerveau — 4 vues** : 🧠 3D+simulations · **🕸 voies neuronales** (le
+   graphe Obsidian réel dessiné DANS la silhouette du cerveau, hubs au centre,
+   impulsions sur les voies, clic = ouvrir dans le graphe) · **🎛 fonctions
+   exécutives & cognitives** (8 boutons : attention, mémoire de travail,
+   inhibition, flexibilité, planification, langage, visuo-spatial, motricité —
+   régions illuminées + lien calibration) · **📟 métriques par type**
+   (comportemental réel, tests calibrés, capteurs détectés, puis bpm / EEG
+   α-β-θ-δ / sudation EDA / eye-tracking / ondes sonores / wifi / vidéo —
+   statut honnête « non connecté » jusqu'à branchement ou import).
+4. **Univers** : orbites à **l'échelle réelle des orbit_r** (plus d'espacement
+   uniforme), inclinaisons variées, **survol des planètes** (curseur pointer +
+   tooltip symbole/département), **pinch tactile 2 doigts** = zoom.
+5. **Mode tactile** : `touch-action:none` sur tous les canvas 3D (gestes
+   natifs), cibles élargies en `pointer:coarse`.
+
+**Réflexion consignée** (docs/UIUX_ROADMAP.md) : la destination est une
+**vue principale de navigation libre** par fonction primordiale — accueil =
+système solaire/nébuleuse/astres en libre-navigation ; cerveau = naviguer
+dans le cerveau 3D avec le graphe Obsidian en voies neuronales, boutons par
+fonction, métriques par type ; tout pensé tactile.
+
+**Tests : 164** (160 + dashboard relié + pipeline expliqué + vues cerveau +
+orbites/réelles/interactions/tactile).

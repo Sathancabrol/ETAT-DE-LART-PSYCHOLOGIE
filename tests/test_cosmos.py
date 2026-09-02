@@ -1846,7 +1846,7 @@ def test_mobiglas_endpoint_et_ui():
     st = c.get("/api/mobiglas").json()
     assert len(st["stages"]) == 6 and st["inferences"] and st["capteurs"] is not None
     idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
-    for motif in ("'Instrument'", "mgPipe", "initMobiglas", "loadMobiglas", "mg-panel",
+    for motif in ("'Pipeline'", "mgPipe", "initMobiglas", "loadMobiglas", "mg-panel",
                   "instrument cognitif", "conclusion émergente", "inférences traçables",
                   "espace partagé", "mg-scan", "getPointAtLength"):
         assert motif in idx, motif
@@ -1976,8 +1976,8 @@ def test_r2_dock_mobiglas_complet():
     # fenêtres déplaçables (fiche astre, chat, tiroirs)
     assert idx.count("winDrag($event)") >= 4 and ".win" in idx
     # onglet renommé Instrument (l'id mobiglas reste pour les liens ?tab=)
-    assert "{id:'mobiglas',label:'Instrument',icon:'glasses'}" in idx
-    assert "🥽 Instrument" in sol
+    assert "{id:'mobiglas',label:'Pipeline',icon:'glasses'}" in idx
+    assert "🥽 Pipeline" in sol
     # /sol ouvre la modale d'outil demandée
     assert "get('modal')" in sol and "openModal(qm)" in sol
     # colonnes MobiGlas empilées sans collision avec le chat/dock
@@ -2049,3 +2049,52 @@ def test_r22_univers_realisme_pin_laplace_lumiere():
     assert "uLightOn" in idx and "le monde se gèle" in idx
     assert "selRing" in idx and "chariot d'Apollon" in idx and "atomes kepleriens autour de Sebas" in idx
     assert "🪐 vue fusionnée" in sol and "toggleSystemLight" in sol   # /sol intact + pont
+
+
+# ═══ ROUND R2.3 — dashboard relié, pipeline expliqué, vues Cerveau, orbites réelles, tactile ═══
+
+def test_r23_dashboard_relie_aux_onglets():
+    """Le dashboard envoie vers les fenêtres correspondantes : HUD cognition
+    affiché dans l'opérateur (mode cerveau) comme dans l'onglet Cerveau, et
+    boutons → Cerveau / métriques / frise / graphe."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "x-show=\"opMode==='cerveau'\"" in idx and "⏱ cognition en direct" in idx
+    assert "this.startHud();" in idx                      # HUD vivant dès le dashboard
+    for motif in ("🧠 ouvrir Cerveau", "voir mes métriques par type (Cerveau) ↗",
+                  "📅 ma frise", "🕸 ouvrir le graphe"):
+        assert motif in idx, motif
+
+def test_r23_pipeline_explique():
+    """L'ancien onglet incompréhensible devient Pipeline avec un ❓ c'est quoi
+    (3 usages en français clair) + à-quoi-ça-sert sur chaque panneau."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    assert "label:'Pipeline'" in idx and "❓ c" in idx and "mgHelp" in idx
+    assert "le pipeline — c'est quoi, ça fait quoi ?" in idx
+    for motif in ("comprendre", "agir", "voir les modèles"):
+        assert motif in idx, motif
+    assert idx.count("à quoi ça sert :") >= 3
+
+def test_r23_cerveau_nouvelles_vues():
+    """Cerveau : voies neuronales (graphe Obsidian DANS le cerveau, hubs au
+    centre), fonctions exécutives/cognitives (bouton par fonction + régions),
+    métriques par type (bpm, EEG, sudation, eye-tracking, son, wifi…)."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("setBrainView", "pathwaysCanvas", "renderPathways", "voies neuronales",
+                  "FUNCS", "BRAIN_REGIONS", "funcSel", "metricCards()",
+                  "fréquence cardiaque", "ondes cérébrales (EEG)", "sudation (EDA)",
+                  "eye-tracking", "ondes sonores", "environnement (wifi)", "quadraticCurveTo"):
+        assert motif in idx, motif
+    # les fenêtres 3D existantes sont regroupées sous la vue 3d
+    assert idx.count("x-show=\"brainView==='3d'\"") >= 3
+
+def test_r23_univers_orbites_reelles_interactions_tactile():
+    """Orbites à l'échelle réelle des orbit_r, inclinaisons variées, survol des
+    planètes (curseur pointer + tooltip département), pinch tactile 2 doigts,
+    gestes 3D natifs + cibles élargies en mode pointeur grossier."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    for motif in ("omin", "omax", "maxR + 34", "maxR + 64", "((i * 37) % 11 - 5) * .038"):
+        assert motif in idx, motif
+    assert "mesh.userData.tip = b.symbol + ' ' + b.name" in idx
+    assert "cv.style.cursor = h ? 'pointer' : 'grab'" in idx
+    assert "ptrs.size === 2" in idx and "pinchD" in idx
+    assert "touch-action: none" in idx and "(pointer: coarse)" in idx
