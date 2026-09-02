@@ -380,6 +380,8 @@ def celestial_registry() -> List[Dict[str, Any]]:
                  "departement": b.get("departement"),
                  "court_label": b.get("court_label"),
                  "naine": b.get("naine", False)}
+        if b.get("orbit_r") is not None:
+            entry["orbit_r"] = b["orbit_r"]
         if "satellites" in b:
             entry["satellites"] = b["satellites"]
         if "court" in b:

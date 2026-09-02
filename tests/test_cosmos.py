@@ -1852,3 +1852,44 @@ def test_mobiglas_endpoint_et_ui():
     # depuis /sol, le bouton ouvre l'onglet
     sol = (Path(__file__).resolve().parents[1] / "app" / "templates" / "sol.html").read_text(encoding="utf-8")
     assert "/?tab=mobiglas" in sol
+
+
+# ═══ ROUND Univers 🪐 — home = système solaire épuré + dock congruent ═══
+
+def test_home_est_le_systeme_solaire_epure():
+    """L'accueil de l'app est la vue Univers : très épurée, uniquement le
+    système solaire + le dock ACCUEIL·FONCTION·OPTION en bas d'écran."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # landing par défaut = univers, onglet en tête
+    assert "activeTab:'univers'" in idx
+    assert idx.index("{id:'univers',label:'Univers'") < idx.index("{id:'dashboard',label:'Dashboard'")
+    # vue épurée : header masqué sur l'univers, plein écran, canvas dédié
+    assert 'x-show="activeTab!==\'univers\'"' in idx
+    assert 'id="universCanvas"' in idx and "initUnivers" in idx and "loadUnivers" in idx
+    # le dock : 3 boutons en bas d'écran, présents partout (navigation congruente)
+    for motif in ("◎</span> ACCUEIL", "⚡</span> FONCTION", "⚙</span> OPTION", "goHome()", "dock-btn"):
+        assert motif in idx, motif
+    # tiroirs : toutes les fonctions au même endroit + options de l'univers
+    assert "fonctions — tout est ici, toujours au même endroit" in idx
+    assert "options de l'univers" in idx and "vitesse du temps" in idx
+    assert "uLabels" in idx and "uOrbits" in idx and "uSpeed" in idx and "toggleFullscreen" in idx
+    # astres cliquables → fiche réelle (pouvoir/devoir + mémoires/interactions)
+    assert "uniFiche" in idx and "/api/cosmos/bodies" in idx and "/api/cosmos/body/" in idx
+    assert "voir sa constellation" in idx
+    # l'utilisateur incarné : satellite de la Terre ; Laplace : nébuleuse enveloppante
+    assert "🕴 vous" in idx and "✳ Laplace — votre interlocuteur" in idx
+
+def test_univers_registre_orbitr():
+    """Le registre expose orbit_r : les planètes sont sur leurs vraies orbites."""
+    from cosmos.bodies import celestial_registry, BODIES
+    reg = celestial_registry()
+    planets = [b for b in reg if b["kind"] == "planet"]
+    assert len(planets) >= 9
+    assert all(isinstance(b.get("orbit_r"), (int, float)) for b in planets if not b["naine"])
+    kinds = {b["kind"] for b in reg}
+    assert {"planet", "star", "nebuleuse"} <= kinds          # sol au centre, laplace nébuleuse
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    bodies = c.get("/api/cosmos/bodies").json()
+    assert len(bodies) == 15 and any(b["id"] == "terre" for b in bodies)

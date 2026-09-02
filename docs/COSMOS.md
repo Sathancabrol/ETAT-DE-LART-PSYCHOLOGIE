@@ -1014,3 +1014,29 @@ le long du flux, point vert « donnée réelle » sur chaque nœud
   bannière **conclusion émergente** avec sa provenance.
 
 **Tests : 149** (147 + pipeline/chaînes mobiglas + endpoint/UI).
+
+## Round Univers 🪐 — l'accueil devient le système solaire + dock congruent
+
+**L'accueil de l'app n'est plus le dashboard : c'est notre système solaire.**
+Vue **Univers** très épurée (plein écran, header masqué) : ☉ SOL au centre
+(sphère + halo pulsant), les planètes sur leurs orbites réelles (`orbit_r`
+exposé au registre) avec lignes d'orbites inclinées, champ d'étoiles, ✳
+Laplace en nébuleuse violette enveloppant le système, et l'utilisateur 🕴
+incarné en satellite de la Terre. Chaque astre est cliquable → **fiche
+réelle** (⚡ pouvoir, ♦ devoir, mémoires, interactions via
+`/api/cosmos/body/{id}`) + lien vers sa constellation dans le graphe.
+
+**Dock congruent ACCUEIL · FONCTION · OPTION** (bas d'écran, présent sur
+tous les onglets — même endroit partout) :
+- **◎ ACCUEIL** — retour au système solaire épuré ;
+- **⚡ FONCTION** — tiroir avec *toutes* les fonctions (les 9 onglets + ☉ SOL
+  + ♅ Uranus agent) : une seule carte mentale, plus de chasse aux onglets ;
+- **⚙ OPTION** — étiquettes des astres, lignes d'orbites, vitesse du temps
+  (×0–×3), plein écran.
+
+Interaction : glisser = tourner, molette = zoom, clic = fiche, rotation
+automatique après inactivité. Analyse complète + feuille de route R1→R7
+(Chronos, incarnation-tuto, tuyauterie, zoom fondateur, genèse) :
+**`docs/UIUX_ROADMAP.md`**.
+
+**Tests : 151** (149 + home épuré/dock/fiches + registre orbit_r).

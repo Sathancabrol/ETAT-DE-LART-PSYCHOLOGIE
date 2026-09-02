@@ -1157,11 +1157,47 @@
       "run": "run_20260901_053959_b4e2",
       "identifies": 5,
       "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "test_run",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "run_20260902_014056_7535",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "test_run",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "run_20260902_014111_3a8a",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "test_run",
+      "identifies": 5,
+      "apres_deduplication": 5
+    },
+    {
+      "date": "2026-09-02",
+      "run": "run_20260902_014126_920d",
+      "identifies": 5,
+      "apres_deduplication": 5
     }
   ],
   "dernier": {
-    "date": "2026-09-01",
-    "run": "run_20260901_053959_b4e2",
+    "date": "2026-09-02",
+    "run": "run_20260902_014126_920d",
     "identifies": 5,
     "apres_deduplication": 5
   }

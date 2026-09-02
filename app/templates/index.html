@@ -100,13 +100,20 @@
     .mg-node:hover circle { filter: brightness(1.5) drop-shadow(0 0 8px currentColor); }
     .mg-pulse { animation: mgPulse 2.2s ease-in-out infinite; }
     @keyframes mgPulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+    /* ─── 🪐 UNIVERS — home système solaire + dock congruent ─── */
+    #universCanvas { cursor: grab; }
+    #universCanvas:active { cursor: grabbing; }
+    .dock-btn { transition: all .2s; }
+    .dock-btn.active { background: rgba(99,102,241,.18); color: #a5b4fc; border-color: rgba(99,102,241,.45); box-shadow: 0 0 18px rgba(99,102,241,.25); }
+    .uni-orbit { pointer-events: none; }
     #operatorCanvas:active, #brainCanvas:active { cursor: grabbing; }
   </style>
 </head>
 <body class="h-full antialiased" x-data="app()" x-init="init()" x-cloak>
 
 <!-- HEADER -->
-<header class="sticky top-0 z-50 glass border-b border-white/5">
+<header x-show="activeTab!=='univers'" class="sticky top-0 z-50 glass border-b border-white/5">
   <div class="max-w-[1920px] mx-auto px-4 md:px-6 flex items-center justify-between h-14">
     <div class="flex items-center space-x-3">
       <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -133,6 +140,65 @@
 </header>
 
 <main class="max-w-[1920px] mx-auto px-4 md:px-6 py-5">
+
+  <!-- ══════════ 🪐 UNIVERS — ACCUEIL : notre système solaire, épuré ══════════ -->
+  <section x-show="activeTab==='univers'" class="fade-in fixed inset-0 z-0 overflow-hidden">
+    <canvas id="universCanvas" class="absolute inset-0 w-full h-full"></canvas>
+    <div class="absolute inset-0 mg-scan pointer-events-none"></div>
+
+    <!-- marque discrète -->
+    <div class="absolute top-3 left-4 flex items-center gap-2.5 pointer-events-none">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25 text-lg">🪐</div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Cognitorium</h1>
+        <p class="text-[9px] text-slate-600 -mt-0.5">notre système solaire · <span x-text="univers?.length || 0"></span> corps · chaque astre gère un élément de l'utilisateur</p>
+      </div>
+    </div>
+
+    <!-- aide -->
+    <div class="absolute top-4 right-4 text-right pointer-events-none leading-relaxed">
+      <p class="text-[9px] text-slate-500">glisser · tourner &nbsp;·&nbsp; molette · zoom</p>
+      <p class="text-[9px] text-slate-500">clic sur un astre · <span class="text-cyan-400/80">sa fiche réelle</span></p>
+    </div>
+
+    <!-- fiche d'astre (données réelles) -->
+    <div x-show="uSel" x-transition.duration.200ms class="absolute top-14 right-4 w-[300px] max-w-[86vw] glass rounded-2xl border border-white/10 p-4 z-20 shadow-2xl">
+      <button @click="uSel=null;uFiche=null" class="absolute top-2 right-2 text-slate-600 hover:text-white text-xs">✕</button>
+      <template x-if="uFiche">
+        <div class="space-y-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl" x-text="uFiche.body.icon"></span>
+            <div>
+              <h3 class="text-sm font-bold text-white leading-tight"><span x-text="uFiche.body.symbol"></span> <span x-text="uFiche.body.name"></span></h3>
+              <p class="text-[9px] uppercase tracking-wider" :style="'color:' + (uFiche.body.color || '#94a3b8')" x-text="uFiche.body.departement || uFiche.body.kind"></p>
+            </div>
+          </div>
+          <div class="p-2 rounded-lg bg-black/30 border border-white/5">
+            <p class="text-[9px] text-amber-300/80 font-semibold mb-0.5">⚡ pouvoir</p>
+            <p class="text-[10.5px] text-slate-300 leading-snug" x-text="uFiche.body.pouvoir"></p>
+          </div>
+          <div class="p-2 rounded-lg bg-black/30 border border-white/5">
+            <p class="text-[9px] text-cyan-300/80 font-semibold mb-0.5">♦ devoir</p>
+            <p class="text-[10.5px] text-slate-300 leading-snug" x-text="uFiche.body.devoir"></p>
+          </div>
+          <div class="flex gap-3 text-center">
+            <div class="flex-1 rounded-lg bg-indigo-500/5 border border-indigo-500/15 py-1.5">
+              <p class="mono text-sm text-indigo-300" x-text="uFiche.memoire?.length ?? 0"></p>
+              <p class="text-[8.5px] text-slate-600 uppercase">mémoires</p>
+            </div>
+            <div class="flex-1 rounded-lg bg-cyan-500/5 border border-cyan-500/15 py-1.5">
+              <p class="mono text-sm text-cyan-300" x-text="uFiche.interactions?.length ?? 0"></p>
+              <p class="text-[8.5px] text-slate-600 uppercase">interactions</p>
+            </div>
+          </div>
+          <a :href="'/?const=' + uFiche.body.id + '&tab=graph'" class="block text-center text-[10px] px-2.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition">🔗 voir sa constellation dans le graphe</a>
+        </div>
+      </template>
+      <template x-if="!uFiche">
+        <p class="text-[10px] text-slate-500 mono animate-pulse">chargement de l'astre…</p>
+      </template>
+    </div>
+  </section>
 
   <!-- ══════════ DASHBOARD ══════════ -->
   <section x-show="activeTab==='dashboard'" class="space-y-5 fade-in">
@@ -1016,6 +1082,62 @@
 
 </main>
 
+<!-- ══════════ 🧭 DOCK — navigation congruente : ACCUEIL · FONCTION · OPTION ══════════ -->
+<nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 glass rounded-2xl border border-white/10 px-2 py-1.5 shadow-2xl shadow-black/60">
+  <button @click="goHome()" :class="activeTab==='univers' ? 'active' : ''" class="dock-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent">
+    <span class="text-sm leading-none">◎</span> ACCUEIL
+  </button>
+  <div class="w-px h-6 bg-white/10"></div>
+  <button @click="dockFx=!dockFx;dockOpt=false" :class="dockFx ? 'active' : ''" class="dock-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent">
+    <span class="text-sm leading-none">⚡</span> FONCTION
+  </button>
+  <div class="w-px h-6 bg-white/10"></div>
+  <button @click="dockOpt=!dockOpt;dockFx=false" :class="dockOpt ? 'active' : ''" class="dock-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-transparent">
+    <span class="text-sm leading-none">⚙</span> OPTION
+  </button>
+</nav>
+
+<!-- tiroir FONCTION : toutes les fonctions au même endroit, partout -->
+<div x-show="dockFx" x-transition.duration.200ms @click.outside="dockFx=false" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,620px)] glass rounded-2xl border border-white/10 p-4 shadow-2xl shadow-black/60">
+  <p class="text-[9px] uppercase tracking-[.16em] text-indigo-300/80 mb-2.5">⚡ fonctions — tout est ici, toujours au même endroit</p>
+  <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+    <button @click="goHome()" class="dock-btn active flex flex-col items-center gap-1 py-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10">
+      <span class="text-lg">🪐</span><span class="text-[9.5px] text-indigo-200">Univers · accueil</span>
+    </button>
+    <template x-for="t in tabs.filter(x=>x.id!=='univers')" :key="t.id">
+      <button @click="switchTab(t.id);dockFx=false" class="dock-btn flex flex-col items-center gap-1 py-2.5 rounded-xl border border-white/5 bg-white/[.02] hover:border-indigo-500/30 hover:bg-indigo-500/[.06] transition">
+        <span class="text-lg" x-text="{dashboard:'▦',mobiglas:'🥽',brain:'🧠',graph:'🕸',taxonomy:'🌳',database:'🗃',concepts:'💡',timeline:'📅',cognitorium:'🧭'}[t.id] || '●'"></span>
+        <span class="text-[9.5px] text-slate-400" x-text="t.label"></span>
+      </button>
+    </template>
+  </div>
+  <div class="flex gap-1.5 mt-2.5 pt-2.5 border-t border-white/5">
+    <a href="/sol" class="flex-1 text-center text-[10px] py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 transition">☉ SOL · orchestrateur</a>
+    <a href="/agent" class="flex-1 text-center text-[10px] py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 transition">♅ Uranus · agent chercheur</a>
+  </div>
+</div>
+
+<!-- tiroir OPTION : réglages de l'univers -->
+<div x-show="dockOpt" x-transition.duration.200ms @click.outside="dockOpt=false" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,420px)] glass rounded-2xl border border-white/10 p-4 shadow-2xl shadow-black/60 space-y-3">
+  <p class="text-[9px] uppercase tracking-[.16em] text-slate-400">⚙ options de l'univers</p>
+  <div class="flex items-center justify-between">
+    <span class="text-[11px] text-slate-300">🏷 étiquettes des astres</span>
+    <button @click="uLabels=!uLabels" :class="uLabels ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-white/[.03] text-slate-600 border-white/10'" class="text-[10px] px-3 py-1 rounded-lg border transition" x-text="uLabels ? 'affichées' : 'masquées'"></button>
+  </div>
+  <div class="flex items-center justify-between">
+    <span class="text-[11px] text-slate-300">💫 lignes d'orbites</span>
+    <button @click="uOrbits=!uOrbits" :class="uOrbits ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-white/[.03] text-slate-600 border-white/10'" class="text-[10px] px-3 py-1 rounded-lg border transition" x-text="uOrbits ? 'visibles' : 'masquées'"></button>
+  </div>
+  <div>
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-[11px] text-slate-300">⏱ vitesse du temps</span>
+      <span class="mono text-[10px] text-cyan-300" x-text="'×' + uSpeed.toFixed(2).replace(/\.?0+$/, '')"></span>
+    </div>
+    <input type="range" min="0" max="3" step="0.25" x-model.number="uSpeed" class="w-full accent-indigo-400">
+  </div>
+  <button @click="toggleFullscreen()" class="w-full text-[10.5px] py-1.5 rounded-lg bg-white/[.03] hover:bg-white/[.06] border border-white/10 text-slate-300 transition">⛶ plein écran</button>
+</div>
+
 <!-- Node Detail Modal -->
 <div x-show="showNodeModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" @click.self="showNodeModal=false">
   <div class="glass rounded-2xl p-5 max-w-2xl w-full max-h-[85vh] overflow-y-auto" @click.stop>
@@ -1044,8 +1166,8 @@
 <script>
 function app() {
   return {
-    activeTab:'dashboard',
-    tabs:[{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'mobiglas',label:'MobiGlas',icon:'glasses'},{id:'brain',label:'Cerveau',icon:'brain-circuit'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
+    activeTab:'univers',
+    tabs:[{id:'univers',label:'Univers',icon:'orbit'},{id:'dashboard',label:'Dashboard',icon:'layout-dashboard'},{id:'mobiglas',label:'MobiGlas',icon:'glasses'},{id:'brain',label:'Cerveau',icon:'brain-circuit'},{id:'graph',label:'Graphe Obsidian',icon:'share-2'},{id:'taxonomy',label:'Taxonomie',icon:'git-branch'},{id:'database',label:'Base de Données',icon:'database'},{id:'concepts',label:'Concepts',icon:'cpu'},{id:'timeline',label:'Timeline',icon:'calendar'},{id:'cognitorium',label:'Module SRL',icon:'compass'}],
 
     stats:{}, nodes:[], filteredNodes:[], concepts4e:[],
     searchQuery:'', filterDomain:'all', uniqueDomains:[], compareList:[], showCompare:false,
@@ -1088,6 +1210,7 @@ function app() {
     async init(){
       await Promise.all([this.loadStats(),this.loadNodes(),this.loadConcepts(),this.loadDashboardMetrics(),this.loadProfilPerso(),this.loadArianeRuns()]);
       this.$nextTick(()=>{lucide.createIcons();this.renderCharts();this.initOperator();this.loadBio();});
+      this.loadUnivers().then(()=>setTimeout(()=>this.initUnivers(),300));
       // ⬇ arrivée depuis une fiche (« aller vers · Obsidian ») : ?const=<corps>&tab=graph
       try{
         const q = new URLSearchParams(location.search);
@@ -1104,6 +1227,205 @@ function app() {
           }
         }
       }catch(e){}
+    },
+
+    async loadUnivers() {
+      if (this.univers) return;
+      try { this.univers = await (await fetch('/api/cosmos/bodies')).json(); } catch (e) { this.univers = []; }
+    },
+
+    async uniFiche(id) {
+      this.uSel = id; this.uFiche = null;
+      try { this.uFiche = await (await fetch('/api/cosmos/body/' + id)).json(); }
+      catch (e) { this.uFiche = { body: (this.univers || []).find(b => b.id === id) || {id}, memoire: [], interactions: [] }; }
+    },
+
+    goHome() { this.dockFx = false; this.dockOpt = false; this.switchTab('univers'); },
+
+    toggleFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => {});
+    },
+
+    initUnivers() {
+      if (this._uniOn || typeof THREE === 'undefined') return;
+      const cv = document.getElementById('universCanvas');
+      if (!cv || !this.univers || !this.univers.length) return;
+      this._uniOn = true;
+      const self = this;
+      const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(innerWidth, innerHeight);
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, .1, 5000);
+      cam.position.set(0, 210, 460); cam.lookAt(0, 0, 0);
+      scene.add(new THREE.AmbientLight(0x475569, 1.1));
+      const sunLight = new THREE.PointLight(0xffd9a0, 2.2, 3000); scene.add(sunLight);
+      const root = new THREE.Group(); scene.add(root);
+
+      // champ d'étoiles
+      {
+        const n = 1700, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+        const tints = [[1,1,1],[.62,.72,1],[.42,.95,1],[.85,.75,1]];
+        for (let i = 0; i < n; i++) {
+          const r = 950 + Math.random() * 700, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+          pos[i*3] = r * Math.sin(ph) * Math.cos(th); pos[i*3+1] = r * Math.cos(ph); pos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+          const t = tints[(Math.random() * tints.length) | 0], b = .5 + Math.random() * .5;
+          col[i*3] = t[0] * b; col[i*3+1] = t[1] * b; col[i*3+2] = t[2] * b;
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+        root.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.7, vertexColors: true, sizeAttenuation: false, transparent: true, opacity: .85 })));
+      }
+
+      const mkGlow = (hex, scale) => {
+        const c = document.createElement('canvas'); c.width = c.height = 256;
+        const x = c.getContext('2d'), gr = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+        gr.addColorStop(0, hex); gr.addColorStop(.35, hex.replace('1)', '.35)')); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        x.fillStyle = gr; x.fillRect(0, 0, 256, 256);
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+        s.scale.setScalar(scale); return s;
+      };
+      const mkLabel = (text, color) => {
+        const c = document.createElement('canvas'); c.width = 320; c.height = 72;
+        const x = c.getContext('2d');
+        x.font = '600 30px system-ui, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.shadowColor = 'rgba(0,0,0,.9)'; x.shadowBlur = 8;
+        x.fillStyle = color; x.fillText(text, 160, 36);
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+        s.scale.set(26, 5.8, 1); return s;
+      };
+
+      const bodies = this.univers, by = Object.fromEntries(bodies.map(b => [b.id, b]));
+      const clickable = [], orbitLines = [], labels = [], spinners = [];
+
+      // ☉ SOL au centre
+      const sun = new THREE.Mesh(new THREE.SphereGeometry(24, 40, 40),
+        new THREE.MeshBasicMaterial({ color: 0xfbbf24 }));
+      root.add(sun);
+      const sunGlow = mkGlow('rgba(251,191,36,1)', 165); root.add(sunGlow);
+      const sunLabel = mkLabel('☉ SOL — approuve tout', '#fcd34d'); sunLabel.position.set(0, 34, 0); root.add(sunLabel); labels.push(sunLabel);
+      const sunHit = new THREE.Mesh(new THREE.SphereGeometry(30, 12, 12), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      sunHit.userData.id = 'sol'; root.add(sunHit); clickable.push(sunHit);
+
+      const addOrbite = (r, tilt, color) => {
+        const pts = [];
+        for (let i = 0; i <= 128; i++) { const a = i / 128 * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)); }
+        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({ color, transparent: true, opacity: .14 }));
+        const g = new THREE.Group(); g.rotation.x = tilt; g.add(line); root.add(g);
+        orbitLines.push(line); return g;
+      };
+
+      const SIZES = { jupiter: 11.5, uranus: 8, neptune: 7.8, terre: 6.2, venus: 6, mars: 5.2, pluton: 4, mercure: 4.4 };
+      const addCorps = (b, r, tilt, size) => {
+        const pivot = addOrbite(r, tilt, new THREE.Color(b.color || '#94a3b8').getHex());
+        const col = new THREE.Color(b.color || '#94a3b8');
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 28, 28),
+          new THREE.MeshStandardMaterial({ color: col, roughness: .55, metalness: .25, emissive: col, emissiveIntensity: .18 }));
+        mesh.position.x = r; pivot.add(mesh); spinners.push(mesh);
+        if (b.id === 'terre') { const glow = mkGlow('rgba(56,189,248,1)', 34); glow.position.x = r; pivot.add(glow); }
+        const lbl = mkLabel(b.symbol + ' ' + b.name, b.color || '#cbd5e1');
+        lbl.position.set(r, size + 6, 0); pivot.add(lbl); labels.push(lbl);
+        const hit = new THREE.Mesh(new THREE.SphereGeometry(Math.max(9, size + 4), 10, 10),
+          new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+        hit.position.x = r; hit.userData.id = b.id; pivot.add(hit); clickable.push(hit);
+        return { pivot, mesh, r, w: (30 / r) * .38 };
+      };
+
+      // planètes par orbit_r réel + corps spéciaux
+      const planets = bodies.filter(b => b.kind === 'planet').sort((a, b) => (a.orbit_r ?? 0) - (b.orbit_r ?? 0));
+      const tours = [];
+      planets.forEach((b, i) => tours.push(addCorps(b, 62 + i * 27, ((i % 3) - 1) * .1, SIZES[b.id] || (b.naine ? 3.4 : 5.5))));
+      if (by.sebas) tours.push(addCorps(by.sebas, 44, .22, 3.2));              // l'exécuteur, près du soleil
+      if (by.themis) tours.push(addCorps(by.themis, 62 + planets.length * 27, -.14, 5)); // la justice, dernière orbite
+      if (by.ananke) tours.push(addCorps(by.ananke, 62 + (planets.length + 1) * 27, .42, 4.4)); // le destin, incliné
+      if (by.laplace) {
+        // ✳ Laplace : nébuleuse violette enveloppant le système — l'interlocuteur
+        const r = 62 + (planets.length + 2) * 27, pivot = addOrbite(r, .3, 0x8b5cf6);
+        const n = 420, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++) {
+          pos[i*3] = r + (Math.random() - .5) * 46; pos[i*3+1] = (Math.random() - .5) * 34; pos[i*3+2] = (Math.random() - .5) * 46;
+          const v = Math.random(); col[i*3] = .55 + v * .3; col[i*3+1] = .35 + v * .25; col[i*3+2] = .95;
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+        const neb = new THREE.Points(g, new THREE.PointsMaterial({ size: 2.6, vertexColors: true, transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false }));
+        pivot.add(neb);
+        const lbl = mkLabel('✳ Laplace — votre interlocuteur', '#c4b5fd'); lbl.position.set(r, 21, 0); pivot.add(lbl); labels.push(lbl);
+        const hit = new THREE.Mesh(new THREE.SphereGeometry(20, 10, 10), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+        hit.position.x = r; hit.userData.id = 'laplace'; pivot.add(hit); clickable.push(hit);
+        tours.push({ pivot, r, w: (30 / r) * .3 });
+      }
+      // l'utilisateur incarné : satellite de la Terre
+      if (by.terre) {
+        const ti = planets.findIndex(p => p.id === 'terre'), tp = tours[ti];
+        if (tp) {
+          const you = new THREE.Mesh(new THREE.OctahedronGeometry(2.3),
+            new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 1.1, wireframe: true }));
+          tp.pivot.add(you); spinners.push(you);
+          const yGlow = mkGlow('rgba(34,211,238,1)', 14); tp.pivot.add(yGlow);
+          const lbl = mkLabel('🕴 vous', '#67e8f9'); tp.pivot.add(lbl); labels.push(lbl);
+          self._uniYou = { mesh: you, glow: yGlow, lbl, r: tp.r, a: 0 };
+        }
+      }
+
+      // interaction : drag = tourner, molette = zoom, clic = fiche
+      let drag = false, moved = 0, px = 0, py = 0, lastTouch = 0;
+      const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+      cv.addEventListener('pointerdown', e => { drag = true; moved = 0; px = e.clientX; py = e.clientY; });
+      addEventListener('pointerup', e => {
+        if (!drag) return; drag = false;
+        if (moved < 5) {
+          ptr.x = (e.clientX / innerWidth) * 2 - 1; ptr.y = -(e.clientY / innerHeight) * 2 + 1;
+          ray.setFromCamera(ptr, cam);
+          const hit = ray.intersectObjects(clickable, false)[0];
+          if (hit) self.uniFiche(hit.object.userData.id);
+        }
+      });
+      addEventListener('pointermove', e => {
+        if (!drag) return;
+        const dx = e.clientX - px, dy = e.clientY - py; px = e.clientX; py = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+        root.rotation.y += dx * .0042;
+        root.rotation.x = Math.max(-.85, Math.min(.85, root.rotation.x + dy * .0032));
+        lastTouch = performance.now();
+      });
+      cv.addEventListener('wheel', e => {
+        e.preventDefault();
+        cam.position.multiplyScalar(e.deltaY > 0 ? 1.07 : .93);
+        if (cam.position.length() < 130) cam.position.setLength(130);
+        if (cam.position.length() > 1100) cam.position.setLength(1100);
+      }, { passive: false });
+      addEventListener('resize', () => {
+        renderer.setSize(innerWidth, innerHeight);
+        cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix();
+      });
+
+      let last = performance.now();
+      const loop = () => {
+        if (!document.getElementById('universCanvas')) { self._uniOn = false; return; }
+        const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
+        const v = self.uSpeed;
+        for (const t of tours) t.pivot.rotation.y += t.w * dt * v;
+        for (const m of spinners) m.rotation.y += .35 * dt * Math.max(v, .15);
+        if (self._uniYou) {
+          const y = self._uniYou; y.a += dt * v * 1.4;
+          const R = 11;
+          y.mesh.position.set(y.r + Math.cos(y.a) * R, Math.sin(y.a * .6) * 3.4, Math.sin(y.a) * R);
+          y.glow.position.copy(y.mesh.position);
+          y.lbl.position.set(y.mesh.position.x, 7.5, y.mesh.position.z);
+        }
+        sunGlow.material.opacity = .75 + .25 * Math.sin(now / 700);
+        if (now - lastTouch > 3500) root.rotation.y += .016 * dt;
+        sunLabel.visible = labels[0].visible = self.uLabels;
+        for (const l of labels) l.visible = self.uLabels;
+        for (const o of orbitLines) o.visible = self.uOrbits;
+        renderer.render(scene, cam);
+        requestAnimationFrame(loop);
+      };
+      loop();
     },
 
     async loadProfilPerso(){
@@ -1242,6 +1564,8 @@ function app() {
     bio: null, cogGauges: [], hud: [], simHud: [], _hudAnchors: null,
     opMode: 'corps', simCases: [], simCaseId: 'horreur',
     mg: null, mgSel: null, mgInput: '', mgReply: '', mgBusy: false,
+    univers: null, uSel: null, uFiche: null, uLabels: true, uOrbits: true, uSpeed: 1,
+    dockFx: false, dockOpt: false,
 
     // 🧠 constructeur partagé : la forme du cerveau (mêmes circonvolutions,
     // cervelet, tronc, neurones, impulsions) — utilisée par la vue du haut,
@@ -2019,6 +2343,7 @@ function app() {
       this.activeTab=tab;
       this.$nextTick(()=>{lucide.createIcons();
         if(tab==='dashboard'){this.renderCharts();this.loadDashboardMetrics();this.initOperator();}
+        if(tab==='univers'){this.loadUnivers().then(()=>setTimeout(()=>this.initUnivers(),250));}
         if(tab==='mobiglas'){this.loadMobiglas().then(()=>this.initMobiglas());}
         if(tab==='brain'){this.loadBio();setTimeout(()=>{this.initBrain();this.initSimulation();this.initMetrics3d();},200);}
         if(tab==='graph'){setTimeout(()=>this.initObsidianGraph(),200);this.loadConstellations();}
