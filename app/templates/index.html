@@ -134,7 +134,7 @@
       </template>
     </nav>
     <div class="hidden xl:flex items-center space-x-2">
-      <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">v4.0</span>
+      <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">v5.0</span>
     </div>
   </div>
 </header>
@@ -145,6 +145,7 @@
   <section x-show="activeTab==='univers'" class="fade-in fixed inset-0 z-0 overflow-hidden">
     <canvas id="universCanvas" class="absolute inset-0 w-full h-full"></canvas>
     <div class="absolute inset-0 mg-scan pointer-events-none"></div>
+    <div id="uniTip" class="hidden absolute z-30 px-2 py-0.5 rounded-md bg-black/85 border border-white/15 text-[10px] text-slate-200 mono pointer-events-none shadow-lg"></div>
 
     <!-- marque discrète -->
     <div class="absolute top-3 left-4 flex items-center gap-2.5 pointer-events-none">
@@ -158,7 +159,8 @@
     <!-- aide -->
     <div class="absolute top-4 right-4 text-right pointer-events-none leading-relaxed">
       <p class="text-[9px] text-slate-500">glisser · tourner &nbsp;·&nbsp; molette · zoom</p>
-      <p class="text-[9px] text-slate-500">clic sur un astre · <span class="text-cyan-400/80">sa fiche réelle</span></p>
+      <p class="text-[9px] text-slate-500">clic · <span class="text-cyan-400/80">fiche réelle</span> · <span class="text-violet-300/80">double-clic · suivre</span> (Échap libère)</p>
+      <p class="text-[9px] text-slate-500">survol d'une lune · <span class="text-slate-400">son nom</span></p>
     </div>
 
     <!-- fiche d'astre (données réelles) -->
@@ -1298,6 +1300,7 @@ function app() {
       };
 
       const bodies = this.univers, by = Object.fromEntries(bodies.map(b => [b.id, b]));
+      const moonPivots = [], hoverables = [];
       const clickable = [], orbitLines = [], labels = [], spinners = [];
 
       // ☉ SOL au centre
@@ -1308,6 +1311,16 @@ function app() {
       const sunLabel = mkLabel('☉ SOL — approuve tout', '#fcd34d'); sunLabel.position.set(0, 34, 0); root.add(sunLabel); labels.push(sunLabel);
       const sunHit = new THREE.Mesh(new THREE.SphereGeometry(30, 12, 12), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
       sunHit.userData.id = 'sol'; root.add(sunHit); clickable.push(sunHit);
+      // 👑 la cour du Soleil — membres de la maison en orbite dorée
+      (by.sol && by.sol.court ? by.sol.court : []).forEach((m, mi) => {
+        const cr = 33 + mi * 3.2;
+        const cp = new THREE.Group(); root.add(cp);
+        const cm = new THREE.Mesh(new THREE.SphereGeometry(1.5, 10, 10),
+          new THREE.MeshStandardMaterial({ color: 0xfcd34d, emissive: 0xd97706, emissiveIntensity: .6, roughness: .35 }));
+        cm.position.x = cr; cp.add(cm);
+        cm.userData.tip = m.name; hoverables.push(cm);
+        moonPivots.push({ p: cp, w: .5 / Math.sqrt(cr) });
+      });
 
       const addOrbite = (r, tilt, color) => {
         const pts = [];
@@ -1331,6 +1344,33 @@ function app() {
         const hit = new THREE.Mesh(new THREE.SphereGeometry(Math.max(9, size + 4), 10, 10),
           new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
         hit.position.x = r; hit.userData.id = b.id; pivot.add(hit); clickable.push(hit);
+        // 🌙 satellites (lunes réelles du registre) + 👑 cour — orbitent la planète
+        const moonRoot = new THREE.Group(); moonRoot.position.x = r; pivot.add(moonRoot);
+        (b.satellites || []).forEach((s, si) => {
+          const mr = size + 2.6 + si * 2.0;
+          const mp = new THREE.Group(); moonRoot.add(mp);
+          const mm = new THREE.Mesh(new THREE.SphereGeometry(.95, 10, 10),
+            new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: .85, emissive: 0x334155, emissiveIntensity: .5 }));
+          mm.position.x = mr; mp.add(mm);
+          mm.userData.tip = s.name; hoverables.push(mm);
+          moonPivots.push({ p: mp, w: 1.5 / Math.sqrt(mr) });
+        });
+        (b.court || []).forEach((m, mi) => {
+          const cr = size + 3.6 + mi * 2.6;
+          const cp = new THREE.Group(); moonRoot.add(cp);
+          const cm = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 10),
+            new THREE.MeshStandardMaterial({ color: 0xfcd34d, emissive: 0xb45309, emissiveIntensity: .55, roughness: .4 }));
+          cm.position.x = cr; cp.add(cm);
+          cm.userData.tip = m.name; hoverables.push(cm);
+          moonPivots.push({ p: cp, w: .55 / Math.sqrt(cr) });
+        });
+        // 💍 anneaux des géantes
+        if (['jupiter', 'uranus', 'neptune'].includes(b.id)) {
+          const ring = new THREE.Mesh(new THREE.RingGeometry(size + 2.4, size + 4.8, 72),
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: .22, side: THREE.DoubleSide }));
+          ring.rotation.x = Math.PI / 2 + (b.id === 'uranus' ? 1.22 : .16);
+          ring.position.x = r; pivot.add(ring);
+        }
         return { pivot, mesh, r, w: (30 / r) * .38 };
       };
 
@@ -1357,6 +1397,15 @@ function app() {
         const lbl = mkLabel('✳ Laplace — votre interlocuteur', '#c4b5fd'); lbl.position.set(r, 21, 0); pivot.add(lbl); labels.push(lbl);
         const hit = new THREE.Mesh(new THREE.SphereGeometry(20, 10, 10), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
         hit.position.x = r; hit.userData.id = 'laplace'; pivot.add(hit); clickable.push(hit);
+        // ✦ Métatron et les satellites de la nébuleuse
+        (by.laplace.satellites || []).forEach((s, si) => {
+          const mp = new THREE.Group(); pivot.add(mp);
+          const mm = new THREE.Mesh(new THREE.OctahedronGeometry(1.7),
+            new THREE.MeshStandardMaterial({ color: 0x67e8f9, emissive: 0x22d3ee, emissiveIntensity: .95, wireframe: true }));
+          mm.position.x = r + 15 + si * 7; mp.add(mm);
+          mm.userData.tip = s.name; hoverables.push(mm);
+          moonPivots.push({ p: mp, w: .38 });
+        });
         tours.push({ pivot, r, w: (30 / r) * .3 });
       }
       // l'utilisateur incarné : satellite de la Terre
@@ -1373,7 +1422,8 @@ function app() {
       }
 
       // interaction : drag = tourner, molette = zoom, clic = fiche
-      let drag = false, moved = 0, px = 0, py = 0, lastTouch = 0;
+      let drag = false, moved = 0, px = 0, py = 0, lastTouch = 0, followObj = null;
+      const followV = new THREE.Vector3();
       const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
       cv.addEventListener('pointerdown', e => { drag = true; moved = 0; px = e.clientX; py = e.clientY; });
       addEventListener('pointerup', e => {
@@ -1386,7 +1436,17 @@ function app() {
         }
       });
       addEventListener('pointermove', e => {
-        if (!drag) return;
+        if (!drag) {
+          ptr.x = (e.clientX / innerWidth) * 2 - 1; ptr.y = -(e.clientY / innerHeight) * 2 + 1;
+          ray.setFromCamera(ptr, cam);
+          const h = ray.intersectObjects(hoverables, false)[0];
+          const tip = document.getElementById('uniTip');
+          if (tip) {
+            if (h) { tip.textContent = h.object.userData.tip; tip.style.left = Math.min(innerWidth - 130, e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 12) + 'px'; tip.classList.remove('hidden'); }
+            else tip.classList.add('hidden');
+          }
+          return;
+        }
         const dx = e.clientX - px, dy = e.clientY - py; px = e.clientX; py = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
         root.rotation.y += dx * .0042;
         root.rotation.x = Math.max(-.85, Math.min(.85, root.rotation.x + dy * .0032));
@@ -1398,6 +1458,13 @@ function app() {
         if (cam.position.length() < 130) cam.position.setLength(130);
         if (cam.position.length() > 1100) cam.position.setLength(1100);
       }, { passive: false });
+      cv.addEventListener('dblclick', e => {
+        ptr.x = (e.clientX / innerWidth) * 2 - 1; ptr.y = -(e.clientY / innerHeight) * 2 + 1;
+        ray.setFromCamera(ptr, cam);
+        const h = ray.intersectObjects(clickable, false)[0];
+        followObj = h ? h.object : null;
+      });
+      addEventListener('keydown', e => { if (e.key === 'Escape') followObj = null; });
       addEventListener('resize', () => {
         renderer.setSize(innerWidth, innerHeight);
         cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix();
@@ -1409,6 +1476,7 @@ function app() {
         const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
         const v = self.uSpeed;
         for (const t of tours) t.pivot.rotation.y += t.w * dt * v;
+        for (const m of moonPivots) m.p.rotation.y += m.w * dt * Math.max(v, .15);
         for (const m of spinners) m.rotation.y += .35 * dt * Math.max(v, .15);
         if (self._uniYou) {
           const y = self._uniYou; y.a += dt * v * 1.4;
@@ -1416,6 +1484,13 @@ function app() {
           y.mesh.position.set(y.r + Math.cos(y.a) * R, Math.sin(y.a * .6) * 3.4, Math.sin(y.a) * R);
           y.glow.position.copy(y.mesh.position);
           y.lbl.position.set(y.mesh.position.x, 7.5, y.mesh.position.z);
+        }
+        if (followObj) {
+          followObj.getWorldPosition(followV);
+          const dir = cam.position.clone().sub(followV).normalize();
+          const dist = Math.max(42, Math.min(cam.position.distanceTo(followV), 520));
+          cam.position.lerp(followV.clone().add(dir.multiplyScalar(dist)), .06);
+          cam.lookAt(followV);
         }
         sunGlow.material.opacity = .75 + .25 * Math.sin(now / 700);
         if (now - lastTouch > 3500) root.rotation.y += .016 * dt;

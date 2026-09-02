@@ -1040,3 +1040,25 @@ automatique après inactivité. Analyse complète + feuille de route R1→R7
 **`docs/UIUX_ROADMAP.md`**.
 
 **Tests : 151** (149 + home épuré/dock/fiches + registre orbit_r).
+
+## Round R1bis 🌙 — la vue Univers habitée : satellites, anneaux, cours + suivi
+
+La vue solaire de l'accueil reprend les features des vues solaires des IA —
+**le système est maintenant habité** (données réelles du registre, 27 lunes et
+12 membres de cour) :
+
+- **🌙 Lunes** : chaque satellite du registre orbite sa planète (Charon ⚰ et
+  Styx ☠ autour de Pluton, les 7 lunes d'Uranus, Deimos/Phobos autour de Mars,
+  la Lune autour de la Terre près de l'utilisateur 🕴…) ; **survol = son nom**
+  (tooltip), vitesse ∝ 1/√r ;
+- **👑 Cours** : les membres de la maison en orbite dorée — cour du Soleil
+  (Apollon 🏆), cour de Vénus (Thalie et la comptabilité…), Mercure, Cérès ;
+- **💍 Anneaux** : Jupiter, Neptune, et Uranus quasi verticaux (tilt 1.22 rad) ;
+- **✦ Métatron** en octaèdre cyan wireframe, satellite de la nébuleuse Laplace ;
+- **Double-clic = suivre** (zoom + verrouillage caméra, la règle du projet
+  désormais appliquée à l'accueil) — **Échap** libère, clic sur astre vide
+  libère aussi ; aide de la vue à jour ;
+- badge de version actualisé (v5.0).
+
+**Tests : 153** (151 + rendu lunes/cours/anneaux/suivi/tooltip + registre
+satellites/cour via API).

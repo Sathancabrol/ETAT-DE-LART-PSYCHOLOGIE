@@ -1893,3 +1893,39 @@ def test_univers_registre_orbitr():
     c = TestClient(app)
     bodies = c.get("/api/cosmos/bodies").json()
     assert len(bodies) == 15 and any(b["id"] == "terre" for b in bodies)
+
+
+# ═══ ROUND R1bis 🌙 — satellites, anneaux, cours + double-clic suivre ═══
+
+def test_r1bis_satellites_anneaux_cours_et_suivi():
+    """La vue Univers reprend les features des vues solaires : lunes réelles,
+    anneaux des géantes, cours de SOL/Vénus, survol=nom, double-clic=suivre."""
+    idx = (Path(__file__).resolve().parents[1] / "app" / "templates" / "index.html").read_text(encoding="utf-8")
+    # lunes + cour rendues depuis le registre, anneaux des géantes
+    assert "(b.satellites || [])" in idx and "(b.court || [])" in idx
+    assert "by.sol.court" in idx and "by.laplace.satellites" in idx
+    assert "moonRoot" in idx and "moonPivots" in idx and "RingGeometry" in idx
+    assert "'uranus' ? 1.22" in idx                       # anneaux d'Uranus quasi verticaux
+    # survol d'une lune → son nom (tooltip)
+    assert "uniTip" in idx and "hoverables" in idx and "userData.tip" in idx
+    # double-clic = suivre (zoom+lock), Échap libère — règle projet appliquée à l'accueil
+    assert "dblclick" in idx and "followObj" in idx and "getWorldPosition" in idx
+    assert "Escape" in idx and "double-clic · suivre" in idx
+    # cosmétique : badge à jour
+    assert "v5.0" in idx and "v4.0" not in idx
+
+def test_r1bis_registre_satellites_et_cour():
+    """Le registre expose les satellites et les cours : la vue est aliméntée
+    en données réelles (27 lunes, 12 membres de cour)."""
+    from cosmos.bodies import celestial_registry
+    reg = celestial_registry()
+    sats = [(b["id"], len(b["satellites"])) for b in reg if b.get("satellites")]
+    court = [(b["id"], len(b["court"])) for b in reg if b.get("court")]
+    assert sum(n for _, n in sats) >= 25 and ("uranus", 7) in sats and ("pluton", 2) in sats
+    assert sum(n for _, n in court) >= 10 and ("sol", 1) in court and ("venus", 4) in court
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    bodies = c.get("/api/cosmos/bodies").json()
+    assert any(len(b.get("satellites", [])) >= 7 for b in bodies)   # Uranus livrée par l'API
+    assert any(b.get("court") for b in bodies)
