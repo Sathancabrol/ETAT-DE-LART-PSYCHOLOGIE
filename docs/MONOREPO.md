@@ -2,8 +2,9 @@
 
 ## Le dépôt
 
-`sathancabrol-monorepo` (dépôt git **séparé**, à côté de celui-ci) contient
-les 8 projets importés tels quels depuis leur branche `main` :
+[`Sathancabrol/monorepo`](https://github.com/Sathancabrol/monorepo) (dépôt
+**séparé**, à cloner à côté de celui-ci) contient les 8 projets importés
+tels quels depuis leur branche `main` :
 
 ```
 sathancabrol-monorepo/
@@ -59,11 +60,13 @@ cd projects/<vite-projet> && npm install && npx vite build --base=./
 ## Lancement
 
 ```bash
+git clone https://github.com/Sathancabrol/monorepo.git ../monorepo
 pip install -r requirements.txt
-MONOREPO_PATH=/home/user/sathancabrol-monorepo \
+MONOREPO_PATH=../monorepo \
   uvicorn app.main:app --host 0.0.0.0 --port 8000
 # → http://localhost:8000/monorepo
 ```
 
-Sans `MONOREPO_PATH`, l'app cherche `../sathancabrol-monorepo` puis
-`/home/user/sathancabrol-monorepo`, sinon 503 explicite.
+Sans `MONOREPO_PATH`, l'app cherche `../monorepo`,
+`../sathancabrol-monorepo` puis `/home/user/sathancabrol-monorepo`,
+sinon 503 explicite.

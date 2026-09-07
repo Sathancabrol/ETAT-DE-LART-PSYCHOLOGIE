@@ -1117,6 +1117,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MONOREPO_CANDIDATES = [
     os.environ.get("MONOREPO_PATH", ""),
     os.path.join(REPO_ROOT, "monorepo"),
+    os.path.join(REPO_ROOT, "..", "monorepo"),
     os.path.join(REPO_ROOT, "..", "sathancabrol-monorepo"),
     "/home/user/sathancabrol-monorepo",
 ]
