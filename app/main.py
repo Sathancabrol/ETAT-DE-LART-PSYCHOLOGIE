@@ -1103,3 +1103,248 @@ def github_refresh(owner: Optional[str] = None):
             "generated_at": new.get("generated_at"),
             "repo_count": len(new.get("repos", [])),
             "log": (proc.stderr or "")[-800:]}
+
+# ──────────────── MONOREPO NAVIGATEUR + PREVIEWS ────────────────
+# Lit le monorepo local (sathancabrol-monorepo) : exploration des fichiers
+# et previews web servies en same-origin (iframe navigable).
+import mimetypes
+
+mimetypes.add_type("application/wasm", ".wasm")
+mimetypes.add_type("application/json", ".geojsonl")
+mimetypes.add_type("text/javascript", ".mjs")
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MONOREPO_CANDIDATES = [
+    os.environ.get("MONOREPO_PATH", ""),
+    os.path.join(REPO_ROOT, "monorepo"),
+    os.path.join(REPO_ROOT, "..", "sathancabrol-monorepo"),
+    "/home/user/sathancabrol-monorepo",
+]
+
+BINARY_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".ico", ".svg",
+               ".pdf", ".zip", ".gz", ".mp3", ".wav", ".ogg", ".mp4", ".webm",
+               ".woff", ".woff2", ".ttf", ".eot", ".wasm", ".pyc", ".patch"}
+CODE_EXTS = {".py", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".json",
+             ".jsonl", ".geojsonl", ".html", ".css", ".scss", ".xml", ".yml",
+             ".yaml", ".toml", ".ini", ".cfg", ".md", ".rst", ".txt", ".csv",
+             ".sh", ".c", ".h", ".java", ".go", ".rs", ".sql", ".vue"}
+LANG_MAP = {".py": "python", ".js": "javascript", ".mjs": "javascript",
+            ".cjs": "javascript", ".ts": "typescript", ".tsx": "tsx",
+            ".jsx": "jsx", ".json": "json", ".html": "xml", ".css": "css",
+            ".yml": "yaml", ".yaml": "yaml", ".toml": "ini", ".sh": "bash",
+            ".md": "markdown", ".xml": "xml", ".sql": "sql"}
+
+_mono_cache: Dict[str, Any] = {}
+
+
+def monorepo_root() -> str:
+    for c in MONOREPO_CANDIDATES:
+        if c and os.path.isdir(os.path.join(c, "projects")):
+            return os.path.normpath(c)
+    raise HTTPException(
+        status_code=503,
+        detail="Monorepo introuvable. Cloner 'sathancabrol-monorepo' a cote de "
+               "ce depot ou definir MONOREPO_PATH. Voir docs/MONOREPO.md.")
+
+
+def mono_projects_dir() -> str:
+    return os.path.join(monorepo_root(), "projects")
+
+
+def list_projects() -> List[str]:
+    base = mono_projects_dir()
+    return sorted(d for d in os.listdir(base)
+                  if os.path.isdir(os.path.join(base, d)) and not d.startswith("."))
+
+
+def safe_project_path(project: str, subpath: str = "") -> str:
+    if project not in list_projects():
+        raise HTTPException(status_code=404, detail=f"Projet '{project}' inconnu")
+    base = os.path.realpath(os.path.join(mono_projects_dir(), project))
+    target = os.path.realpath(os.path.join(base, subpath or ""))
+    if target != base and not target.startswith(base + os.sep):
+        raise HTTPException(status_code=400, detail="Chemin hors projet (traversal refuse)")
+    return target
+
+
+def project_manifest() -> Dict[str, Any]:
+    try:
+        with open(os.path.join(monorepo_root(), "MANIFEST.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def detect_entries(project: str) -> List[Dict[str, str]]:
+    """Points d'entree web (previews) d'un projet, par priorite."""
+    base = os.path.join(mono_projects_dir(), project)
+    entries: List[Dict[str, str]] = []
+
+    def exists(p: str) -> bool:
+        return os.path.isfile(os.path.join(base, p))
+
+    has_dist = exists("dist/index.html")
+    if has_dist:
+        entries.append({"label": "App buildée (dist)", "path": "dist/index.html"})
+    for cand, label in [("index.html", "Page d'accueil"),
+                        ("public/index.html", "Page publique"),
+                        ("docs/index.html", "Doc d'accueil")]:
+        if cand == "index.html" and has_dist:
+            continue  # source vite : inutilisable sans build, dist fait foi
+        if exists(cand):
+            entries.append({"label": label, "path": cand})
+    for extra in ["learning/index.html", "watchtower-mods/index.html"]:
+        if exists(extra):
+            entries.append({"label": extra.split("/")[0], "path": extra})
+    vis = os.path.join(base, "output", "visual")
+    if os.path.isdir(vis):
+        for f in sorted(os.listdir(vis)):
+            if f.endswith(".html"):
+                entries.append({"label": f"visuel : {f}",
+                                "path": f"output/visual/{f}"})
+    return entries
+
+
+def project_stats(project: str) -> Dict[str, int]:
+    if project in _mono_cache:
+        return _mono_cache[project]
+    base = os.path.join(mono_projects_dir(), project)
+    files = dirs = size = 0
+    for root, dnames, fnames in os.walk(base):
+        dnames[:] = [d for d in dnames if d != "node_modules"]
+        dirs += len(dnames)
+        for fn in fnames:
+            files += 1
+            try:
+                size += os.path.getsize(os.path.join(root, fn))
+            except OSError:
+                pass
+    st = {"files": files, "dirs": dirs, "size": size}
+    _mono_cache[project] = st
+    return st
+
+
+def file_kind(name: str) -> str:
+    ext = os.path.splitext(name)[1].lower()
+    if ext == ".md":
+        return "markdown"
+    if ext == ".html":
+        return "html"
+    if ext in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"}:
+        return "image"
+    if ext == ".pdf":
+        return "pdf"
+    if ext in CODE_EXTS:
+        return "code"
+    if ext in BINARY_EXTS:
+        return "binary"
+    return "other"
+
+
+@app.get("/monorepo", response_class=HTMLResponse)
+def monorepo_page(request: Request):
+    """Explorateur du monorepo + previews web navigables."""
+    return templates.TemplateResponse(request, "monorepo.html", {"request": request})
+
+
+@app.get("/api/mono/projects")
+def mono_projects():
+    manifest = project_manifest().get("projects", {})
+    out = []
+    for p in list_projects():
+        entries = detect_entries(p)
+        st = project_stats(p)
+        meta = manifest.get(p, {})
+        out.append({
+            "name": p, "url": meta.get("url"), "sha": meta.get("sha"),
+            "branch": meta.get("branch", "main"),
+            "stack": meta.get("stack", ""),
+            "entries": entries,
+            "preview_kind": ("built" if entries and entries[0]["path"].startswith("dist/")
+                             else "static" if entries else "none"),
+            **st,
+        })
+    return {"root": monorepo_root(), "count": len(out), "projects": out}
+
+
+@app.get("/api/mono/tree")
+def mono_tree(project: str = Query(...), path: str = Query(default="")):
+    target = safe_project_path(project, path)
+    if not os.path.isdir(target):
+        raise HTTPException(status_code=404, detail="Dossier introuvable")
+    rel = os.path.relpath(target, os.path.join(mono_projects_dir(), project))
+    rel = "" if rel == "." else rel
+    crumbs = [{"name": project, "path": ""}]
+    if rel:
+        acc = []
+        for part in rel.split(os.sep):
+            acc.append(part)
+            crumbs.append({"name": part, "path": "/".join(acc)})
+    dirs, files = [], []
+    for name in sorted(os.listdir(target)):
+        if name in {"node_modules", ".git"} or name.startswith("."):
+            continue
+        full = os.path.join(target, name)
+        rp = f"{rel}/{name}" if rel else name
+        if os.path.isdir(full):
+            dirs.append({"name": name, "path": rp})
+        else:
+            try:
+                size = os.path.getsize(full)
+            except OSError:
+                size = 0
+            files.append({"name": name, "path": rp, "size": size,
+                          "ext": os.path.splitext(name)[1].lower(),
+                          "kind": file_kind(name)})
+    return {"project": project, "path": rel, "breadcrumbs": crumbs,
+            "dirs": dirs, "files": files,
+            "truncated": len(dirs) + len(files) > 2000}
+
+
+@app.get("/api/mono/file")
+def mono_file(project: str = Query(...), path: str = Query(...)):
+    target = safe_project_path(project, path)
+    if not os.path.isfile(target):
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+    size = os.path.getsize(target)
+    ext = os.path.splitext(target)[1].lower()
+    kind = file_kind(os.path.basename(target))
+    raw_url = f"/mono/{project}/{path}"
+    if kind in {"binary", "image", "pdf"} or size > 2_000_000:
+        return {"project": project, "path": path, "size": size, "kind": kind,
+                "binary": True, "raw_url": raw_url}
+    try:
+        with open(target, "rb") as f:
+            raw = f.read(300_000)
+        if b"\x00" in raw:
+            return {"project": project, "path": path, "size": size, "kind": "binary",
+                    "binary": True, "raw_url": raw_url}
+        content = raw.decode("utf-8", errors="replace")
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return {"project": project, "path": path, "size": size, "kind": kind,
+            "binary": False, "content": content,
+            "truncated": size > 300_000,
+            "language": LANG_MAP.get(ext, "plaintext"), "raw_url": raw_url}
+
+
+@app.get("/mono/{project}/{subpath:path}")
+def mono_raw(project: str, subpath: str):
+    """Fichiers bruts du monorepo (alimente l'iframe preview, same-origin)."""
+    target = safe_project_path(project, subpath)
+    if os.path.isdir(target):
+        idx = os.path.join(target, "index.html")
+        if os.path.isfile(idx):
+            target = idx
+        else:
+            raise HTTPException(status_code=404,
+                                detail="Dossier sans index.html (utilisez l'explorateur)")
+    if not os.path.isfile(target):
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+    media, _ = mimetypes.guess_type(target)
+    return FileResponse(target, media_type=media or "application/octet-stream")
+
+
+@app.get("/mono")
+def mono_index():
+    return {"projects": list_projects(), "explorer": "/monorepo"}

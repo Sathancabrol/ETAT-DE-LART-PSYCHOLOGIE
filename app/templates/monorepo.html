@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monorepo — Explorateur & Previews</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+    [x-cloak] { display: none !important; }
+    :root {
+      --bg0:#030508; --bg1:#070b14; --bg2:#0d1320; --bg3:#151d2e;
+      --border:#1e293b; --border2:#334155;
+      --text1:#f1f5f9; --text2:#94a3b8; --text3:#64748b;
+      --emerald:#34d399; --cyan:#22d3ee; --amber:#fbbf24; --rose:#fb7185; --indigo:#818cf8;
+    }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg0); color:var(--text1); }
+    .font-mono { font-family:'JetBrains Mono',monospace; }
+    ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    .scrollbar-hide{-ms-overflow-style:none;scrollbar-width:none}.scrollbar-hide::-webkit-scrollbar{display:none}
+    .glass{background:rgba(13,19,32,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05)}
+    .glass-card{background:rgba(21,29,46,0.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
+    .proj-pill{transition:all .2s;cursor:pointer;border:1px solid var(--border)}
+    .proj-pill:hover{border-color:var(--emerald)}
+    .proj-pill.active{background:rgba(52,211,153,.10);border-color:rgba(52,211,153,.4)}
+    .row-hover:hover{background:rgba(255,255,255,.03)}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeInUp .35s ease-out}
+    .drawer{transition:transform .3s cubic-bezier(.4,0,.2,1)}
+    iframe#preview{width:100%;height:100%;border:0;background:#fff}
+    .md-body{font-size:12px;line-height:1.7;color:#cbd5e1}
+    .md-body h1,.md-body h2,.md-body h3{color:#fff;font-weight:700;margin:.8em 0 .4em}
+    .md-body h1{font-size:18px;border-bottom:1px solid var(--border);padding-bottom:.3em}
+    .md-body h2{font-size:15px}.md-body h3{font-size:13px}
+    .md-body a{color:var(--cyan)}.md-body code{background:rgba(255,255,255,.06);padding:0 4px;border-radius:4px;font-size:11px}
+    .md-body pre{background:#00000055;border:1px solid var(--border);border-radius:8px;padding:10px;overflow-x:auto}
+    .md-body pre code{background:none;padding:0}
+    .md-body ul{list-style:disc;padding-left:20px;margin:.4em 0}
+    .md-body ol{list-style:decimal;padding-left:20px;margin:.4em 0}
+    .md-body table{border-collapse:collapse;margin:.6em 0;font-size:11px}
+    .md-body th,.md-body td{border:1px solid var(--border);padding:4px 8px}
+    .md-body blockquote{border-left:2px solid var(--border2);padding-left:10px;color:var(--text2)}
+    pre.codebox{margin:0;background:#00000066;border:1px solid var(--border);border-radius:8px;overflow:auto}
+    pre.codebox code{background:none;font-size:11px;line-height:1.6}
+  </style>
+</head>
+<body class="h-full antialiased" x-data="monoApp()" x-init="init()" x-cloak>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="sticky top-0 z-40 glass border-b border-white/5">
+  <div class="max-w-[1920px] mx-auto px-4 md:px-6 flex items-center gap-2 h-14">
+    <a href="/" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0" title="Accueil Cognitorium">
+      <i data-lucide="home" class="w-4 h-4 text-slate-300"></i>
+    </a>
+    <a href="/repos" class="h-8 px-2.5 rounded-lg bg-white/5 border border-white/10 hidden sm:flex items-center gap-1.5 hover:bg-white/10 shrink-0" title="Panorama GitHub">
+      <i data-lucide="github" class="w-4 h-4 text-purple-300"></i><span class="text-[10px] text-slate-300">Panorama</span>
+    </a>
+    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-400 hidden sm:flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+      <i data-lucide="package-open" class="w-4 h-4 text-white"></i>
+    </div>
+    <div class="min-w-0 mr-2">
+      <h1 class="text-sm font-bold tracking-tight whitespace-nowrap">Monorepo</h1>
+      <p class="text-[9px] text-slate-600 -mt-0.5 whitespace-nowrap" x-text="statusLine()"></p>
+    </div>
+    <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-hide flex-1 py-1">
+      <template x-for="p in projects" :key="p.name">
+        <button @click="selectProject(p.name)" :class="project===p.name && 'active'" class="proj-pill rounded-lg px-2.5 py-1.5 text-left shrink-0">
+          <span class="text-[11px] font-bold font-mono block leading-tight" x-text="p.name"></span>
+          <span class="text-[8px] block leading-tight mt-0.5" :class="p.preview_kind==='built' ? 'text-emerald-400' : p.preview_kind==='static' ? 'text-cyan-400' : 'text-slate-600'" x-text="p.preview_kind==='built' ? '● preview buildée' : p.preview_kind==='static' ? '● preview statique' : '○ code seul'"></span>
+        </button>
+      </template>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1920px] mx-auto px-4 md:px-6 py-4">
+  <div x-show="loading" class="glass-card rounded-xl p-10 text-center">
+    <i data-lucide="loader-2" class="w-6 h-6 text-emerald-400 mx-auto mb-3 animate-spin"></i>
+    <p class="text-xs text-slate-500">Chargement du monorepo…</p>
+  </div>
+  <div x-show="!loading && globalError" class="rounded-xl p-5 border border-rose-500/30 bg-rose-500/5">
+    <div class="flex items-start space-x-3">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
+      <div>
+        <h3 class="text-sm font-bold text-rose-300">Monorepo inaccessible</h3>
+        <p class="text-[11px] text-slate-400 mt-1" x-text="globalError"></p>
+        <p class="text-[10px] text-slate-600 mt-2 font-mono">MONOREPO_PATH=/home/user/sathancabrol-monorepo uvicorn app.main:app --port 8000</p>
+      </div>
+    </div>
+  </div>
+
+  <div x-show="!loading && !globalError" class="grid grid-cols-1 xl:grid-cols-12 gap-4" style="height:calc(100vh - 130px);min-height:560px">
+
+    <!-- ══════════ EXPLORATEUR ══════════ -->
+    <section class="xl:col-span-4 glass-card rounded-xl flex flex-col overflow-hidden fade-in">
+      <div class="p-3 border-b border-white/5 shrink-0 space-y-2">
+        <div class="flex items-center gap-2">
+          <h2 class="text-xs font-bold flex items-center"><i data-lucide="folder-tree" class="w-3.5 h-3.5 text-emerald-400 mr-1.5"></i><span class="font-mono" x-text="project"></span></h2>
+          <a :href="currentProject()?.url" target="_blank" rel="noopener" x-show="currentProject()?.url" class="text-slate-600 hover:text-white" title="Dépôt d’origine sur GitHub"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+          <span class="text-[9px] text-slate-600 ml-auto whitespace-nowrap" x-text="currentProjectMeta()"></span>
+        </div>
+        <div class="flex items-center gap-1 text-[10px] font-mono overflow-x-auto scrollbar-hide whitespace-nowrap">
+          <template x-for="(c,i) in tree.breadcrumbs" :key="c.path">
+            <span class="flex items-center gap-1 shrink-0">
+              <button @click="browse(c.path)" class="text-slate-400 hover:text-white px-1 py-0.5 rounded hover:bg-white/5" x-text="c.name"></button>
+              <span x-show="i<tree.breadcrumbs.length-1" class="text-slate-700">/</span>
+            </span>
+          </template>
+        </div>
+        <input type="text" x-model="filter" placeholder="Filtrer ce dossier…" class="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-[11px] text-slate-300 focus:border-emerald-500 focus:outline-none">
+      </div>
+      <div class="flex-1 overflow-y-auto p-2">
+        <div x-show="treeLoading" class="text-center py-8"><i data-lucide="loader-2" class="w-5 h-5 text-emerald-400 mx-auto animate-spin"></i></div>
+        <div x-show="!treeLoading">
+          <template x-for="d in filteredDirs" :key="d.path">
+            <div @click="browse(d.path)" class="row-hover flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer">
+              <i data-lucide="folder" class="w-4 h-4 text-amber-400/80 shrink-0"></i>
+              <span class="text-[11px] font-mono text-slate-200 truncate" x-text="d.name"></span>
+              <i data-lucide="chevron-right" class="w-3 h-3 text-slate-700 ml-auto shrink-0"></i>
+            </div>
+          </template>
+          <template x-for="f in filteredFiles" :key="f.path">
+            <div @click="openFile(f.path)" class="row-hover flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer group">
+              <i :data-lucide="fileIcon(f.kind)" class="w-4 h-4 shrink-0" :class="fileColor(f.kind)"></i>
+              <span class="text-[11px] font-mono text-slate-300 truncate" x-text="f.name"></span>
+              <button x-show="f.kind==='html'" @click.stop="previewPath(f.path)" class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/25 opacity-0 group-hover:opacity-100 shrink-0">preview</button>
+              <span x-show="f.kind!=='html'" class="text-[9px] text-slate-700 font-mono ml-auto shrink-0" x-text="fmtSize(f.size)"></span>
+            </div>
+          </template>
+          <div x-show="filteredDirs.length===0 && filteredFiles.length===0" class="text-center py-8 text-[11px] text-slate-600">Dossier vide ou aucun résultat.</div>
+        </div>
+      </div>
+      <div class="p-2 border-t border-white/5 shrink-0">
+        <p class="text-[9px] text-slate-600 text-center" x-text="tree.dirs.length+' dossiers • '+tree.files.length+' fichiers dans ce dossier'"></p>
+      </div>
+    </section>
+
+    <!-- ══════════ PREVIEW ══════════ -->
+    <section class="xl:col-span-8 glass-card rounded-xl flex flex-col overflow-hidden fade-in">
+      <!-- barre d’adresse -->
+      <div class="p-2.5 border-b border-white/5 shrink-0 flex items-center gap-1.5 flex-wrap">
+        <button @click="pvHome()" class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white" title="Page d’accueil du projet"><i data-lucide="home" class="w-4 h-4"></i></button>
+        <button @click="pvBack()" class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white" title="Précédent (dans la preview)"><i data-lucide="arrow-left" class="w-4 h-4"></i></button>
+        <button @click="pvForward()" class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white" title="Suivant (dans la preview)"><i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+        <button @click="pvReload()" class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white" title="Recharger"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+        <div class="flex items-center gap-1 flex-1 min-w-[200px] bg-black/30 border border-white/10 rounded-lg px-2 py-1">
+          <i data-lucide="lock" class="w-3 h-3 text-emerald-500 shrink-0"></i>
+          <span class="text-[10px] font-mono text-slate-500 shrink-0 hidden sm:inline" x-text="'/mono/'+project+'/'"></span>
+          <input type="text" x-model="pvAddr" @keyup.enter="pvGo()" class="flex-1 min-w-0 bg-transparent text-[11px] font-mono text-slate-200 focus:outline-none" placeholder="chemin…">
+        </div>
+        <select x-model="pvEntry" @change="previewPath(pvEntry)" x-show="currentEntries().length>1" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[10px] text-slate-300 max-w-[220px]">
+          <template x-for="e in currentEntries()" :key="e.path"><option :value="e.path" x-text="e.label"></option></template>
+        </select>
+        <a :href="pvSrc" target="_blank" rel="noopener" class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white" title="Ouvrir la preview dans un nouvel onglet"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+      </div>
+      <!-- iframe / placeholder -->
+      <div class="flex-1 relative bg-white" x-show="hasPreview()">
+        <iframe id="preview" x-ref="preview" :src="pvSrc" @load="pvOnLoad()" title="Preview du projet"></iframe>
+        <div x-show="pvLoading" class="absolute inset-0 bg-[var(--bg1)] flex items-center justify-center">
+          <div class="text-center"><i data-lucide="loader-2" class="w-6 h-6 text-emerald-400 mx-auto mb-2 animate-spin"></i><p class="text-[11px] text-slate-500 font-mono" x-text="pvAddr"></p></div>
+        </div>
+      </div>
+      <div x-show="!hasPreview()" class="flex-1 flex items-center justify-center p-8 bg-[var(--bg1)]">
+        <div class="text-center max-w-md">
+          <i data-lucide="code-2" class="w-10 h-10 text-slate-700 mx-auto mb-3"></i>
+          <h3 class="text-sm font-bold">Pas d’aperçu web pour ce projet</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Projet non-web (code, docs, données). Explorez les fichiers à gauche — les README et le code s’ouvrent dans le volet.</p>
+          <button @click="openReadme()" class="mt-4 px-3 py-1.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-white text-[11px] font-medium">Ouvrir le README</button>
+        </div>
+      </div>
+      <div class="px-3 py-1.5 border-t border-white/5 shrink-0 flex items-center gap-2">
+        <p class="text-[9px] text-slate-600 truncate">Astuce : cliquez les liens <strong class="text-slate-400">dans</strong> la preview pour naviguer — la barre d’adresse suit, et ←/→ permettent de revenir en arrière.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ══════════ VOLET FICHIER ══════════ -->
+<div x-show="viewer.open" class="fixed inset-0 z-50" x-transition.opacity>
+  <div class="absolute inset-0 bg-black/60" style="backdrop-filter:blur(2px)" @click="viewer.open=false"></div>
+  <aside class="drawer absolute top-0 right-0 h-full w-full sm:w-[560px] glass border-l border-white/10 flex flex-col" :class="viewer.open ? 'translate-x-0' : 'translate-x-full'">
+    <div class="p-4 border-b border-white/5 shrink-0">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <p class="text-[9px] uppercase tracking-wider font-semibold text-emerald-400 font-mono" x-text="project+' / '+viewer.dir"></p>
+          <h2 class="text-sm font-bold font-mono truncate" x-text="viewer.name"></h2>
+        </div>
+        <button @click="viewer.open=false" class="text-slate-500 hover:text-white shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400" x-text="viewer.kind"></span>
+        <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 font-mono" x-text="fmtSize(viewer.size)"></span>
+        <button x-show="viewer.kind==='html'" @click="previewPath(viewer.path); viewer.open=false" class="text-[10px] px-2 py-1 rounded-lg bg-cyan-600/80 hover:bg-cyan-600 text-white">Voir dans la preview</button>
+        <a :href="viewer.raw_url" target="_blank" rel="noopener" class="text-[10px] px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10">Ouvrir brut</a>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4">
+      <div x-show="viewer.loading" class="text-center py-12"><i data-lucide="loader-2" class="w-5 h-5 text-emerald-400 mx-auto animate-spin"></i></div>
+      <div x-show="!viewer.loading && viewer.error" class="text-[11px] text-rose-400" x-text="viewer.error"></div>
+      <!-- markdown -->
+      <div x-show="!viewer.loading && !viewer.error && viewer.kind==='markdown'" class="md-body" x-html="viewer.rendered"></div>
+      <!-- code -->
+      <div x-show="!viewer.loading && !viewer.error && (viewer.kind==='code' || viewer.kind==='html' || viewer.kind==='other')">
+        <p x-show="viewer.truncated" class="text-[10px] text-amber-400 mb-2">Fichier tronqué à 300 Ko — <a :href="viewer.raw_url" target="_blank" class="underline">ouvrir brut</a> pour le tout.</p>
+        <pre class="codebox"><code x-ref="codebox" :class="'language-'+viewer.language" x-text="viewer.content"></code></pre>
+      </div>
+      <!-- image -->
+      <div x-show="!viewer.loading && !viewer.error && viewer.kind==='image'" class="text-center">
+        <img :src="viewer.raw_url" class="max-w-full rounded-lg border border-white/10 mx-auto" style="background:repeating-conic-gradient(#111 0 25%, #1a1a1a 0 50%) 0 0/20px 20px" alt="preview image">
+      </div>
+      <!-- pdf -->
+      <div x-show="!viewer.loading && !viewer.error && viewer.kind==='pdf'" style="height:70vh">
+        <iframe :src="viewer.raw_url" class="w-full h-full rounded-lg border border-white/10" title="PDF"></iframe>
+      </div>
+      <!-- binaire -->
+      <div x-show="!viewer.loading && !viewer.error && viewer.kind==='binary'" class="text-center py-12">
+        <i data-lucide="file-box" class="w-10 h-10 text-slate-700 mx-auto mb-3"></i>
+        <p class="text-[11px] text-slate-500">Fichier binaire (<span x-text="fmtSize(viewer.size)"></span>) — prévisualisation impossible.</p>
+        <a :href="viewer.raw_url" target="_blank" rel="noopener" class="inline-block mt-3 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] text-slate-300">Télécharger / ouvrir brut</a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer class="max-w-[1920px] mx-auto px-4 md:px-6 pb-5">
+  <p class="text-[9px] text-slate-700 font-mono" x-text="footerLine()"></p>
+</footer>
+
+<script>
+function monoApp() {
+  return {
+    loading: true, globalError: "", projects: [], project: "",
+    tree: {breadcrumbs: [], dirs: [], files: []}, treeLoading: false, filter: "",
+    pvSrc: "about:blank", pvAddr: "", pvEntry: "", pvLoading: false,
+    viewer: {open: false, loading: false, name: "", dir: "", path: "", kind: "", size: 0, language: "plaintext", content: "", rendered: "", truncated: false, raw_url: "", error: ""},
+
+    async init() {
+      try {
+        const r = await fetch("/api/mono/projects");
+        if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || ("HTTP " + r.status)); }
+        const d = await r.json();
+        this.projects = d.projects || [];
+        this.rootPath = d.root;
+        if (this.projects.length) await this.selectProject(this.projects[0].name);
+      } catch (e) { this.globalError = String(e.message || e); }
+      finally { this.loading = false; this.$nextTick(() => lucide.createIcons()); }
+    },
+
+    currentProject() { return this.projects.find(p => p.name === this.project); },
+    currentEntries() { return this.currentProject()?.entries || []; },
+    hasPreview() { return this.currentEntries().length > 0; },
+    currentProjectMeta() {
+      const p = this.currentProject();
+      if (!p) return "";
+      return p.files + " fichiers • " + this.fmtSize(p.size) + (p.sha ? " • " + p.sha : "");
+    },
+    statusLine() {
+      if (!this.projects.length) return "explorateur + previews";
+      const n = this.projects.reduce((a, p) => a + p.files, 0);
+      return this.projects.length + " projets • " + n + " fichiers • " + this.projects.filter(p => p.entries.length).length + " previews web";
+    },
+    footerLine() {
+      return "monorepo : " + (this.rootPath || "—") + " • previews servies en same-origin (/mono/<projet>/…) — navigation interne suivie par la barre d’adresse";
+    },
+
+    async selectProject(name) {
+      this.project = name;
+      this.filter = "";
+      await this.browse("");
+      const entries = this.currentEntries();
+      if (entries.length) this.previewPath(entries[0].path);
+      else { this.pvSrc = "about:blank"; this.pvAddr = ""; }
+      this.$nextTick(() => lucide.createIcons());
+    },
+
+    async browse(path) {
+      this.treeLoading = true;
+      try {
+        const r = await fetch("/api/mono/tree?project=" + encodeURIComponent(this.project) + "&path=" + encodeURIComponent(path));
+        this.tree = await r.json();
+      } catch (e) { console.error(e); }
+      finally { this.treeLoading = false; this.$nextTick(() => lucide.createIcons()); }
+    },
+
+    get filteredDirs() {
+      const q = this.filter.toLowerCase().trim();
+      return (this.tree.dirs || []).filter(d => !q || d.name.toLowerCase().includes(q));
+    },
+    get filteredFiles() {
+      const q = this.filter.toLowerCase().trim();
+      return (this.tree.files || []).filter(f => !q || f.name.toLowerCase().includes(q));
+    },
+
+    fileIcon(kind) {
+      return {markdown: "book-open", html: "globe", image: "image", pdf: "file-text", code: "file-code", binary: "file-box", other: "file"}[kind] || "file";
+    },
+    fileColor(kind) {
+      return {markdown: "text-purple-400", html: "text-cyan-400", image: "text-amber-400", pdf: "text-rose-400", code: "text-slate-500", binary: "text-slate-700", other: "text-slate-600"}[kind] || "text-slate-600";
+    },
+    fmtSize(n) {
+      if (n === undefined || n === null) return "";
+      if (n < 1024) return n + " o";
+      if (n < 1048576) return (n / 1024).toFixed(1) + " Ko";
+      return (n / 1048576).toFixed(1) + " Mo";
+    },
+
+    // ─── preview navigable ───
+    previewPath(path) {
+      const clean = String(path).replace(/^\/+/, "");
+      this.pvEntry = clean;
+      this.pvAddr = clean;
+      this.pvLoading = true;
+      this.pvSrc = "/mono/" + this.project + "/" + clean.split("/").map(encodeURIComponent).join("/");
+    },
+    pvHome() { const e = this.currentEntries(); if (e.length) this.previewPath(e[0].path); },
+    pvBack() { try { this.$refs.preview.contentWindow.history.back(); } catch (e) {} },
+    pvForward() { try { this.$refs.preview.contentWindow.history.forward(); } catch (e) {} },
+    pvReload() { try { this.pvLoading = true; this.$refs.preview.contentWindow.location.reload(); } catch (e) { this.pvLoading = false; } },
+    pvGo() { if (this.pvAddr.trim()) this.previewPath(this.pvAddr.trim()); },
+    pvOnLoad() {
+      this.pvLoading = false;
+      try {
+        const u = new URL(this.$refs.preview.contentWindow.location.href);
+        const prefix = "/mono/" + this.project + "/";
+        if (u.pathname.startsWith(prefix)) {
+          this.pvAddr = decodeURIComponent(u.pathname.slice(prefix.length)) + (u.search || "") + (u.hash || "");
+          if (this.currentEntries().some(e => e.path === this.pvAddr.split(/[?#]/)[0])) this.pvEntry = this.pvAddr.split(/[?#]/)[0];
+        }
+      } catch (e) { /* page externe : on garde l’adresse précédente */ }
+      this.$nextTick(() => lucide.createIcons());
+    },
+
+    // ─── visualiseur de fichier ───
+    async openFile(path) {
+      const parts = path.split("/");
+      this.viewer = {open: true, loading: true, name: parts[parts.length - 1], dir: parts.slice(0, -1).join("/") || "(racine)", path, kind: "", size: 0, language: "plaintext", content: "", rendered: "", truncated: false, raw_url: "", error: ""};
+      try {
+        const r = await fetch("/api/mono/file?project=" + encodeURIComponent(this.project) + "&path=" + encodeURIComponent(path));
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const d = await r.json();
+        Object.assign(this.viewer, {kind: d.kind, size: d.size, language: d.language || "plaintext", content: d.content || "", truncated: !!d.truncated, raw_url: d.raw_url});
+        if (d.kind === "markdown" && d.content) {
+          this.viewer.rendered = marked.parse(d.content);
+        }
+      } catch (e) { this.viewer.error = "Impossible d’ouvrir ce fichier : " + (e.message || e); }
+      finally {
+        this.viewer.loading = false;
+        this.$nextTick(() => {
+          lucide.createIcons();
+          if ((this.viewer.kind === "code" || this.viewer.kind === "html" || this.viewer.kind === "other") && this.viewer.content) {
+            try { hljs.highlightElement(this.$refs.codebox); } catch (e) {}
+          }
+        });
+      }
+    },
+    async openReadme() {
+      const names = (this.tree.files || []).map(f => f.name);
+      const rm = names.find(n => n.toLowerCase() === "readme.md") || names.find(n => n.toLowerCase().startsWith("readme"));
+      if (rm) this.openFile((this.tree.path ? this.tree.path + "/" : "") + rm);
+      else {
+        // chercher à la racine du projet
+        try {
+          const r = await fetch("/api/mono/tree?project=" + encodeURIComponent(this.project) + "&path=");
+          const d = await r.json();
+          const r2 = (d.files || []).map(f => f.name).find(n => n.toLowerCase().startsWith("readme"));
+          if (r2) this.openFile(r2);
+        } catch (e) {}
+      }
+    }
+  };
+}
+</script>
+</body>
+</html>

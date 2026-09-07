@@ -67,6 +67,9 @@
           <i :data-lucide="v.icon" class="w-3.5 h-3.5"></i><span x-text="v.label" class="hidden md:inline"></span>
         </button>
       </template>
+      <a href="/monorepo" class="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-emerald-500/25 text-emerald-300 hover:bg-emerald-500/10 flex items-center space-x-1.5" title="Explorer le monorepo (fichiers + previews)">
+        <i data-lucide="package-open" class="w-3.5 h-3.5"></i><span class="hidden md:inline">Monorepo</span>
+      </a>
       <button @click="refreshSnapshot()" :disabled="refreshing" class="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-40 flex items-center space-x-1.5" :title="refreshMsg || 'Regénérer le snapshot depuis l’API GitHub'">
         <i data-lucide="refresh-cw" class="w-3.5 h-3.5" :class="refreshing && 'animate-spin'"></i><span class="hidden md:inline" x-text="refreshing ? 'Actualisation…' : 'Actualiser'"></span>
       </button>
