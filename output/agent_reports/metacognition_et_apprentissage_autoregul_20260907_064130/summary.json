@@ -1,0 +1,32 @@
+{
+  "topic": "métacognition et apprentissage autorégulé",
+  "mode": "heuristique",
+  "demo": true,
+  "period": "2020-2026",
+  "papers": 4,
+  "trust_avg": 54,
+  "top_paper": "Yves Karlen et al. 2023",
+  "prisma": {
+    "identifiees": 4,
+    "doublons": 0,
+    "exclus": 0,
+    "retenus": 4,
+    "sources": [
+      "OpenAlex (fixtures démo, données réelles)"
+    ]
+  },
+  "sub_questions": [
+    "Quel est l'état des preuves empiriques sur « métacognition et apprentissage autorégulé » (designs, échantillons, effets) ?",
+    "Quels mécanismes et construits sont mobilisés pour expliquer « métacognition et apprentissage autorégulé » ?",
+    "Quelles limites méthodologiques et quels gaps la littérature récente identifie-t-elle sur « métacognition et apprentissage autorégulé » ?",
+    "Quelles applications concrètes (terrain) se dégagent des travaux sur « métacognition et apprentissage autorégulé » ?"
+  ],
+  "out_dir": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/agent_reports/metacognition_et_apprentissage_autoregul_20260907_064130",
+  "files": {
+    "rapport": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/agent_reports/metacognition_et_apprentissage_autoregul_20260907_064130/rapport.md",
+    "bibliographie_md": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/agent_reports/metacognition_et_apprentissage_autoregul_20260907_064130/bibliographie.md",
+    "bibliographie_bib": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/agent_reports/metacognition_et_apprentissage_autoregul_20260907_064130/bibliographie.bib",
+    "csv": "/home/user/ETAT-DE-LART-PSYCHOLOGIE/output/agent_reports/metacognition_et_apprentissage_autoregul_20260907_064130/nodes_agent.csv"
+  },
+  "duration_s": 0.0
+}

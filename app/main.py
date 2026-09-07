@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -903,3 +903,91 @@ def get_taxonomy():
             }
         ]
     }
+
+
+# ===========================================================================
+# AGENT DE RECHERCHE LITTÉRAIRE  (agent/ — pipeline planifier→chercher→
+# filtrer→analyser→scorer→comparer→appliquer→livrer)
+# ===========================================================================
+import sys as _sys
+import threading as _threading
+import uuid as _uuid
+
+_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _REPO_ROOT not in _sys.path:
+    _sys.path.insert(0, _REPO_ROOT)
+
+from agent.config import AgentConfig as _AgentConfig  # noqa: E402
+from agent.pipeline import run_research as _agent_run_research  # noqa: E402
+
+AGENT_JOBS: Dict[str, Dict[str, Any]] = {}
+_AGENT_LOCK = _threading.Lock()
+
+
+class AgentResearchRequest(BaseModel):
+    topic: str
+    from_year: int = 2020
+    to_year: int = 2026
+    max_papers: int = 8
+    demo: bool = True  # true = fixtures réelles hors-ligne ; false = API live (OpenAlex/Crossref/arXiv)
+
+
+def _run_agent_job(job_id: str, req: AgentResearchRequest):
+    def _progress(stage: str, pct: int, msg: str = ""):
+        with _AGENT_LOCK:
+            if job_id in AGENT_JOBS:
+                AGENT_JOBS[job_id]["progress"] = {"stage": stage, "pct": pct, "message": msg}
+    try:
+        cfg = _AgentConfig.from_env()
+        summary = _agent_run_research(
+            topic=req.topic, year_min=req.from_year, year_max=req.to_year,
+            max_papers=req.max_papers, cfg=cfg, demo=req.demo, progress=_progress,
+        )
+        with _AGENT_LOCK:
+            AGENT_JOBS[job_id]["status"] = "done"
+            AGENT_JOBS[job_id]["summary"] = summary
+    except Exception as exc:  # noqa: BLE001
+        with _AGENT_LOCK:
+            AGENT_JOBS[job_id]["status"] = "failed"
+            AGENT_JOBS[job_id]["error"] = str(exc)
+
+
+@app.post("/api/agent/research")
+def agent_launch_research(req: AgentResearchRequest, background_tasks: BackgroundTasks):
+    """Lance une recherche littéraire (asynchrone). Retourne un job_id à suivre."""
+    job_id = _uuid.uuid4().hex[:12]
+    with _AGENT_LOCK:
+        AGENT_JOBS[job_id] = {
+            "job_id": job_id, "status": "running", "request": req.model_dump(),
+            "progress": {"stage": "start", "pct": 0, "message": "Démarrage"},
+        }
+    background_tasks.add_task(_run_agent_job, job_id, req)
+    return {"job_id": job_id, "status_url": f"/api/agent/research/{job_id}"}
+
+
+@app.get("/api/agent/research")
+def agent_list_jobs():
+    with _AGENT_LOCK:
+        return JSONResponse(list(AGENT_JOBS.values()))
+
+
+@app.get("/api/agent/research/{job_id}")
+def agent_job_status(job_id: str):
+    with _AGENT_LOCK:
+        job = AGENT_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "job inconnu")
+    return JSONResponse(job)
+
+
+@app.get("/api/agent/research/{job_id}/report")
+def agent_job_report(job_id: str):
+    with _AGENT_LOCK:
+        job = AGENT_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "job inconnu")
+    summary = job.get("summary") or {}
+    report = (summary.get("files") or {}).get("rapport")
+    if not report or not os.path.exists(report):
+        raise HTTPException(404, f"rapport indisponible (statut: {job.get('status')})")
+    return FileResponse(report, media_type="text/markdown", filename="rapport.md")

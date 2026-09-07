@@ -33,6 +33,19 @@ scripts/
 ├── validate_entry.py                                   # Validation 28 mandatory, DOI regex, triangulation >=3, tags >=3, trust 0-100, dates ISO, duplicates
 ├── add_entry.py                                        # DOI → auto row via Crossref API
 └── (à venir) deduplicate.py, generate_visuals.py
+
+agent/                                                   # 🤖 AGENT DE RECHERCHE LITTÉRAIRE (v1)
+├── config.py           # config .env : provider LLM (none|openai|ollama), email, clés (jamais committées)
+├── llm.py              # couche LLM : OpenAI-compatible + Ollama + repli heuristique
+├── tools.py            # API scientifiques : OpenAlex, Crossref, arXiv (+ Semantic Scholar option)
+├── trust.py            # Trust Factor DÉTERMINISTE : M(30)+R(20)+O(20)+C(15)+T(15)-P, borné 0-100
+├── analysis.py         # analyse 42 champs : LLM (JSON) | heuristique (regex titres+abstracts)
+├── pipeline.py         # boucle agentique 8 étapes (plan→chercher→filtrer→analyser→scorer→comparer→appliquer→livrer)
+├── schema.py           # CSV 42 colonnes compatible validate_entry.py + références APA/BibTeX
+├── report.py           # rapport.md (PRISMA, comparatif Trust, fiches, applications, limites)
+├── cli.py              # python -m agent.cli "sujet" [--demo] [--from-year] [--max]
+└── fixtures/           # mode démo hors-ligne : 4 articles RÉELS capturés d'OpenAlex
+
 ```
 
 ## 🎯 12 Domaines couverts (analyse critique)
@@ -153,3 +166,47 @@ python scripts/validate_entry.py --file data/nodes_etat_art_psychologie.csv
 
 ---
 Généré 2026-08-25 - Version 2.0 corrigée répondant à analyse critique + base 42 champs + D3 interactif
+
+---
+
+## 🤖 Agent de recherche littéraire (v1)
+
+Agent autonome qui automatise l'exploration littéraire : **cherche → filtre (PRISMA) → analyse → score Trust Factor → compare → applications monde réel → livrables**.
+
+### Utilisation
+
+```bash
+# 1. Environnement
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+# 2. (optionnel mais recommandé) cerveau LLM : copier .env.example → .env et remplir
+#    AGENT_PROVIDER=none     → 100% heuristique (gratuit, sans clé)
+#    AGENT_PROVIDER=openai   → tout endpoint compatible OpenAI (Mistral, Groq…)
+#    AGENT_PROVIDER=ollama   → modèle local (privé)
+
+# 3. Lancer
+.venv/bin/python -m agent.cli "métacognition et apprentissage autorégulé" --from-year 2020 --to-year 2026
+.venv/bin/python -m agent.cli "..." --demo          # démo hors-ligne (fixtures réelles OpenAlex)
+```
+
+Sorties dans `output/agent_reports/<slug>_<ts>/` : `rapport.md`, `bibliographie.md`,
+`bibliographie.bib`, `nodes_agent.csv` (**passe validate_entry.py directement**), `summary.json`.
+
+### API FastAPI (Cognitorium)
+
+```bash
+.venv/bin/uvicorn app.main:app --port 8000
+POST /api/agent/research                  {"topic": "...", "demo": true}   → job_id
+GET  /api/agent/research/{job_id}         statut + progression + résumé
+GET  /api/agent/research/{job_id}/report  rapport.md
+```
+
+### Principe d'or : le code mesure, le LLM juge
+
+| Donnée | Produite par | Exemples |
+|---|---|---|
+| Citations, DOI, OA, années | API (OpenAlex/Crossref) | objectif, reproductible |
+| Design, validité, cohérence, gaps | LLM ou heuristique | jugement, justifié |
+| **Trust Factor** | **Python pur** (`agent/trust.py`) | M+R+O+C+T−P, déterministe |
+
+Tests : `.venv/bin/python -m pytest tests/ -v` (12 tests, 100 % hors-ligne).

@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "description": "Fixtures du mode démo (--demo) : métadonnées ET abstracts RÉELS, capturés depuis l'API OpenAlex (api.openalex.org) le 2026-09-07. Les abstracts ont été reconstitués depuis les abstract_inverted_index OpenAlex. Utilisées pour tester le pipeline sans appel réseau ; la recherche live interroge les API en direct.",
+    "topic": "metacognition self-regulated learning",
+    "period": "2020-2026"
+  },
+  "papers": [
+    {
+      "doi": "10.1016/j.tate.2023.104055",
+      "title": "Teachers as learners and agents of self-regulated learning: The importance of different teachers competence aspects for promoting metacognition",
+      "year": 2023,
+      "journal": "Teaching and Teacher Education",
+      "authors": ["Yves Karlen", "Carmen Nadja Hirt", "Johannes Jud", "Amina Rosenthal", "Tabea Daria Eberli"],
+      "cited_by_count": 118,
+      "is_oa": true,
+      "oa_url": "https://linkinghub.elsevier.com/retrieve/pii/S0742051X23000434",
+      "url": "https://doi.org/10.1016/j.tate.2023.104055",
+      "openalex_id": "W4319782117",
+      "sample_size": 185,
+      "abstract": "This study examines the extent to which teachers' competence aspects as self-regulated learners and agents of self-regulated learning (SRL) explain their self-reported and students' perceived promotion of metacognition. One hundred and eighty-five lower secondary school teachers participated in this study. The results reveal positive direct relationships between teachers' knowledge, self-efficacy, intrinsic interest value and the promotion of metacognition. Teachers' own SRL skills and mindsets about SRL were indirectly related to the promotion of metacognition via their self-efficacy and intrinsic interest value. This study provides new evidence of the importance of teachers' dual competence profile for promoting metacognition.",
+      "sources": ["OpenAlex", "Crossref", "doi.org"]
+    },
+    {
+      "doi": "10.1111/bjep.12402",
+      "title": "Implicit theories of self-regulated learning: Interplay with students' achievement goals, learning strategies, and metacognition",
+      "year": 2020,
+      "journal": "British Journal of Educational Psychology",
+      "authors": ["Silke Hertel", "Yves Karlen"],
+      "cited_by_count": 66,
+      "is_oa": true,
+      "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1111/bjep.12402",
+      "url": "https://doi.org/10.1111/bjep.12402",
+      "openalex_id": "W3117535682",
+      "abstract": "BACKGROUND: Implicit theories are important belief systems that influence an individual's motivation and behaviour. In academic contexts, domain-general implicit theories of ability (e.g., intelligence) and their relation to self-regulated learning (SRL) have been examined. AIMS: In this study, we followed a domain-specific approach and first introduced scales to assess students' implicit theories of the malleability and of the relevance of SRL. Second, we investigated how implicit theories of SRL are related to students' SRL. Third, we examined the relationship of implicit theories of SRL with students' demographics and personality traits. SAMPLE: Participants were students from a medium-sized university in Germany (N = 254) aged M = 23.85 years. METHODS: Data on students' demographics and personality traits, implicit theories of intelligence (INT), achievement goals, and learning strategies were collected with well-established measures. In addition, students' implicit theories of SRL and their declarative metacognitive knowledge about SRL were assessed with measures developed within this study. Confirmatory factor analyses and regression analyses were performed. RESULTS: The two postulated dimensions of implicit theories of SRL were supported. As expected, implicit theories of SRL were more strongly related to students' achievement goals, learning strategies, and metacognitive knowledge than implicit theories of INT. Moreover, implicit theories of SRL were mostly unrelated to students' demographics and personality traits. CONCLUSION: The results emphasize that domain-specific implicit theories of SRL contribute substantially to the explanation of students' SRL. Thus, further research on SRL should consider domain-specific implicit theories of SRL in addition to implicit theories of INT.",
+      "sources": ["OpenAlex", "Crossref", "doi.org"]
+    },
+    {
+      "doi": "10.1080/10401334.2021.1889559",
+      "title": "What Were You Thinking? Medical Students' Metacognition and Perceptions of Self-Regulated Learning",
+      "year": 2021,
+      "journal": "Teaching and Learning in Medicine",
+      "authors": ["Marjolein Versteeg", "Guusje Bressers", "Marjo Wijnen-Meijer", "Belinda W. C. Ommering", "Arnout Jan de Beaufort", "Paul Steendijk"],
+      "cited_by_count": 44,
+      "is_oa": true,
+      "oa_url": "https://www.tandfonline.com/doi/epdf/10.1080/10401334.2021.1889559",
+      "url": "https://doi.org/10.1080/10401334.2021.1889559",
+      "openalex_id": "W3138842443",
+      "sample_size": 11,
+      "abstract": "Phenomenon: As a component of self-regulated learning, metacognition is gaining attention in the medical education research community. Metacognition, simply put, is thinking about one's thinking. Having a metacognitive habit of mind is essential for healthcare professionals. This study identified metacognitive competencies students used as they completed a conceptual learning task, and provided insight into students' perceptions of their metacognition and curriculum. Approach: Eleven third-year medical students from a Dutch University were purposively sampled to participate in this qualitative study. The study design included a think-aloud assignment followed by a semi-structured interview. During the assignment, participants were instructed to think aloud while solving questions about physiological concepts such as blood flow, pressure, and resistance. Think-aloud data were collected through audiotaping and used to identify participants' metacognitive competencies. The assignment also served as a prompt for an interview in which participants were questioned about metacognitive knowledge, monitoring, and experiences. All interview data were transcribed verbatim and analyzed iteratively using template analysis. Findings: Students differed in their use of metacognitive skills, with an overall focus on monitoring and, to a lesser extent, planning and evaluation. Additionally, differences were found in metacognitive knowledge and experiences. There was an apparent use of inefficient, superficial predictive cues. Regarding perceptions, some students felt no need to develop metacognitive skills and perceived the exercise as memorizing facts. Others emphasized the need for more insight into their actual level of competence. Insights: Pre-clinical medical students require explicit teaching of metacognitive skills to facilitate learning. Educators should aim to integrate metacognition in the everyday discourse of the classroom to foster an environment in which students discuss their own learning.",
+      "sources": ["OpenAlex", "Crossref", "doi.org"]
+    },
+    {
+      "doi": "10.1007/s11423-022-10156-2",
+      "title": "Improving metacognition through self-explication in a digital self-regulated learning tool",
+      "year": 2022,
+      "journal": "Educational Technology Research and Development",
+      "authors": ["Eelco Braad"],
+      "cited_by_count": 27,
+      "is_oa": true,
+      "oa_url": "https://link.springer.com/content/pdf/10.1007/s11423-022-10156-2.pdf",
+      "url": "https://doi.org/10.1007/s11423-022-10156-2",
+      "openalex_id": "W4296961619",
+      "abstract": "Digital support during self-regulated learning can improve metacognitive knowledge and skills in learners. Previous research has predominantly focused on embedding metacognitive support in domain-specific content. In this study, we examine a detached approach where digital metacognitive support is offered in parallel to an ongoing domain-specific training via a digital tool. The primary support mechanism was self-explication, where learners are prompted to make, otherwise implicit, metacognition concrete. In a controlled pre-test/post-test quasi-experiment, we compared domain-specific and domain-general digital support [abstract tronqué en mode démo — capturer le texte intégral en mode live].",
+      "abstract_truncated": true,
+      "notes": "Liste d'auteurs incomplète dans la fixture démo (premier auteur Eelco Braad) — les co-auteurs complets sont récupérés en mode live.",
+      "sources": ["OpenAlex", "Crossref", "doi.org"]
+    }
+  ]
+}
