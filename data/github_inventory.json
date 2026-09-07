@@ -1,0 +1,2713 @@
+{
+  "generated_at": "2026-09-07T18:56:08.004888+00:00",
+  "owner": "Sathancabrol",
+  "source": "github-api-snapshot",
+  "api_calls": 62,
+  "rate_limit": {
+    "limit": 5000,
+    "remaining": 5000,
+    "reset": 1788810967
+  },
+  "repos": [
+    {
+      "name": "watchtower",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/watchtower",
+      "description": null,
+      "url": "https://github.com/Sathancabrol/watchtower",
+      "default_branch": "main",
+      "primary_language": "JavaScript",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 9322,
+      "created_at": "2026-09-01T21:47:06Z",
+      "updated_at": "2026-09-07T05:43:22Z",
+      "pushed_at": "2026-09-07T06:00:00Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a06ebe-watchtower",
+          "protected": false,
+          "last_commit_sha": "715bfa7"
+        },
+        {
+          "name": "arena/01a072e1-watchtower",
+          "protected": false,
+          "last_commit_sha": "b16337b"
+        },
+        {
+          "name": "arena/01a0730a-watchtower",
+          "protected": false,
+          "last_commit_sha": "500b912"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "d44ef7c"
+        }
+      ],
+      "languages": {
+        "JavaScript": 10075271,
+        "CSS": 256232,
+        "Python": 157250,
+        "HTML": 66678,
+        "Shell": 44884,
+        "PowerShell": 13516
+      },
+      "recent_commits": [
+        {
+          "sha": "d44ef7c",
+          "message": "Merge pull request #2 from Sathancabrol/arena/01a0730a-watchtower",
+          "date": "2026-09-07T05:43:16Z",
+          "author": "arena-ai-coding-agent[bot]",
+          "author_login": "arena-ai-coding-agent[bot]",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/d44ef7c4c3a768613c190e8d220a55243869398e"
+        },
+        {
+          "sha": "500b912",
+          "message": "Merge origin/main dans la branche d'audit (PR sans destruction)",
+          "date": "2026-09-07T01:04:17Z",
+          "author": "Arena Agent",
+          "author_login": null,
+          "url": "https://github.com/Sathancabrol/watchtower/commit/500b91254682549d9a59b00284a48c292dcdfb06"
+        },
+        {
+          "sha": "1c73910",
+          "message": "docs(rnd): audit de structure + 6 chantiers + 12 gabarits + 14 tâches calibrées (aucun code modifié)",
+          "date": "2026-09-07T00:47:38Z",
+          "author": "Arena Agent",
+          "author_login": null,
+          "url": "https://github.com/Sathancabrol/watchtower/commit/1c739107e4b0eb136ac73935efc1ad744829a8d9"
+        },
+        {
+          "sha": "5e7d9bc",
+          "message": "Merge pull request #1 from Sathancabrol/arena/01a06ebe-watchtower",
+          "date": "2026-09-06T23:56:55Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/5e7d9bc8e9774b23475120925b7f88732ce60fe9"
+        },
+        {
+          "sha": "35fc474",
+          "message": "docs(reference): filets de recherche (besoins enrichis + repli) et exemples de commande portables",
+          "date": "2026-09-06T19:40:20Z",
+          "author": "Arena Agent",
+          "author_login": null,
+          "url": "https://github.com/Sathancabrol/watchtower/commit/35fc474e63010fdb28cfb8e3679f9c8a526936c5"
+        },
+        {
+          "sha": "a8f30da",
+          "message": "docs(reference): organisation pour la recherche — index, routage par besoin, CLI de recherche, TSV, AGENTS.md",
+          "date": "2026-09-06T19:39:24Z",
+          "author": "Arena Agent",
+          "author_login": null,
+          "url": "https://github.com/Sathancabrol/watchtower/commit/a8f30da059884e0f20b426511381bae71fcfde52"
+        },
+        {
+          "sha": "d00e253",
+          "message": "ref(reference): champ « origine » — chaque fiche rattachee au lien analyse qui l'a fait naitre",
+          "date": "2026-09-06T19:29:09Z",
+          "author": "Arena Agent",
+          "author_login": null,
+          "url": "https://github.com/Sathancabrol/watchtower/commit/d00e253efae718e5e2a8a519291b5561449f9f95"
+        },
+        {
+          "sha": "715bfa7",
+          "message": "docs: état de reprise (sauvegarde de session it. 21 — HEAD 55e553b)",
+          "date": "2026-09-06T04:34:31Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/715bfa793923fb8e0fddc3c0f9561e252178723a"
+        },
+        {
+          "sha": "55e553b",
+          "message": "Itération 21 — 🏰 HQ : la tour de guet dans le ciel, apparition par distance (type Maps)",
+          "date": "2026-09-06T04:18:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/55e553b7283d914997227d9b044dabe4a28ad4d7"
+        },
+        {
+          "sha": "fcd127e",
+          "message": "Itération 21 — 🔍 audit général (docs/AUDIT.md) + roadmap remise à plat (9→21)",
+          "date": "2026-09-06T04:04:11Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/fcd127ebc351618f1089abeb8342b65c2b726cbc"
+        },
+        {
+          "sha": "e349381",
+          "message": "Itération 20 — 🗂 dossier d'investigation, 📺 télé, 🪟 rideaux → stellaire, 🚁 décollage confirmé",
+          "date": "2026-09-06T03:37:47Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/e349381eb642f071f6bcbcc7e27c29b18d36aa57"
+        },
+        {
+          "sha": "00a8b80",
+          "message": "Itération 19 — 🧭 boussole lisible · 😴 veille patiente · 🧹 écran épuré · 📐 Kepler",
+          "date": "2026-09-06T02:59:35Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/00a8b8016bed0396ca766a8b417eebafd1d37b10"
+        },
+        {
+          "sha": "bc3cd4f",
+          "message": "Itération 18 — 🎯 lanceur 2 lignes · 🗺 globe épousé · 📍 pastilles ancrées",
+          "date": "2026-09-06T02:07:52Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/bc3cd4f9a4c64e5d74eec6ddeca2f6ee14d4d65d"
+        },
+        {
+          "sha": "5bb70f5",
+          "message": "Itération 17 — 🔥 le bug qui coupait 19 modules est réparé + garde-fous",
+          "date": "2026-09-06T01:38:41Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/5bb70f5c8af3c0b1951beb69cc02565e5470c3e1"
+        },
+        {
+          "sha": "90b02d4",
+          "message": "scripts: preview.sh — relance l'aperçu en une commande (HOST, ALLOW_FRAMING, PUPPETEER_SKIP_DOWNLOAD)",
+          "date": "2026-09-06T01:23:33Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/90b02d4a1fe945402d4becb84f657d702fe6818f"
+        },
+        {
+          "sha": "3139516",
+          "message": "docs: recette de relance du serveur d'aperçu (HOST, ALLOW_FRAMING, PUPPETEER_SKIP_DOWNLOAD)",
+          "date": "2026-09-06T00:53:28Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/3139516a4ba2715a9438bfd7751b6a0dbc45f6f9"
+        },
+        {
+          "sha": "8120be1",
+          "message": "Itération 16 — 🐞 diagnostic F3, 📶 bandeau live rendu, 🧭 médaillons robustes",
+          "date": "2026-09-05T22:54:23Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/8120be110fc09f39eee56a6e1c27369a04d256a9"
+        },
+        {
+          "sha": "2eb78e2",
+          "message": "Itération 15 — 🗂 27 calques (rien de bloqué) · 🧭 médaillons 360° · 🎛 pastilles",
+          "date": "2026-09-05T22:27:04Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/2eb78e2d6faa64e8b6e43e4596ae3738675b2fc3"
+        },
+        {
+          "sha": "8dd6ece",
+          "message": "Itération 14 — 🎛 lanceur par catégories : TOUTES les fonctions atteignables",
+          "date": "2026-09-05T22:07:35Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/8dd6ecec95be74cbf39340d53b1823b49a17601f"
+        },
+        {
+          "sha": "6855847",
+          "message": "Itération 13 — boussole « casque », ▚ MATRIX, peau néon, œil dans le logo",
+          "date": "2026-09-05T21:46:49Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/watchtower/commit/6855847653d3038ac5b40298a02a94385586e135"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".env.example",
+          "type": "blob",
+          "size": 8100
+        },
+        {
+          "name": ".gitattributes",
+          "type": "blob",
+          "size": 737
+        },
+        {
+          "name": ".github",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 472
+        },
+        {
+          "name": "AGENTS.md",
+          "type": "blob",
+          "size": 3883
+        },
+        {
+          "name": "AUDIT-OUTILS-2026.md",
+          "type": "blob",
+          "size": 50853
+        },
+        {
+          "name": "CHANGELOG.md",
+          "type": "blob",
+          "size": 10356
+        },
+        {
+          "name": "CONTRIBUTING.md",
+          "type": "blob",
+          "size": 4221
+        },
+        {
+          "name": "DATA_SOURCES.md",
+          "type": "blob",
+          "size": 21442
+        },
+        {
+          "name": "LICENSE",
+          "type": "blob",
+          "size": 2713
+        },
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 62884
+        },
+        {
+          "name": "ROADMAP.md",
+          "type": "blob",
+          "size": 44440
+        },
+        {
+          "name": "SECURITY.md",
+          "type": "blob",
+          "size": 7937
+        },
+        {
+          "name": "TESTING.md",
+          "type": "blob",
+          "size": 11591
+        },
+        {
+          "name": "audit",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "config",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "index.html",
+          "type": "blob",
+          "size": 55265
+        },
+        {
+          "name": "package-lock.json",
+          "type": "blob",
+          "size": 128270
+        },
+        {
+          "name": "package.json",
+          "type": "blob",
+          "size": 1669
+        },
+        {
+          "name": "pinokio",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "public",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "scripts",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "src",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "style.css",
+          "type": "blob",
+          "size": 256232
+        },
+        {
+          "name": "tools",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "vite.config.js",
+          "type": "blob",
+          "size": 343080
+        }
+      ],
+      "files_total": 583,
+      "readme_file": "README.md",
+      "readme_excerpt": "<div align=\"center\">\n\n# 🗼 WATCHTOWER\n\n### Fork de [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view) — chaque fonction payante a sa version gratuite.\n\n</div>\n\n**Écran de démarrage** avec deux boutons :\n\n- **MODE GRATUIT** — démarre immédiatement, **zéro clé API**, aucun blocage possible.\n- **MODE PAYANT** — saisie des clés (`GOOGLE_MAPS_API_KEY`, `CESIUM_ION_TOKEN`) :\n  coller + **Entrée** → **✓ vert** à droite du champ ; bouton **ENTER** en bas,\n  **vert** si au moins une clé est active, **rouge** sinon. Clés mémorisées en\n  localStorage et pré-validées au prochain démarrage.\n\n**Équivalents gratuits (ce fork) :**\n\n| Fonction | Payant (clé) | Gratuit (sans clé) |\n|---|---|---|\n| Globe 3D photoréaliste | Google Maps | Globe satellite Esri |\n| Carte routière | — | Tuiles **CARTO Voyager** (OSM) — remplace `tile.openstreetmap.org`, qui **bloque désormais cette app** (osm.wiki/Blocked) |\n| Recherche de lieux | Google Geocoding | **Photon → Nominatim** (OSM, sans clé) |\n| Commandes vocales | OpenAI Realtime | **Voix navigateur** (Web Speech, FR/EN) : « va à Paris », « montre les avions », « carte satellite », « zoom arrière », « vue globe »… |\n| Résumé HUD | OpenAI | Fallback keyless (déjà upstream) |\n| Feux actifs | NASA FIRMS (clé gratuite) | **NASA EONET** — incendies ouverts, sans clé |\n| Avions, satellites, séismes, CCTV, radio, vélos, lancements, câbles | — | déjà sans clé (upstream) |\n| Navires en direct | AISStream (clé **gratuite** sur aisstream.io) | pas de ",
+      "modules": [
+        {
+          "path": ".",
+          "name": "(racine)",
+          "kind": "manifest",
+          "manifests": [
+            "package.json"
+          ],
+          "files_count": 0,
+          "top_extensions": {},
+          "dependencies": [
+            "@mapbox/vector-tile",
+            "cesium",
+            "egm96-universal",
+            "mgrs",
+            "pbf",
+            "puppeteer",
+            "satellite.js",
+            "sharp",
+            "vite",
+            "vite-plugin-cesium",
+            "ws"
+          ]
+        },
+        {
+          "path": "audit/stack",
+          "name": "audit/stack",
+          "kind": "manifest",
+          "manifests": [
+            "docker-compose.yml"
+          ],
+          "files_count": 17,
+          "top_extensions": {
+            "md": 6,
+            "py": 3,
+            "sh": 2,
+            "json": 1,
+            "tsv": 1,
+            "example": 1,
+            "(sans ext)": 1,
+            "yml": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "pinokio",
+          "name": "pinokio",
+          "kind": "manifest",
+          "manifests": [
+            "package.json"
+          ],
+          "files_count": 7,
+          "top_extensions": {
+            "js": 5,
+            "(sans ext)": 1,
+            "json": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "audit",
+          "name": "audit",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 17,
+          "top_extensions": {
+            "md": 6,
+            "py": 3,
+            "sh": 2,
+            "json": 1,
+            "tsv": 1,
+            "example": 1,
+            "(sans ext)": 1,
+            "yml": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "config",
+          "name": "config",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 2,
+          "top_extensions": {
+            "json": 2
+          },
+          "dependencies": []
+        },
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 11,
+          "top_extensions": {
+            "md": 11
+          },
+          "dependencies": []
+        },
+        {
+          "path": "public",
+          "name": "public",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 15,
+          "top_extensions": {
+            "glb": 9,
+            "svg": 5,
+            "md": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "scripts",
+          "name": "scripts",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 59,
+          "top_extensions": {
+            "mjs": 52,
+            "sh": 5,
+            "md": 1,
+            "wav": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "src",
+          "name": "src",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 446,
+          "top_extensions": {
+            "js": 218,
+            "mjs": 211,
+            "md": 6,
+            "json": 6,
+            "geojsonl": 2,
+            "csv": 1,
+            "pbf": 1,
+            "geojson": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "tools",
+          "name": "tools",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 7,
+          "top_extensions": {
+            "mjs": 5,
+            "md": 1,
+            "html": 1
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": [
+        "@mapbox/vector-tile",
+        "cesium",
+        "egm96-universal",
+        "mgrs",
+        "pbf",
+        "puppeteer",
+        "satellite.js",
+        "sharp",
+        "vite",
+        "vite-plugin-cesium",
+        "ws"
+      ]
+    },
+    {
+      "name": "COGNITORIUM",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/COGNITORIUM",
+      "description": "outils de visualisation cognitif - cognitive tool visualization ",
+      "url": "https://github.com/Sathancabrol/COGNITORIUM",
+      "default_branch": "main",
+      "primary_language": "JavaScript",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 22304,
+      "created_at": "2026-08-02T21:18:24Z",
+      "updated_at": "2026-09-06T21:21:30Z",
+      "pushed_at": "2026-09-07T14:40:41Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a05ef8-cognitorium",
+          "protected": false,
+          "last_commit_sha": "cbf6539"
+        },
+        {
+          "name": "arena/01a06876-cognitorium",
+          "protected": false,
+          "last_commit_sha": "01f5879"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "5348d4c"
+        },
+        {
+          "name": "watchtower/osint-workbench-v0.1",
+          "protected": false,
+          "last_commit_sha": "0e2bef1"
+        }
+      ],
+      "languages": {
+        "JavaScript": 1603738,
+        "HTML": 58956
+      },
+      "recent_commits": [
+        {
+          "sha": "5348d4c",
+          "message": "Merge pull request #2 from Sathancabrol/arena/01a06876-cognitorium",
+          "date": "2026-09-06T21:21:24Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/5348d4cbc15311647cf59f36f854b96f0988d9c1"
+        },
+        {
+          "sha": "01f5879",
+          "message": "docs: gouvernance, état des lieux, audits et architecture Cognitorium",
+          "date": "2026-09-05T21:47:41Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/01f5879699487640fcc2c19a68819efe64c73fcb"
+        },
+        {
+          "sha": "abfdb96",
+          "message": "Merge pull request #1 from Sathancabrol/arena/01a05ef8-cognitorium",
+          "date": "2026-09-03T01:40:05Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/abfdb961e6837041e7df7fd425a7da807f4e0e9b"
+        },
+        {
+          "sha": "cbf6539",
+          "message": "v14: poste de commandement (5 missions de démarrage), MOI (GPS+manuel+POV rue+repere cliquable), minimap bas-gauche anti-collision, BATI3D 1 draw-call (rapide) + labels cliquables, vol: raccourcis+joy",
+          "date": "2026-09-03T00:33:47Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/cbf65391278f5eff904452554c38338574ca4590"
+        },
+        {
+          "sha": "d82dc0b",
+          "message": "v13: fix nuages+bati3D, calques rails/mer/GIBS, mode pilotage POV, POV street, RESSOURCES+DEVIS, phasage typé+attributions, drill population enrichi",
+          "date": "2026-09-02T22:01:48Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/d82dc0bac8c58d5b7fe4a2a1ab957b2e074f0c0b"
+        },
+        {
+          "sha": "b241cae",
+          "message": "Watchtower v8: chantier 8 onglets (filtres BOAMP, cadastre, gestion/inventaire, équipe, fiche projet, suivi GPS outils+logs, sous-sol), INTEL (icônes volantes+3D, résumé HUD, news GDELT, dangers/eau/a",
+          "date": "2026-09-02T21:31:32Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/b241cae147478f45f0c33a0fdf63cbc8529645ee"
+        },
+        {
+          "sha": "1947e8a",
+          "message": "Watchtower: INTEL v2 (KPI cliquables+arborescence+fiche, PROFIL cognitif T0, ANALYSE territoriale allo/ego/heat+rapport+BOAMP) + HUB CHANTIER A-Z (prospection BOAMP, dossier drag&drop, phasage 4D, sim",
+          "date": "2026-09-02T20:34:43Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/1947e8acb472b8760082cce16db39527e35d89e1"
+        },
+        {
+          "sha": "161fcfc",
+          "message": "Watchtower: mode INTEL jumeau numérique (KPI, civilisation territoriale, context panel) — remplace le HUD intel d'origine",
+          "date": "2026-09-02T19:45:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/161fcfc8c4a48f2a4076b6ea8654e8f023f8aff1"
+        },
+        {
+          "sha": "faa9c33",
+          "message": "Watchtower: versions gratuites de tout — bâti 3D OSM, visite intérieure schématique, chantier 4D v0, GPS engin, HUD français, densité UI",
+          "date": "2026-09-02T19:31:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/faa9c33d0cd578893fbbe27c777ccbb341b5b99b"
+        },
+        {
+          "sha": "775d325",
+          "message": "Watchtower: FICHE LIEU au clic (Wikipédia+photo, onglets politique/économie/citoyen, visite drone 3D) + FILTRES de vue",
+          "date": "2026-09-02T19:23:42Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/775d3253864a26a30ff73c9e2a3deae05fbe17ae"
+        },
+        {
+          "sha": "2cf0929",
+          "message": "Watchtower: dock MobiGlas en bas (catégories), chat textuel, AUTOUR (géoloc gratuite), boussole interactive corrigée",
+          "date": "2026-09-02T18:56:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/2cf0929cd555938caf94fe79bf3ccad6e084eb15"
+        },
+        {
+          "sha": "b4a6ae0",
+          "message": "Watchtower: UI épurée (rail d'icônes), boussole FPS, départ vue orbitale, dialogue options payantes en mode gratuit",
+          "date": "2026-09-02T09:59:36Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/b4a6ae0bdf1b8e6a760e4bc0033565c37b9739c9"
+        },
+        {
+          "sha": "f94e856",
+          "message": "Watchtower: panneau AFFICHAGE façon Google Maps (pluie RainViewer, nuages IR, relief, noms, cadastre IGN) + fond Relief OpenTopoMap",
+          "date": "2026-09-02T09:37:47Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/f94e85640c6bbfc5584e5ac135c44961109e845d"
+        },
+        {
+          "sha": "0bf7180",
+          "message": "MAJ notice reconstruction watchtower",
+          "date": "2026-09-02T03:50:32Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/0bf71808dbe6c5931faf4f7d74bd2d6f19e544ca"
+        },
+        {
+          "sha": "76ebf2e",
+          "message": "Watchtower FR: branding, panneau INFO VUE/météo/domicile/vues/import, fonds IGN France, doc sources open data FR",
+          "date": "2026-09-02T03:50:22Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/76ebf2e21506cf973ac2abae18ba3f5d40298bfc"
+        },
+        {
+          "sha": "4256f08",
+          "message": "Watchtower: carte routière Esri (fix filigrane CARTO) + écran de connexion guidé (OBTENIR MA CLÉ, étapes par service)",
+          "date": "2026-09-02T03:03:04Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/4256f08529691c422a1a3cd23ae5f6096392635a"
+        },
+        {
+          "sha": "1184f9c",
+          "message": "Sauvegarde des modifications Watchtower (fork gods-eye-view: gate gratuit/payant + équivalents gratuits)",
+          "date": "2026-09-02T01:44:49Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/1184f9c0871346e1049041051295978409782e70"
+        },
+        {
+          "sha": "5ffae9b",
+          "message": "image ref",
+          "date": "2026-08-30T20:05:16Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/5ffae9b34a30b74ca85c69d8f54a6e4926c8b891"
+        },
+        {
+          "sha": "a095f0f",
+          "message": "feat(learning): add conceptual feedback and comprehension progression",
+          "date": "2026-08-28T16:26:34Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/a095f0f59bd07651d15c92cc98388e4806beaa2f"
+        },
+        {
+          "sha": "93d8496",
+          "message": "style(learning): animate feedback and comprehension UI",
+          "date": "2026-08-28T16:26:14Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/COGNITORIUM/commit/93d8496b64007b012242d82948ca1f7dd2291639"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": "Gemini_Generated_Image_ujp0osujp0osujp0.png",
+          "type": "blob",
+          "size": 1734378
+        },
+        {
+          "name": "Generated Image August 01, 2026 - 10_44PM (1).png",
+          "type": "blob",
+          "size": 2060058
+        },
+        {
+          "name": "Generated Image August 01, 2026 - 10_45PM.png",
+          "type": "blob",
+          "size": 2033760
+        },
+        {
+          "name": "Generated Image August 01, 2026 - 10_50PM.png",
+          "type": "blob",
+          "size": 2101976
+        },
+        {
+          "name": "Generated Image July 27, 2026 - 6_55PM (1).png",
+          "type": "blob",
+          "size": 1980432
+        },
+        {
+          "name": "Generated Image July 27, 2026 - 6_55PM.png",
+          "type": "blob",
+          "size": 1982095
+        },
+        {
+          "name": "Generated Image July 27, 2026 - 6_56PM (1).png",
+          "type": "blob",
+          "size": 1969673
+        },
+        {
+          "name": "Generated Image July 29, 2026 - 10_15PM.png",
+          "type": "blob",
+          "size": 1690737
+        },
+        {
+          "name": "Generated Image July 30, 2026 - 1_23AM.png",
+          "type": "blob",
+          "size": 1802962
+        },
+        {
+          "name": "Generated Image July 30, 2026 - 5_50AM.png",
+          "type": "blob",
+          "size": 2115076
+        },
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 1530
+        },
+        {
+          "name": "a6aab6c7-0962-42ce-b4ce-cb70b5d2095a.jpg",
+          "type": "blob",
+          "size": 159874
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "generated-image.png",
+          "type": "blob",
+          "size": 359800
+        },
+        {
+          "name": "learning",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "téléchargement (1).png",
+          "type": "blob",
+          "size": 2133541
+        },
+        {
+          "name": "watchtower-mods",
+          "type": "tree",
+          "size": 0
+        }
+      ],
+      "files_total": 131,
+      "readme_file": "README.md",
+      "readme_excerpt": "# COGNITORIUM\n\nOutils de visualisation cognitive — cognitive tool visualization.\n\n> **Documentation & gouvernance :** voir [`docs/`](docs/) — vision\n> (`docs/constitution/`), état des lieux des dépôts (`docs/etat-des-lieux/`),\n> audits (`docs/audits/`), architecture cible (`docs/architecture/`), agents\n> (`docs/agents/`) et registre de décisions (`docs/constitution/09-decision-log.md`).\n\n## Learning Engine — PoC v0.1\n\nLe premier Proof of Concept teste une hypothèse pédagogique : faire comprendre un système complexe par résolution progressive de problèmes, avec feedback explicatif et construction dynamique d'un graphe conceptuel.\n\n### PoC « Comprendre l'argent »\n\nParcours : **troc → double coïncidence des besoins → monnaie → prix → épargne → crédit → intérêt → inflation → investissement**.\n\nChaque niveau contient :\n- une situation concrète ;\n- un problème à résoudre ;\n- plusieurs choix ;\n- une conséquence explicative ;\n- les concepts associés ;\n- les liens avec les concepts précédents et suivants ;\n- une mise à jour du Skill / Concept Graph.\n\nLe parcours se termine par une question de transfert et conserve localement les événements de session.\n\n### Lancer\n\nDepuis la racine du dépôt :\n\n```bash\npython -m http.server 8000\n```\n\nPuis ouvrir `http://localhost:8000/learning/` et choisir le PoC.\n\n## Architecture\n\nVoir `learning/ARCHITECTURE.md` pour le modèle CLE : Scenario Engine, Challenge Engine, Cognitive Engine, Skill Graph Engine et Adaptive Learning Loop.\n",
+      "modules": [
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 48,
+          "top_extensions": {
+            "md": 48
+          },
+          "dependencies": []
+        },
+        {
+          "path": "learning",
+          "name": "learning",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 7,
+          "top_extensions": {
+            "html": 2,
+            "js": 2,
+            "css": 2,
+            "md": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "watchtower-mods",
+          "name": "watchtower-mods",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 62,
+          "top_extensions": {
+            "js": 58,
+            "md": 3,
+            "html": 1
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": []
+    },
+    {
+      "name": "animation-chronos",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/animation-chronos",
+      "description": "animation",
+      "url": "https://github.com/Sathancabrol/animation-chronos",
+      "default_branch": "main",
+      "primary_language": "TypeScript",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 3626,
+      "created_at": "2026-09-02T17:46:54Z",
+      "updated_at": "2026-09-02T17:47:23Z",
+      "pushed_at": "2026-09-02T17:47:15Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "38c57a3"
+        }
+      ],
+      "languages": {
+        "TypeScript": 111181,
+        "HTML": 1315,
+        "CSS": 546
+      },
+      "recent_commits": [
+        {
+          "sha": "38c57a3",
+          "message": "feat: initialize ferrofluid consciousness vessel",
+          "date": "2026-09-02T17:47:14Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/animation-chronos/commit/38c57a364c36c58514838e1d05eff4f0c7f385ab"
+        },
+        {
+          "sha": "9845e47",
+          "message": "Initial commit",
+          "date": "2026-09-02T17:46:59Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/animation-chronos/commit/9845e473f96d2a5e4a6082eb299c0ae7fc7d44b8"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".env.example",
+          "type": "blob",
+          "size": 445
+        },
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 73
+        },
+        {
+          "name": "index.html",
+          "type": "blob",
+          "size": 1315
+        },
+        {
+          "name": "metadata.json",
+          "type": "blob",
+          "size": 326
+        },
+        {
+          "name": "package.json",
+          "type": "blob",
+          "size": 845
+        },
+        {
+          "name": "public",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "src",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "tsconfig.json",
+          "type": "blob",
+          "size": 508
+        },
+        {
+          "name": "vite.config.ts",
+          "type": "blob",
+          "size": 708
+        }
+      ],
+      "files_total": 30,
+      "readme_excerpt": "",
+      "modules": [
+        {
+          "path": ".",
+          "name": "(racine)",
+          "kind": "manifest",
+          "manifests": [
+            "package.json"
+          ],
+          "files_count": 0,
+          "top_extensions": {},
+          "dependencies": [
+            "@google/genai",
+            "@tailwindcss/vite",
+            "@types/express",
+            "@types/node",
+            "@vitejs/plugin-react",
+            "autoprefixer",
+            "dotenv",
+            "esbuild",
+            "express",
+            "lucide-react",
+            "motion",
+            "react",
+            "react-dom",
+            "tailwindcss",
+            "tsx",
+            "typescript",
+            "vite"
+          ]
+        },
+        {
+          "path": "public",
+          "name": "public",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 1,
+          "top_extensions": {
+            "(sans ext)": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "src",
+          "name": "src",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 22,
+          "top_extensions": {
+            "tsx": 11,
+            "jpg": 6,
+            "ts": 4,
+            "css": 1
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": [
+        "@google/genai",
+        "@tailwindcss/vite",
+        "@types/express",
+        "@types/node",
+        "@vitejs/plugin-react",
+        "autoprefixer",
+        "dotenv",
+        "esbuild",
+        "express",
+        "lucide-react",
+        "motion",
+        "react",
+        "react-dom",
+        "tailwindcss",
+        "tsx",
+        "typescript",
+        "vite"
+      ]
+    },
+    {
+      "name": "Language-decoder",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/Language-decoder",
+      "description": "test pour créer un décodeur de langage multimodale",
+      "url": "https://github.com/Sathancabrol/Language-decoder",
+      "default_branch": "main",
+      "primary_language": null,
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 581,
+      "created_at": "2026-08-30T19:04:36Z",
+      "updated_at": "2026-08-30T19:33:23Z",
+      "pushed_at": "2026-08-31T05:48:47Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a05429-language-decoder",
+          "protected": false,
+          "last_commit_sha": "d75c2f6"
+        },
+        {
+          "name": "arena/01a05471-language-decoder",
+          "protected": false,
+          "last_commit_sha": "4f7782f"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "583f37a"
+        }
+      ],
+      "languages": {},
+      "recent_commits": [
+        {
+          "sha": "583f37a",
+          "message": "Initial commit",
+          "date": "2026-08-30T19:32:59Z",
+          "author": "arena-ai-coding-agent[bot]",
+          "author_login": "arena-ai-coding-agent[bot]",
+          "url": "https://github.com/Sathancabrol/Language-decoder/commit/583f37ab4d75ec759fc279f7918e6b3ce7ebd4b4"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 19
+        }
+      ],
+      "files_total": 1,
+      "readme_file": "README.md",
+      "readme_excerpt": "# Language-decoder\n",
+      "modules": [],
+      "all_dependencies": []
+    },
+    {
+      "name": "ETAT-DE-LART-PSYCHOLOGIE",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE",
+      "description": "state of the art - psychology - cognition ",
+      "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE",
+      "default_branch": "main",
+      "primary_language": "HTML",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 10315,
+      "created_at": "2026-08-24T22:47:26Z",
+      "updated_at": "2026-08-30T18:08:23Z",
+      "pushed_at": "2026-09-07T06:41:59Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a03aac-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "e16980b"
+        },
+        {
+          "name": "arena/01a03adf-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "da06a37"
+        },
+        {
+          "name": "arena/01a04f7b-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "11fefa8"
+        },
+        {
+          "name": "arena/01a035f7-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "89b21dd"
+        },
+        {
+          "name": "arena/01a045a1-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "a4f0436"
+        },
+        {
+          "name": "arena/01a0369b-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "5c91021"
+        },
+        {
+          "name": "arena/01a0389d-etat-de-lart-psychologie",
+          "protected": false,
+          "last_commit_sha": "c37d2af"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "258ddad"
+        }
+      ],
+      "languages": {
+        "HTML": 101528,
+        "Python": 99925
+      },
+      "recent_commits": [
+        {
+          "sha": "258ddad",
+          "message": "Add files via upload",
+          "date": "2026-08-30T18:07:30Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/258ddadf1eb01d5bc433e5895b53010fe87c06b2"
+        },
+        {
+          "sha": "da06a37",
+          "message": "Merge pull request #2 from Sathancabrol/arena/01a0389d-etat-de-lart-psychologie",
+          "date": "2026-08-25T13:32:18Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/da06a378017aac29fd939d4a06af1269ecbb715e"
+        },
+        {
+          "sha": "c37d2af",
+          "message": "feat: Cognitorium v7 — Graphe Obsidian 99 nœuds, 137 liens, 38 sources OER, taxonomie 225 nœuds",
+          "date": "2026-08-25T13:31:42Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/c37d2af694a7f9be0a71ff6233e139f0bb37302f"
+        },
+        {
+          "sha": "5c91021",
+          "message": "fix: réécriture ultra-épurée et robuste du graphe D3 (sans dépendance complexe)",
+          "date": "2026-08-25T03:24:54Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/5c91021fc34a236530e9dfe783358f362f0220df"
+        },
+        {
+          "sha": "cf51c2c",
+          "message": "fix: simplifie et sécurise le rendu D3 force simulation du graphe méthodologique",
+          "date": "2026-08-25T03:23:45Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/cf51c2cb38a8f2edbb0fe88754334c83460a56a9"
+        },
+        {
+          "sha": "2500044",
+          "message": "fix: map source_id and target_id to source and target in /api/graph for D3 force simulation",
+          "date": "2026-08-25T03:22:29Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/25000446d238292fb81bec1f586bd5d27e73169d"
+        },
+        {
+          "sha": "35bc96b",
+          "message": "fix: corrige le parsing des relations source/target et améliore la page dédiée du graphe D3 (/graph)",
+          "date": "2026-08-25T03:21:09Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/35bc96b6431d91a3a12b7b631063405389b1946f"
+        },
+        {
+          "sha": "a53187b",
+          "message": "fix: corrige le passage de request dans TemplateResponse pour Starlette/FastAPI",
+          "date": "2026-08-25T03:13:04Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/a53187b41faf0640160db1f53bf51403e76994da"
+        },
+        {
+          "sha": "81f55fb",
+          "message": "fix: corrige TemplateResponse en passant request explicitement pour Starlette/FastAPI",
+          "date": "2026-08-25T03:09:56Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/81f55fb22daa2bf474dcfa1f1ca92be9c51e1ded"
+        },
+        {
+          "sha": "59972c8",
+          "message": "feat: ajoute l'application web FastAPI / SQLite / Tailwind / D3.js (Cognitorium & État de l'Art)",
+          "date": "2026-08-25T02:41:38Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/59972c864dbb0cad51042e5c026e6eb32cdd4b24"
+        },
+        {
+          "sha": "aabab8d",
+          "message": "docs: ajoute la spécification technique de la base de données (PostgreSQL/SQLite, tables 42 champs, relations graphe et traces métacognitives)",
+          "date": "2026-08-25T02:28:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/aabab8d84761c07b6020350c8c39033ef966b920"
+        },
+        {
+          "sha": "e8b2d4a",
+          "message": "feat: ajoute la visualisation interactive de la taxonomie (taxonomy_graph.html) basée sur l'arborescence complète",
+          "date": "2026-08-25T02:25:58Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/e8b2d4aab7fb9efe6465a4e3ea3ca04b709019c0"
+        },
+        {
+          "sha": "90b9780",
+          "message": "docs: ajoute la taxonomie et l'arborescence complète de la psychologie et de la psychologie cognitive (5 piliers, 9 processus, approches et applications)",
+          "date": "2026-08-25T02:07:24Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/90b9780da26c40da75a79524cc09882f8ce3d125"
+        },
+        {
+          "sha": "e08d6b7",
+          "message": "docs: ajoute la cartographie détaillée Métacognition et Éducation (2025-2026) avec modèles, méta-analyses, schéma Mermaid et canevas de prompts GenAI",
+          "date": "2026-08-25T02:00:14Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/e08d6b789c6a9120287b90b22c864901328234a1"
+        },
+        {
+          "sha": "54b7bbf",
+          "message": "docs: ajoute la synthèse ciblée 2026 (métacognition, embodiment et IA pour le Cognitorium)",
+          "date": "2026-08-25T01:51:14Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/54b7bbf46dc03a0f208b19c79001a07dfb8a182f"
+        },
+        {
+          "sha": "89b21dd",
+          "message": "feat: consolidation complète projet dans repo - tout le projet",
+          "date": "2026-08-25T01:20:46Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/89b21dd5256cb92ca0ae3522515bc2811d903050"
+        },
+        {
+          "sha": "3e318af",
+          "message": "feat: restore full state - cartographie critique PRISMA + base 42 champs + D3 + analyse concepts 4E",
+          "date": "2026-08-25T01:16:24Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/3e318af68cddf046ff61aeb62567c35f554c4383"
+        },
+        {
+          "sha": "d6d827e",
+          "message": "feat: analyse concepts 4E/enactivisme pour Cognitorium - sources gaps opérationnalisation",
+          "date": "2026-08-25T01:15:53Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/d6d827ebe370fae6825c7385585714133efe9fee"
+        },
+        {
+          "sha": "746e3fa",
+          "message": "Initial commit",
+          "date": "2026-08-24T22:47:27Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE/commit/746e3fa2548d12faed52314defc5863de14f9c1e"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 56
+        },
+        {
+          "name": "Cognition_Distribuee_2025.pptx",
+          "type": "blob",
+          "size": 60187
+        },
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 10636
+        },
+        {
+          "name": "README_PRESENTATION.md",
+          "type": "blob",
+          "size": 16221
+        },
+        {
+          "name": "a6aab6c7-0962-42ce-b4ce-cb70b5d2095a.jpg",
+          "type": "blob",
+          "size": 159874
+        },
+        {
+          "name": "app",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "data",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "generated-image.png",
+          "type": "blob",
+          "size": 359800
+        },
+        {
+          "name": "output",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "scripts",
+          "type": "tree",
+          "size": 0
+        }
+      ],
+      "files_total": 37,
+      "readme_file": "README.md",
+      "readme_excerpt": "# ETAT-DE-LART-PSYCHOLOGIE - Cartographie critique 2020-2026\n\n> **Version 2.0 corrigée** - Répond à l'analyse critique : passage de \"état de l'art exhaustif\" à **cartographie critique préliminaire** conforme PRISMA 2020, avec protocole transparent, évaluation biais, et programme recherche testable.\n\n## 📁 Structure du dépôt (corrigée)\n\n```\ndocs/\n├── ETAT_ART_CRITIQUE_PSYCHOLOGIE_2020_2026_CORRIGE.md  # DOCUMENT PRINCIPAL - 5 parties, 12 domaines, PRISMA, gaps → questions testables\n├── PRISMA_FLOW.md                                      # Diagramme flux PRISMA 2020 + checklist\n├── SEARCH_STRATEGIES.md                                # Équations recherche reproductibles par base\n├── TEMPLATE_CHAMPS.csv                                 # Template 42 colonnes (type, obligatoire, exemple, description, contraintes)\n└── GUIDE_REMPLISSAGE_IA.md                             # Guide IA 23k chars - workflow 7 étapes + formule Trust Factor\n\ndata/\n├── nodes_etat_art_psychologie.csv                      # Base 42 champs, 14 entrées, validation PASSED, trust avg 73.2\n└── README.md\n\noutput/\n├── etat_art_psychologie_cognitive.csv                  # Ancien tableau 12 refs (pour compatibilité)\n├── tableau_etat_art.md                                 # Tableau synthétique avec validités\n├── classification_methodologique.md                    # Pyramide preuves + validités Cook & Campbell + cycle Popper\n├── mermaid_mindmap.md + mermaid_methode_scientifique.md # 8 diagrammes Mermaid\n├── template_champs",
+      "modules": [
+        {
+          "path": "app",
+          "name": "app",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 3,
+          "top_extensions": {
+            "py": 2,
+            "html": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "data",
+          "name": "data",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 2,
+          "top_extensions": {
+            "md": 1,
+            "csv": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 12,
+          "top_extensions": {
+            "md": 11,
+            "csv": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "output",
+          "name": "output",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 12,
+          "top_extensions": {
+            "md": 5,
+            "html": 3,
+            "csv": 2,
+            "png": 2
+          },
+          "dependencies": []
+        },
+        {
+          "path": "scripts",
+          "name": "scripts",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 2,
+          "top_extensions": {
+            "py": 2
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": []
+    },
+    {
+      "name": "reaserch-engine",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/reaserch-engine",
+      "description": null,
+      "url": "https://github.com/Sathancabrol/reaserch-engine",
+      "default_branch": "main",
+      "primary_language": "Python",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 96,
+      "created_at": "2026-08-26T19:14:39Z",
+      "updated_at": "2026-08-27T12:48:00Z",
+      "pushed_at": "2026-08-27T12:36:55Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "ed4640d"
+        }
+      ],
+      "languages": {
+        "Python": 58123
+      },
+      "recent_commits": [
+        {
+          "sha": "ed4640d",
+          "message": "Document canonical epistemic research model",
+          "date": "2026-08-27T12:36:55Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/ed4640d177f138ad4c752e02bcd98ce75e520166"
+        },
+        {
+          "sha": "b5cc3ac",
+          "message": "Add canonical epistemic research model",
+          "date": "2026-08-27T12:36:49Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/b5cc3ac8365186baf2c89d594c210028d66831fc"
+        },
+        {
+          "sha": "1f84a73",
+          "message": "Add mindmap-derived Research Engine architecture synthesis",
+          "date": "2026-08-27T12:10:39Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/1f84a73674962799bc812b01cea9a5d03429b82f"
+        },
+        {
+          "sha": "a3e3e0e",
+          "message": "docs: define Hermes integration architecture for Research Engine",
+          "date": "2026-08-26T22:13:15Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/a3e3e0e6ca9e9c597195b34a869a00e4b1dbaddf"
+        },
+        {
+          "sha": "cdffaa9",
+          "message": "Drive sufficiency from graph assessment",
+          "date": "2026-08-26T21:26:28Z",
+          "author": "Codex",
+          "author_login": "codex",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/cdffaa947bfdef7c1610de4368dd7974e95f8696"
+        },
+        {
+          "sha": "75c1355",
+          "message": "Add local-first academic retrieval",
+          "date": "2026-08-26T21:25:09Z",
+          "author": "Codex",
+          "author_login": "codex",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/75c1355aa5a84c6dd344098a0e86cb1fae15044b"
+        },
+        {
+          "sha": "488b2ff",
+          "message": "Generate audit-ready research dossiers",
+          "date": "2026-08-26T21:23:32Z",
+          "author": "Codex",
+          "author_login": "codex",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/488b2ff95d137f1ebd75efef8fe0b58b485d3634"
+        },
+        {
+          "sha": "0261683",
+          "message": "Add durable research run checkpoints",
+          "date": "2026-08-26T21:22:13Z",
+          "author": "Codex",
+          "author_login": "codex",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/0261683e9ae1566e46bfc7d2cc652ea5042c6584"
+        },
+        {
+          "sha": "99259ce",
+          "message": "Implement provenance-preserving evidence graph",
+          "date": "2026-08-26T21:17:41Z",
+          "author": "Codex",
+          "author_login": "codex",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/99259ce94a60278b05cc239145b9e55a93b9e704"
+        },
+        {
+          "sha": "dfc46a1",
+          "message": "Document Research Engine v0.1 architecture",
+          "date": "2026-08-26T20:45:45Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/dfc46a1b02825d185eff183d6fff19e57cc27812"
+        },
+        {
+          "sha": "806462d",
+          "message": "Add canonical autonomous research state",
+          "date": "2026-08-26T20:42:41Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/806462d8cbc0182500ca24e068f0247f44657d85"
+        },
+        {
+          "sha": "bd517f7",
+          "message": "Strengthen stopping and sufficiency gates",
+          "date": "2026-08-26T20:38:03Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/bd517f7465957cab61bec3f0ad788d0a0d66c200"
+        },
+        {
+          "sha": "154c21d",
+          "message": "Test adaptive research strategy",
+          "date": "2026-08-26T20:36:10Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/154c21dba2b3c13ceb70596d4a9975244426ed2b"
+        },
+        {
+          "sha": "99202c1",
+          "message": "Add adaptive research strategy engine",
+          "date": "2026-08-26T20:36:06Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/99202c18969dfa2f0a939de9c9540d7b199ee79b"
+        },
+        {
+          "sha": "8173fde",
+          "message": "Test question analyzer",
+          "date": "2026-08-26T20:30:20Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/8173fdea4ceb3841dcc356066e9489a9083c5b86"
+        },
+        {
+          "sha": "b75b1f3",
+          "message": "Add question analyzer",
+          "date": "2026-08-26T20:30:16Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/b75b1f362e11d5516b2c37cdcd3777bbd139cd7b"
+        },
+        {
+          "sha": "abc1ced",
+          "message": "Test adaptive research planner",
+          "date": "2026-08-26T20:24:22Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/abc1ced5c2acb3a7d4c9b133b37881f072176fd6"
+        },
+        {
+          "sha": "25a1329",
+          "message": "Add transparent source quality model",
+          "date": "2026-08-26T20:24:18Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/25a132961b0be0da7f9a8029bc34a1af4b84d8a9"
+        },
+        {
+          "sha": "9260684",
+          "message": "Add adaptive research planner",
+          "date": "2026-08-26T20:24:13Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/9260684546bc23cbc3ae0a371d28418859c1ca1f"
+        },
+        {
+          "sha": "a90d85a",
+          "message": "Define rigorous research output specification",
+          "date": "2026-08-26T20:18:25Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/reaserch-engine/commit/a90d85aaeddc040fa180d12306e843b9d02602c6"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 24
+        },
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 2672
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "engine",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "schemas",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "tests",
+          "type": "tree",
+          "size": 0
+        }
+      ],
+      "files_total": 61,
+      "readme_file": "README.md",
+      "readme_excerpt": "# Research Engine\n\nResearch Engine v0.1 is an autonomous research-assistant core designed to turn one natural-language input into a rigorous, documented research dossier.\n\n## Design principles\n\n- **Local-first evidence**: inspect user/local sources before expanding externally when available.\n- **Hybrid methodology**: fixed scientific-quality gates + adaptive strategy based on question type, evidence gaps, contradictions and expected information gain.\n- **Evidence over fluency**: the LLM is a reasoning component; the engine owns research state, provenance, verification and stopping logic.\n- **Auditability**: important conclusions should be traceable through claims, evidence and sources.\n- **Explicit uncertainty**: mixed or insufficient evidence must remain visible.\n- **Autonomous iteration**: search → evidence → claims → contradiction analysis → synthesis → verification → sufficiency → next action.\n\n## Current v0.1 core\n\n```text\nUser input\n  -> Question analysis\n  -> Research planning\n  -> Adaptive strategy\n  -> Research agents/tools\n  -> Evidence + claims\n  -> Contradiction analysis\n  -> Synthesis\n  -> Verification\n  -> Sufficiency / stopping\n  -> Final research dossier\n```\n\nCore modules include the state machine, dependency-injected orchestrator, adaptive planner/strategy components, source-quality model, sufficiency gates and tests.\n\n## Evidence graph increment\n\nThe v0.1 core now records an inspectable chain:\n\n```text\nSource --provides--> Evidence --supports|contradicts--> ",
+      "modules": [
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 15,
+          "top_extensions": {
+            "md": 15
+          },
+          "dependencies": []
+        },
+        {
+          "path": "engine",
+          "name": "engine",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 23,
+          "top_extensions": {
+            "py": 23
+          },
+          "dependencies": []
+        },
+        {
+          "path": "schemas",
+          "name": "schemas",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 9,
+          "top_extensions": {
+            "json": 9
+          },
+          "dependencies": []
+        },
+        {
+          "path": "tests",
+          "name": "tests",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 12,
+          "top_extensions": {
+            "py": 12
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": []
+    },
+    {
+      "name": "proto-cognitorium",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/proto-cognitorium",
+      "description": "proto de l'app",
+      "url": "https://github.com/Sathancabrol/proto-cognitorium",
+      "default_branch": "main",
+      "primary_language": "TypeScript",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 95009,
+      "created_at": "2026-08-24T11:00:09Z",
+      "updated_at": "2026-08-26T13:15:30Z",
+      "pushed_at": "2026-08-26T13:12:00Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a033e8-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "05058b3"
+        },
+        {
+          "name": "arena/01a034f2-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "383b86b"
+        },
+        {
+          "name": "arena/01a035a5-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "639a43e"
+        },
+        {
+          "name": "arena/01a0369e-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "6267c64"
+        },
+        {
+          "name": "arena/01a03436-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "b75f700"
+        },
+        {
+          "name": "arena/01a03899-proto-cognitorium",
+          "protected": false,
+          "last_commit_sha": "f7861b5"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "f83042c"
+        }
+      ],
+      "languages": {
+        "TypeScript": 7110120,
+        "HTML": 49065,
+        "Python": 7224,
+        "CSS": 853
+      },
+      "recent_commits": [
+        {
+          "sha": "f83042c",
+          "message": "Add files via upload",
+          "date": "2026-08-26T13:11:51Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/f83042c2a656a4384c2e04a0e4e50607fd323549"
+        },
+        {
+          "sha": "9aed5c1",
+          "message": "big update",
+          "date": "2026-08-26T10:50:55Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/9aed5c17075cadf3e1498585fc6e687c12f50015"
+        },
+        {
+          "sha": "b8a0bfd",
+          "message": "Merge pull request #6 from Sathancabrol/arena/01a03899-proto-cognitorium",
+          "date": "2026-08-26T09:00:05Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/b8a0bfd1bd4ce588167fee2f9ffbee6595298536"
+        },
+        {
+          "sha": "f7861b5",
+          "message": "Merge main into Savoirs branch and resolve PR conflicts",
+          "date": "2026-08-26T08:40:33Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/f7861b58417f9fd0bb2dbe0723a0a3333648621c"
+        },
+        {
+          "sha": "3101cd7",
+          "message": "Merge remote Savoirs history with Mes évaluations",
+          "date": "2026-08-25T21:58:29Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/3101cd77f5dcc22f62436a51200c0bbac045d112"
+        },
+        {
+          "sha": "f9f74eb",
+          "message": "Add Mes évaluations in Savoirs as a documentary evidence vault",
+          "date": "2026-08-25T21:58:06Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/f9f74ebb2a41e930e39461fb2c6adcab6ce1161e"
+        },
+        {
+          "sha": "1a291ae",
+          "message": "Show official logos and live homepages on Outils coverflow cards",
+          "date": "2026-08-25T20:20:32Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/1a291ae527e4b793d56a1f4116b2b0647a696e60"
+        },
+        {
+          "sha": "3d3885d",
+          "message": "Merge remote session history and keep the Outils layer",
+          "date": "2026-08-25T19:57:25Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/3d3885d5587261f1623c9d5cfb93df9413a7504c"
+        },
+        {
+          "sha": "b621596",
+          "message": "Add Outils layer in Ressources with assessment and data catalogs",
+          "date": "2026-08-25T19:55:51Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/b6215966493e5d8ebecb4d3e7e5b0b8e41c9d226"
+        },
+        {
+          "sha": "d46f507",
+          "message": "Add intent search and lab/test/concept catalogs to Ressources",
+          "date": "2026-08-25T19:21:24Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/d46f507d21532459b0cdb9fc4000183ab6c5389c"
+        },
+        {
+          "sha": "2b90f5e",
+          "message": "Add Savoirs Ressources: OER map plus most-cited classics",
+          "date": "2026-08-25T17:55:56Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/2b90f5e840ede3074cf175bf4dff9b3425765f76"
+        },
+        {
+          "sha": "b7ce14f",
+          "message": "Expand the métiers graph with lived jobs, aliases and weaker matches",
+          "date": "2026-08-25T17:45:20Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/b7ce14fde11c5f34f382ed5eb468282106ec84e7"
+        },
+        {
+          "sha": "5f679d3",
+          "message": "Add a métiers graph in Possibilités with ROME filters",
+          "date": "2026-08-25T17:11:57Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/5f679d31b3d2c119b9d5ac662d4aac05f1fa3304"
+        },
+        {
+          "sha": "d02a919",
+          "message": "update",
+          "date": "2026-08-25T14:54:45Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/d02a919fd3a1e779104c15082013804e0d29fe72"
+        },
+        {
+          "sha": "ce82705",
+          "message": "Guide constellation: named coverflow first, then one nebula",
+          "date": "2026-08-25T13:58:29Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/ce82705db80f271b686b21f3597b30d7732c0928"
+        },
+        {
+          "sha": "facea59",
+          "message": "Rebuild Savoirs constellation as a Skyrim-like 3D celestial sphere",
+          "date": "2026-08-25T13:44:31Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/facea596f81777072125ccc39d7b7fccf7593299"
+        },
+        {
+          "sha": "3a5b033",
+          "message": "Restyle atlas constellation after Skyrim perk-tree interactions",
+          "date": "2026-08-25T13:33:39Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/3a5b03382a508389e35d38c7ea9e60849fef0425"
+        },
+        {
+          "sha": "5626ab3",
+          "message": "Replace atlas coverflow with a Skyrim-style planar constellation",
+          "date": "2026-08-25T13:11:33Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/5626ab3a49ca79ec5b24203593cff65c62cbd0cc"
+        },
+        {
+          "sha": "b91e5df",
+          "message": "Make Savoirs arborescence switchable: outline, ontology graph, drill-down coverflow",
+          "date": "2026-08-25T12:59:26Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/b91e5dffe9a23ccf821caa6e50110b902fc0d623"
+        },
+        {
+          "sha": "d1ba0fa",
+          "message": "big update",
+          "date": "2026-08-25T12:57:07Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/proto-cognitorium/commit/d1ba0fa7b3b186c6eeaf6c34059668db7f81b4c7"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".env.example",
+          "type": "blob",
+          "size": 16
+        },
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 73
+        },
+        {
+          "name": "ANALYSE_RAW.md",
+          "type": "blob",
+          "size": 28039
+        },
+        {
+          "name": "CONSOLIDATION.md",
+          "type": "blob",
+          "size": 11392
+        },
+        {
+          "name": "bun.lock",
+          "type": "blob",
+          "size": 77939
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "index.html",
+          "type": "blob",
+          "size": 893
+        },
+        {
+          "name": "metadata.json",
+          "type": "blob",
+          "size": 332
+        },
+        {
+          "name": "package.json",
+          "type": "blob",
+          "size": 1151
+        },
+        {
+          "name": "raw",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "scripts",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "server.ts",
+          "type": "blob",
+          "size": 22307
+        },
+        {
+          "name": "src",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "tsconfig.json",
+          "type": "blob",
+          "size": 528
+        },
+        {
+          "name": "vite.config.ts",
+          "type": "blob",
+          "size": 1033
+        }
+      ],
+      "files_total": 160,
+      "readme_excerpt": "",
+      "modules": [
+        {
+          "path": ".",
+          "name": "(racine)",
+          "kind": "manifest",
+          "manifests": [
+            "package.json"
+          ],
+          "files_count": 0,
+          "top_extensions": {},
+          "dependencies": [
+            "@google/genai",
+            "@tailwindcss/vite",
+            "@types/canvas-confetti",
+            "@types/express",
+            "@types/node",
+            "@types/react",
+            "@types/react-dom",
+            "@types/three",
+            "@vitejs/plugin-react",
+            "autoprefixer",
+            "canvas-confetti",
+            "dotenv",
+            "esbuild",
+            "express",
+            "lucide-react",
+            "motion",
+            "react",
+            "react-dom",
+            "tailwindcss",
+            "three",
+            "tsx",
+            "typescript",
+            "vite"
+          ]
+        },
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 1,
+          "top_extensions": {
+            "md": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "raw",
+          "name": "raw",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 61,
+          "top_extensions": {
+            "pdf": 43,
+            "xlsm": 5,
+            "xlsx": 4,
+            "md": 2,
+            "docx": 2,
+            "patch": 1,
+            "doc": 1,
+            "png": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "scripts",
+          "name": "scripts",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 1,
+          "top_extensions": {
+            "py": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "src",
+          "name": "src",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 86,
+          "top_extensions": {
+            "tsx": 34,
+            "ts": 28,
+            "jpg": 22,
+            "md": 1,
+            "css": 1
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": [
+        "@google/genai",
+        "@tailwindcss/vite",
+        "@types/canvas-confetti",
+        "@types/express",
+        "@types/node",
+        "@types/react",
+        "@types/react-dom",
+        "@types/three",
+        "@vitejs/plugin-react",
+        "autoprefixer",
+        "canvas-confetti",
+        "dotenv",
+        "esbuild",
+        "express",
+        "lucide-react",
+        "motion",
+        "react",
+        "react-dom",
+        "tailwindcss",
+        "three",
+        "tsx",
+        "typescript",
+        "vite"
+      ]
+    },
+    {
+      "name": "HCSM",
+      "status": "ok",
+      "error": null,
+      "full_name": "Sathancabrol/HCSM",
+      "description": "Humain cognitive state model ",
+      "url": "https://github.com/Sathancabrol/HCSM",
+      "default_branch": "main",
+      "primary_language": "Python",
+      "stars": 0,
+      "forks": 0,
+      "open_issues": 0,
+      "size_kb": 118,
+      "created_at": "2026-08-25T19:31:11Z",
+      "updated_at": "2026-08-25T20:37:13Z",
+      "pushed_at": "2026-08-25T20:34:47Z",
+      "topics": [],
+      "is_fork": false,
+      "is_archived": false,
+      "is_empty": false,
+      "branches": [
+        {
+          "name": "arena/01a03a6b-hcsm",
+          "protected": false,
+          "last_commit_sha": "162ca5f"
+        },
+        {
+          "name": "arena/01a03a93-hcsm",
+          "protected": false,
+          "last_commit_sha": "74fb35a"
+        },
+        {
+          "name": "main",
+          "protected": false,
+          "last_commit_sha": "c8fe0e3"
+        }
+      ],
+      "languages": {
+        "Python": 61298
+      },
+      "recent_commits": [
+        {
+          "sha": "c8fe0e3",
+          "message": "Merge pull request #2 from Sathancabrol/arena/01a03a93-hcsm",
+          "date": "2026-08-25T20:34:47Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/HCSM/commit/c8fe0e3f7b8717fc5e3aeae3c5f84defbb4d7a57"
+        },
+        {
+          "sha": "74fb35a",
+          "message": "feat(validator): Phase 1 V1 form + V5 admissibility contract",
+          "date": "2026-08-25T20:26:39Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/HCSM/commit/74fb35a2ea0875594fffc4f6040eb5dc03c26a0f"
+        },
+        {
+          "sha": "64d15c8",
+          "message": "Merge pull request #1 from Sathancabrol/arena/01a03a6b-hcsm",
+          "date": "2026-08-25T19:56:39Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/HCSM/commit/64d15c8ba3c5add6d8fe805d4594499354c02533"
+        },
+        {
+          "sha": "162ca5f",
+          "message": "Structure HCSM as a scientific research framework (v0.1)",
+          "date": "2026-08-25T19:53:44Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/HCSM/commit/162ca5fb318cceb65d95d4a5de9b1bc4af0a79ea"
+        },
+        {
+          "sha": "df76818",
+          "message": "Initial commit",
+          "date": "2026-08-25T19:31:12Z",
+          "author": "Sathancabrol",
+          "author_login": "Sathancabrol",
+          "url": "https://github.com/Sathancabrol/HCSM/commit/df768185faaa58a83f4459c7a178f02f51f20037"
+        }
+      ],
+      "tree_truncated": false,
+      "root_entries": [
+        {
+          "name": ".gitignore",
+          "type": "blob",
+          "size": 362
+        },
+        {
+          "name": "CHANGELOG.md",
+          "type": "blob",
+          "size": 3077
+        },
+        {
+          "name": "CITATION.cff",
+          "type": "blob",
+          "size": 854
+        },
+        {
+          "name": "CONTRIBUTING.md",
+          "type": "blob",
+          "size": 2429
+        },
+        {
+          "name": "LICENSE",
+          "type": "blob",
+          "size": 857
+        },
+        {
+          "name": "README.md",
+          "type": "blob",
+          "size": 8370
+        },
+        {
+          "name": "docs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "figures",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "model",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "ontology",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "papers",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "research",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "scientific",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "specs",
+          "type": "tree",
+          "size": 0
+        },
+        {
+          "name": "validator",
+          "type": "tree",
+          "size": 0
+        }
+      ],
+      "files_total": 87,
+      "readme_file": "README.md",
+      "readme_excerpt": "# HCSM — Human Cognitive State Model\n\n**Version 0.1.1** · 25 août 2026 · statut global : `PROPOSED`  \nCadre scientifique pour une représentation multidimensionnelle, contextualisée, temporelle et evidentiale de l'état cognitif humain à T0.\n\n> L'enjeu scientifique n'est plus simplement de mesurer davantage.  \n> Il est de **relier correctement ce qui est déjà mesuré**.\n\n---\n\n## Ce que HCSM est — et n'est pas\n\n| Objet | Rôle | Couche |\n|---|---|---|\n| **HCSM** | Modèle scientifique de l'état cognitif humain | MODEL |\n| **Cognition Hub** | Système computationnel qui instancie HCSM | SPEC / IMPLEMENTATION |\n| **Cognitorium** | Architecture globale des connaissances, compétences, expériences et trajectoires | ECOSYSTEM |\n\nHCSM n'est **pas** :\n\n- un score cognitif unique, ni un QI 2.0 ;\n- « la première plateforme à intégrer cognition + psychologie + physiologie + neurologie » — cette revendication est **réfutable** et n'est pas portée ici ;\n- une nouvelle nosologie, ni un substitut de [RDoC](https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc), de l'[ICF](https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health), du [Cognitive Atlas](https://www.cognitiveatlas.org/) ou de [HPO](https://hpo.jax.org/) ;\n- un moteur de diagnostic clinique.\n\nHCSM est une **couche d'intégration computationnelle** entre des mondes déjà existants :\n\n```\nRDoC          → logique d'intégration des unités d'analyse\nICF           → fonctionnement",
+      "modules": [
+        {
+          "path": "validator",
+          "name": "validator",
+          "kind": "manifest",
+          "manifests": [
+            "requirements.txt"
+          ],
+          "files_count": 32,
+          "top_extensions": {
+            "json": 23,
+            "py": 7,
+            "md": 1,
+            "txt": 1
+          },
+          "dependencies": [
+            "PyYAML",
+            "pytest"
+          ]
+        },
+        {
+          "path": "docs",
+          "name": "docs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 16,
+          "top_extensions": {
+            "md": 16
+          },
+          "dependencies": []
+        },
+        {
+          "path": "figures",
+          "name": "figures",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 8,
+          "top_extensions": {
+            "md": 8
+          },
+          "dependencies": []
+        },
+        {
+          "path": "model",
+          "name": "model",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 4,
+          "top_extensions": {
+            "md": 4
+          },
+          "dependencies": []
+        },
+        {
+          "path": "ontology",
+          "name": "ontology",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 5,
+          "top_extensions": {
+            "md": 4,
+            "yaml": 1
+          },
+          "dependencies": []
+        },
+        {
+          "path": "papers",
+          "name": "papers",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 3,
+          "top_extensions": {
+            "md": 3
+          },
+          "dependencies": []
+        },
+        {
+          "path": "research",
+          "name": "research",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 4,
+          "top_extensions": {
+            "md": 4
+          },
+          "dependencies": []
+        },
+        {
+          "path": "scientific",
+          "name": "scientific",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 6,
+          "top_extensions": {
+            "md": 6
+          },
+          "dependencies": []
+        },
+        {
+          "path": "specs",
+          "name": "specs",
+          "kind": "folder",
+          "manifests": [],
+          "files_count": 3,
+          "top_extensions": {
+            "md": 3
+          },
+          "dependencies": []
+        }
+      ],
+      "all_dependencies": [
+        "PyYAML",
+        "pytest"
+      ]
+    }
+  ],
+  "fusion": {
+    "shared_dependencies": [
+      {
+        "name": "vite",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          },
+          {
+            "repo": "watchtower",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "@google/genai",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "@tailwindcss/vite",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "@types/express",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "@types/node",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "@vitejs/plugin-react",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "autoprefixer",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "dotenv",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "esbuild",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "express",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "lucide-react",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "motion",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "react",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "react-dom",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "tailwindcss",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "tsx",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      },
+      {
+        "name": "typescript",
+        "used_by": [
+          {
+            "repo": "animation-chronos",
+            "module": "."
+          },
+          {
+            "repo": "proto-cognitorium",
+            "module": "."
+          }
+        ]
+      }
+    ],
+    "cross_references": [
+      {
+        "from_repo": "COGNITORIUM",
+        "to_repo": "watchtower",
+        "via": "module"
+      }
+    ],
+    "language_groups": [
+      {
+        "language": "HTML",
+        "repos": [
+          "ETAT-DE-LART-PSYCHOLOGIE"
+        ]
+      },
+      {
+        "language": "Inconnu",
+        "repos": [
+          "Language-decoder"
+        ]
+      },
+      {
+        "language": "JavaScript",
+        "repos": [
+          "COGNITORIUM",
+          "watchtower"
+        ]
+      },
+      {
+        "language": "Python",
+        "repos": [
+          "HCSM",
+          "reaserch-engine"
+        ]
+      },
+      {
+        "language": "TypeScript",
+        "repos": [
+          "animation-chronos",
+          "proto-cognitorium"
+        ]
+      }
+    ],
+    "repo_count": 8,
+    "module_count": 39
+  }
+}

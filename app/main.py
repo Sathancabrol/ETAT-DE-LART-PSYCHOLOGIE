@@ -3,7 +3,11 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+import json
+import re
 import sqlite3
+import subprocess
+import sys
 import os
 from typing import Optional, List, Dict, Any
 
@@ -903,3 +907,199 @@ def get_taxonomy():
             }
         ]
     }
+
+# ──────────────── PANORAMA GITHUB (repos > branches > modules) ────────────────
+# Snapshot genere par scripts/github_inventory.py (token GitHub COTE SERVEUR
+# uniquement, jamais expose au client). L'API ne fait que lire le JSON.
+
+INVENTORY_PATH = os.environ.get("GITHUB_INVENTORY_PATH", "data/github_inventory.json")
+INVENTORY_SCRIPT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                "scripts", "github_inventory.py")
+
+
+@app.get("/repos", response_class=HTMLResponse)
+def repos_page(request: Request):
+    """Page dediee : panorama des depots GitHub + volet lateral + vue fusion."""
+    return templates.TemplateResponse(request, "repos.html", {"request": request})
+
+
+def load_inventory() -> Dict[str, Any]:
+    if not os.path.exists(INVENTORY_PATH):
+        raise HTTPException(
+            status_code=503,
+            detail="Snapshot GitHub introuvable. Lancez "
+                   "'python3 scripts/github_inventory.py' ou POST /api/github/refresh.")
+    with open(INVENTORY_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def repo_summary(r: Dict[str, Any]) -> Dict[str, Any]:
+    commits = r.get("recent_commits", []) or []
+    return {
+        "name": r.get("name"),
+        "full_name": r.get("full_name"),
+        "description": r.get("description"),
+        "url": r.get("url"),
+        "default_branch": r.get("default_branch"),
+        "primary_language": r.get("primary_language"),
+        "languages": r.get("languages", {}),
+        "stars": r.get("stars", 0),
+        "forks": r.get("forks", 0),
+        "open_issues": r.get("open_issues", 0),
+        "size_kb": r.get("size_kb", 0),
+        "updated_at": r.get("updated_at"),
+        "pushed_at": r.get("pushed_at"),
+        "topics": r.get("topics", []),
+        "is_fork": r.get("is_fork", False),
+        "is_archived": r.get("is_archived", False),
+        "is_empty": r.get("is_empty", False),
+        "status": r.get("status", "ok"),
+        "error": r.get("error"),
+        "branches": r.get("branches", []),
+        "branch_count": len(r.get("branches", [])),
+        "commit_count": len(commits),
+        "last_commit": commits[0] if commits else None,
+        "modules": [{"path": m.get("path"), "name": m.get("name"),
+                     "kind": m.get("kind"), "manifests": m.get("manifests", []),
+                     "files_count": m.get("files_count", 0),
+                     "dep_count": len(m.get("dependencies", []))}
+                    for m in r.get("modules", [])],
+        "module_count": len(r.get("modules", [])),
+        "files_total": r.get("files_total", 0),
+        "dep_count": len(r.get("all_dependencies", [])),
+    }
+
+
+@app.get("/api/github/snapshot")
+def github_snapshot():
+    """Meta du snapshot + resume de chaque repo (allege pour les cartes)."""
+    inv = load_inventory()
+    repos = [repo_summary(r) for r in inv.get("repos", [])]
+    ok = sum(1 for r in repos if r["status"] == "ok")
+    return {
+        "generated_at": inv.get("generated_at"),
+        "owner": inv.get("owner"),
+        "source": inv.get("source"),
+        "api_calls": inv.get("api_calls"),
+        "rate_limit": inv.get("rate_limit", {}),
+        "repo_count": len(repos),
+        "repo_ok": ok,
+        "module_count": sum(r["module_count"] for r in repos),
+        "repos": repos,
+    }
+
+
+@app.get("/api/github/repos/{repo_name}")
+def github_repo_detail(repo_name: str):
+    """Detail complet d'un repo (README, commits, modules, dependances)."""
+    inv = load_inventory()
+    for r in inv.get("repos", []):
+        if r.get("name") == repo_name:
+            return r
+    raise HTTPException(status_code=404, detail=f"Repo '{repo_name}' absent du snapshot")
+
+
+@app.get("/api/github/fusion")
+def github_fusion():
+    """Vue fusion : graphe repos <-> modules <-> dependances partagees."""
+    inv = load_inventory()
+    fusion = inv.get("fusion", {})
+    repos = [r for r in inv.get("repos", []) if r.get("status") == "ok"]
+
+    nodes, links = [], []
+    for r in repos:
+        nodes.append({
+            "id": f"repo:{r['name']}", "label": r["name"], "type": "repo",
+            "group": r.get("primary_language") or "Inconnu",
+            "desc": r.get("description") or "Sans description",
+            "modules": len(r.get("modules", [])),
+            "branches": len(r.get("branches", [])),
+            "commits": len(r.get("recent_commits", [])),
+            "stars": r.get("stars", 0),
+        })
+    for r in repos:
+        for m in r.get("modules", []):
+            mid = f"mod:{r['name']}/{m.get('path')}"
+            nodes.append({
+                "id": mid, "label": m.get("path"), "type": "module",
+                "group": r["name"], "repo": r["name"],
+                "kind": m.get("kind"), "manifests": m.get("manifests", []),
+                "files": m.get("files_count", 0),
+                "deps": len(m.get("dependencies", [])),
+                "desc": f"Module '{m.get('path')}' du repo {r['name']} "
+                        f"({m.get('kind')}, {len(m.get('dependencies', []))} deps).",
+            })
+            links.append({"source": f"repo:{r['name']}", "target": mid,
+                          "type": "contains"})
+    for s in fusion.get("shared_dependencies", []):
+        nodes.append({
+            "id": f"dep:{s['name']}", "label": s["name"], "type": "dep",
+            "group": "partagee", "used_by": len(s.get("used_by", [])),
+            "desc": f"Dependance partagee par {len(s.get('used_by', []))} modules.",
+        })
+        for u in s.get("used_by", []):
+            links.append({"source": f"mod:{u['repo']}/{u['module']}",
+                          "target": f"dep:{s['name']}", "type": "depends"})
+    for c in fusion.get("cross_references", []):
+        links.append({"source": f"repo:{c['from_repo']}",
+                      "target": f"repo:{c['to_repo']}",
+                      "type": "mentions", "via": c.get("via", "")})
+
+    # retirer les liens orphelins (securite)
+    ids = {n["id"] for n in nodes}
+    links = [l for l in links if l["source"] in ids and l["target"] in ids]
+
+    # matrice dependances partagees x repos (pour le tableau)
+    repo_names = [r["name"] for r in repos]
+    matrix = []
+    for s in fusion.get("shared_dependencies", []):
+        present = {u["repo"] for u in s.get("used_by", [])}
+        matrix.append({"dep": s["name"],
+                       "repos": {rn: (rn in present) for rn in repo_names}})
+
+    return {
+        "generated_at": inv.get("generated_at"),
+        "nodes": nodes, "links": links,
+        "shared_dependencies": fusion.get("shared_dependencies", []),
+        "cross_references": fusion.get("cross_references", []),
+        "language_groups": fusion.get("language_groups", []),
+        "matrix": matrix, "repo_names": repo_names,
+        "counts": {"repos": fusion.get("repo_count", 0),
+                   "modules": fusion.get("module_count", 0),
+                   "shared_deps": len(fusion.get("shared_dependencies", []))},
+    }
+
+
+@app.post("/api/github/refresh")
+def github_refresh(owner: Optional[str] = None):
+    """Regenere le snapshot via le script serveur (token jamais expose)."""
+    inv_owner = None
+    if os.path.exists(INVENTORY_PATH):
+        try:
+            with open(INVENTORY_PATH, encoding="utf-8") as f:
+                inv_owner = json.load(f).get("owner")
+        except Exception:
+            pass
+    target = owner or inv_owner or "Sathancabrol"
+    if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?", target):
+        raise HTTPException(status_code=400, detail="Nom owner GitHub invalide")
+    cmd = [sys.executable, INVENTORY_SCRIPT, "--owner", target,
+           "--out", INVENTORY_PATH]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=280)
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504,
+                            detail="Refresh trop long (>280s), reessayez plus tard")
+    if proc.returncode != 0:
+        raise HTTPException(status_code=502, detail=(
+            "Echec du refresh GitHub : " + (proc.stderr or proc.stdout)[-500:]))
+    try:
+        with open(INVENTORY_PATH, encoding="utf-8") as f:
+            new = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=502,
+                            detail=f"Snapshot regenere mais illisible : {e}")
+    return {"status": "refreshed", "owner": target,
+            "generated_at": new.get("generated_at"),
+            "repo_count": len(new.get("repos", [])),
+            "log": (proc.stderr or "")[-800:]}

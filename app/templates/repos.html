@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panorama GitHub — Modules & Fusion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+    [x-cloak] { display: none !important; }
+    :root {
+      --bg0:#030508; --bg1:#070b14; --bg2:#0d1320; --bg3:#151d2e; --bg4:#1c2640;
+      --border:#1e293b; --border2:#334155;
+      --text1:#f1f5f9; --text2:#94a3b8; --text3:#64748b;
+      --indigo:#818cf8; --cyan:#22d3ee; --emerald:#34d399; --amber:#fbbf24; --rose:#fb7185; --purple:#c084fc;
+    }
+    body { font-family:'Inter',system-ui,sans-serif; background:var(--bg0); color:var(--text1); }
+    .font-mono { font-family:'JetBrains Mono',monospace; }
+    ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    .glass{background:rgba(13,19,32,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.05)}
+    .glass-card{background:rgba(21,29,46,0.5);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.04)}
+    .repo-card{transition:all .25s;border:1px solid var(--border);cursor:pointer}
+    .repo-card:hover{border-color:var(--indigo);box-shadow:0 8px 32px rgba(129,140,248,.10);transform:translateY(-2px)}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeInUp .4s ease-out}
+    .drawer{transition:transform .3s cubic-bezier(.4,0,.2,1)}
+    .tree-branch{border-left:1px solid var(--border)}
+    /* fusion graph */
+    #fusionGraph { background: radial-gradient(ellipse at center, #080c18 0%, #030508 70%); position:relative; overflow:hidden; }
+    #fusionGraph svg { width:100%; height:100%; display:block; }
+    .f-node circle { cursor:pointer; }
+    .f-node text { pointer-events:none; fill:#cbd5e1; font-size:10px; text-shadow:0 0 4px rgba(0,0,0,.9); opacity:0; transition:opacity .3s; }
+    .f-node:hover text, .f-node.highlighted text { opacity:1; }
+    .f-node.dimmed { opacity:.08; }
+    .f-link { stroke-opacity:.15; }
+    .f-link.highlighted { stroke-opacity:.85; stroke-width:2.5; }
+    .f-link.dimmed { stroke-opacity:.02; }
+    .matrix-cell-yes{background:rgba(52,211,153,.15);color:#34d399}
+    .matrix-cell-no{color:#1e293b}
+    details>summary{list-style:none;cursor:pointer}
+    details>summary::-webkit-details-marker{display:none}
+    pre.readme{white-space:pre-wrap;word-break:break-word}
+  </style>
+</head>
+<body class="h-full antialiased" x-data="reposApp()" x-init="init()" x-cloak>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="sticky top-0 z-40 glass border-b border-white/5">
+  <div class="max-w-[1920px] mx-auto px-4 md:px-6 flex items-center justify-between h-14 gap-3">
+    <div class="flex items-center space-x-3 min-w-0">
+      <a href="/" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 shrink-0" title="Retour Cognitorium">
+        <i data-lucide="arrow-left" class="w-4 h-4 text-slate-300"></i>
+      </a>
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-400 hidden sm:flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+        <i data-lucide="github" class="w-4 h-4 text-white"></i>
+      </div>
+      <div class="min-w-0">
+        <h1 class="text-sm font-bold tracking-tight truncate">Panorama GitHub <span class="text-slate-500 font-medium" x-text="owner ? '• '+owner : ''"></span></h1>
+        <p class="text-[9px] text-slate-600 -mt-0.5 truncate" x-text="metaLine()"></p>
+      </div>
+    </div>
+    <nav class="flex items-center space-x-1 shrink-0">
+      <template x-for="v in views" :key="v.id">
+        <button @click="switchView(v.id)" :class="activeView===v.id ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent hover:bg-white/[0.03]'" class="px-3 py-1.5 rounded-lg text-[11px] font-medium transition flex items-center space-x-1.5 border whitespace-nowrap">
+          <i :data-lucide="v.icon" class="w-3.5 h-3.5"></i><span x-text="v.label" class="hidden md:inline"></span>
+        </button>
+      </template>
+      <button @click="refreshSnapshot()" :disabled="refreshing" class="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-40 flex items-center space-x-1.5" :title="refreshMsg || 'Regénérer le snapshot depuis l’API GitHub'">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5" :class="refreshing && 'animate-spin'"></i><span class="hidden md:inline" x-text="refreshing ? 'Actualisation…' : 'Actualiser'"></span>
+      </button>
+    </nav>
+  </div>
+  <div x-show="refreshMsg" class="px-4 md:px-6 pb-2 -mt-1"><p class="text-[10px]" :class="refreshOk ? 'text-emerald-400' : 'text-rose-400'" x-text="refreshMsg"></p></div>
+</header>
+
+<main class="max-w-[1920px] mx-auto px-4 md:px-6 py-5">
+
+  <!-- chargement / erreur globale -->
+  <div x-show="loading" class="glass-card rounded-xl p-10 text-center">
+    <i data-lucide="loader-2" class="w-6 h-6 text-purple-400 mx-auto mb-3 animate-spin"></i>
+    <p class="text-xs text-slate-500">Chargement du snapshot GitHub…</p>
+  </div>
+  <div x-show="!loading && globalError" class="rounded-xl p-5 border border-rose-500/30 bg-rose-500/5">
+    <div class="flex items-start space-x-3">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400 shrink-0 mt-0.5"></i>
+      <div>
+        <h3 class="text-sm font-bold text-rose-300">Snapshot indisponible</h3>
+        <p class="text-[11px] text-slate-400 mt-1" x-text="globalError"></p>
+        <button @click="refreshSnapshot()" class="mt-3 px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-[11px] font-medium">Générer le snapshot maintenant</button>
+        <p class="text-[10px] text-slate-600 mt-2 font-mono">ou en CLI : python3 scripts/github_inventory.py --owner Sathancabrol</p>
+      </div>
+    </div>
+  </div>
+
+  <div x-show="!loading && !globalError">
+    <!-- bandeau quotas / repos en erreur -->
+    <div x-show="quotaWarning" class="mb-4 rounded-xl p-3 border border-amber-500/30 bg-amber-500/5 flex items-start space-x-2">
+      <i data-lucide="gauge" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+      <p class="text-[11px] text-amber-200/90" x-text="quotaWarning"></p>
+    </div>
+    <div x-show="errorRepos.length>0" class="mb-4 rounded-xl p-3 border border-rose-500/20 bg-rose-500/5">
+      <p class="text-[11px] text-rose-300 font-semibold mb-1.5"><span x-text="errorRepos.length"></span> dépôt(s) en erreur (token, accès privé, rate limit ou vide) :</p>
+      <div class="space-y-1">
+        <template x-for="r in errorRepos" :key="r.name">
+          <p class="text-[10px] text-slate-400"><span class="font-mono text-slate-300" x-text="r.name"></span> — <span x-text="r.error?.message"></span> <span class="text-slate-600" x-text="r.error?.hint ? '• '+r.error.hint : ''"></span></p>
+        </template>
+      </div>
+    </div>
+
+    <!-- ══════════ VUE CARTES ══════════ -->
+    <section x-show="activeView==='cards'" class="space-y-4 fade-in">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold">Dépôts <span class="text-slate-600 text-sm font-medium" x-text="'('+filteredRepos.length+' / '+repos.length+')'"></span></h2>
+          <p class="text-[10px] text-slate-600">Cliquez sur une carte pour ouvrir le volet détail (README, branches, commits, modules).</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="text" x-model="search" placeholder="Rechercher un dépôt, module, topic…" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-[11px] text-slate-300 w-56 focus:border-purple-500 focus:outline-none">
+          <select x-model="langFilter" class="bg-[var(--bg2)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[11px] text-slate-300">
+            <option value="all">Tous langages</option>
+            <template x-for="l in allLanguages" :key="l"><option :value="l" x-text="l"></option></template>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <template x-for="r in filteredRepos" :key="r.name">
+          <div class="repo-card rounded-xl p-4 bg-[var(--bg3)] flex flex-col" @click="openRepo(r.name)">
+            <div class="flex items-start justify-between mb-1.5 gap-2">
+              <h3 class="text-sm font-bold text-white truncate flex items-center gap-1.5">
+                <i data-lucide="book-marked" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i><span x-text="r.name"></span>
+              </h3>
+              <span x-show="r.status!=='ok'" class="text-[8px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/25 shrink-0">erreur</span>
+            </div>
+            <p class="text-[10px] text-slate-500 leading-snug line-clamp-2 min-h-[28px] mb-2" x-text="r.description || 'Sans description'"></p>
+            <div class="flex flex-wrap gap-1 mb-2.5">
+              <span class="text-[8px] px-1.5 py-0.5 rounded-full border" :style="langBadge(r.primary_language)" x-text="r.primary_language || 'Inconnu'"></span>
+              <span x-show="r.is_archived" class="text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-500 border border-white/10">archivé</span>
+              <span x-show="r.is_fork" class="text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-500 border border-white/10">fork</span>
+              <span x-show="r.is_empty" class="text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25">vide</span>
+              <template x-for="t in (r.topics||[]).slice(0,3)" :key="t"><span class="text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-slate-500" x-text="t"></span></template>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 py-2 border-t border-white/5 text-center">
+              <div><p class="text-sm font-bold" x-text="r.branch_count"></p><p class="text-[8px] text-slate-600">branches</p></div>
+              <div><p class="text-sm font-bold" x-text="r.module_count"></p><p class="text-[8px] text-slate-600">modules</p></div>
+              <div><p class="text-sm font-bold" x-text="r.commit_count"></p><p class="text-[8px] text-slate-600">commits</p></div>
+              <div><p class="text-sm font-bold" x-text="r.dep_count"></p><p class="text-[8px] text-slate-600">dépend.</p></div>
+            </div>
+            <div class="pt-1.5 border-t border-white/5 flex items-center justify-between">
+              <span class="text-[9px] text-slate-600 font-mono truncate" x-text="r.last_commit ? r.last_commit.sha+' • '+r.last_commit.message.slice(0,38) : 'aucun commit'"></span>
+              <a :href="r.url" target="_blank" rel="noopener" @click.stop class="text-slate-600 hover:text-white shrink-0 ml-2"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div x-show="filteredRepos.length===0" class="text-center py-10 text-slate-600 text-xs">Aucun dépôt ne correspond aux filtres.</div>
+    </section>
+
+    <!-- ══════════ VUE ARBORESCENCE ══════════ -->
+    <section x-show="activeView==='tree'" class="space-y-3 fade-in">
+      <div>
+        <h2 class="text-lg font-bold">Arborescence <span class="text-slate-600 text-sm font-medium">repo › branches › modules › commits</span></h2>
+        <p class="text-[10px] text-slate-600">Dépliez un dépôt pour explorer ses branches, modules détectés et commits récents. Cliquez sur un module pour l’ouvrir dans le volet.</p>
+      </div>
+      <div class="space-y-2">
+        <template x-for="r in repos" :key="r.name">
+          <details class="glass-card rounded-xl overflow-hidden" :open="treeOpen[r.name]" @toggle="treeOpen[r.name]=$event.target.open">
+            <summary class="p-3.5 flex items-center gap-3 hover:bg-white/[0.02]">
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 transition-transform" :class="treeOpen[r.name] && 'rotate-90'"></i>
+              <i data-lucide="book-marked" class="w-4 h-4 text-purple-400"></i>
+              <span class="text-sm font-bold" x-text="r.name"></span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded-full border" :style="langBadge(r.primary_language)" x-text="r.primary_language || 'Inconnu'"></span>
+              <span class="text-[10px] text-slate-600 ml-auto whitespace-nowrap" x-text="r.branch_count+' branches • '+r.module_count+' modules • '+r.commit_count+' commits'"></span>
+              <button @click.stop.prevent="openRepo(r.name)" class="text-[10px] text-purple-400 hover:text-purple-300 whitespace-nowrap">Volet →</button>
+            </summary>
+            <div class="px-4 pb-4 pt-1 ml-4 tree-branch pl-4 space-y-4">
+              <!-- branches -->
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 flex items-center"><i data-lucide="git-branch" class="w-3 h-3 mr-1"></i>Branches (<span x-text="r.branches.length"></span>)</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <template x-for="b in r.branches" :key="b.name">
+                    <span class="text-[10px] font-mono px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-slate-300 flex items-center gap-1.5">
+                      <span x-text="b.name"></span>
+                      <span x-show="b.name===r.default_branch" class="text-[8px] text-emerald-400">défaut</span>
+                      <span x-show="b.protected" class="text-[8px] text-amber-400">protégée</span>
+                      <span class="text-[8px] text-slate-600" x-text="b.last_commit_sha"></span>
+                    </span>
+                  </template>
+                  <span x-show="r.branches.length===0" class="text-[10px] text-slate-600">Aucune branche (dépôt vide ou inaccessible).</span>
+                </div>
+              </div>
+              <!-- modules -->
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 flex items-center"><i data-lucide="boxes" class="w-3 h-3 mr-1"></i>Modules détectés (<span x-text="r.modules.length"></span>)</p>
+                <div x-show="r.modules.length===0" class="text-[10px] text-slate-600">Aucun module (dépôt quasi vide : un seul fichier à la racine).</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
+                  <template x-for="m in r.modules" :key="m.path">
+                    <div @click="openModule(r.name, m.path)" class="p-2 rounded-lg bg-black/20 border border-white/5 hover:border-cyan-500/40 cursor-pointer transition">
+                      <div class="flex items-center gap-1.5">
+                        <i data-lucide="folder" class="w-3 h-3 text-cyan-400 shrink-0"></i>
+                        <span class="text-[11px] font-mono text-slate-200 truncate" x-text="m.path"></span>
+                        <span class="text-[8px] px-1 py-px rounded ml-auto shrink-0" :class="m.kind==='manifest' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/25' : 'bg-white/5 text-slate-500'" x-text="m.kind"></span>
+                      </div>
+                      <div class="flex items-center gap-1.5 mt-1 ml-4">
+                        <template x-for="mf in m.manifests" :key="mf"><span class="text-[8px] font-mono px-1 py-px rounded bg-purple-500/10 text-purple-300" x-text="mf"></span></template>
+                        <span class="text-[8px] text-slate-600" x-text="m.files_count+' fichiers • '+m.dep_count+' dép.'"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+              <!-- dernier commit -->
+              <div x-show="r.last_commit">
+                <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 flex items-center"><i data-lucide="git-commit-horizontal" class="w-3 h-3 mr-1"></i>Dernier commit</p>
+                <p class="text-[10px] text-slate-400 font-mono"><span class="text-amber-400" x-text="r.last_commit?.sha"></span> <span x-text="r.last_commit?.message"></span> <span class="text-slate-600" x-text="'• '+(r.last_commit?.author_login || r.last_commit?.author || '')+' • '+formatDate(r.last_commit?.date)"></span></p>
+                <button @click="openRepo(r.name, 'commits')" class="text-[10px] text-purple-400 hover:text-purple-300 mt-1">Voir les <span x-text="r.commit_count"></span> commits récents dans le volet →</button>
+              </div>
+            </div>
+          </details>
+        </template>
+      </div>
+    </section>
+
+    <!-- ══════════ VUE FUSION ══════════ -->
+    <section x-show="activeView==='fusion'" class="space-y-4 fade-in">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-lg font-bold">Vue fusion <span class="text-slate-600 text-sm font-medium">comment tout fonctionne ensemble</span></h2>
+          <p class="text-[10px] text-slate-600">Cartographie logique (sans copie de code) : dépôts ↔ modules ↔ dépendances partagées + références croisées. Survolez, zoomez, cliquez un nœud.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <template x-for="ft in fusionFilters" :key="ft.type">
+            <button @click="ft.active=!ft.active; applyFusionFilters()" :class="ft.active ? 'border-opacity-60 opacity-100' : 'border-opacity-20 opacity-40'" class="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] border transition" :style="'border-color:'+ft.color+';color:'+ft.color">
+              <div class="w-2 h-2 rounded-full" :style="'background:'+ft.color"></div><span x-text="ft.label"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div id="fusionGraph" class="xl:col-span-2 rounded-xl border border-white/5" style="height:560px;min-height:480px">
+          <svg id="fusionSvg"></svg>
+          <div class="absolute bottom-3 left-3 glass rounded-lg px-3 py-2">
+            <p class="text-[9px] text-slate-600"><span class="text-slate-400 font-medium" x-text="fusionCounts.repos"></span> dépôts • <span class="text-slate-400 font-medium" x-text="fusionCounts.modules"></span> modules • <span class="text-slate-400 font-medium" x-text="fusionCounts.shared_deps"></span> dépendances partagées</p>
+          </div>
+          <div x-show="selectedFusionNode" class="absolute top-3 right-3 w-72 glass rounded-xl p-3 max-h-[80%] overflow-y-auto">
+            <button @click="clearFusionHighlight()" class="absolute top-2 right-2 text-slate-600 hover:text-white"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            <div class="flex items-center gap-1.5 mb-1">
+              <div class="w-2.5 h-2.5 rounded-full" :style="'background:'+fusionNodeColor(selectedFusionNode)"></div>
+              <span class="text-[9px] uppercase font-semibold" :style="'color:'+fusionNodeColor(selectedFusionNode)" x-text="selectedFusionNode?.type"></span>
+            </div>
+            <h4 class="text-xs font-bold font-mono break-words" x-text="selectedFusionNode?.label"></h4>
+            <p class="text-[10px] text-slate-400 mt-1" x-text="selectedFusionNode?.desc"></p>
+            <button x-show="selectedFusionNode?.type==='repo'" @click="openRepo(selectedFusionNode.label)" class="mt-2 text-[10px] text-purple-400 hover:text-purple-300">Ouvrir dans le volet →</button>
+            <button x-show="selectedFusionNode?.type==='module'" @click="openModule(selectedFusionNode.repo, selectedFusionNode.label)" class="mt-2 text-[10px] text-purple-400 hover:text-purple-300">Ouvrir dans le volet →</button>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="glass-card rounded-xl p-4">
+            <h3 class="text-xs font-bold mb-2 flex items-center"><i data-lucide="link" class="w-3.5 h-3.5 text-amber-400 mr-1.5"></i>Dépendances partagées (<span x-text="fusion.shared_dependencies?.length||0"></span>)</h3>
+            <div x-show="!fusion.shared_dependencies?.length" class="text-[10px] text-slate-600">Aucune dépendance commune détectée.</div>
+            <div class="space-y-1.5 max-h-56 overflow-y-auto">
+              <template x-for="s in fusion.shared_dependencies" :key="s.name">
+                <div>
+                  <p class="text-[10px] font-mono text-amber-300" x-text="s.name"></p>
+                  <p class="text-[9px] text-slate-500" x-text="s.used_by.map(u=>u.repo+'/'+u.module).join('  •  ')"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="glass-card rounded-xl p-4">
+            <h3 class="text-xs font-bold mb-2 flex items-center"><i data-lucide="arrow-left-right" class="w-3.5 h-3.5 text-cyan-400 mr-1.5"></i>Références croisées (<span x-text="fusion.cross_references?.length||0"></span>)</h3>
+            <div x-show="!fusion.cross_references?.length" class="text-[10px] text-slate-600">Aucun dépôt ne cite un autre (README, dépendances, modules).</div>
+            <template x-for="c in fusion.cross_references" :key="c.from_repo+c.to_repo">
+              <p class="text-[10px] text-slate-300"><span class="font-mono" x-text="c.from_repo"></span> <span class="text-cyan-400">→</span> <span class="font-mono" x-text="c.to_repo"></span> <span class="text-slate-600" x-text="'via '+c.via"></span></p>
+            </template>
+          </div>
+          <div class="glass-card rounded-xl p-4">
+            <h3 class="text-xs font-bold mb-2 flex items-center"><i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-400 mr-1.5"></i>Familles par langage</h3>
+            <template x-for="g in fusion.language_groups" :key="g.language">
+              <div class="flex items-center gap-2 py-0.5">
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full border shrink-0" :style="langBadge(g.language==='Inconnu'?null:g.language)" x-text="g.language"></span>
+                <span class="text-[10px] text-slate-400 font-mono truncate" x-text="g.repos.join(', ')"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <!-- matrice dépendances x dépôts -->
+      <div class="glass-card rounded-xl p-4 overflow-x-auto">
+        <h3 class="text-xs font-bold mb-1 flex items-center"><i data-lucide="table" class="w-3.5 h-3.5 text-purple-400 mr-1.5"></i>Matrice dépendances partagées × dépôts</h3>
+        <p class="text-[10px] text-slate-600 mb-3">Lecture de la cohésion : plus une ligne est remplie, plus la dépendance fédère les dépôts (candidats à une factorisation / un socle commun).</p>
+        <table class="w-full text-[10px]">
+          <thead><tr class="border-b border-white/10">
+            <th class="text-left py-1.5 pr-3 text-slate-500 font-medium">Dépendance</th>
+            <template x-for="rn in fusion.repo_names" :key="rn"><th class="py-1.5 px-2 text-slate-400 font-mono font-medium" x-text="rn"></th></template>
+          </tr></thead>
+          <tbody>
+            <template x-for="row in fusion.matrix" :key="row.dep">
+              <tr class="border-b border-white/5">
+                <td class="py-1.5 pr-3 font-mono text-amber-200/80" x-text="row.dep"></td>
+                <template x-for="rn in fusion.repo_names" :key="rn">
+                  <td class="py-1.5 px-2 text-center rounded" :class="row.repos[rn] ? 'matrix-cell-yes' : 'matrix-cell-no'" x-text="row.repos[rn] ? '●' : '·'"></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ══════════ VOLET LATÉRAL (DRAWER) ══════════ -->
+<div x-show="drawer.open" class="fixed inset-0 z-50" x-transition.opacity>
+  <div class="absolute inset-0 bg-black/60" style="backdrop-filter:blur(2px)" @click="closeDrawer()"></div>
+  <aside class="drawer absolute top-0 right-0 h-full w-full sm:w-[520px] glass border-l border-white/10 flex flex-col" :class="drawer.open ? 'translate-x-0' : 'translate-x-full'">
+    <div class="p-4 border-b border-white/5 flex items-start justify-between gap-2 shrink-0">
+      <div class="min-w-0">
+        <p class="text-[9px] uppercase tracking-wider font-semibold" :class="drawer.kind==='module' ? 'text-cyan-400' : 'text-purple-400'" x-text="drawer.kind==='module' ? 'Module • '+drawer.repoName : 'Dépôt'"></p>
+        <h2 class="text-base font-bold font-mono truncate" x-text="drawer.title"></h2>
+      </div>
+      <button @click="closeDrawer()" class="text-slate-500 hover:text-white shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-4" x-show="!drawer.loading">
+      <!-- ── détail dépôt ── -->
+      <template x-if="drawer.kind==='repo' && drawer.data">
+        <div class="space-y-4">
+          <p class="text-[11px] text-slate-400" x-text="drawer.data.description || 'Sans description'"></p>
+          <div class="flex flex-wrap gap-1.5">
+            <a :href="drawer.data.url" target="_blank" rel="noopener" class="text-[10px] px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 flex items-center gap-1"><i data-lucide="external-link" class="w-3 h-3"></i>Ouvrir sur GitHub</a>
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-slate-500 font-mono" x-text="'★ '+drawer.data.stars+' • ⑂ '+drawer.data.forks+' • '+drawer.data.size_kb+' Ko'"></span>
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-slate-500" x-text="'poussé le '+formatDate(drawer.data.pushed_at)"></span>
+          </div>
+          <div x-show="drawer.data.status!=='ok'" class="rounded-lg p-3 border border-rose-500/25 bg-rose-500/5">
+            <p class="text-[11px] text-rose-300 font-semibold">Erreur d’accès</p>
+            <p class="text-[10px] text-slate-400" x-text="drawer.data.error?.message"></p>
+            <p class="text-[10px] text-slate-500" x-text="drawer.data.error?.hint"></p>
+          </div>
+          <!-- README -->
+          <div x-show="drawer.data.readme_excerpt">
+            <h3 class="text-[11px] font-bold mb-1.5 flex items-center"><i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-500 mr-1.5"></i>README <span class="text-slate-600 font-medium font-mono ml-1" x-text="drawer.data.readme_file"></span></h3>
+            <pre class="readme text-[10px] text-slate-400 p-3 rounded-lg bg-black/30 border border-white/5 max-h-48 overflow-y-auto" x-text="drawer.data.readme_excerpt"></pre>
+          </div>
+          <!-- branches -->
+          <div>
+            <h3 class="text-[11px] font-bold mb-1.5 flex items-center"><i data-lucide="git-branch" class="w-3.5 h-3.5 text-slate-500 mr-1.5"></i>Branches (<span x-text="(drawer.data.branches||[]).length"></span>)</h3>
+            <div class="space-y-1 max-h-40 overflow-y-auto">
+              <template x-for="b in drawer.data.branches" :key="b.name">
+                <div class="flex items-center gap-2 text-[10px] font-mono px-2 py-1 rounded bg-black/20">
+                  <span class="text-slate-300 truncate" x-text="b.name"></span>
+                  <span x-show="b.name===drawer.data.default_branch" class="text-[8px] text-emerald-400">défaut</span>
+                  <span class="text-slate-600 ml-auto shrink-0" x-text="b.last_commit_sha"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+          <!-- modules -->
+          <div>
+            <h3 class="text-[11px] font-bold mb-1.5 flex items-center"><i data-lucide="boxes" class="w-3.5 h-3.5 text-slate-500 mr-1.5"></i>Modules (<span x-text="(drawer.data.modules||[]).length"></span>)</h3>
+            <div class="space-y-1.5">
+              <template x-for="m in drawer.data.modules" :key="m.path">
+                <div @click="openModule(drawer.data.name, m.path)" class="p-2 rounded-lg bg-black/20 border border-white/5 hover:border-cyan-500/40 cursor-pointer">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] font-mono text-slate-200" x-text="m.path"></span>
+                    <span class="text-[8px] px-1 py-px rounded ml-auto" :class="m.kind==='manifest' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-white/5 text-slate-500'" x-text="m.kind"></span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1 mt-1">
+                    <template x-for="mf in m.manifests" :key="mf"><span class="text-[8px] font-mono px-1 py-px rounded bg-purple-500/10 text-purple-300" x-text="mf"></span></template>
+                    <span class="text-[8px] text-slate-600" x-text="m.files_count+' fichiers'"></span>
+                    <span class="text-[8px] text-slate-600" x-show="m.dependencies?.length" x-text="'• '+m.dependencies.length+' dép.'"></span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+          <!-- commits -->
+          <div id="drawer-commits">
+            <h3 class="text-[11px] font-bold mb-1.5 flex items-center"><i data-lucide="git-commit-horizontal" class="w-3.5 h-3.5 text-slate-500 mr-1.5"></i>Commits récents (<span x-text="(drawer.data.recent_commits||[]).length"></span>)</h3>
+            <div class="space-y-1 max-h-64 overflow-y-auto">
+              <template x-for="c in drawer.data.recent_commits" :key="c.sha">
+                <a :href="c.url" target="_blank" rel="noopener" class="block px-2 py-1.5 rounded bg-black/20 hover:bg-black/40">
+                  <p class="text-[10px] text-slate-300 leading-snug" x-text="c.message"></p>
+                  <p class="text-[9px] text-slate-600 font-mono mt-0.5"><span class="text-amber-400" x-text="c.sha"></span> <span x-text="'• '+(c.author_login||c.author||'')+' • '+formatDate(c.date)"></span></p>
+                </a>
+              </template>
+              <div x-show="!(drawer.data.recent_commits||[]).length" class="text-[10px] text-slate-600">Aucun commit (dépôt vide ou historique inaccessible).</div>
+            </div>
+          </div>
+          <!-- fichiers racine -->
+          <div x-show="(drawer.data.root_entries||[]).length">
+            <h3 class="text-[11px] font-bold mb-1.5 flex items-center"><i data-lucide="folder-tree" class="w-3.5 h-3.5 text-slate-500 mr-1.5"></i>Racine (<span x-text="(drawer.data.root_entries||[]).length"></span> entrées)</h3>
+            <div class="flex flex-wrap gap-1">
+              <template x-for="e in drawer.data.root_entries" :key="e.name">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/20 border border-white/5 text-slate-500" :class="e.type==='dir' && 'text-cyan-300/80'" x-text="(e.type==='dir'?'▸ ':'')+e.name"></span>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+      <!-- ── détail module ── -->
+      <template x-if="drawer.kind==='module' && drawer.module">
+        <div class="space-y-4">
+          <button @click="openRepo(drawer.repoName)" class="text-[10px] text-purple-400 hover:text-purple-300">← Retour au dépôt <span class="font-mono" x-text="drawer.repoName"></span></button>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-slate-400" x-text="drawer.module.files_count+' fichiers'"></span>
+            <span class="text-[10px] px-2 py-1 rounded-lg bg-black/30 border border-white/5 text-slate-400" x-text="drawer.module.kind"></span>
+            <template x-for="mf in drawer.module.manifests" :key="mf"><span class="text-[10px] font-mono px-2 py-1 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/20" x-text="mf"></span></template>
+          </div>
+          <div x-show="(drawer.module.dependencies||[]).length">
+            <h3 class="text-[11px] font-bold mb-1.5">Dépendances (<span x-text="drawer.module.dependencies.length"></span>)</h3>
+            <div class="flex flex-wrap gap-1">
+              <template x-for="d in drawer.module.dependencies" :key="d">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border" :class="isSharedDep(d) ? 'bg-amber-500/10 text-amber-300 border-amber-500/25' : 'bg-black/20 text-slate-400 border-white/5'" :title="isSharedDep(d) ? 'Dépendance partagée entre dépôts' : ''" x-text="d"></span>
+              </template>
+            </div>
+            <p class="text-[9px] text-slate-600 mt-1.5">En surbrillance : dépendances partagées avec d’autres dépôts (leviers de fusion).</p>
+          </div>
+          <div x-show="!(drawer.module.dependencies||[]).length" class="text-[10px] text-slate-600">Aucune dépendance déclarée (dossier sans manifeste).</div>
+          <div x-show="Object.keys(drawer.module.top_extensions||{}).length">
+            <h3 class="text-[11px] font-bold mb-1.5">Extensions dominantes</h3>
+            <div class="space-y-1">
+              <template x-for="[ext,n] in Object.entries(drawer.module.top_extensions)" :key="ext">
+                <div class="flex items-center gap-2 text-[10px]">
+                  <span class="font-mono text-slate-400 w-20 truncate" x-text="ext"></span>
+                  <div class="flex-1 h-1.5 rounded bg-white/5 overflow-hidden"><div class="h-full rounded bg-cyan-500/70" :style="'width:'+Math.max(4, 100*n/maxExtCount())+'%'"></div></div>
+                  <span class="text-slate-600 font-mono w-8 text-right" x-text="n"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div x-show="drawer.loading" class="flex-1 flex items-center justify-center">
+      <i data-lucide="loader-2" class="w-5 h-5 text-purple-400 animate-spin"></i>
+    </div>
+  </aside>
+</div>
+
+<footer class="max-w-[1920px] mx-auto px-4 md:px-6 pb-6">
+  <p class="text-[9px] text-slate-700">Snapshot GitHub généré côté serveur (<span class="font-mono" x-text="generatedAt || '—'"></span>) • token jamais exposé au client • <span x-text="apiCalls"></span> appels API • dépôt source : <a class="underline" href="https://github.com/Sathancabrol/ETAT-DE-LART-PSYCHOLOGIE">ETAT-DE-LART-PSYCHOLOGIE</a></p>
+</footer>
+
+<script>
+function reposApp() {
+  return {
+    loading: true, globalError: "", owner: "", generatedAt: "", apiCalls: 0,
+    repos: [], quotaWarning: "",
+    views: [
+      {id:"cards", label:"Cartes", icon:"layout-grid"},
+      {id:"tree", label:"Arborescence", icon:"list-tree"},
+      {id:"fusion", label:"Fusion", icon:"share-2"}
+    ],
+    activeView: "cards",
+    search: "", langFilter: "all",
+    treeOpen: {},
+    refreshing: false, refreshMsg: "", refreshOk: true,
+    fusion: {shared_dependencies:[], cross_references:[], language_groups:[], matrix:[], repo_names:[], nodes:[], links:[]},
+    fusionCounts: {repos:0, modules:0, shared_deps:0},
+    fusionLoaded: false, selectedFusionNode: null,
+    fusionFilters: [
+      {type:"repo", label:"Dépôts", color:"#818cf8", active:true},
+      {type:"module", label:"Modules", color:"#22d3ee", active:true},
+      {type:"dep", label:"Dép. partagées", color:"#fbbf24", active:true}
+    ],
+    drawer: {open:false, kind:"repo", title:"", repoName:"", data:null, module:null, loading:false},
+    detailCache: {},
+
+    async init() {
+      await this.loadSnapshot();
+      this.$nextTick(() => lucide.createIcons());
+    },
+
+    async loadSnapshot() {
+      this.loading = true; this.globalError = "";
+      try {
+        const r = await fetch("/api/github/snapshot");
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          throw new Error(e.detail || ("HTTP " + r.status));
+        }
+        const d = await r.json();
+        this.owner = d.owner; this.generatedAt = d.generated_at;
+        this.apiCalls = d.api_calls || 0;
+        this.repos = d.repos || [];
+        const rem = d.rate_limit && d.rate_limit.remaining;
+        if (rem !== undefined && rem !== null && Number(rem) < 100)
+          this.quotaWarning = "Quota API GitHub bas : " + rem + " requêtes restantes. Prochain reset : " + (d.rate_limit.reset || "inconnu") + ". Privilégiez le snapshot en cache.";
+        else this.quotaWarning = "";
+      } catch (e) {
+        this.globalError = String(e.message || e);
+      } finally {
+        this.loading = false;
+        this.$nextTick(() => lucide.createIcons());
+      }
+    },
+
+    get errorRepos() { return this.repos.filter(r => r.status !== "ok"); },
+    get allLanguages() {
+      return [...new Set(this.repos.map(r => r.primary_language || "Inconnu"))].sort();
+    },
+    get filteredRepos() {
+      const q = this.search.toLowerCase().trim();
+      return this.repos.filter(r => {
+        if (this.langFilter !== "all" && (r.primary_language || "Inconnu") !== this.langFilter) return false;
+        if (!q) return true;
+        const hay = [r.name, r.description||"", ...(r.topics||[]), ...(r.modules||[]).map(m=>m.path)].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    },
+
+    metaLine() {
+      if (!this.repos.length) return "Repos › branches › modules";
+      const mods = this.repos.reduce((a,r)=>a+r.module_count,0);
+      return this.repos.length + " dépôts • " + mods + " modules • snapshot " + this.formatDate(this.generatedAt);
+    },
+
+    switchView(v) {
+      this.activeView = v;
+      this.$nextTick(() => {
+        lucide.createIcons();
+        if (v === "fusion") setTimeout(() => this.initFusion(), 150);
+      });
+    },
+
+    async refreshSnapshot() {
+      this.refreshing = true; this.refreshMsg = ""; this.refreshOk = true;
+      try {
+        const r = await fetch("/api/github/refresh", {method:"POST"});
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || ("HTTP " + r.status));
+        this.refreshMsg = "✓ Snapshot régénéré (" + d.repo_count + " dépôts, " + this.formatDate(d.generated_at) + ")";
+        this.fusionLoaded = false;
+        await this.loadSnapshot();
+        if (this.activeView === "fusion") setTimeout(() => this.initFusion(true), 150);
+      } catch (e) {
+        this.refreshOk = false;
+        this.refreshMsg = "✗ Échec : " + (e.message || e);
+      } finally {
+        this.refreshing = false;
+        this.$nextTick(() => lucide.createIcons());
+      }
+    },
+
+    // ─── volet ───
+    async openRepo(name, anchor) {
+      this.drawer = {open:true, kind:"repo", title:name, repoName:name, data:null, module:null, loading:true};
+      try {
+        if (!this.detailCache[name]) {
+          const r = await fetch("/api/github/repos/" + encodeURIComponent(name));
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          this.detailCache[name] = await r.json();
+        }
+        this.drawer.data = this.detailCache[name];
+      } catch(e) {
+        this.drawer.data = {name, description:"Détail inaccessible : "+e.message, status:"error", error:{message:String(e.message||e)}, branches:[], modules:[], recent_commits:[], root_entries:[]};
+      } finally {
+        this.drawer.loading = false;
+        this.$nextTick(() => {
+          lucide.createIcons();
+          if (anchor === "commits") setTimeout(() => document.getElementById("drawer-commits")?.scrollIntoView({behavior:"smooth"}), 150);
+        });
+      }
+    },
+    async openModule(repoName, modPath) {
+      this.drawer = {open:true, kind:"module", title:modPath, repoName, data:null, module:null, loading:true};
+      try {
+        if (!this.detailCache[repoName]) {
+          const r = await fetch("/api/github/repos/" + encodeURIComponent(repoName));
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          this.detailCache[repoName] = await r.json();
+        }
+        const mods = this.detailCache[repoName].modules || [];
+        this.drawer.module = mods.find(m => m.path === modPath) || {path:modPath, kind:"?", manifests:[], dependencies:[], top_extensions:{}, files_count:0};
+      } catch(e) {
+        this.drawer.module = {path:modPath, kind:"?", manifests:[], dependencies:[], top_extensions:{}, files_count:0};
+      } finally {
+        this.drawer.loading = false;
+        this.$nextTick(() => lucide.createIcons());
+      }
+    },
+    closeDrawer() { this.drawer.open = false; },
+    isSharedDep(name) {
+      return (this.fusion.shared_dependencies || []).some(s => s.name.toLowerCase() === String(name).toLowerCase());
+    },
+    maxExtCount() {
+      const vals = Object.values(this.drawer.module?.top_extensions || {});
+      return Math.max(1, ...vals);
+    },
+
+    // ─── helpers ───
+    langBadge(lang) {
+      const c = {"JavaScript":"#f7df1e","TypeScript":"#3178c6","Python":"#3776ab","HTML":"#e34f26","CSS":"#a074c4","Shell":"#89e051","Java":"#ed8b00","Go":"#00add8","Rust":"#dea584"}[lang] || "#64748b";
+      return "border-color:"+c+"55;color:"+c+";background:"+c+"14";
+    },
+    formatDate(iso) {
+      if (!iso) return "—";
+      try { return iso.slice(0,10) + " " + (iso.slice(11,16) || ""); } catch(e) { return iso; }
+    },
+
+    // ─── graphe fusion ───
+    fusionNodeColor(d) {
+      if (!d) return "#818cf8";
+      return {repo:"#818cf8", module:"#22d3ee", dep:"#fbbf24"}[d.type] || "#818cf8";
+    },
+    async initFusion(force) {
+      const container = document.getElementById("fusionGraph");
+      const svg = document.getElementById("fusionSvg");
+      if (!container || !svg) return;
+      if (this.fusionLoaded && !force && svg.querySelector("g")) return;
+      svg.innerHTML = "";
+      await new Promise(r => setTimeout(r, 250));
+      try {
+        const r = await fetch("/api/github/fusion");
+        const d = await r.json();
+        this.fusion = d; this.fusionCounts = d.counts || this.fusionCounts;
+      } catch(e) { console.error(e); return; }
+      const {nodes, links} = this.fusion;
+      const W = container.clientWidth || 800, H = container.clientHeight || 520;
+      const svgSel = d3.select(svg).attr("width", W).attr("height", H);
+      const g = svgSel.append("g");
+      const zoom = d3.zoom().scaleExtent([0.2, 4]).on("zoom", e => g.attr("transform", e.transform));
+      svgSel.call(zoom);
+      const linkColor = {contains:"#334155", depends:"#fbbf24", mentions:"#22d3ee"};
+      const sim = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(l => l.type === "depends" ? 70 : 120).strength(0.25))
+        .force("charge", d3.forceManyBody().strength(-280).distanceMax(520))
+        .force("center", d3.forceCenter(W/2, H/2))
+        .force("collision", d3.forceCollide().radius(d => this.fusionRadius(d) + 10))
+        .alphaDecay(0.02).velocityDecay(0.35);
+      const link = g.append("g").selectAll("line").data(links).join("line")
+        .attr("class", "f-link")
+        .attr("stroke", d => linkColor[d.type] || "#334155")
+        .attr("stroke-width", d => d.type === "mentions" ? 2 : 1)
+        .attr("stroke-dasharray", d => d.type === "mentions" ? "5,3" : null);
+      const node = g.append("g").selectAll("g").data(nodes).join("g")
+        .attr("class", "f-node")
+        .call(d3.drag().on("start", (e,d) => { if(!e.active) sim.alphaTarget(0.15).restart(); d.fx=d.x; d.fy=d.y; })
+          .on("drag", (e,d) => { d.fx=e.x; d.fy=e.y; })
+          .on("end", (e,d) => { if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; }));
+      node.append("circle")
+        .attr("r", d => this.fusionRadius(d) + 5).attr("fill", d => this.fusionNodeColor(d)).attr("opacity", 0.08);
+      node.append("circle")
+        .attr("r", d => this.fusionRadius(d))
+        .attr("fill", d => this.fusionNodeColor(d)).attr("fill-opacity", d => d.type === "repo" ? 0.75 : 0.5)
+        .attr("stroke", d => this.fusionNodeColor(d)).attr("stroke-width", 1.5).attr("stroke-opacity", 0.6);
+      node.append("text")
+        .text(d => d.label.length > 26 ? d.label.slice(0,24) + "…" : d.label)
+        .attr("x", d => this.fusionRadius(d) + 6).attr("y", 4);
+      node.on("click", (e, d) => {
+        e.stopPropagation();
+        this.selectedFusionNode = d;
+        const connected = new Set([d.id]);
+        links.forEach(l => {
+          const sid = typeof l.source === "object" ? l.source.id : l.source;
+          const tid = typeof l.target === "object" ? l.target.id : l.target;
+          if (sid === d.id) connected.add(tid);
+          if (tid === d.id) connected.add(sid);
+        });
+        node.classed("dimmed", n => !connected.has(n.id)).classed("highlighted", n => n.id === d.id);
+        link.classed("dimmed", l => {
+          const sid = typeof l.source === "object" ? l.source.id : l.source;
+          const tid = typeof l.target === "object" ? l.target.id : l.target;
+          return sid !== d.id && tid !== d.id;
+        }).classed("highlighted", l => {
+          const sid = typeof l.source === "object" ? l.source.id : l.source;
+          const tid = typeof l.target === "object" ? l.target.id : l.target;
+          return sid === d.id || tid === d.id;
+        });
+        this.$nextTick(() => lucide.createIcons());
+      });
+      svgSel.on("click", () => this.clearFusionHighlight());
+      sim.on("tick", () => {
+        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+        node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
+      });
+      this._fNode = node; this._fLink = link;
+      this.fusionLoaded = true;
+      this.applyFusionFilters();
+    },
+    fusionRadius(d) {
+      if (d.type === "repo") return 9;
+      if (d.type === "dep") return 5 + Math.min(6, (d.used_by || 1));
+      return 5;
+    },
+    clearFusionHighlight() {
+      this.selectedFusionNode = null;
+      if (this._fNode) this._fNode.classed("dimmed", false).classed("highlighted", false);
+      if (this._fLink) this._fLink.classed("dimmed", false).classed("highlighted", false);
+    },
+    applyFusionFilters() {
+      if (!this._fNode) return;
+      const active = this.fusionFilters.filter(f => f.active).map(f => f.type);
+      const byId = {};
+      (this.fusion.nodes || []).forEach(n => byId[n.id] = n.type);
+      const tOf = l => typeof l.source === "object" ? l.source.type : byId[l.source];
+      const tOfT = l => typeof l.target === "object" ? l.target.type : byId[l.target];
+      this._fNode.style("display", d => active.includes(d.type) ? null : "none");
+      this._fLink.style("display", l => (active.includes(tOf(l)) && active.includes(tOfT(l))) ? null : "none");
+    }
+  };
+}
+</script>
+</body>
+</html>
