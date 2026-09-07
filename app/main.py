@@ -1349,3 +1349,19 @@ def mono_raw(project: str, subpath: str):
 @app.get("/mono")
 def mono_index():
     return {"projects": list_projects(), "explorer": "/monorepo"}
+
+# ──────────────── TELECHARGEMENT MONOREPO (bundle git) ────────────────
+# Secours si le push direct est impossible (403) : le bundle contient
+# l'historique git complet, a cloner/pousser depuis une machine autorisee.
+MONOREPO_BUNDLE = os.environ.get("MONOREPO_BUNDLE_PATH", "/home/user/monorepo.bundle")
+
+
+@app.get("/download/monorepo.bundle")
+def download_monorepo_bundle():
+    if not os.path.isfile(MONOREPO_BUNDLE):
+        raise HTTPException(
+            status_code=404,
+            detail="Bundle introuvable. Regenerer : dans sathancabrol-monorepo, "
+                   "'git bundle create /home/user/monorepo.bundle --all'.")
+    return FileResponse(MONOREPO_BUNDLE, media_type="application/octet-stream",
+                        filename="monorepo.bundle")
