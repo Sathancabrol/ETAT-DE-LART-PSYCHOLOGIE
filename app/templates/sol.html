@@ -1049,6 +1049,9 @@
         <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300/40 to-amber-600/20 border border-amber-400/40 flex items-center justify-center text-amber-200" title="☉ SOL approuve chaque réponse">☉</span>
         <div class="flex-1"><h2 class="text-sm font-semibold">✳ Laplace — interlocuteur principal <span class="text-[9.5px] text-amber-300/80 font-normal">· ☉ SOL approuve chaque réponse</span></h2>
         <p class="text-[10px] text-slate-600">réponses ancrées sur les données réelles · toute interaction inter-corps est approuvée & journalisée</p></div>
+        <label class="flex items-center gap-1 text-[10px] text-amber-200 cursor-pointer" title="Sathyr décide s'il intervient ; jamais de réponse imposée">
+          <input type="checkbox" x-model="sathyrEnabled" class="accent-amber-400"> Sathyr
+        </label>
         <button x-show="!split" @click="startSplit('sol')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white" title="afficher la fiche réactive à côté du chat">⬅ fiche</button>
         <button @click="closeModal('sol')" class="text-slate-500 hover:text-white text-xl leading-none px-2">✕</button>
       </div>
@@ -1074,9 +1077,13 @@
             </template>
             <template x-if="m.role!=='user'">
               <div class="flex gap-2">
-                <span class="w-6 h-6 shrink-0 rounded-full bg-purple-400/15 border border-purple-400/30 flex items-center justify-center text-[11px] text-purple-300 mt-0.5">✳</span>
+                <span class="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[11px] mt-0.5"
+                  :class="m.role==='sathyr' ? 'bg-amber-400/15 border border-amber-400/30 text-amber-200' : 'bg-purple-400/15 border border-purple-400/30 text-purple-300'"
+                  x-text="m.role==='sathyr' ? '♠' : '✳'"></span>
                 <div class="max-w-[88%] min-w-0">
-                  <div class="glass-card text-[12px] text-slate-300 leading-relaxed rounded-xl rounded-tl-sm px-3 py-2 whitespace-pre-wrap" x-text="m.text"></div>
+                  <p x-show="m.role==='sathyr'" class="text-[10px] font-semibold text-amber-200 mb-1">Sathyr · second envoyé</p>
+                  <div class="glass-card text-[12px] leading-relaxed rounded-xl rounded-tl-sm px-3 py-2 whitespace-pre-wrap"
+                    :class="m.role==='sathyr' ? 'border-amber-400/30 text-amber-100' : 'text-slate-300'" x-text="m.text"></div>
                   <div class="flex flex-wrap gap-1.5 mt-1.5" x-show="m.artifacts && m.artifacts.length">
                     <template x-for="(a, j) in (m.artifacts || [])" :key="j">
                       <button class="chip" @click="openArtifact(a.path)" x-text="a.icon + ' ' + a.name"></button>
@@ -1228,6 +1235,7 @@ function solApp() {
     integ: {label: '…', statut: 'stable', score: null},
     budget: {}, venus: {},
     messages: [], input: '', busy: false, view: null, viewPanel: '',
+    sathyrEnabled: true, sathyrSession: 'sol-' + Math.random().toString(36).slice(2),
     modals: {sol: false, uranus: false, venus: false, artifact: false, laplace: false, sebas: false, mars: false, body: false, hades: false, tokens: false, aide: false, inferno: false, olympus: false, ombre: false},
     olympus: null, olympusBeat: null, olyFeed: [], olyChat: [],
     bodyData: null, inspectN: null, bodyToast: null,
@@ -1894,10 +1902,15 @@ function solApp() {
       this.busy = true;
       try {
         const res = await fetch('/api/cosmos/chat', {method: 'POST',
-          headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: text})});
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: text, sathyr_enabled: this.sathyrEnabled,
+            session_id: this.sathyrSession})});
         const data = await res.json();
         const arts = data.data?.artifacts || data.artifacts || [];
         this.messages.push({role: 'laplace', text: data.reply, intent: data.intent, artifacts: arts});
+        for (const note of (data.interjections || [])) {
+          if (note.role === 'sathyr' && note.text) this.messages.push({role: 'sathyr', text: note.text});
+        }
         this.reactSide(data.intent);   // la fiche de côté s'actualise selon la demande
         const graphPath = data.data?.graph || data.graph;
         if (graphPath) { const g = await this.tryFetchGraph(graphPath); if (g) this.graphs['#dossier'] = g; }
