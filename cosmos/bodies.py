@@ -83,6 +83,18 @@ BODIES: Dict[str, Dict[str, Any]] = {
                      "instructions des anges."},
         ],
     },
+    "sathyr": {
+        "name": "Sathyr", "symbol": "♠", "icon": "♠",
+        "pouvoir": "observer, critiquer et intervenir de sa propre initiative dans le dialogue",
+        "devoir": "savoir se taire, respecter les preuves et ne pas entreprendre d'actions sans autorisation",
+        "kind": "envoye", "orbit_r": -1,
+        "departement": "Second envoyé de Cronos — système parallèle à Laplace",
+        "role": "Bouffon-serpent et accusateur-avertisseur, indépendant de Laplace "
+                "mais soumis à Cronos. Aucun panthéon initial. Peut proposer "
+                "des perspectives nouvelles et signaler des angles morts sans "
+                "se substituer à Laplace ni disposer d'un droit d'exécution.",
+        "color": "#eabf56",
+    },
     "ananke": {
         "name": "Ananké", "symbol": "⧉", "icon": "⛓️",
         "pouvoir": "imposer la nécessité : limites, échéances, rareté des ressources",

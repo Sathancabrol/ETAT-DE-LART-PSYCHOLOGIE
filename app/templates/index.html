@@ -1461,14 +1461,22 @@
 <div x-show="chatOpen && !dockFx && !dockOpt" class="mg-ghost fixed bottom-[76px] left-1/2 -translate-x-1/2 z-40 w-[min(412px,88vw)] glass rounded-2xl border border-violet-500/25 shadow-2xl shadow-black/50 overflow-hidden win">
   <div @pointerdown="winDrag($event)" class="flex items-center gap-2 px-3 py-1.5 border-b border-white/5 cursor-move select-none">
     <span class="text-sm leading-none">✳</span>
-    <span class="text-[10px] font-semibold text-violet-200 flex-1">Laplace</span>
+    <span class="text-[10px] font-semibold text-violet-200 flex-1">Laplace <span class="text-amber-300">+ Sathyr</span></span>
+    <label class="flex items-center gap-1 text-[9px] text-amber-300 cursor-pointer" title="Sathyr parle rarement et peut choisir le silence">
+      <input type="checkbox" x-model="sathyrEnabled" class="accent-amber-400"> Sathyr
+    </label>
     <span class="text-[8.5px] text-slate-500 truncate max-w-[190px]" title="où vous êtes, depuis l'accueil">📂 <span x-text="whereAmI()"></span></span>
     <button @click="chatMsgs=[]" class="text-[9px] text-slate-500 hover:text-slate-300">effacer</button>
     <button @click="chatOpen=false" class="text-slate-500 hover:text-white text-xs">✕</button>
   </div>
-  <div class="max-h-32 overflow-y-auto px-3 py-2 space-y-1.5">
+  <div class="max-h-56 overflow-y-auto px-3 py-2 space-y-1.5">
     <template x-for="(m, i) in chatMsgs" :key="i">
-      <p class="text-[10.5px] leading-snug" :class="m.role === 'user' ? 'text-cyan-200 text-right' : 'text-slate-300'"><span x-show="m.role!=='user'" class="text-violet-400">✳ </span><span x-text="m.text"></span></p>
+      <p class="text-[10.5px] leading-snug whitespace-pre-wrap"
+        :class="m.role === 'user' ? 'text-cyan-200 text-right' : m.role === 'sathyr' ? 'text-amber-200 bg-amber-400/5 border-l-2 border-amber-400/50 px-2 py-1' : 'text-slate-300'">
+        <span x-show="m.role==='laplace'" class="text-violet-400">✳ Laplace : </span>
+        <span x-show="m.role==='sathyr'" class="font-semibold text-amber-300">♠ Sathyr : </span>
+        <span x-text="m.text"></span>
+      </p>
     </template>
   </div>
   <div class="flex gap-1.5 p-2 border-t border-white/5">
@@ -2454,14 +2462,18 @@ function app() {
     followBid(id) { if (this._uniCam) this._uniCam.follow(id); },
 
     async sendChat() {
-      const q = this.chatInput.trim(); if (!q) return;
+      const q = this.chatInput.trim(); if (!q || this.chatBusy) return;
       this.chatMsgs.push({ role: 'user', text: q });
       this.chatInput = ''; this.chatBusy = true;
       try {
         const r = await (await fetch('/api/cosmos/chat', { method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: q }) })).json();
+          body: JSON.stringify({ message: q, sathyr_enabled: this.sathyrEnabled,
+            session_id: this.sathyrSession }) })).json();
         this.chatMsgs.push({ role: 'laplace', text: (r.reply || '').slice(0, 900) });
+        for (const note of (r.interjections || [])) {
+          if (note.role === 'sathyr' && note.text) this.chatMsgs.push({role: 'sathyr', text: note.text});
+        }
       } catch (e) { this.chatMsgs.push({ role: 'laplace', text: '⚠️ ' + e.message }); }
       this.chatBusy = false;
     },
@@ -2670,6 +2682,7 @@ function app() {
     uHide: {},
     chatOpen: true, chatMsgs: [{ role: 'laplace', text: "✳ Laplace — votre interlocuteur, partout et en contexte. Demandez « aide », « outils », « profil », ou parlez-moi de votre projet." }],
     chatInput: '', chatBusy: false,
+    sathyrEnabled: true, sathyrSession: 'global-' + Math.random().toString(36).slice(2),
     dockFx: false, dockOpt: false,
 
     // 🧠 constructeur partagé : la forme du cerveau (mêmes circonvolutions,
