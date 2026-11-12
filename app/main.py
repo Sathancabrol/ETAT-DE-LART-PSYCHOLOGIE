@@ -1027,6 +1027,8 @@ def _trace_public(trace: Dict[str, Any]) -> Dict[str, Any]:
 
 class SolChatRequest(BaseModel):
     message: str
+    sathyr_enabled: bool = True
+    session_id: Optional[str] = None
 
 class BudgetUpdateRequest(BaseModel):
     daily_cap_usd: Optional[float] = None
@@ -1079,7 +1081,18 @@ def cosmos_chat(req: SolChatRequest):
     if not req.message or not req.message.strip():
         raise HTTPException(status_code=400, detail="Message vide")
     get_system()
-    return laplace.chat(req.message.strip()[:600])
+    result = laplace.chat(req.message.strip()[:600])
+    # Sathyr est un second envoyé, pas une réponse de Laplace ni un agent d'action.
+    # Un silence est normal ; une erreur de son moteur n'altère jamais Laplace.
+    try:
+        from cosmos import sathyr
+        note = sathyr.maybe_interject(
+            req.message.strip()[:600], result.get("reply", ""),
+            session_id=req.session_id or "default", enabled=req.sathyr_enabled)
+    except Exception:
+        note = None
+    result["interjections"] = [note] if note else []
+    return result
 
 @app.get("/api/cosmos/body/{body_id}")
 def cosmos_body(body_id: str):
